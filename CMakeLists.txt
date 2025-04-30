@@ -21,6 +21,8 @@ execute_process(
 
 string(REGEX REPLACE "\n" "" PYTHON_VER ${PYTHON_VER})
 
+message(STATUS "Python version: ${PYTHON_VER}")
+
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME_DEBUG "${PROJECT_NAME}-cpy${PYTHON_VER}-dbg${_CMAKE_BITS}")
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME_RELEASE "${PROJECT_NAME}-cpy${PYTHON_VER}-rel${_CMAKE_BITS}")
 set_target_properties(${PROJECT_NAME} PROPERTIES PREFIX "")
