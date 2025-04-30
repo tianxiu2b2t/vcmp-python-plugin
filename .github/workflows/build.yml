@@ -18,6 +18,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Install CMake
+        uses: ssrobins/install-cmake@v1
+        with:
+          version: 4.0.1
+          
       - name: Configure CMake
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
