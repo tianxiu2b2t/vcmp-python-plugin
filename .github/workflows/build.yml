@@ -22,7 +22,9 @@ jobs:
         uses: ssrobins/install-cmake@v1
         with:
           version: 4.0.1
-          
+      - name: Clone Dependencies
+        run: |
+          git clone https://github.com/pybind/pybind11.git
       - name: Configure CMake
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
