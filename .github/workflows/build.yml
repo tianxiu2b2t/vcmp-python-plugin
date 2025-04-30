@@ -7,12 +7,12 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_and_upload_windows:
-    runs-on: windows-latest
+  build_and_upload:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [windows-latest, ubuntu-latest]
         arch: ['x64', 'x86']
-        python-version: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
       - name: Checkout code
@@ -24,58 +24,23 @@ jobs:
           version: 4.0.1
 
       - name: Clone Dependencies
-        run: git clone https://github.com/pybind/pybind11.git
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
+        run: |
+          git clone https://github.com/pybind/pybind11.git
 
       - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
         run: |
           if [ "$ARCH" = "x64" ]; then
-            cmake -G "Visual Studio 16 2019" -A x64 -S . -B build -DCMAKE_BUILD_TYPE=Release
+            cmake -G "Visual Studio 17 2022" -A x64 -S . -B build -DCMAKE_BUILD_TYPE=Release
           else
-            cmake -G "Visual Studio 16 2019" -A Win32 -S . -B build -DCMAKE_BUILD_TYPE=Release
+            cmake -G "Visual Studio 17 2022" -A Win32 -S . -B build -DCMAKE_BUILD_TYPE=Release
           fi
         shell: bash
         env:
           ARCH: ${{ matrix.arch }}
 
-      - name: Build with CMake
-        run: cmake --build build --config Release
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: DLLs-Windows-${{ matrix.arch }}-${{ matrix.python-version }}
-          path: build/
-
-  build_and_upload_linux:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: ['x64', 'x86']
-        python-version: ['3.10', '3.11', '3.12', '3.13']
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install CMake
-        uses: ssrobins/install-cmake@v1
-        with:
-          version: 4.0.1
-
-      - name: Clone Dependencies
-        run: git clone https://github.com/pybind/pybind11.git
-
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
       - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
         run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build with CMake
@@ -84,5 +49,5 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLLs-Linux-${{ matrix.arch }}-${{ matrix.python-version }}
+          name: DLLs-${{ matrix.os }}-${{ matrix.arch }}
           path: build/
