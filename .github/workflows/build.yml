@@ -27,20 +27,21 @@ jobs:
         run: |
           git clone https://github.com/pybind/pybind11.git
 
-      - name: Configure CMake
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
         run: |
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            if [ "$ARCH" = "x64" ]; then
-              cmake -G "Visual Studio 16 2019" -A x64 -S . -B build -DCMAKE_BUILD_TYPE=Release
-            else
-              cmake -G "Visual Studio 16 2019" -A Win32 -S . -B build -DCMAKE_BUILD_TYPE=Release
-            fi
+          if [ "$ARCH" = "x64" ]; then
+            cmake -G "Visual Studio 16 2019" -A x64 -S . -B build -DCMAKE_BUILD_TYPE=Release
           else
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+            cmake -G "Visual Studio 16 2019" -A Win32 -S . -B build -DCMAKE_BUILD_TYPE=Release
           fi
         shell: bash
         env:
           ARCH: ${{ matrix.arch }}
+
+      - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build with CMake
         run: cmake --build build --config Release
