@@ -1,0 +1,42 @@
+name: Build and Upload DLL
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build_and_upload:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+        arch: ['x64', 'x86']
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure CMake
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            if [ "$ARCH" = "x64" ]; then
+              cmake -S . -B build -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release
+            else
+              cmake -S . -B build -DCMAKE_GENERATOR_PLATFORM=Win32 -DCMAKE_BUILD_TYPE=Release
+            fi
+          else
+            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          fi
+        env:
+          ARCH: ${{ matrix.arch }}
+
+      - name: Build with CMake
+        run: cmake --build build --config Release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DLLs-${{ matrix.os }}-${{ matrix.arch }}
+          path: build/
