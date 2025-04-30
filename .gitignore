@@ -1,0 +1,13 @@
+build
+.lh
+converters
+**/__pycache__/
+server64.exe
+server32.exe
+main.py
+start.bat
+server_log.txt
+server.cfg
+server64.cfg
+server32.cfg
+plugins/
