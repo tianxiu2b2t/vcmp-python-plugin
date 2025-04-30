@@ -22,20 +22,23 @@ jobs:
         uses: ssrobins/install-cmake@v1
         with:
           version: 4.0.1
+
       - name: Clone Dependencies
         run: |
           git clone https://github.com/pybind/pybind11.git
+
       - name: Configure CMake
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
             if [ "$ARCH" = "x64" ]; then
-              cmake -S . -B build -DCMAKE_GENERATOR_PLATFORM=x64 -DCMAKE_BUILD_TYPE=Release
+              cmake -G "Visual Studio 16 2019" -A x64 -S . -B build -DCMAKE_BUILD_TYPE=Release
             else
-              cmake -S . -B build -DCMAKE_GENERATOR_PLATFORM=Win32 -DCMAKE_BUILD_TYPE=Release
+              cmake -G "Visual Studio 16 2019" -A Win32 -S . -B build -DCMAKE_BUILD_TYPE=Release
             fi
           else
             cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           fi
+        shell: bash
         env:
           ARCH: ${{ matrix.arch }}
 
