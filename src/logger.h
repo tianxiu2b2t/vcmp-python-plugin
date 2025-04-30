@@ -37,12 +37,12 @@ private:
 
     string getFormattedTime() {
         time_t t = time(nullptr);
-        tm localTime;
-        if (localtime_s(&localTime, &t) == 0) {
+        tm* localTime;
+        if ((localTime = localtime(&t)) == 0) {
             char buffer[20];
             sprintf_s(buffer, "%04d-%02d-%02d %02d:%02d:%02d",
-                localTime.tm_year + 1900, localTime.tm_mon + 1, localTime.tm_mday,
-                localTime.tm_hour, localTime.tm_min, localTime.tm_sec);
+                localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday,
+                localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
             return string(buffer);
         }
         return "1970-01-01 00:00:00";
