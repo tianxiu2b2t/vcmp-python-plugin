@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from ..__abc import funcs
+from ..__export import funcs
 
 @dataclass
 class PluginInfo:

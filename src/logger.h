@@ -34,14 +34,15 @@ private:
     map<int, int> COLORS_32;
     map<string, int> LEVELS;
     string FORMAT;
+    string timeFormat = "%Y-%m-%d %H:%M:%S";
     regex REGEXP;
 
     string getFormattedTime() {
         time_t t = time(nullptr);
         tm* localTime;
-        if ((localTime = localtime(&t)) == 0) {
+        if ((localTime = localtime(&t)) != nullptr) {
             char buffer[256];
-            strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localTime);
+            strftime(buffer, sizeof(buffer), timeFormat.c_str(), localTime);
             return string(buffer);
         }
         return "1970-01-01 00:00:00";

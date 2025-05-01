@@ -86,13 +86,24 @@ py::object callPythonFunc(const std::string& key, std::function<py::object(py::o
 	return func();
 }) {
 	try {
-		{
-			auto func = getPythonFuncCall(key);
-			if (py::isinstance<py::function>(func)) {
-				return callback(func);
+		//if (sync) {
+			{
+				auto func = getPythonFuncCall(key);
+				if (py::isinstance<py::function>(func)) {
+					return callback(func);
+				}
 			}
-
-		}
+		//} else {
+			//std::thread t([key, callback]() {
+				//py::gil_scoped_acquire acquire;
+				//auto func = getPythonFuncCall(key);
+				//if (py::isinstance<py::function>(func)) {
+				//	callback(func);
+				//}
+				//py::gil_scoped_release release;
+			//});
+			//t.detach();
+		//}
 	}
 	catch (...) {
 		throwException("Failed to call Python function " + key);
@@ -343,7 +354,6 @@ void registerFunctions(py::module_ m) {
 	});
 
 	m.def("play_sound", [](int32_t worldId, int32_t soundId, float x, float y, float z) {
-		#undef PlaySound
 		throwVCMPError(
 			funcs->PlaySound(worldId, soundId, x, y, z), "Failed to play sound."
 		);
@@ -1493,7 +1503,7 @@ void registerCallbacks(py::module_ m) {
 	{
 		callPythonFunc("plugin_command", [&commandIdentifier, &message](py::object func) {
 			return func(commandIdentifier, message);
-	});
+		});
 		return 1;
 	};
 
@@ -1515,7 +1525,7 @@ void registerCallbacks(py::module_ m) {
 	
 		callPythonFunc("client_script_data", [&playerId, &vec, &size](py::object func) {
 			return func(playerId, py::bytes(reinterpret_cast<const char*>(vec.data()), vec.size()), size);
-	});
+		});
 	};
 	calls->OnPlayerConnect = [](int32_t playerId) {
 		callPythonFunc("player_connect", [&playerId](py::object func) {
@@ -1844,7 +1854,7 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 	// load config
 	logger.setDebug(true);
 	loadConfig();
-	//logger.setDebug(cfg.loggerDebug);
+	logger.setDebug(cfg.loggerDebug);
 
 	logger.debug("Python script file: " + cfg.pythonscript);
 
@@ -1853,9 +1863,12 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 
 	try {
 		// eval py
-		{
-			py::eval_file(cfg.pythonscript.c_str());
-		}
+		//std::thread t([]{
+		    {
+				py::eval_file(cfg.pythonscript.c_str());
+			} 
+		//});
+		//t.detach();
 	} catch (const py::error_already_set& e) {
 		logger.error("Python eval script error: " + std::string(e.what()));
 	} catch (const std::exception& e) {

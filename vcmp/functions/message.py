@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from ..__abc import funcs
+from ..__export import funcs
 from .common import get_player_ids
 
 def announce_all(
