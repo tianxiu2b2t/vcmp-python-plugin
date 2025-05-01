@@ -9,6 +9,7 @@
 #include "plugin.h"
 #include "meta.hpp"
 #include "config.h"
+#include "encoding.h"
 #include <functional>
 
 #include <pybind11/embed.h>

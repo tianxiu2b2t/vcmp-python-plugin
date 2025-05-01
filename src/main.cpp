@@ -16,7 +16,7 @@ string getSomethingFromVCMP(
 	char buffer[256];
 	while (error == vcmpErrorBufferTooSmall) {
 		error = func(buffer, sizeof(buffer));
-		if (error == vcmpErrorNone) return std::string(buffer);
+		if (error == vcmpErrorNone) return gbk_to_utf8(std::string(buffer));
 	}
     throwVCMPError(error, extra);
 	return "";
@@ -175,7 +175,7 @@ void registerFunctions(py::module_ m) {
 
 	m.def("set_server_name", [](const char* text) {
 		throwVCMPError(
-			funcs->SetServerName(text), "Failed to set server name."
+			funcs->SetServerName(utf8_to_gbk(std::string(text)).c_str()), "Failed to set server name."
 		);
 	});
 
@@ -203,7 +203,7 @@ void registerFunctions(py::module_ m) {
 
 	m.def("set_game_mode_text", [](const char* gameMode) {
 		throwVCMPError(
-			funcs->SetGameModeText(gameMode), "Failed to set game mode text."
+			funcs->SetGameModeText(utf8_to_gbk(std::string(gameMode)).c_str()), "Failed to set game mode text."
 		);
 	});
 
@@ -343,6 +343,7 @@ void registerFunctions(py::module_ m) {
 	});
 
 	m.def("play_sound", [](int32_t worldId, int32_t soundId, float x, float y, float z) {
+		#undef PlaySound
 		throwVCMPError(
 			funcs->PlaySound(worldId, soundId, x, y, z), "Failed to play sound."
 		);
@@ -1562,13 +1563,13 @@ void registerCallbacks(py::module_ m) {
 		callPythonFunc("player_death", [playerId, killerId, reason, bodyPart](py::object func) {
 			return func(playerId, killerId, reason, (int)bodyPart);
 		});
-		};
+	};
 	
 	calls->OnPlayerUpdate = [](int32_t playerId, vcmpPlayerUpdate updateType) {
 		callPythonFunc("player_update", [playerId, updateType](py::object func) {
 			return func(playerId, (int)updateType);
 		});
-		};
+	};
 	
 	calls->OnPlayerRequestEnterVehicle = [](int32_t playerId, int32_t vehicleId, int32_t slotIndex) -> uint8_t {
 		try {
@@ -1582,73 +1583,73 @@ void registerCallbacks(py::module_ m) {
 			throwException();
 		}
 		return 1;
-		};
+	};
 	
 	calls->OnPlayerEnterVehicle = [](int32_t playerId, int32_t vehicleId, int32_t slotIndex) {
 		callPythonFunc("player_enter_vehicle", [playerId, vehicleId, slotIndex](py::object func) {
 			return func(playerId, vehicleId, slotIndex);
 		});
-		};
+	};
 	
 	calls->OnPlayerExitVehicle = [](int32_t playerId, int32_t vehicleId) {
 		callPythonFunc("player_exit_vehicle", [playerId, vehicleId](py::object func) {
 			return func(playerId, vehicleId);
 		});
-		};
+	};
 	
 	calls->OnPlayerNameChange = [](int32_t playerId, const char* oldName, const char* newName) {
 		callPythonFunc("player_name_change", [playerId, oldName, newName](py::object func) {
 			return func(playerId, oldName, newName);
 		});
-		};
+	};
 	
 	calls->OnPlayerStateChange = [](int32_t playerId, vcmpPlayerState oldState, vcmpPlayerState newState) {
 		callPythonFunc("player_state_change", [playerId, oldState, newState](py::object func) {
 			return func(playerId, (int)oldState, (int)newState);
 		});
-		};
+	};
 	
 	calls->OnPlayerActionChange = [](int32_t playerId, int32_t oldAction, int32_t newAction) {
 		callPythonFunc("player_action_change", [playerId, oldAction, newAction](py::object func) {
 			return func(playerId, oldAction, newAction);
 		});
-		};
+	};
 	
 	calls->OnPlayerOnFireChange = [](int32_t playerId, uint8_t isOnFire) {
 		callPythonFunc("player_on_fire_change", [playerId, isOnFire](py::object func) {
 			return func(playerId, isOnFire);
 		});
-		};
+	};
 	
 	calls->OnPlayerCrouchChange = [](int32_t playerId, uint8_t isCrouching) {
 		callPythonFunc("player_crouch_change", [playerId, isCrouching](py::object func) {
 			return func(playerId, isCrouching);
 		});
-		};
+	};
 	
 	calls->OnPlayerGameKeysChange = [](int32_t playerId, uint32_t oldKeys, uint32_t newKeys) {
 		callPythonFunc("player_game_keys_change", [playerId, oldKeys, newKeys](py::object func) {
 			return func(playerId, oldKeys, newKeys);
 		});
-		};
+	};
 	
 	calls->OnPlayerBeginTyping = [](int32_t playerId) {
 		callPythonFunc("player_begin_typing", [playerId](py::object func) {
 			return func(playerId);
 		});
-		};
+	};
 	
 	calls->OnPlayerEndTyping = [](int32_t playerId) {
 		callPythonFunc("player_end_typing", [playerId](py::object func) {
 			return func(playerId);
 		});
-		};
+	};
 	
 	calls->OnPlayerAwayChange = [](int32_t playerId, uint8_t isAway) {
 		callPythonFunc("player_away_change", [playerId, isAway](py::object func) {
 			return func(playerId, isAway);
 		});
-		};
+	};
 	
 	calls->OnPlayerMessage = [](int32_t playerId, const char* message) -> uint8_t {
 		try {
@@ -1659,10 +1660,10 @@ void registerCallbacks(py::module_ m) {
 			return ret.cast<uint8_t>();
 		}
 		catch (...) {
-			throwException();
+			throwException("player_message");
 		}
 		return 1;
-		};
+	};
 	
 	calls->OnPlayerCommand = [](int32_t playerId, const char* message) -> uint8_t {
 		try {
@@ -1673,10 +1674,10 @@ void registerCallbacks(py::module_ m) {
 			return ret.cast<uint8_t>();
 		}
 		catch (...) {
-			throwException();
+			throwException("player_command");
 		}
 		return 1;
-		};
+	};
 	
 	calls->OnPlayerPrivateMessage = [](int32_t playerId, int32_t targetPlayerId, const char* message) -> uint8_t {
 		try {
@@ -1690,61 +1691,61 @@ void registerCallbacks(py::module_ m) {
 			throwException();
 		}
 		return 1;
-		};
+	};
 	
 	calls->OnPlayerKeyBindDown = [](int32_t playerId, int32_t bindId) {
 		callPythonFunc("player_key_bind_down", [playerId, bindId](py::object func) {
 			return func(playerId, bindId);
 		});
-		};
+	};
 	
 	calls->OnPlayerKeyBindUp = [](int32_t playerId, int32_t bindId) {
 		callPythonFunc("player_key_bind_up", [playerId, bindId](py::object func) {
 			return func(playerId, bindId);
 		});
-		};
+	};
 	
 	calls->OnPlayerSpectate = [](int32_t playerId, int32_t targetPlayerId) {
 		callPythonFunc("player_spectate", [playerId, targetPlayerId](py::object func) {
 			return func(playerId, targetPlayerId);
 		});
-		};
+	};
 	
 	calls->OnPlayerCrashReport = [](int32_t playerId, const char* report) {
 		callPythonFunc("player_crash_report", [playerId, report](py::object func) {
 			return func(playerId, report);
 		});
-		};
+	};
 	
 	calls->OnVehicleUpdate = [](int32_t vehicleId, vcmpVehicleUpdate updateType) {
 		callPythonFunc("vehicle_update", [vehicleId, updateType](py::object func) {
 			return func(vehicleId, (int)updateType);
 		});
-		};
+	};
 	
 	calls->OnVehicleExplode = [](int32_t vehicleId) {
 		callPythonFunc("vehicle_explode", [vehicleId](py::object func) {
 			return func(vehicleId);
 		});
-		};
+	};
 	
 	calls->OnVehicleRespawn = [](int32_t vehicleId) {
 		callPythonFunc("vehicle_respawn", [vehicleId](py::object func) {
 			return func(vehicleId);
 		});
-		};
+	};
 	
 	calls->OnObjectShot = [](int32_t objectId, int32_t playerId, int32_t weaponId) {
 		callPythonFunc("object_shot", [objectId, playerId, weaponId](py::object func) {
 			return func(objectId, playerId, weaponId);
 		});
-		};
+	};
 	
 	calls->OnObjectTouched = [](int32_t objectId, int32_t playerId) {
 		callPythonFunc("object_touched", [objectId, playerId](py::object func) {
 			return func(objectId, playerId);
 		});
-		};
+	};
 	
 	calls->OnPickupPickAttempt = [](int32_t pickupId, int32_t playerId) -> uint8_t {
 		try {
@@ -1758,37 +1759,37 @@ void registerCallbacks(py::module_ m) {
 			throwException();
 		}
 		return 1;
-		};
+	};
 	
 	calls->OnPickupPicked = [](int32_t pickupId, int32_t playerId) {
 		callPythonFunc("pickup_picked", [pickupId, playerId](py::object func) {
 			return func(pickupId, playerId);
 		});
-		};
+	};
 	
 	calls->OnPickupRespawn = [](int32_t pickupId) {
 		callPythonFunc("pickup_respawn", [pickupId](py::object func) {
 			return func(pickupId);
 		});
-		};
+	};
 	
 	calls->OnCheckpointEntered = [](int32_t checkPointId, int32_t playerId) {
 		callPythonFunc("checkpoint_entered", [checkPointId, playerId](py::object func) {
 			return func(checkPointId, playerId);
 		});
-		};
+	};
 	
 	calls->OnCheckpointExited = [](int32_t checkPointId, int32_t playerId) {
 		callPythonFunc("checkpoint_exited", [checkPointId, playerId](py::object func) {
 			return func(checkPointId, playerId);
 		});
-		};
+	};
 	
 	calls->OnEntityPoolChange = [](vcmpEntityPool entityType, int32_t entityId, uint8_t isDeleted) {
 		callPythonFunc("entity_pool_change", [entityType, entityId, isDeleted](py::object func) {
 			return func((int)entityType, entityId, isDeleted);
 		});
-		};
+	};
 	
 	//calls->OnServerPerformanceReport = [](size_t entryCount, const char** descriptions, uint64_t* times) {
 	//	logger.debug("Server performance report");
@@ -1807,7 +1808,7 @@ void registerCallbacks(py::module_ m) {
 		callPythonFunc("player_module_list", [playerId, list](py::object func) {
 			return func(playerId, list);
 		});
-		};
+	};
 
 }
 

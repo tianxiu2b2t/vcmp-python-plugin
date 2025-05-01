@@ -18,6 +18,7 @@
 #include <Windows.h>
 #endif
 #define PYBIND11_DETAILED_ERROR_MESSAGES
+#define _CRT_SECURE_NO_WARNINGS
 
 using namespace std;
 
