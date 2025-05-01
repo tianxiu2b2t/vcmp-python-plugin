@@ -1,0 +1,13 @@
+from .abc import Event
+
+class PickupEvent(Event):
+	...
+
+class PickupPickAttemptEvent(PickupEvent):
+	...
+
+class PickupPickedEvent(PickupEvent):
+	...
+
+class PickupRespawnEvent(PickupEvent):
+	...

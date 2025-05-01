@@ -5,4 +5,5 @@ except ImportError:
     exit(1)
 
 from .__runner import run
+from .events import *
 from .__callbacks import *

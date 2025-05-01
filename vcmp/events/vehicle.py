@@ -1,0 +1,13 @@
+from .abc import Event
+
+class VehicleEvent(Event):
+    ...
+
+class VehicleUpdateEvent(VehicleEvent):
+    ...
+
+class VehicleExplodeEvent(VehicleEvent):
+    ...
+
+class VehicleRespawnEvent(VehicleEvent):
+    ...

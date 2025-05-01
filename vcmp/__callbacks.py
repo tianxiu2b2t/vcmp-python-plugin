@@ -1,6 +1,6 @@
 import abc
 from collections import defaultdict, deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 import inspect
 from queue import Queue
 import threading
@@ -9,37 +9,26 @@ from typing import Any, Awaitable, Callable, Literal, Type
 import anyio
 import anyio.abc
 from tianxiu2b2t.utils import runtime
+
 from .__abc import calls
 
 from .__utils import camel_to_snake, snake_to_camel
+from . import events
+from .events import Event
 
-CallbackEvent = Literal[
-    "server_initialise",
-    "server_shutdown",
-    "server_frame"
-]
+@dataclass
+class FunctionCallback:
+    event: threading.Lock = field(default_factory=threading.Lock)
+    result: Any = None
 
-class Event(
-    metaclass=abc.ABCMeta
-):
-    __fields__ = ()
-    _raw_args = ()
-    _raw_kwargs = {}
-
-    def __init__(self):
-        ...
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({', '.join([f'{field}={getattr(self, field)}' for field in self.__fields__])})"
-
-class ServerFrameEvent(Event):
-    __fields__ = (
-        "elapsed_time",
-    )
-    elapsed_time: float
-
-class ServerShutdownEvent(Event):
-    ...
+    def wait(self):
+        self.event.acquire()
+        self.event.release()
+        return self.result
+    
+    def set_result(self, result: Any):
+        self.result = result
+        self.event.release()
 
 @dataclass
 class Callback:
@@ -51,12 +40,12 @@ class CallbackManager:
         self.module_callbacks = calls
         self.callbacks: deque[Callback] = deque()
         self.queues = Queue(1)
+        self.callback_queue: defaultdict[str, FunctionCallback] = defaultdict(FunctionCallback)
         self.events: dict[str, Type[Event]] = {}
         self._find_events()
 
     def _find_events(self):
-        frame = inspect.currentframe()
-        module = inspect.getmodule(frame)
+        module = inspect.getmodule(events)
         classes = inspect.getmembers(module, inspect.isclass)
         cls: Type[Event]
 
@@ -85,10 +74,12 @@ class CallbackManager:
             *args,
             **kwargs
         ):
+            self.callback_queue[event].result = None
+            self.callback_queue[event].event.acquire()
             self.queues.put(
-                (runtime.perf_counter(), event, args, kwargs)
+                (event, args, kwargs)
             )
-            return decorator
+            return self.callback_queue[event].wait()
         setattr(self.module_callbacks, f"on_{event}", decorator)
 
 
@@ -111,7 +102,7 @@ class CallbackManager:
             while 1:
                 while not self.queues.empty():
                     item = self.queues.get(False)
-                    running, event, args, kwargs = item
+                    event, args, kwargs = item
                     task_group.start_soon(
                         self._callback,
                         event,
@@ -122,35 +113,39 @@ class CallbackManager:
                 
     async def _callback(
         self,
-        event: CallbackEvent,
+        event: str,
         args: tuple[Any, ...],
         kwargs: dict[str, Any]
     ):
         if event not in self.events:
+            self.callback_queue[event].set_result(1)
             return
         
         cls = self.events[event]
         fields = cls.__fields__
 
-        instance = cls()
-        instance._raw_args = args
-        instance._raw_kwargs = kwargs
+        instance = cls(*args, **kwargs)
         for idx, field in enumerate(fields):
             setattr(instance, field, args[idx])
+            
         
-        await self._handle(instance)
+        res = await self._handle(instance)
+        self.callback_queue[event].set_result(res)
         
     async def _handle(
         self,
         event: Event
     ):
-        print(event)
+        if isinstance(event, (
+            events.ServerFrameEvent,
+            events.PlayerUpdateEvent
+        )):
+            return
+        print(event, event._raw_args, event._raw_kwargs)
+        
 
 callbacks = CallbackManager()
 
 __all__ = [
     "callbacks",
-    "Event",
-] + [
-    snake_to_camel(name + "_event") for name in callbacks.events.keys()
-] # type: ignore
+]
