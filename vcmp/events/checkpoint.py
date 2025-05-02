@@ -1,10 +1,10 @@
 from .abc import Event
 
-class CheckpointEvent:
+class CheckpointEvent(Event):
     ...
 
-class CheckpointEnteredEvent(Event):
+class CheckpointEnteredEvent(CheckpointEvent):
     ...
 
-class CheckpointExitedEvent(Event):
+class CheckpointExitedEvent(CheckpointEvent):
     ...
