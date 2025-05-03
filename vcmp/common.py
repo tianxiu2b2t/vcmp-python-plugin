@@ -1,6 +1,5 @@
 import threading
-import time
-from typing import Callable, TypeVar
+from typing import Callable
 from apscheduler.schedulers.background import BackgroundScheduler
 
 

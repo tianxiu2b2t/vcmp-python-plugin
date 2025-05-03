@@ -1,3 +1,4 @@
+from ..enums import Weather
 from ..__export import vcmpServerOption, funcs, INT32_MAX
 
 def set_taxi_boost_jump(value: bool) -> None:
@@ -437,7 +438,7 @@ def get_weather() -> int:
     """
     return funcs.get_weather()
 
-def set_weather(value: int) -> None:
+def set_weather(value: int | Weather) -> None:
     """
     Set the current weather of the game world.
 

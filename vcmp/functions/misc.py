@@ -19,6 +19,8 @@ def create_explosion(
         :param ground: Whether the explosion should be on the ground.
     """
     target = target if target is not None else -1
+    if target != -1 and not funcs.is_player_connected(target):
+        target = -1
     funcs.create_explosion(world_id, type, pos.x, pos.y, pos.z, target, ground)
 
 def play_sound(
@@ -73,4 +75,3 @@ def show_all_map_objects():
         Shows all map objects.
     """
     funcs.show_all_map_objects()
-    
