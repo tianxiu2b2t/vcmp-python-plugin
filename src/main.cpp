@@ -877,7 +877,7 @@ void registerFunctions(py::module_ m) {
 		throwVCMPError(funcs->RedirectPlayerToServer(playerId, ip, port, nick, serverPassword, userPassword), "Failed to redirect player to server.");
 	});
 
-	m.def("check_entitiy_exists", [](int32_t entityPool, int32_t index) {
+	m.def("check_entity_exists", [](int32_t entityPool, int32_t index) {
 		return pybind11::bool_(funcs->CheckEntityExists(static_cast<vcmpEntityPool>(entityPool), index));
 	});
 
