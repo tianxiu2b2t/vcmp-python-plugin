@@ -53,6 +53,7 @@ class WeaponField(IntEnum):
 class KeyCode(IntEnum):
     """ Key codes. """
 
+
     VK_LBUTTON = 0x01
     VK_RBUTTON = 0x02
     VK_CANCEL = 0x03
