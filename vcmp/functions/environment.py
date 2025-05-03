@@ -1,3 +1,8 @@
+import math
+from typing import overload
+from ..vec import Vector
+from ..instance import RGB
+from ..enums import Weather
 from ..__export import vcmpServerOption, funcs, INT32_MAX
 
 def set_taxi_boost_jump(value: bool) -> None:
@@ -437,7 +442,7 @@ def get_weather() -> int:
     """
     return funcs.get_weather()
 
-def set_weather(value: int) -> None:
+def set_weather(value: int | Weather) -> None:
     """
     Set the current weather of the game world.
 
@@ -591,4 +596,128 @@ def set_vehicles_forced_respawn_height(value: float) -> None:
     """
 
     funcs.set_vehicles_forced_respawn_height(value)
+
+
+@overload
+def add_player_class(
+    team: int,
+    color: RGB,
+    skin: int,
+    pos: Vector,
+    angle: float,
+    weapon: int,
+    ammo: int
+):
+    ...
+
+@overload
+def add_player_class(
+    team: int,
+    color: RGB,
+    skin: int,
+    pos: Vector,
+    angle: float,
+    weapon: int,
+    ammo: int,
+    weapon2: int,
+    ammo2: int
+):
+    ...
+
+def add_player_class(
+    team: int,
+    color: RGB,
+    skin: int,
+    pos: Vector,
+    angle: float,
+    weapon: int,
+    ammo: int,
+    weapon2: int = 0,
+    ammo2: int = 0,
+    weapon3: int = 0,
+    ammo3: int = 0
+):
+    """
+    Add a player class to the game world.
+
+    Args:
+        team (int): The team of the player class.
+        color (RGB): The color of the player class.
+        skin (int): The skin of the player class.
+        pos (Vector): The position of the player class.
+        angle (float): The angle of the player class.
+        weapon (int): The weapon of the player class.
+        ammo (int): The ammo of the player class.
+        weapon2 (int): The second weapon of the player class.
+        ammo2 (int): The second ammo of the player class.
+        weapon3 (int): The third weapon of the player class.
+        ammo3 (int): The third ammo of the player class.
+    """
+
+    funcs.add_player_class(team, color.to_alpha(), skin, pos.x, pos.y, pos.z, angle, weapon, ammo, weapon2, ammo2, weapon3, ammo3)
+
+
+def set_spawn_player_position(
+    pos: Vector,
+):
+    """
+    Set the spawn position of the player.
+
+    Args:
+        pos (Vector): The new spawn position of the player.
+    """
+
+    funcs.set_spawn_player_position(pos.x, pos.y, pos.z)
+
+def set_spawn_camera_position(
+    pos: Vector,
+) -> None:
+    """
+    Set the camera position of the player.
+
+    Args:
+        pos (Vector): The new camera position of the player.
+    """
+
+    funcs.set_spawn_camera_position(pos.x, pos.y, pos.z)
+
+
+def set_spawn_camera_look_at(
+    pos: Vector,
+) -> None:
+    """
+    Set the camera look at position of the player.
+
+    Args:
+        pos (Vector): The new camera look at position of the player.
+    """
+
+    funcs.set_spawn_camera_look_at(pos.x, pos.y, pos.z)
+
+def set_spawn_camera(
+    pos: Vector,
+    look_yaw: float,
+    look_pitch: float,
+    range: float = 0.5
+) -> None:
+    """
+    Set the camera position and look at position of the player.
+
+    Args:
+        pos (Vector): The new camera position of the player.
+        look_yaw (float): The new camera look at yaw of the player. Should be in degrees.
+        look_pitch (float): The new camera look at pitch of the player. Should be in degrees.
+        range (float): The distance between the camera and the look at position. Default is 0.5.
+    """
+
+    look = Vector(0, 0, 0)
+
+    # Calculate the look at position
+    look.x = pos.x + math.cos(math.radians(look_yaw)) * math.sin(math.radians(look_pitch)) * range
+    look.y = pos.y + math.sin(math.radians(look_yaw)) * math.sin(math.radians(look_pitch)) * range
+    look.z = pos.z + math.cos(math.radians(look_pitch)) * range
+
+    # Set the camera position and look at position
+    set_spawn_camera_position(pos)
+    set_spawn_camera_look_at(look)
 

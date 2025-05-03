@@ -1528,14 +1528,19 @@ void registerCallbacks(py::module_ m) {
 		});
 	};
 	calls->OnPlayerConnect = [](int32_t playerId) {
-		callPythonFunc("player_connect", [&playerId](py::object func) {
+		// first call into module and init player object
+		callPythonFunc("pre_player_connect", [&playerId](py::object func) {
 			return func(playerId);
-	});
+		});
 	};
 	calls->OnPlayerDisconnect = [](int32_t playerId, vcmpDisconnectReason reason) {
 		callPythonFunc("player_disconnect", [&playerId, &reason](py::object func) {
 			return func(playerId, (int)reason);
-	});
+		});
+		// post call into module and destroy player object
+		callPythonFunc("post_player_disconnect", [&playerId](py::object func) {
+			return func(playerId);
+		});
 	};
 	calls->OnPlayerRequestClass = [](int32_t playerId, int32_t offset) -> uint8_t {
 		try {

@@ -19,6 +19,8 @@ def create_explosion(
         :param ground: Whether the explosion should be on the ground.
     """
     target = target if target is not None else -1
+    if target != -1 and not funcs.is_player_connected(target):
+        target = -1
     funcs.create_explosion(world_id, type, pos.x, pos.y, pos.z, target, ground)
 
 def play_sound(
@@ -73,4 +75,38 @@ def show_all_map_objects():
         Shows all map objects.
     """
     funcs.show_all_map_objects()
-    
+
+
+def add_radio_stream(
+    id: int,
+    name: str,
+    url: str,
+    can_select: bool
+):
+    """
+        Adds a radio stream.
+        :param id: The id of the stream.
+        :param name: The name of the stream.
+        :param url: The url of the stream.
+        :param can_select: Whether the stream can be selected.
+    """
+    try:
+        funcs.add_radio_stream(id, name, url, can_select)
+        return True
+    except:
+        pass
+    return False
+
+def remove_radio_stream(
+    id: int
+):
+    """
+        Removes a radio stream.
+        :param id: The id of the stream.
+    """
+    try:
+        funcs.remove_radio_stream(id)
+        return True
+    except:
+        pass
+    return False
