@@ -721,3 +721,22 @@ def set_spawn_camera(
     set_spawn_camera_position(pos)
     set_spawn_camera_look_at(look)
 
+def set_fall_timer(value: int) -> None:
+    """
+    Set the fail timer for the game.
+
+    Args:
+        value (int): The new fail timer value.
+    """
+
+    funcs.set_fall_timer(value)
+
+def get_fall_timer() -> int:
+    """
+    Get the fail timer for the game.
+
+    Returns:
+        int: The fail timer value.
+    """
+
+    return funcs.get_fall_timer()
