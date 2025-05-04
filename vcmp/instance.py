@@ -115,9 +115,6 @@ class ReadStream(Stream):
     def read_float(self) -> float:
         return struct.unpack("f", self.read(4))[0]
     
-
-    
-
 class Player:
     def __init__(
         self,
@@ -456,7 +453,6 @@ class Player:
     def vehicle_status(self):
         return funcs.get_player_in_vehicle_status(self._id)
     
-
     @property
     def weapon(self):
         """
@@ -522,7 +518,6 @@ class Player:
         if target is not None:
             id = target.id
         funcs.set_player_spectate_target(self._id, id)
-
 
     def kick(self, reason: Optional[str] = None):
         """
@@ -593,7 +588,6 @@ class Player:
             return
 
         funcs.put_player_in_vehicle(self.id, vehicle.id, slot, 1, 0)
-    
 
     def give_weapon(self, weapon: int, ammo: int):
         """
@@ -664,8 +658,6 @@ class Player:
         """
         funcs.remove_all_weapons(self._id)
 
-    """ Camera """
-
     def set_camera_position(self, position: Vector, look_at: Vector):
         """
         Set the player camera position
@@ -705,6 +697,19 @@ class Player:
         Redirect the player to a new server
         """
         funcs.redirect_player_to_server(self._id, ip, port, nick, password, user_password)
+
+    def request_module_list(self):
+        """
+        Request the player module list
+        Need to recieve the module list from the PlayerModuleListEvent
+        """
+        funcs.get_player_module_list(self._id)
+
+    def kill(self):
+        """
+        Kill the player
+        """
+        funcs.kill_player(self._id)
 
     def __repr__(self) -> str:
         return f"Player(id={self.id}, name='{self.name}')"
@@ -818,7 +823,6 @@ class Vehicle:
         """
         funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionSingleUse, value)
     
-    
     @property
     def sync_source(self):
         """
@@ -854,7 +858,6 @@ class Vehicle:
         """
         return funcs.get_vehicle_model(self._id)
 
-
     @property
     def immunity(self):
         """
@@ -862,7 +865,6 @@ class Vehicle:
         """
         return funcs.get_vehicle_immunity_flags(self._id)
     
-
     @immunity.setter
     def immunity(self, value: int):
         """
@@ -1122,6 +1124,19 @@ class Vehicle:
         """
         return funcs.get_vehicle_turret_rotation(self._id)
 
+    @property
+    def lights_data(self):
+        """
+        Get the vehicle lights data
+        """
+        return funcs.get_vehicle_lights_data(self._id)
+    
+    @lights_data.setter
+    def lights_data(self, value: int):
+        """
+        Set the vehicle lights data
+        """
+        funcs.set_vehicle_lights_data(self._id, value)
 
     def delete(self):
         """
@@ -1236,7 +1251,6 @@ class Vehicle:
     def __del__(self):
         self.delete()
 
-
     def __new__(cls, vehicle_id: int):
         if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolVehicle, vehicle_id):
             return None
@@ -1308,13 +1322,20 @@ class Pickup:
     def quantity(self):
         return funcs.get_pickup_quantity(self._id)
 
+    @property
+    def single_use(self):
+        return funcs.get_pickup_option(self._id, 0)
+    
+    @single_use.setter
+    def single_use(self, single_use: bool):
+        funcs.set_pickup_option(self._id, 0, single_use)
+
     def refresh(self):
         """
         Refresh the pickup
         """
         funcs.refresh_pickup(self._id)
         
-    
     def delete(self):
         """
         Delete the pickup
@@ -1335,7 +1356,6 @@ class Pickup:
             pickup = super().__new__(cls)
             _pickups.append(pickup)
         return pickup
-
 
 class CheckPoint:
     def __init__(self, id: int):
@@ -1537,7 +1557,6 @@ _pools_max: dict[vcmpEntityPool, int] = {
     vcmpEntityPool.vcmpEntityPoolCheckPoint: constant.MAX_CHECKPOINTS,
 }
 
-
 def get_player_from_id(
     player_id: int
 ) -> Optional[Player]:
@@ -1629,4 +1648,4 @@ setattr(calls, "on_post_player_connect", _on_post_player_disconnect)
 setattr(calls, "on_pre_entity_pool_change", _on_pre_entity_pool_update)
 setattr(calls, "on_post_entity_pool_change", _on_post_entity_pool_update)
 
-update_pools()
+#update_pools()

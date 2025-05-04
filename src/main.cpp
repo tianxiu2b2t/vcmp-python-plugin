@@ -1451,6 +1451,46 @@ void registerFunctions(py::module_ m) {
 		return funcs->GetVehicleLightsData(vehicleId);
 	});
 
+	/* Maybe 0.4.7.0 or high version */
+	m.def("kill_player", [](int32_t player) {
+		throwVCMPError(funcs->KillPlayer(player), "Failed to kill player.");
+	});
+
+	m.def("set_vehicle_3d_arrow_for_player", [](int32_t vehicleId, int32_t targetPlayerId, bool toggle) {
+		throwVCMPError(funcs->SetVehicle3DArrowForPlayer(vehicleId, targetPlayerId, toggle), "Failed to set vehicle 3D arrow for player.");
+	});
+
+	m.def("get_vehicle_3d_arrow_for_player", [](int32_t vehicleId, int32_t targetPlayerId) {
+		return py::bool_(funcs->GetVehicle3DArrowForPlayer(vehicleId, targetPlayerId));
+	});
+
+	m.def("set_player_3d_arrow_for_player", [](int32_t playerId, int32_t targetPlayerId, bool toggle) {
+		throwVCMPError(funcs->SetPlayer3DArrowForPlayer(playerId, targetPlayerId, toggle), "Failed to set player 3D arrow for player.");
+	});
+
+	m.def("get_player_3d_arrow_for_player", [](int32_t playerId, int32_t targetPlayerId) {
+		return py::bool_(funcs->GetPlayer3DArrowForPlayer(playerId, targetPlayerId));
+	});
+
+	m.def("set_player_drunk_handling", [](int32_t playerId, uint32_t drunkLevel) {
+		throwVCMPError(funcs->SetPlayerDrunkHandling(playerId, drunkLevel), "Failed to set player drunk handling.");
+	});
+
+	m.def("get_player_drunk_handling", [](int32_t playerId) {
+		return funcs->GetPlayerDrunkHandling(playerId);
+	});
+
+	m.def("set_player_drunk_visuals", [](int32_t playerId, uint8_t drunkLevel) {
+		throwVCMPError(funcs->SetPlayerDrunkVisuals(playerId, drunkLevel), "Failed to set player drunk visuals.");
+	});
+
+	m.def("get_player_drunk_visuals", [](int32_t playerId) {
+		return funcs->GetPlayerDrunkVisuals(playerId);
+	});
+
+	m.def("interpolate_camera_look_at", [](int32_t playerId, float lookX, float lookY, float lookZ, uint32_t interpTimeMS) {
+		throwVCMPError(funcs->InterpolateCameraLookAt(playerId, lookX, lookY, lookZ, interpTimeMS), "Failed to interpolate camera look at.");
+	});
 }
 
 void registerCallbacks(py::module_ m) {
@@ -1873,7 +1913,7 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 	logger.setDebug(true);
 	loadConfig();
 	logger.debug("Debug: " + to_string(cfg.loggerDebug));
-	logger.setDebug(cfg.loggerDebug);
+	//logger.setDebug(cfg.loggerDebug);
 
 	logger.debug("Python script file: " + cfg.pythonscript);
 
