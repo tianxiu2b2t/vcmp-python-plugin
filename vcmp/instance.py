@@ -1,10 +1,12 @@
 from dataclasses import dataclass
 import io
+import math
 import struct
 from typing import Optional
 
-from vcmp.vec import Vector
-from .__export import calls, funcs, vcmpEntityPool, vcmpPlayerOption, vcmpPlayerState
+from .logger import logger
+from .vec import Vector, Quaterion
+from .__export import calls, funcs, vcmpEntityPool, vcmpPlayerOption, vcmpPlayerState, vcmpVehicleSync, vcmpVehicleOption
 
 @dataclass
 class RGB:
@@ -59,6 +61,14 @@ class WriteStream(Stream):
             datum >>= 7
         self.write(bytearray([datum]))
 
+    def write_sq_string(self, value: str, encoding = "gbk"):
+        data = value.encode(encoding)
+        if len(data) > 4096:
+            data = data[:4096]
+            logger.warning(f"String is too long, truncated to 4096 bytes")
+        self.write(len(data).to_bytes(2, "big"))
+        self.write(data)
+
     def write_string(self, value: str, encoding = "gbk"):
         data = value.encode(encoding)
         self.write_long(len(data))
@@ -71,6 +81,10 @@ class WriteStream(Stream):
         self.write(struct.pack("f", value))
     
 class ReadStream(Stream):
+    def __init__(self, data: bytes):
+        super().__init__()
+        self._buffer = io.BytesIO(data)
+
     def read(self, length: int) -> bytes:
         return self._buffer.read(length)
 
@@ -85,6 +99,10 @@ class ReadStream(Stream):
         datum = (n >> 1) ^ -(n & 1)
         return datum
     
+    def read_sq_string(self, encoding = "gbk") -> str:
+        length = int.from_bytes(self.read(2))
+        return self.read(length).decode(encoding)
+
     def read_string(self, encoding = "gbk") -> str:
         length = self.read_long()
         return self.read(length).decode(encoding)
@@ -333,7 +351,7 @@ class Player:
         return funcs.get_player_health(self._id)
 
     @health.setter
-    def health(self, health: int):
+    def health(self, health: float):
         funcs.set_player_health(self._id, health)
 
     @property
@@ -373,11 +391,11 @@ class Player:
         funcs.set_player_speed(self._id, speed.x, speed.y, speed.z)
 
     @property
-    def heading(self):
+    def angle(self):
         return funcs.get_player_heading(self._id)
     
-    @heading.setter
-    def heading(self, heading: int):
+    @angle.setter
+    def angle(self, heading: float):
         funcs.set_player_heading(self._id, heading)
 
     @property
@@ -421,6 +439,88 @@ class Player:
     @property
     def vehicle(self):
         return Vehicle(funcs.get_player_vehicle_id(self._id))
+    
+    @vehicle.setter
+    def vehicle(self, vehicle: Optional['Vehicle']):
+        id = None
+        if vehicle is not None:
+            id = vehicle.id
+        if id is not None and funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolVehicle, id):
+            funcs.put_player_in_vehicle(self._id, id, 0, 0, 1)
+        else:
+            funcs.remove_player_from_vehicle(self._id)
+
+    @property
+    def vehicle_status(self):
+        return funcs.get_player_in_vehicle_status(self._id)
+    
+
+    @property
+    def weapon(self):
+        """
+        Get the player weapon
+        """
+        return funcs.get_player_weapon(self._id)
+    
+    @property
+    def weapon_ammo(self):
+        """
+        Get the player weapon ammo
+        """
+        return funcs.get_player_weapon_ammo(self._id)
+    
+    @weapon_ammo.setter
+    def weapon_ammo(self, ammo: int):
+        """
+        Set the player weapon ammo
+        """
+        funcs.set_player_weapon(self._id, self.weapon, ammo)
+
+    @property
+    def weapon_slot(self):
+        """
+        Get the player weapon slot
+        """
+        return funcs.get_player_weapon_slot(self._id)
+    
+    @weapon_slot.setter
+    def weapon_slot(self, slot: int):
+        """
+        Set the player weapon slot
+        """
+        funcs.set_player_weapon_slot(self._id, slot)
+    
+    @property
+    def camera_locked(self):
+        return funcs.is_camera_locked(self._id)
+    
+    @property
+    def standing_vehicle(self):
+        return Vehicle(funcs.get_player_standing_on_vehicle(self._id))
+    
+    @property
+    def standing_object(self):
+        # TODO: 
+        return funcs.get_player_standing_on_object(self._id)
+    
+    @property
+    def away(self):
+        return funcs.is_player_away(self._id)
+
+    @property
+    def spectate_target(self):
+        id = funcs.get_player_spectate_target(self._id)
+        if funcs.is_player_connected(id):
+            return Player(id)
+        return None
+    
+    @spectate_target.setter
+    def spectate_target(self, target: Optional['Player']):
+        id = -1
+        if target is not None:
+            id = target.id
+        funcs.set_player_spectate_target(self._id, id)
+
 
     def kick(self, reason: Optional[str] = None):
         """
@@ -482,6 +582,131 @@ class Player:
         """
         funcs.force_player_select(self._id)
 
+    def set_vehicle_slot(self, vehicle: 'Vehicle', slot: int):
+        """
+        Set the player vehicle slot
+        """
+        if vehicle is None:
+            funcs.remove_player_from_vehicle(self._id)
+            return
+
+        funcs.put_player_in_vehicle(self.id, vehicle.id, slot, 1, 0)
+    
+
+    def give_weapon(self, weapon: int, ammo: int):
+        """
+        Give the player a weapon
+        """
+        funcs.give_player_weapon(self._id, weapon, ammo)
+
+    def set_weapon(self, weapon: int, ammo: int):
+        """
+        Set the player weapon
+        """
+        funcs.set_player_weapon(self._id, weapon, ammo)
+
+    def get_weapon(self):
+        """
+        Get the player weapon
+        """
+        return funcs.get_player_weapon(self._id)
+
+    def get_weapon_ammo(self):
+        """
+        Get the player weapon ammo
+        """
+        return funcs.get_player_weapon_ammo(self._id)
+    
+    def set_weapon_slot(self, slot: int):
+        """
+        Set the player weapon slot
+        maybe let the player select the weapon slot
+        """
+        funcs.set_player_weapon_slot(self._id, slot)
+
+    def get_weapon_slot(self):
+        """
+        Get the player weapon slot
+        """
+        return funcs.get_player_weapon_slot(self._id)
+    
+    def get_weapon_at_slot(self, slot: int):
+        """
+        Get the player weapon at slot
+        """
+        return funcs.get_player_weapon_at_slot(self._id, slot)
+    
+    def get_weapon_ammo_at_slot(self, slot: int):
+        """
+        Get the player weapon ammo at slot
+        """
+        return funcs.get_player_ammo_at_slot(self._id, slot)
+    
+    def remove_weapon(self, weapon: int):
+        """
+        Remove the player weapon
+        """
+        funcs.remove_player_weapon(self._id, weapon)
+
+    def disarm(self):
+        """
+        Remove the player weapons
+        same as clear_weapons
+        """
+        funcs.remove_all_weapons(self._id)
+
+    def clear_weapons(self):
+        """
+        Remove the player weapons
+        same as disarm
+        """
+        funcs.remove_all_weapons(self._id)
+
+    """ Camera """
+
+    def set_camera_position(self, position: Vector, look_at: Vector):
+        """
+        Set the player camera position
+        """
+        funcs.set_camera_position(self._id, position.x, position.y, position.z, look_at.x, look_at.y, look_at.z)
+
+    def restore_camera(self):
+        """
+        Restore the player camera
+        """
+        funcs.restore_camera(self._id)
+
+    def set_camera(self, position: Vector, look_yaw: float, look_pitch: float, range: float = 0.5):
+        """
+        Set the player camera with look yaw and look pitch,
+        yaw is degrees from 0 to 360
+        pitch is degrees from -90 to 90
+        range is the distance from the player to the camera
+        
+        """
+        look = Vector(0, 0, 0)
+        look.x = math.cos(math.radians(look_yaw)) * range
+        look.y = math.sin(math.radians(look_yaw)) * range
+        look.z = math.sin(math.radians(look_pitch)) * range
+        look = look + position
+
+        funcs.set_camera_position(self._id, position.x, position.y, position.z, look.x, look.y, look.z)
+
+    def play_animation(self, group: int, animation: int):
+        """
+        Play the player animation
+        """
+        funcs.set_player_animation(self._id, group, animation)
+
+    def redirect(self, ip: str, port: int, nick: str, password: str, user_password: str):
+        """
+        Redirect the player to a new server
+        """
+        funcs.redirect_player_to_server(self._id, ip, port, nick, password, user_password)
+
+    def __repr__(self) -> str:
+        return f"Player(id={self.id}, name='{self.name}')"
+
 class Vehicle:
     # if vehicle in _vehicles, use it, else create new
     def __init__(self, vehicle_id: int):
@@ -493,8 +718,475 @@ class Vehicle:
         return self._id
 
     @property
+    def doors_locked(self):
+        """
+        Get the vehicle doors locked
+        """
+        return funcs.get_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionDoorsLocked)
+
+    @doors_locked.setter
+    def doors_locked(self, value: bool):
+        """
+        Set the vehicle doors locked
+        """
+        funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionDoorsLocked, value)
+
+    @property
+    def alarm(self):
+        """
+        Get the vehicle alarm
+        """
+        return funcs.get_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionAlarm)
+    
+    @alarm.setter
+    def alarm(self, value: bool):
+        """
+        Set the vehicle alarm
+        """
+        funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionAlarm, value)
+
+    @property
+    def lights(self):
+        """
+        Get the vehicle lights
+        """
+        return funcs.get_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionLights)
+
+    @lights.setter
+    def lights(self, value: bool):
+        """
+        Set the vehicle lights
+        """
+        funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionLights, value)
+
+    @property
+    def radio_locked(self):
+        """
+        Get the vehicle radio locked
+        """
+        return funcs.get_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionRadioLocked)
+
+    @radio_locked.setter
+    def radio_locked(self, value: bool):
+        """
+        Set the vehicle radio locked
+        """
+
+        funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionRadioLocked, value)
+
+    @property
+    def ghost(self):
+        """
+        Get the vehicle ghost
+        """
+        return funcs.get_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionGhost)
+
+    @ghost.setter
+    def ghost(self, value: bool):
+        """
+        Set the vehicle ghost
+        """
+        funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionGhost, value)
+
+    @property
+    def siren(self):
+        """
+        Get the vehicle siren
+        """
+        return funcs.get_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionSiren)
+    
+    @siren.setter
+    def siren(self, value: bool):
+        """
+        Set the vehicle siren
+        """
+        funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionSiren, value)
+
+    @property
+    def single_use(self):
+        """
+        Get the vehicle single use
+        """
+        return funcs.get_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionSingleUse)
+
+    @single_use.setter
+    def single_use(self, value: bool):
+        """
+        Set the vehicle single use
+        """
+        funcs.set_vehicle_option(self._id, vcmpVehicleOption.vcmpVehicleOptionSingleUse, value)
+    
+    
+    @property
+    def sync_source(self):
+        """
+        Get the vehicle sync source
+        """
+        return funcs.get_vehicle_sync_source(self._id)
+    
+    @property
+    def sync_type(self):
+        """
+        Get the vehicle sync type
+        """
+        return vcmpVehicleSync(funcs.get_vehicle_sync_type(self._id))
+    
+    @property
+    def world(self):
+        """
+        Get the vehicle world
+        """
+        return funcs.get_vehicle_world(self._id)
+
+    @world.setter
+    def world(self, value: int):
+        """
+        Set the vehicle world
+        """
+        funcs.set_vehicle_world(self._id, value)
+
+    @property
     def model(self):
+        """
+        Get the vehicle model
+        """
         return funcs.get_vehicle_model(self._id)
+
+
+    @property
+    def immunity(self):
+        """
+        Get the vehicle immutability
+        """
+        return funcs.get_vehicle_immunity_flags(self._id)
+    
+
+    @immunity.setter
+    def immunity(self, value: int):
+        """
+        Set the vehicle immutability
+        """
+        funcs.set_vehicle_immunity_flags(self._id, value)
+
+    @property
+    def wrecked(self):
+        """
+        Get the vehicle wrecked
+        """
+        return funcs.is_vehicle_wrecked(self._id)
+    
+    @property
+    def position(self):
+        """
+        Get the vehicle position
+        """
+        return funcs.get_vehicle_position(self._id)
+
+    @position.setter
+    def position(self, value: Vector):
+        """
+        Set the vehicle position
+        """
+        funcs.set_vehicle_position(self._id, value.x, value.y, value.z, False)
+
+    @property
+    def rotation(self):
+        """
+        Get the vehicle rotation
+        """
+        return Quaterion(**funcs.get_vehicle_rotation(self._id))
+
+    @rotation.setter
+    def rotation(self, value: Quaterion):
+        """
+        Set the vehicle rotation
+        """
+        funcs.set_vehicle_rotation(self._id, value.x, value.y, value.z, value.w)
+
+    @property
+    def rotation_euler(self):
+        """
+        Get the vehicle rotation euler
+        """
+        return Vector(**funcs.get_vehicle_rotation_euler(self._id))
+    
+    @rotation_euler.setter
+    def rotation_euler(self, value: Vector):
+        """
+        Set the vehicle rotation euler
+        """
+        funcs.set_vehicle_rotation_euler(self._id, value.x, value.y, value.z)
+
+    @property
+    def speed(self):
+        """
+        Get the vehicle speed
+        """
+        return Vector(**funcs.get_vehicle_speed(self._id, False))
+    
+    @speed.setter
+    def speed(self, value: Vector):
+        """
+        Set the vehicle speed
+        """
+        funcs.set_vehicle_speed(self._id, value.x, value.y, value.z, False, False)
+
+    @property
+    def relative_speed(self):
+        """
+        Get the vehicle relative speed
+        """
+        return Vector(**funcs.get_vehicle_speed(self._id, True))
+    
+    @relative_speed.setter
+    def relative_speed(self, value: Vector):
+        """
+        Set the vehicle relative speed
+        """
+        funcs.set_vehicle_speed(self._id, value.x, value.y, value.z, False, True)
+
+    @property
+    def turn_speed(self):
+        """
+        Get the vehicle turn speed
+        """
+        return Vector(**funcs.get_vehicle_turn_speed(self._id, False))
+
+    @turn_speed.setter
+    def turn_speed(self, value: Vector):
+        """
+        Set the vehicle turn speed
+        """
+        funcs.set_vehicle_turn_speed(self._id, value.x, value.y, value.z, False, False)
+
+    @property
+    def relative_turn_speed(self):
+        """
+        Get the vehicle relative turn speed
+        """
+        return Vector(**funcs.get_vehicle_turn_speed(self._id, True))
+
+    @relative_turn_speed.setter
+    def relative_turn_speed(self, value: Vector):
+        """
+        Set the vehicle relative turn speed
+        """
+        funcs.set_vehicle_turn_speed(self._id, value.x, value.y, value.z, False, True)
+    
+    @property
+    def spawn_position(self):
+        """
+        Get the vehicle spawn position
+        """
+        return Vector(**funcs.get_vehicle_spawn_position(self._id))
+
+    @spawn_position.setter
+    def spawn_position(self, value: Vector):
+        """
+        Set the vehicle spawn position
+        """
+        funcs.set_vehicle_spawn_position(self._id, value.x, value.y, value.z)
+
+    @property
+    def spawn_rotation(self):
+        """
+        Get the vehicle spawn rotation
+        """
+        return Quaterion(**funcs.get_vehicle_spawn_rotation(self._id))
+
+    @spawn_rotation.setter
+    def spawn_rotation(self, value: Quaterion):
+        """
+        Set the vehicle spawn rotation
+        """
+        funcs.set_vehicle_spawn_rotation(self._id, value.x, value.y, value.z, value.w)
+
+    @property
+    def spawn_rotation_euler(self):
+        """
+        Get the vehicle spawn rotation euler
+        """
+        return Vector(**funcs.get_vehicle_spawn_rotation_euler(self._id))
+    
+    @spawn_rotation_euler.setter
+    def spawn_rotation_euler(self, value: Vector):
+        """
+        Set the vehicle spawn rotation euler
+        """
+        funcs.set_vehicle_spawn_rotation_euler(self._id, value.x, value.y, value.z)
+
+    @property
+    def idle_respawn_timer(self):
+        """
+        Get the vehicle idle respawn timer
+        """
+        return funcs.get_vehicle_idle_respawn_timer(self._id)
+    
+    @idle_respawn_timer.setter
+    def idle_respawn_timer(self, value: int):
+        """
+        Set the vehicle idle respawn timer
+        """
+        funcs.set_vehicle_idle_respawn_timer(self._id, value)
+
+    @property
+    def health(self):
+        """
+        Get the vehicle health
+        """
+        return funcs.get_vehicle_health(self._id)
+    
+    @health.setter
+    def health(self, value: int):
+        """
+        Set the vehicle health
+        """
+        funcs.set_vehicle_health(self._id, value)
+
+    @property
+    def primary_color(self):
+        """
+        Get the vehicle primary color
+        """
+        return funcs.get_vehicle_colour(self._id)[0]
+
+    @primary_color.setter
+    def primary_color(self, value: int):
+        """
+        Set the vehicle primary color
+        """
+        funcs.set_vehicle_colour(self._id, value, self.secondary_color)
+
+    @property
+    def secondary_color(self):
+        """
+        Get the vehicle secondary color
+        """
+        return funcs.get_vehicle_colour(self._id)[1]
+    
+    @secondary_color.setter
+    def secondary_color(self, value: int):
+        """
+        Set the vehicle secondary color
+        """
+        funcs.set_vehicle_colour(self._id, self.primary_color, value)
+
+    @property
+    def color(self) -> tuple[int, int]:
+        """
+        Get the vehicle color
+        """
+        return funcs.get_vehicle_colour(self._id)
+
+    @color.setter
+    def color(self, value: tuple[int, int]):
+        """
+        Set the vehicle color
+        """
+        funcs.set_vehicle_colour(self._id, value[0], value[1])
+
+    @property
+    def damage(self):
+        """
+        Get the vehicle damage
+        """
+        return funcs.get_vehicle_damage_data(self._id)
+
+    @damage.setter
+    def damage(self, value: int):
+        """
+        Set the vehicle damage
+        """
+        funcs.set_vehicle_damage_data(self._id, value)
+
+    @property
+    def radio(self):
+        """
+        Get the vehicle radio
+        """
+        return funcs.get_vehicle_radio(self._id)
+
+    @radio.setter
+    def radio(self, value: int):
+        """
+        Set the vehicle radio
+        """
+        funcs.set_vehicle_radio(self._id, value)
+
+    @property
+    def turret_rotation(self) -> tuple[int, int]:
+        """
+        Get the vehicle turret rotation
+        """
+        return funcs.get_vehicle_turret_rotation(self._id)
+
+
+    def delete(self):
+        """
+        Delete the vehicle
+        """
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolVehicle, self._id):
+            return
+        funcs.delete_vehicle(self._id)
+
+    def is_streamed_for_player(self, player_id: int | Player):
+        """
+        Check if the vehicle is streamed for the player
+        """
+        id = player_id if isinstance(player_id, int) else player_id.id
+        return funcs.is_vehicle_streamed_for_player(self._id, id)
+    
+    def get_occupant(self, slot: int) -> Optional[Player]:
+        """
+        Get the vehicle occupant
+        """
+        return get_player_from_id(funcs.get_vehicle_occupant(self._id, slot))
+
+    def respawn(self):
+        """
+        Respawn the vehicle
+        """
+        funcs.respawn_vehicle(self._id)
+
+    def explode(self):  
+        """
+        Explode the vehicle
+        """
+        funcs.explode_vehicle(self._id)
+        
+    def set_position(self, position: Vector, remove_occupants: bool = False):
+        """
+        Set the vehicle position
+        """
+        funcs.set_vehicle_position(self._id, position.x, position.y, position.z, remove_occupants)
+
+    def get_part_status(self, part: int) -> int:
+        """
+        Get the vehicle part status
+        """
+        return funcs.get_vehicle_part_status(self._id, part)
+
+    def set_part_status(self, part: int, status: int):
+        """
+        Set the vehicle part status
+        """
+        funcs.set_vehicle_part_status(self._id, part, status)
+
+    def get_tyre_status(self, tyre: int) -> int:
+        """
+        Get the vehicle tyre status
+        """
+        return funcs.get_vehicle_tyre_status(self._id, tyre)
+
+    def set_tyre_status(self, tyre: int, status: int):
+        """
+        Set the vehicle tyre status
+        """
+        funcs.set_vehicle_tyre_status(self._id, tyre, status)
+
+    def __del__(self):
+        self.delete()
+
 
     def __new__(cls, vehicle_id: int):
         if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolVehicle, vehicle_id):
@@ -513,6 +1205,11 @@ def get_player_from_id(
     player_id: int
 ) -> Optional[Player]:
     return next((player for player in _players if player.id == player_id), None)
+
+def get_vehicle_from_id(
+    vehicle_id: int
+) -> Optional[Vehicle]:
+    return next((vehicle for vehicle in _vehicles if vehicle.id == vehicle_id), None)
 
 def _on_pre_player_connect(
     player_id: int
