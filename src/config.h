@@ -18,6 +18,10 @@ string readConfig(ifstream& stream, string key, string defaultValue) {
     string line;
     string value = defaultValue;
 
+    // move to the beginning of the file
+    stream.clear();
+    stream.seekg(0, ios::beg);
+
     while (std::getline(stream, line)) {
         if (line.empty() || line[0] == '#') {
             continue;
@@ -30,8 +34,7 @@ string readConfig(ifstream& stream, string key, string defaultValue) {
         std::string linekey = line.substr(0, spiltSpace);
         std::string linevalue = line.substr(spiltSpace + 1);
 
-        transform(linekey.begin(), linekey.end(), linekey.begin(), ::tolower);
-        transform(key.begin(), key.end(), key.begin(), ::tolower);
+        logger.debug(linekey + " " + key);
         if (linekey.compare(key) == 0) {
             value = linevalue;
             break;
@@ -46,7 +49,6 @@ bool parseValueToBool(string value) {
     copy(value.begin(), value.end(), lowercase.begin());
 
     transform(lowercase.begin(), lowercase.end(), lowercase.begin(), ::tolower);
-    // true, yes, y, t, 1
     return lowercase.compare("true") == 0 || lowercase.compare("yes") == 0 || lowercase.compare("y") == 0 || lowercase.compare("t") == 0 || lowercase.compare("1") == 0;
 }
 
