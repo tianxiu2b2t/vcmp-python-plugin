@@ -39,6 +39,16 @@ string readConfig(ifstream& stream, string key, string defaultValue) {
     }
     return value;
 }
+bool parseValueToBool(string value) {
+    string lowercase;
+
+    lowercase.resize(value.size());
+    copy(value.begin(), value.end(), lowercase.begin());
+
+    transform(lowercase.begin(), lowercase.end(), lowercase.begin(), ::tolower);
+    // true, yes, y, t, 1
+    return lowercase.compare("true") == 0 || lowercase.compare("yes") == 0 || lowercase.compare("y") == 0 || lowercase.compare("t") == 0 || lowercase.compare("1") == 0;
+}
 
 void loadConfig() {
     // check server.cfg exists
@@ -49,7 +59,7 @@ void loadConfig() {
     }
     cfg.pythonscript = readConfig(stream, "pythonscript", "main.py");
     cfg.pythonpath = readConfig(stream, "pythonpath", "");
-    cfg.loggerDebug = readConfig(stream, "loggerdebug", "false").compare("true") == 0;
+    cfg.loggerDebug = parseValueToBool(readConfig(stream, "pythonloggerdebug", "false"));
 
     // debug
     stream.close();
