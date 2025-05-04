@@ -9,6 +9,7 @@ from .pickup import *
 from .player import *
 from .server import *
 from .vehicle import *
+from .plugin import *
 
 def get_current_events():
     frame = inspect.currentframe()

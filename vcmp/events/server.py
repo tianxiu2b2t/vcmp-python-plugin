@@ -15,10 +15,12 @@ class ServerFrameEvent(ServerEvent):
 class ServerShutdownEvent(ServerEvent):
     ...
 
-class ServerPerformanceReport(ServerEvent):
+class ServerPerformanceReportEvent(ServerEvent):
     __fields__ = (
+        "count",
         "descriptions",
         "times",
     )
-    descriptions: str
-    times: int
+    count: int
+    descriptions: list[str]
+    times: list[int]

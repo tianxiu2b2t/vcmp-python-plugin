@@ -1,10 +1,25 @@
-from vcmp.__export import vcmpBodyPart, vcmpDisconnectReason, vcmpPlayerState, vcmpPlayerUpdate
+from ..functions.keybind import get_bindkey
+from ..__export import vcmpBodyPart, vcmpDisconnectReason, vcmpPlayerState, vcmpPlayerUpdate
 from .abc import Event
+from ..instance import Player, ReadStream, get_player_from_id, get_vehicle_from_id
 
 class PlayerEvent(Event):
-    ...
+    id: int
+    player: Player
 
-class IncomingConnectionEvent(PlayerEvent):
+    def __init__(
+        self,
+        id: int
+    ):
+        self.id = id
+
+        player = get_player_from_id(id)
+        assert player is not None, f"Player with id {id} does not exist"
+
+        self.player = player
+        
+
+class IncomingConnectionEvent(Event):
     __fields__ = (
         "name",
         "password",
@@ -15,230 +30,194 @@ class IncomingConnectionEvent(PlayerEvent):
     address: str
 
 class ClientScriptDataEvent(PlayerEvent):
-    __fields__ = (
-        "id"
-    )
-    id: int
+    def __init__(self, id: int, data: bytes):
+        super().__init__(id)
+        self.data = data
+        self.stream = ReadStream(data)
 
 class PlayerConnectEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-    )
-    id: int
+    ...
 
 class PlayerDisconnectEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "reason"
-    )
-    id: int
     reason: vcmpDisconnectReason
 
+    def __init__(self, id: int, reason: vcmpDisconnectReason):
+        super().__init__(id)
+        self.reason = vcmpDisconnectReason(reason)
+
 class PlayerRequestClassEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "clazz"
-    )
-    id: int
-    clazz: int
+    classid: int
+
+    def __init__(self, id: int, classid: int):
+        super().__init__(id)
+        self.classid = classid
 
 class PlayerRequestSpawnEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-    )
-    id: int
+    ...
 
 class PlayerSpawnEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-    )
-    id: int
+    ...
 
 class PlayerDeathEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "killerid",
-        "reason",
-        "bodypart",
-    )
-    id: int
-    killerid: int
-    reason: int
-    bodypart: vcmpBodyPart
+    def __init__(self, id: int, killerid: int, reason: int, bodypart: vcmpBodyPart):
+        super().__init__(id)
+
+        self.killerid = killerid
+        self.reason = reason
+        self.bodypart = bodypart
+
+        self.killer = get_player_from_id(killerid)
 
 class PlayerUpdateEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "update",
-    )
-    id: int
     update: vcmpPlayerUpdate
+
+    def __init__(self, id: int, update: vcmpPlayerUpdate):
+        super().__init__(id)
+        self.update = update
+
 class PlayerRequestEnterVehicleEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "vehicleid",
-        "slotindex"
-    )
-    id: int
-    vehicleid: int
-    slotindex: int
+    def __init__(self, id: int, vehicleid: int, slotindex: int):
+        super().__init__(id)
+
+        self.vehicleid = vehicleid
+        self.slotindex = slotindex
+
+        self.vehicle = get_vehicle_from_id(vehicleid)
+
 
 class PlayerEnterVehicleEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "vehicleid",
-        "slotindex",
-    )
-    id: int
-    vehicleid: int
-    slotindex: int
+    def __init__(self, id: int, vehicleid: int, slotindex: int):
+        super().__init__(id)
+
+        self.vehicleid = vehicleid
+        self.slotindex = slotindex
+
+        self.vehicle = get_vehicle_from_id(vehicleid)
+
 
 class PlayerExitVehicleEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "vehicleid",
-    )
-    id: int
-    vehicleid: int
+    def __init__(self, id: int, vehicleid: int):
+        super().__init__(id)
+
+        self.vehicleid = vehicleid
+
+        self.vehicle = get_vehicle_from_id(vehicleid)
+
 
 class PlayerNameChangeEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "oldname",
-        "newname",
-    )
-    id: int
-    oldname: str
-    newname: str
+    def __init__(self, id: int, old_name: str, new_name: str):
+        super().__init__(id)
+
+        self.old_name = old_name
+        self.new_name = new_name
 
 class PlayerStateChangeEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "oldstate",
-        "newstate",
-    )
-    id: int
-    oldstate: vcmpPlayerState
-    newstate: vcmpPlayerState
+    def __init__(self, id: int, old_state: vcmpPlayerState, new_state: vcmpPlayerState):
+        super().__init__(id)
+
+        self.old_state = old_state
+        self.new_state = new_state
 
 class PlayerActionChangeEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "oldaction",
-        "newaction",
-    )
-    id: int
-    oldaction: int
-    newaction: int
+    def __init__(self, id: int, old_action: int, new_action: int):
+        super().__init__(id)
+
+        self.old_action = old_action
+        self.new_action = new_action
 
 class PlayerOnFireChangeEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "isonfire",
-    )
-    id: int
-    isonfire: int
+    def __init__(self, id: int, onfire: bool):
+        super().__init__(id)
+
+        self.onfire = onfire
 
 class PlayerCrouchChangeEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "iscrouching",
-    )
-    id: int
-    iscrouching: int
+    def __init__(self, id: int, crouching: bool):
+        super().__init__(id)
+
+        self.crouching = crouching
+
 
 class PlayerGameKeysChangeEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "oldkeys",
-        "newkeys",
-    )
-    id: int
-    oldkeys: int
-    newkeys: int
+    def __init__(self, id: int, old_keys: int, new_keys: int):
+        super().__init__(id)
+
+        self.old_keys = old_keys
+        self.new_keys = new_keys
 
 class PlayerBeginTypingEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-    )
-    id: int
+    ...
 
 class PlayerEndTypingEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-    )
-    id: int
+    ...
 
 class PlayerAwayChangeEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "isaway",
-    )
-    id: int
-    isaway: int
+    def __init__(self, id: int, away: bool):
+        super().__init__(id)
+
+        self.away = away
 
 class PlayerMessageEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "message",
-    )
-    id: int
-    message: str
+    def __init__(self, id: int, message: str):
+        super().__init__(id)
+
+        self.message = message
 
 class PlayerCommandEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "message",
-    )
-    id: int
-    message: str
+    def __init__(self, id: int, message: str):
+        super().__init__(id)
+
+        self.message = message
+
+        self.cmd, _, self.text = message.partition(' ')
+        self.args = tuple(
+            arg for arg in self.text.split(' ') if arg.strip()
+        )
 
 class PlayerPrivateMessageEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "senderid",
-        "message",
-    )
-    id: int
-    senderid: int
-    message: str
+    def __init__(self, id: int, senderid: int, message: str):
+        super().__init__(id)
+
+        self.senderid = senderid
+        self.message = message
+
+        sender = get_player_from_id(senderid)
+        assert sender is not None
+        
+        self.sender = sender
 
 class PlayerKeyBindDownEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "bindid",
-    )
-    id: int
-    bindid: int
+    def __init__(self, id: int, keyid: int):
+        super().__init__(id)
+
+        self.keyid = keyid
+
+        self.key = get_bindkey(keyid)
+
 
 class PlayerKeyBindUpEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "bindid",
-    )
-    id: int
-    bindid: int
+    def __init__(self, id: int, keyid: int):
+        super().__init__(id)
+
+        self.keyid = keyid
+
+        self.key = get_bindkey(keyid)
 
 class PlayerSpectateEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "targetid",
-    )
-    id: int
-    targetid: int
+    def __init__(self, id: int, targetid: int):
+        super().__init__(id)
+
+        self.targetid = targetid
+        self.target = get_player_from_id(targetid)
 
 class PlayerCrashReportEvent(PlayerEvent):
-    __fields__ = (
-        "id",
-        "report",
-    )
-    id: int
-    report: str
+    def __init__(self, id: int, report: str):
+        super().__init__(id)
+
+        self.report = report
 
 class PlayerModuleList(PlayerEvent):
-    __fields__ = (
-        "id",
-        "list",
-    )
-    id: int
-    list: str
+    def __init__(self, id: int, modules: str):
+        super().__init__(id)
+
+        self.modules = modules
