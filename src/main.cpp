@@ -493,12 +493,19 @@ void registerFunctions(py::module_ m) {
 		);
 	});
 
-	m.def("get_player_uid", [](int32_t playerId, char* buffer, size_t size) {
-		throwVCMPError(funcs->GetPlayerUID(playerId, buffer, size), "Failed to get player UID.");
+	m.def("get_player_uid", [](int32_t playerId) {
+		return getSomethingFromVCMP(
+			[&playerId](char* buffer, size_t size) {
+				return funcs->GetPlayerUID(playerId, buffer, size);
+			}, "Failed to get player UID."
+		);
 	});
-
-	m.def("get_player_uid2", [](int32_t playerId, char* buffer, size_t size) {
-		throwVCMPError(funcs->GetPlayerUID2(playerId, buffer, size), "Failed to get player UID2.");
+	m.def("get_player_uid2", [](int32_t playerId) {
+		return getSomethingFromVCMP(
+			[&playerId](char* buffer, size_t size) {
+				return funcs->GetPlayerUID2(playerId, buffer, size);
+			}, "Failed to get player UID2."
+		);
 	});
 
 	m.def("kick_player", [](int32_t playerId) {
@@ -995,9 +1002,8 @@ void registerFunctions(py::module_ m) {
 		throwVCMPError(funcs->SetVehicleSpeed(vehicleId, x, y, z, add, relative), "Failed to set vehicle speed.");
 	});
 
-	m.def("get_vehicle_speed", [](int32_t vehicleId) {
+	m.def("get_vehicle_speed", [](int32_t vehicleId, bool relative) {
 		float x, y, z;
-		uint8_t relative = 0;
 		throwVCMPError(funcs->GetVehicleSpeed(vehicleId, &x, &y, &z, relative), "Failed to get vehicle speed.");
 		pybind11::dict ret = pybind11::dict();
 		ret["x"] = x;
@@ -1632,13 +1638,13 @@ void registerCallbacks(py::module_ m) {
 	
 	calls->OnPlayerOnFireChange = [](int32_t playerId, uint8_t isOnFire) {
 		callPythonFunc("player_on_fire_change", [playerId, isOnFire](py::object func) {
-			return func(playerId, isOnFire);
+			return func(playerId, py::bool_(isOnFire));
 		});
 	};
 	
 	calls->OnPlayerCrouchChange = [](int32_t playerId, uint8_t isCrouching) {
 		callPythonFunc("player_crouch_change", [playerId, isCrouching](py::object func) {
-			return func(playerId, isCrouching);
+			return func(playerId, py::bool_(isCrouching));
 		});
 	};
 	
@@ -1662,7 +1668,7 @@ void registerCallbacks(py::module_ m) {
 	
 	calls->OnPlayerAwayChange = [](int32_t playerId, uint8_t isAway) {
 		callPythonFunc("player_away_change", [playerId, isAway](py::object func) {
-			return func(playerId, isAway);
+			return func(playerId, py::bool_(isAway));
 		});
 	};
 	
@@ -1802,22 +1808,23 @@ void registerCallbacks(py::module_ m) {
 	
 	calls->OnEntityPoolChange = [](vcmpEntityPool entityType, int32_t entityId, uint8_t isDeleted) {
 		callPythonFunc("entity_pool_change", [entityType, entityId, isDeleted](py::object func) {
-			return func((int)entityType, entityId, isDeleted);
+			return func((int)entityType, entityId, py::bool_(isDeleted));
 		});
 	};
 	
-	//calls->OnServerPerformanceReport = [](size_t entryCount, const char** descriptions, uint64_t* times) {
-	//	logger.debug("Server performance report");
-	//	callPythonFunc("server_performance_report", [entryCount, descriptions, times](py::object func) {
-	//		std::vector<std::string> descriptionsVec = {};
-	//		std::vector<uint64_t> timesVec = {};
-	//		for (size_t i = 0; i < entryCount; ++i) {
-	//			descriptionsVec.push_back(descriptions[i]);
-	//			timesVec.push_back(times[i]);
-	//		}
-	//		return func((int)entryCount, descriptionsVec, timesVec);
-	//	});
-	//	};
+	calls->OnServerPerformanceReport = [](size_t entryCount, const char** descriptions, uint64_t* times) {
+		callPythonFunc("server_performance_report", [entryCount, descriptions, times](py::object func) {
+			py::list pyDescriptions = py::list();
+			py::list pyTimes = py::list();
+			std::vector<std::string> descriptionsVec = {};
+			std::vector<uint64_t> timesVec = {};
+			for (size_t i = 0; i < entryCount; ++i) {
+				pyDescriptions.append(std::string(descriptions[i]));
+				pyTimes.append(times[i]);
+			}
+			return func((int)entryCount, pyDescriptions, pyTimes);
+		});
+	};
 	
 	calls->OnPlayerModuleList = [](int32_t playerId, const char* list) {
 		callPythonFunc("player_module_list", [playerId, list](py::object func) {
@@ -1859,6 +1866,7 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 	// load config
 	logger.setDebug(true);
 	loadConfig();
+	logger.debug("Debug: " + to_string(cfg.loggerDebug));
 	logger.setDebug(cfg.loggerDebug);
 
 	logger.debug("Python script file: " + cfg.pythonscript);
