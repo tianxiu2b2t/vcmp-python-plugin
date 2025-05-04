@@ -229,3 +229,12 @@ class KeyCode(IntEnum):
     VK_PA1 = 0xFD
     VK_OEM_CLEAR = 0xFE
     VK_UNKNOWN = 0xFF
+
+class Version(IntEnum):
+    """ Version enum. """
+    v04rel002 = 66215
+    v04rel003 = 66230
+    v04rel004 = 67000
+    v04rel006 = 67400
+    v0_4_7_0 = 67700
+    v0_4_7_1 = 67710
