@@ -1184,6 +1184,36 @@ class Vehicle:
         """
         funcs.set_vehicle_tyre_status(self._id, tyre, status)
 
+    def exists_handling_rule(self, rule: int) -> bool:
+        """
+        Check if the vehicle exists handling rule
+        """
+        return funcs.exists_inst_handling_rule(self._id, rule)
+    
+    def set_handling_rule(self, rule: int, value: float):
+        """
+        Set the vehicle handling rule
+        """
+        funcs.set_inst_handling_rule(self._id, rule, value)
+
+    def get_handling_rule(self, rule: int) -> float:
+        """
+        Get the vehicle handling rule
+        """
+        return funcs.get_inst_handling_rule(self._id, rule)
+    
+    def reset_handling_rule(self, rule: int):
+        """
+        Reset the vehicle handling rule
+        """
+        funcs.reset_inst_handling_rule(self._id, rule)
+
+    def reset_handling(self):
+        """
+        Reset the vehicle handling
+        """
+        funcs.reset_inst_handling(self._id)
+
     def __del__(self):
         self.delete()
 

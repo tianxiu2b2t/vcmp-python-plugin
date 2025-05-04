@@ -35,3 +35,56 @@ def create_vehicle(
     )
 
     return Vehicle(veh_id)
+
+def reset_all_vehicle_handlings():
+    """
+        Resets all vehicle handlings.
+    """
+    funcs.reset_all_vehicle_handlings()
+
+def exists_handling_rule(model: int, rule: int):
+    """
+        Checks if a vehicle handling rule exists.
+
+        :param model: The model of the vehicle.
+        :param rule: The rule to check.
+        :return: True if the rule exists, False otherwise.
+    """
+    return funcs.exists_handling_rule(model, rule)
+
+def set_handling_rule(model: int, rule: int, value: float):
+    """
+        Sets a vehicle handling rule.
+
+        :param model: The model of the vehicle.
+        :param rule: The rule to set.
+        :param value: The value to set the rule to.
+    """
+    funcs.set_handling_rule(model, rule, value)
+
+def get_handling_rule(model: int, rule: int):
+    """
+        Gets a vehicle handling rule.
+
+        :param model: The model of the vehicle.
+        :param rule: The rule to get.
+        :return: The value of the rule.
+    """
+    return funcs.get_handling_rule(model, rule)
+
+def reset_handling_rule(model: int, rule: int):
+    """
+        Resets a vehicle handling rule.
+
+        :param model: The model of the vehicle.
+        :param rule: The rule to reset.
+    """
+    funcs.reset_handling_rule(model, rule)
+
+def reset_handling(model: int):
+    """
+        Resets a vehicle handling.
+
+        :param model: The model of the vehicle.
+    """
+    funcs.reset_handling(model)
