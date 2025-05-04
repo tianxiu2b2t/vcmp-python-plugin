@@ -14,11 +14,15 @@ setup(
     url='https://github.com/tianxiu2b2t/vcmp-python-plugin',
     author='tianxiu2b2t',
     author_email='administrator@ttb-network.top',
+    version=read_version(),
     license='MIT',
     packages=[
         package for package in find_namespace_packages()
         if package.startswith("__vcmp") or package.startswith("vcmp")
     ],
+    package_data={
+        "libraries": ["*.so", "*.dll"],
+    },
     install_requires=[
         'tianxiu2b2t-utils',
         'anyio'
