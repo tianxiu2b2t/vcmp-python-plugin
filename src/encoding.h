@@ -34,7 +34,7 @@ std::string utf8_to_gbk(const std::string& utf8_str) {
     char* out_ptr = &out_buf[0];
     size_t out_len = out_buf.size();
 
-    size_t res = iconv(conv, &in_ptr, &in_len, &out_ptr &,out_len);
+    size_t res = iconv(conv, &in_ptr, &in_len, &out_ptr, &out_len);
     iconv_close(conv);
 
     if (res == (size_t)-1) {
