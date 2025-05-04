@@ -4,6 +4,8 @@ import math
 import struct
 from typing import Optional
 
+from vcmp import constant
+
 from .logger import logger
 from .vec import Vector, Quaterion
 from .__export import calls, funcs, vcmpEntityPool, vcmpPlayerOption, vcmpPlayerState, vcmpVehicleSync, vcmpVehicleOption
@@ -1128,6 +1130,7 @@ class Vehicle:
         if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolVehicle, self._id):
             return
         funcs.delete_vehicle(self._id)
+        _vehicles.remove(self)
 
     def is_streamed_for_player(self, player_id: int | Player):
         """
@@ -1153,6 +1156,22 @@ class Vehicle:
         Explode the vehicle
         """
         funcs.explode_vehicle(self._id)
+
+    def kill(self):
+        """
+        Kill the vehicle, same as explode
+        """
+        funcs.explode_vehicle(self._id)
+
+    def fix(self):
+        """
+        Fix the vehicle
+        """
+        funcs.set_vehicle_health(self._id, 1000)
+        funcs.set_vehicle_damage_data(self._id, 0)
+        dwLightsData = funcs.get_vehicle_lights_data(self._id)
+        dwLightsData &= 0xFFFFFF00
+        funcs.set_vehicle_lights_data(self._id, dwLightsData)
         
     def set_position(self, position: Vector, remove_occupants: bool = False):
         """
@@ -1227,9 +1246,106 @@ class Vehicle:
             _vehicles.append(vehicle)
         return vehicle
 
+class Pickup:
+    def __init__(self, pickup_id: int):
+        self._id = pickup_id
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def world(self):
+        return funcs.get_pickup_world(self._id)
+    
+    @world.setter
+    def world(self, world: int):
+        funcs.set_pickup_world(self._id, world)
+
+    @property
+    def alpha(self):
+        return funcs.get_pickup_alpha(self._id)
+
+    @alpha.setter
+    def alpha(self, alpha: int):
+        funcs.set_pickup_alpha(self._id, alpha)
+
+    @property
+    def automatic(self):
+        return funcs.is_pickup_automatic(self._id)
+
+    @automatic.setter
+    def automatic(self, automatic: bool):
+        funcs.set_pickup_is_automatic(self._id, automatic)
+
+    @property
+    def timer(self):
+        """
+        Auto timer
+        """
+        return funcs.get_pickup_auto_timer(self._id)
+
+    @timer.setter
+    def timer(self, timer: int):
+        """
+        Auto timer
+        """
+        funcs.set_pickup_auto_timer(self._id, timer)
+
+    @property
+    def position(self):
+        return Vector(**funcs.get_pickup_position(self._id))
+    
+    @position.setter
+    def position(self, position: Vector):
+        funcs.set_pickup_position(self._id, position.x, position.y, position.z)
+
+    @property
+    def model(self):
+        return funcs.get_pickup_model(self._id)
+
+    @property
+    def quantity(self):
+        return funcs.get_pickup_quantity(self._id)
+
+    def refresh(self):
+        """
+        Refresh the pickup
+        """
+        funcs.refresh_pickup(self._id)
+        
+    
+    def delete(self):
+        """
+        Delete the pickup
+        """
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolPickup, self._id):
+            return
+        funcs.delete_pickup(self._id)
+        _pickups.remove(self)
+
+    def __del__(self):
+        self.delete()
+
+    def __new__(cls, pickup_id: int):
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolPickup, pickup_id):
+            return None
+        pickup = next((pickup for pickup in _pickups if pickup.id == pickup_id), None)
+        if pickup is None:
+            pickup = super().__new__(cls)
+            _pickups.append(pickup)
+        return pickup
 
 _players: list[Player] = []
 _vehicles: list[Vehicle] = []
+_pickups: list[Pickup] = []
+_pools_max: dict[vcmpEntityPool, int] = {
+    vcmpEntityPool.vcmpEntityPoolVehicle: constant.MAX_VEHICLES,
+    vcmpEntityPool.vcmpEntityPoolPickup: constant.MAX_PICKUPS,
+    vcmpEntityPool.vcmpEntityPoolObject: constant.MAX_OBJECTS,
+    vcmpEntityPool.vcmpEntityPoolCheckPoint: constant.MAX_CHECKPOINTS,
+}
+
 
 def get_player_from_id(
     player_id: int
@@ -1241,6 +1357,36 @@ def get_vehicle_from_id(
 ) -> Optional[Vehicle]:
     return next((vehicle for vehicle in _vehicles if vehicle.id == vehicle_id), None)
 
+def get_pickup_from_id(
+    pickup_id: int
+) -> Optional[Pickup]:
+    return next((pickup for pickup in _pickups if pickup.id == pickup_id), None)
+
+def search_from_pool(
+    pool: vcmpEntityPool,
+) -> list[int]:
+    max = _pools_max[pool]
+    return [i for i in range(max) if not funcs.check_entity_exists(pool, i)]
+
+def update_pool(
+    pool: vcmpEntityPool,
+):
+    searched = search_from_pool(pool)
+    match pool:
+        case vcmpEntityPool.vcmpEntityPoolVehicle:
+            _vehicles = [Vehicle(i) for i in searched if Vehicle(i) is not None]
+        case vcmpEntityPool.vcmpEntityPoolPickup:
+            _pickups = [Pickup(i) for i in searched if Pickup(i) is not None]
+        case vcmpEntityPool.vcmpEntityPoolObject:
+            pass
+        case vcmpEntityPool.vcmpEntityPoolCheckPoint:
+            pass
+    return searched
+
+def update_pools():
+    for pool in _pools_max.keys():
+        update_pool(pool)
+
 def _on_pre_player_connect(
     player_id: int
 ):
@@ -1248,11 +1394,48 @@ def _on_pre_player_connect(
 
 def _on_post_player_disconnect(
     player_id: int,
-    **args
+    *args,
 ):
     instance = next((player for player in _players if player.id == player_id), None)
     if instance is not None:
         _players.remove(instance)
 
+def _on_pre_entity_pool_update(
+    pool: int,
+    id: int,
+    deleted: bool
+):
+    if deleted:
+        return
+    
+    match pool:
+        case vcmpEntityPool.vcmpEntityPoolVehicle:
+            Vehicle(id)
+        case vcmpEntityPool.vcmpEntityPoolPickup:
+            Pickup(id)
+    
+
+def _on_post_entity_pool_update(
+    pool: int,
+    id: int,
+    deleted: bool
+):
+    if not deleted:
+        return
+    match pool:
+        case vcmpEntityPool.vcmpEntityPoolVehicle:
+            instance = next((vehicle for vehicle in _vehicles if vehicle.id == id), None)
+            if instance is not None:
+                _vehicles.remove(instance)
+        case vcmpEntityPool.vcmpEntityPoolPickup:
+            instance = next((pickup for pickup in _pickups if pickup.id == id), None)
+            if instance is not None:
+                _pickups.remove(instance)
+    
+
 setattr(calls, "on_pre_player_connect", _on_pre_player_connect)
 setattr(calls, "on_post_player_connect", _on_post_player_disconnect)
+setattr(calls, "on_pre_entity_pool_change", _on_pre_entity_pool_update)
+setattr(calls, "on_post_entity_pool_change", _on_post_entity_pool_update)
+
+update_pools()

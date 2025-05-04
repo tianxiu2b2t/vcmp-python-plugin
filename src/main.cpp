@@ -1807,7 +1807,13 @@ void registerCallbacks(py::module_ m) {
 	};
 	
 	calls->OnEntityPoolChange = [](vcmpEntityPool entityType, int32_t entityId, uint8_t isDeleted) {
+		callPythonFunc("pre_entity_pool_change", [entityType, entityId, isDeleted](py::object func) {
+			return func((int)entityType, entityId, py::bool_(isDeleted));
+		});
 		callPythonFunc("entity_pool_change", [entityType, entityId, isDeleted](py::object func) {
+			return func((int)entityType, entityId, py::bool_(isDeleted));
+		});
+		callPythonFunc("post_entity_pool_change", [entityType, entityId, isDeleted](py::object func) {
 			return func((int)entityType, entityId, py::bool_(isDeleted));
 		});
 	};
