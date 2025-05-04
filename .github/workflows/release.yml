@@ -9,13 +9,6 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_and_upload:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, ubuntu-latest]
-        arch: ['x64']
-        python-version: ['3.10', '3.11', '3.12', '3.13']
 
   release_and_publish:
     # 发布到 GitHub Release 和 PyPI
