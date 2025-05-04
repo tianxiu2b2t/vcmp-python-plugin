@@ -1411,10 +1411,125 @@ class CheckPoint:
             _checkpoints.append(checkpoint)
         return checkpoint
 
+class Object:
+    def __init__(self, id: int):
+        self._id = id
+
+    @property
+    def id(self) -> int:
+        return self._id
+    
+    @property
+    def model(self):
+        return funcs.get_object_model(self._id)
+    
+    @property
+    def world(self):
+        return funcs.get_object_world(self._id)
+
+    @world.setter
+    def world(self, world: int):
+        funcs.set_object_world(self._id, world)
+
+    @property
+    def alpha(self):
+        return funcs.get_object_alpha(self._id)
+
+    @property
+    def position(self):
+        return Vector(**funcs.get_object_position(self._id))
+
+    @position.setter
+    def position(self, position: Vector):
+        funcs.set_object_position(self._id, position.x, position.y, position.z)
+
+    @property
+    def shot_report(self):
+        return funcs.is_object_shot_report_enabled(self._id)
+    
+    @shot_report.setter
+    def shot_report(self, shot_report: bool):
+        funcs.set_object_shot_report_enabled(self._id, shot_report)
+
+    @property
+    def touched_report(self):
+        return funcs.is_object_touched_report_enabled(self._id)
+
+    @touched_report.setter
+    def touched_report(self, touched_report: bool):
+        funcs.set_object_touched_report_enabled(self._id, touched_report)
+
+    def delete(self):
+        """
+        Delete the pickup
+        """
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolObject, self._id):
+            return
+        funcs.delete_object(self._id)
+        _objects.remove(self)
+
+    def is_streamed_for_player(self, player: int | Player) -> bool:
+        id = player if isinstance(player, int) else player.id
+        return funcs.is_object_streamed_for_player(self._id, id)
+    
+    def set_alpha(self, alpha: int, duration: int = 0):
+        funcs.set_object_alpha(self._id, alpha, duration)
+
+    def move_to(self, position: Vector, duration: int = 0):
+        """
+        Move the object to the given position
+        """
+        funcs.move_object_to(self._id, position.x, position.y, position.z, duration)
+
+    def move_by(self, position: Vector, duration: int = 0):
+        """
+        Move the object by the given position
+        """
+        funcs.move_object_by(self._id, position.x, position.y, position.z, duration)
+
+
+    def rotate_to(self, rotation: Quaterion, duration: int = 0):
+        """
+        Rotate the object to the given rotation
+        """
+        funcs.rotate_object_to(self._id, rotation.x, rotation.y, rotation.z, rotation.w, duration)
+
+    def rotate_to_euler(self, rotation: Vector, duration: int = 0):
+        """
+        Rotate the object to the given euler rotation
+        """
+        funcs.rotate_object_to_euler(self._id, rotation.x, rotation.y, rotation.z, duration)
+
+    def rotate_by(self, rotation: Quaterion, duration: int = 0):
+        """
+        Rotate the object by the given rotation
+        """
+        funcs.rotate_object_by(self._id, rotation.x, rotation.y, rotation.z, rotation.w, duration)
+
+    def rotate_by_euler(self, rotation: Vector, duration: int = 0):
+        """
+        Rotate the object by the given euler rotation
+        """
+        funcs.rotate_object_by_euler(self._id, rotation.x, rotation.y, rotation.z, duration)
+        
+
+    def __del__(self):
+        self.delete()
+
+    def __new__(cls, pickup_id: int):
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolObject, pickup_id):
+            return None
+        object = next((object for object in _objects if object.id == pickup_id), None)
+        if object is None:
+            object = super().__new__(cls)
+            _objects.append(object)
+        return object
+            
 _players: list[Player] = []
 _vehicles: list[Vehicle] = []
 _pickups: list[Pickup] = []
 _checkpoints: list[CheckPoint] = []
+_objects: list[Object] = []
 _pools_max: dict[vcmpEntityPool, int] = {
     vcmpEntityPool.vcmpEntityPoolVehicle: constant.MAX_VEHICLES,
     vcmpEntityPool.vcmpEntityPoolPickup: constant.MAX_PICKUPS,
