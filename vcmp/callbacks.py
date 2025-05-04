@@ -117,7 +117,8 @@ class CallbackManager:
             setattr(instance, field, args[idx])
             
         #print(event, args, kwargs)
-        res = self._handle(instance)
+        return self._handle(instance)
+
         
     def _handle(
         self,
@@ -137,8 +138,8 @@ class CallbackManager:
                 if arg.required and arg.name not in params:
                     matched = False
                     break
-                
-                params[arg.name] = arg.default
+                elif arg.name not in params:
+                    params[arg.name] = arg.default
 
             if not matched:
                 continue
@@ -160,6 +161,16 @@ class Matcher:
         self.event = event
         self._finished = False
         self._result = None
+
+    def send(
+        self,
+        message: str
+    ):
+        if isinstance(self.event, events.PlayerEvent):
+            player = self.event.player
+
+            player.send_message(message)
+
     
     def finish(
         self,
