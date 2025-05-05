@@ -10,9 +10,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [ubuntu-latest]
         arch: ['x64']
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.13']
     
     steps:
       - name: Checkout code
@@ -93,11 +93,6 @@ jobs:
           cp dl_libraries/**/*.so libraries/
 
           rm -rf dl_libraries
-        
-      - name: Copy into vcmp libraries folder
-        run: |
-          mkdir -p ./vcmp/libraries
-          cp -r libraries/* ./vcmp/libraries
           
       - name: List Artifacts after download
         run: ls -a ./libraries
