@@ -9,7 +9,8 @@ ADD /libraries/vcmp-python-plugin-cpy313-rel64.so /app/plugin/vcmp-python-plugin
 
 # update 
 RUN apt update && apt install -y \
-    gcc-12 g++-12 libstdc++6
+    gcc-12 g++-12 libstdc++6 \
+    gcc-13 g++-13
 
 RUN pip install -r requirements.txt
 
