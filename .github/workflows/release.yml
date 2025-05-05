@@ -94,8 +94,17 @@ jobs:
 
       - name: Move downloaded DLLs to libraries folder and clean empty folders
         run: |
-          mv ./libraries/* ./libraries
-          find ./libraries -type d -empty -delete
+          find ./libraries -name "*.dll" -o -name "*.so" | while read -r file
+          do
+            filename=$(basename "$file")
+            if [ -e "/libraries/$filename" ]; then
+              echo "File $filename already exists in /libraries/"
+              mv "$file" "/libraries/${filename}.backup"
+              echo "Renamed $file to /libraries/${filename}.backup"
+            else
+              mv "$file" /libraries/
+            fi
+          done
 
       - name: List Artifacts after download
         run: ls -a ./libraries
