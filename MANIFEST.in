@@ -1,0 +1,2 @@
+include vcmp/libraries/*.dll
+include vcmp/libraries/*.so

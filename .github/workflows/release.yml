@@ -98,9 +98,14 @@ jobs:
 
           cp dl_libraries/**/*.dll libraries/
           cp dl_libraries/**/*.so libraries/
-          
-          rm -rf dl_libraries
 
+          rm -rf dl_libraries
+        
+      - name: Copy into vcmp libraries folder
+        run: |
+          mkdir -p ./vcmp/libraries
+          cp -r libraries/* ./vcmp/libraries
+          
       - name: List Artifacts after download
         run: ls -a ./libraries
 
