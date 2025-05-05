@@ -92,6 +92,11 @@ jobs:
           name: ${{ needs.build_and_upload.outputs.artifact_name }} # 动态获取工件名称
           path: ./libraries
 
+      - name: Move downloaded DLLs to libraries folder and clean empty folders
+        run: |
+          mv ./libraries/* ./libraries
+          find ./libraries -type d -empty -delete
+
       - name: List Artifacts after download
         run: ls -a ./libraries
 
