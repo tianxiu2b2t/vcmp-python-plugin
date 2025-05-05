@@ -90,21 +90,16 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build_and_upload.outputs.artifact_name }} # 动态获取工件名称
-          path: ./libraries
+          path: ./dl_libraries
 
       - name: Move downloaded DLLs to libraries folder and clean empty folders
         run: |
-          find ./libraries -name "*.dll" -o -name "*.so" | while read -r file
-          do
-            filename=$(basename "$file")
-            if [ -e "/libraries/$filename" ]; then
-              echo "File $filename already exists in /libraries/"
-              mv "$file" "/libraries/${filename}.backup"
-              echo "Renamed $file to /libraries/${filename}.backup"
-            else
-              mv "$file" /libraries/
-            fi
-          done
+          mkdir -p libraries
+
+          cp dl_libraries/**/*.dll libraries/
+          cp dl_libraries/**/*.so libraries/
+          
+          rm -rf dl_libraries
 
       - name: List Artifacts after download
         run: ls -a ./libraries
