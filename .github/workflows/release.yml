@@ -59,6 +59,9 @@ jobs:
           path: |
             build/Release/*.dll
             build/*.so
+            
+      - name: Save Artifact Names
+        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
 
   release_and_publish:
     # 发布到 GitHub Release 和 PyPI
@@ -74,10 +77,14 @@ jobs:
         run: |
           echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
+      - name: List Artifacts
+        run: |
+          echo "Artifacts available: ${{ needs.build_and_upload.outputs.artifact_name }}"
+  
       - name: Download DLL Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: DLLs_*
+          name: ${{ needs.build_and_upload.outputs.artifact_name }} # 动态获取工件名称
           path: ./dlls
 
       - uses: actions/setup-node@v3
