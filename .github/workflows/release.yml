@@ -59,7 +59,7 @@ jobs:
           path: |
             build/Release/*.dll
             build/*.so
-            
+
       - name: Save Artifact Names
         run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
 
@@ -85,7 +85,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: ${{ needs.build_and_upload.outputs.artifact_name }} # 动态获取工件名称
-          path: ./dlls
+          path: ./libraries
+
+      - name: List Artifacts after download
+        run: ls -l ./libraries
 
       - uses: actions/setup-node@v3
         with:
@@ -117,6 +120,6 @@ jobs:
       - name: Upload DLL to Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./dlls/*
+          files: ./libraries/*
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}

@@ -21,7 +21,7 @@ setup(
         if package.startswith("__vcmp") or package.startswith("vcmp")
     ],
     package_data={
-        "libraries": ["*.so", "*.dll"],
+        "": ["libraries/*.so", "libraries/*.dll"],
     },
     install_requires=[
         'tianxiu2b2t-utils',
