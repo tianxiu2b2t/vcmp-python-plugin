@@ -52,10 +52,18 @@ jobs:
       - name: Build with CMake
         run: cmake --build build --config Release
 
+      - name: Move DLLs to build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mv build/Release/*.dll build/
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLLs-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.python-version }}
+          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
           path: |
-            build/Release/*.dll
+            build/*.dll
             build/*.so
+
+      - name: Save Artifact Names
+        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV

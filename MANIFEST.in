@@ -1,2 +1,3 @@
 include vcmp/libraries/*.dll
 include vcmp/libraries/*.so
+include extend/*.nut
