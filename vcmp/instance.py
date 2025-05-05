@@ -2,13 +2,15 @@ from dataclasses import dataclass
 import io
 import math
 import struct
-from typing import Optional
+from typing import Generic, Optional, Type, TypeVar
 
 from vcmp import constant
 
 from .logger import logger
 from .vec import Vector, Quaterion
 from .__export import calls, funcs, vcmpEntityPool, vcmpPlayerOption, vcmpPlayerState, vcmpVehicleSync, vcmpVehicleOption
+
+T = TypeVar('T')
 
 @dataclass
 class RGB:
@@ -1544,17 +1546,57 @@ class Object:
             object = super().__new__(cls)
             _objects.append(object)
         return object
+
+class Marker:
+    def __init__(self, id: int):
+        self._id = id
+
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def world(self):
+        return funcs.get_coord_blip_info(self._id)[0]
+    
+    @property
+    def model(self):
+        return funcs.get_coord_blip_info(self._id)[6]
+
+    @property
+    def position(self):
+        info = funcs.get_coord_blip_info(self._id)
+        return Vector(info[1], info[2], info[3])
+
+    @property
+    def scale(self):
+        return funcs.get_coord_blip_info(self._id)[4]
+    
+    @property
+    def color(self):
+        return RGB.from_int(funcs.get_coord_blip_info(self._id)[5])
+
+    def delete(self):
+        """
+        Delete the pickup
+        """
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolBlip, self._id):
+            return
+        funcs.destroy_coord_blip(self._id)
+        _markers.remove(self)
             
 _players: list[Player] = []
 _vehicles: list[Vehicle] = []
 _pickups: list[Pickup] = []
 _checkpoints: list[CheckPoint] = []
 _objects: list[Object] = []
+_markers: list[Marker] = []
 _pools_max: dict[vcmpEntityPool, int] = {
     vcmpEntityPool.vcmpEntityPoolVehicle: constant.MAX_VEHICLES,
     vcmpEntityPool.vcmpEntityPoolPickup: constant.MAX_PICKUPS,
     vcmpEntityPool.vcmpEntityPoolObject: constant.MAX_OBJECTS,
     vcmpEntityPool.vcmpEntityPoolCheckPoint: constant.MAX_CHECKPOINTS,
+    vcmpEntityPool.vcmpEntityPoolBlip: 99999
 }
 
 def get_player_from_id(
@@ -1572,26 +1614,58 @@ def get_pickup_from_id(
 ) -> Optional[Pickup]:
     return next((pickup for pickup in _pickups if pickup.id == pickup_id), None)
 
+def get_object_from_id(
+    object_id: int
+) -> Optional[Object]:
+    return next((object for object in _objects if object.id == object_id), None)
+
+def get_marker_from_id(
+    marker_id: int
+) -> Optional[Marker]:
+    return next((marker for marker in _markers if marker.id == marker_id), None)
+
+def get_checkpoint_from_id(
+    checkpoint_id: int
+) -> Optional[CheckPoint]:
+    return next((checkpoint for checkpoint in _checkpoints if checkpoint.id == checkpoint_id), None)
+    
+
 def search_from_pool(
     pool: vcmpEntityPool,
 ) -> list[int]:
     max = _pools_max[pool]
     return [i for i in range(max) if not funcs.check_entity_exists(pool, i)]
 
+def _update_pool(
+    pool: vcmpEntityPool,
+    instance: Type[T]
+) -> list[T]:
+    searched = search_from_pool(pool)
+    res = []
+    for i in searched:
+        obj = instance(i) # type: ignore
+        if obj is None:
+            continue
+        res.append(obj)
+    return res
+
 def update_pool(
     pool: vcmpEntityPool,
 ):
-    searched = search_from_pool(pool)
+    global _vehicles, _pickups, _objects, _checkpoints, _markers
     match pool:
         case vcmpEntityPool.vcmpEntityPoolVehicle:
-            _vehicles = [Vehicle(i) for i in searched if Vehicle(i) is not None]
+            _vehicles = _update_pool(pool, Vehicle)
         case vcmpEntityPool.vcmpEntityPoolPickup:
-            _pickups = [Pickup(i) for i in searched if Pickup(i) is not None]
+            _pickups = _update_pool(pool, Pickup)
         case vcmpEntityPool.vcmpEntityPoolObject:
-            pass
+            _objects = _update_pool(pool, Object)
         case vcmpEntityPool.vcmpEntityPoolCheckPoint:
-            pass
-    return searched
+            _checkpoints = _update_pool(pool, CheckPoint)
+        case vcmpEntityPool.vcmpEntityPoolBlip:
+            _markers = _update_pool(pool, Marker)
+            
+
 
 def update_pools():
     for pool in _pools_max.keys():
@@ -1623,6 +1697,12 @@ def _on_pre_entity_pool_update(
             Vehicle(id)
         case vcmpEntityPool.vcmpEntityPoolPickup:
             Pickup(id)
+        case vcmpEntityPool.vcmpEntityPoolObject:
+            Object(id)
+        case vcmpEntityPool.vcmpEntityPoolCheckPoint:
+            CheckPoint(id)
+        case vcmpEntityPool.vcmpEntityPoolBlip:
+            Marker(id)
     
 
 def _on_post_entity_pool_update(
