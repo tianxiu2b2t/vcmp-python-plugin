@@ -44,6 +44,7 @@ pip install vcmp-python-plugin
 #### 4. 修改 server.cfg 文件，添加以下内容
 
 ```cfg
+plugins vcmp-python-plugin-cpy<py_version>-rel64.dll
 pythonscript main.py
 ```
 
