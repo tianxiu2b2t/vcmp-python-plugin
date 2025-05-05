@@ -52,12 +52,17 @@ jobs:
       - name: Build with CMake
         run: cmake --build build --config Release
 
+      - name: Move DLLs to build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          mv build/Release/*.dll build/
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
           path: |
-            build/Release/*.dll
+            build/*.dll
             build/*.so
 
       - name: Save Artifact Names
@@ -88,7 +93,7 @@ jobs:
           path: ./libraries
 
       - name: List Artifacts after download
-        run: ls -l ./libraries
+        run: ls -a ./libraries
 
       - uses: actions/setup-node@v3
         with:
