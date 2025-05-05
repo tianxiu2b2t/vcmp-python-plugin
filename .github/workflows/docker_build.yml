@@ -89,7 +89,6 @@ jobs:
         run: |
           mkdir -p libraries
 
-          cp dl_libraries/**/*.dll libraries/
           cp dl_libraries/**/*.so libraries/
 
           rm -rf dl_libraries
