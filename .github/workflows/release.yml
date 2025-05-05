@@ -55,7 +55,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLLs-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.python-version }}
+          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
           path: |
             build/Release/*.dll
             build/*.so
@@ -77,7 +77,7 @@ jobs:
       - name: Download DLL Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: DLLs-*
+          name: DLLs_*
           path: ./dlls
 
       - uses: actions/setup-node@v3
