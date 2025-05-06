@@ -52,6 +52,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
+          strings /lib/x86_64-linux-gnu/libc.so.6 | grep GLIBC
 
       - name: Build with CMake
         run: cmake --build build --config Release
@@ -64,16 +65,16 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
+          name: DLLs_ubuntu_${{ matrix.arch }}_${{ matrix.python-version }}
           path: |
             build/*.dll
             build/*.so
 
       - name: Save Artifact Names
-        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
+        run: echo "artifact_name=DLLs_ubuntu_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
     
   build-multiarch:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: build_and_upload
     steps:
       - uses: actions/checkout@v4
