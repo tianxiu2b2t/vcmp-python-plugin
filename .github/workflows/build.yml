@@ -11,11 +11,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest]
+        os: [windows-latest, ubuntu-20.04]
         arch: ['x64']
         python-version: ['3.10', '3.11', '3.12', '3.13']
-        glibc-version: ['2.31', '2.33', '2.35'] # 添加 glibc 版本支持
-        gcc-version: ['10', '11', '12']         # 添加 gcc/glibcxx 版本支持
 
     steps:
       - name: Checkout code
@@ -35,31 +33,6 @@ jobs:
         run: |
           git clone https://github.com/pybind/pybind11.git
 
-      - name: Install Specific GCC and glibc (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y software-properties-common
-          
-          # 安装指定版本的 GCC
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          sudo apt-get update && sudo apt-get install -y gcc-${{ matrix.gcc-version }} g++-${{ matrix.gcc-version }}
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-${{ matrix.gcc-version }} 100
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-${{ matrix.gcc-version }} 100
-          
-          # 安装指定版本的 glibc
-          wget http://ftp.gnu.org/gnu/libc/glibc-${{ matrix.glibc-version }}.tar.gz
-          tar -xvzf glibc-${{ matrix.glibc-version }}.tar.gz
-          cd glibc-${{ matrix.glibc-version }}
-          mkdir build && cd build
-          ../configure --prefix=/opt/glibc-${{ matrix.glibc-version }}
-          make -j$(nproc)
-          sudo make install
-          
-          # 设置运行时路径
-          sudo ldconfig /opt/glibc-${{ matrix.glibc-version }}/lib
-          export LD_LIBRARY_PATH=/opt/glibc-${{ matrix.glibc-version }}/lib:$LD_LIBRARY_PATH
-
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
         run: |
@@ -74,11 +47,7 @@ jobs:
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
-        run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-            -DCMAKE_C_FLAGS="-Wl,--rpath=/opt/glibc-${{ matrix.glibc-version }}/lib -L/opt/glibc-${{ matrix.glibc-version }}/lib" \
-            -DCMAKE_CXX_FLAGS="-Wl,--rpath=/opt/glibc-${{ matrix.glibc-version }}/lib -L/opt/glibc-${{ matrix.glibc-version }}/lib"
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build with CMake
         run: cmake --build build --config Release
@@ -91,10 +60,10 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}_glibc${{ matrix.glibc-version }}_gcc${{ matrix.gcc-version }}
+          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
           path: |
             build/*.dll
             build/*.so
 
       - name: Save Artifact Names
-        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}_glibc${{ matrix.glibc-version }}_gcc${{ matrix.gcc-version }}" >> $GITHUB_ENV
+        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
