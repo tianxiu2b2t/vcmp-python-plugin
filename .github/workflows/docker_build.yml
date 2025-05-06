@@ -67,6 +67,10 @@ jobs:
       - name: Save Artifact Names
         run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
     
+      - name: debug
+        run: |
+          strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
+
   build-multiarch:
     runs-on: ubuntu-latest
     needs: build_and_upload
