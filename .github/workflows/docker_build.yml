@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [debian-latest]
+        os: [ubuntu-latest]
         arch: ['x64']
         python-version: ['3.13']
     
