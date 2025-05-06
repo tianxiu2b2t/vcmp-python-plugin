@@ -46,27 +46,58 @@ jobs:
 
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+        run: |
+          apt-get update && apt-get install -y gcc-12 g++-12 libstdc++6
+          update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100
+          update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 
       - name: Build with CMake
         run: cmake --build build --config Release
 
-      - name: debug
+      - name: Move DLLs to build (Windows)
+        if: runner.os == 'Windows'
         run: |
-          strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
+          mv build/Release/*.dll build/
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
+          path: |
+            build/*.dll
+            build/*.so
+
+      - name: Save Artifact Names
+        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
+    
+  build-multiarch:
+    runs-on: ubuntu-latest
+    needs: build_and_upload
+    steps:
+      - uses: actions/checkout@v4
       - name: Set env
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: List Artifacts
+        run: |
+          echo "Artifacts available: ${{ needs.build_and_upload.outputs.artifact_name }}"
+  
+      - name: Download DLL Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.build_and_upload.outputs.artifact_name }} # 动态获取工件名称
+          path: ./dl_libraries
 
       - name: Move downloaded DLLs to libraries folder and clean empty folders
         run: |
           mkdir -p libraries
 
-          cp build/*.so libraries/
+          cp dl_libraries/**/*.so libraries/
 
-          rm -rf build
+          rm -rf dl_libraries
           
-      - name: List Artifacts
+      - name: List Artifacts after download
         run: ls -a ./libraries
 
       - name: Set up Docker Buildx
