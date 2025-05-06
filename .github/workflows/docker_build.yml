@@ -52,6 +52,7 @@ jobs:
           sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100
           sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
 
       - name: Build with CMake
         run: cmake --build build --config Release
