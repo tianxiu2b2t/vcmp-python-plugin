@@ -15,7 +15,6 @@ if(WIN32)
     set(PLATFORM_LIBS ws2_32)
 else()
     message(STATUS "Detected non-Windows platform")
-    set(PLATFORM_LIBS pthread)
 endif()
 
 # 添加共享库
