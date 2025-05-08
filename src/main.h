@@ -25,18 +25,3 @@ namespace py = pybind11;
 
 PluginFuncs* funcs;
 PluginCallbacks* calls;
-
-py::module pfuncs;
-py::module pcallbacks;
-
-map<int, string> vcmpErrorMappings = {
-	{vcmpErrorNoSuchEntity, "No such entity."},
-	{vcmpErrorBufferTooSmall, "Buffer too small."},
-	{vcmpErrorTooLargeInput, "Too large input."},
-	{vcmpErrorArgumentOutOfBounds, "Argument out of bounds."},
-	{vcmpErrorNullArgument, "Null argument."},
-	{vcmpErrorPoolExhausted, "Pool exhausted."},
-	{vcmpErrorInvalidName, "Invalid name."},
-	{vcmpErrorRequestDenied, "Request denied."},
-	{forceSizeVcmpError, "Unknown Error"}
-};
