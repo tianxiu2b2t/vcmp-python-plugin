@@ -47,40 +47,15 @@ jobs:
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
-            # 下载并安装指定版本的 glibc
-            wget http://ftp.gnu.org/gnu/libc/glibc-2.31.tar.gz
-            tar -xvzf glibc-2.31.tar.gz
-            cd glibc-2.31
-            mkdir build && cd build
-            ../configure --prefix=/opt/glibc-2.31
-            make -j$(nproc)
-            sudo make install
-            cd ../..
-  
-            # 下载并安装指定版本的 GCC（包含对应的 glibcxx）
-            sudo apt-get update
-            sudo apt-get install -y software-properties-common
-            sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-            sudo apt-get update && sudo apt-get install -y gcc-12 g++-12
-            sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100
-            sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
-  
-            # 设置运行时路径，确保使用指定版本的 glibc 和 glibcxx
-            export LD_LIBRARY_PATH=/opt/glibc-2.31/lib:$LD_LIBRARY_PATH
-  
-            # 验证安装的 glibc 和 glibcxx 版本
-            strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
-            strings /opt/glibc-2.31/lib/libc.so.6 | grep GLIBC
-  
-            # 配置 CMake
-            cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_COMPILER=gcc -DCMAKE_CXX_COMPILER=g++ \
-              -DCMAKE_C_FLAGS="-Wl,--rpath=/opt/glibc-2.31/lib -L/opt/glibc-2.31/lib" \
-              -DCMAKE_CXX_FLAGS="-Wl,--rpath=/opt/glibc-2.31/lib -L/opt/glibc-2.31/lib"
-  
+          sudo apt-get install -y gcc-9 g++-9
+          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 100
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 100
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+          strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
+          strings /lib/x86_64-linux-gnu/libc.so.6 | grep GLIBC
+
       - name: Build with CMake
-        run: |
-          cmake --build build --config Release
+        run: cmake --build build --config Release
 
       - name: Move DLLs to build (Windows)
         if: runner.os == 'Windows'
