@@ -90,7 +90,14 @@ string getSomethingFromVCMP(
 	char buffer[256];
 	while (error == vcmpErrorBufferTooSmall) {
 		error = func(buffer, sizeof(buffer));
-		if (error == vcmpErrorNone) return gbk_to_utf8(std::string(buffer));
+		if (error == vcmpErrorNone) {
+			string ret = gbk_to_utf8(std::string(buffer));
+			// remove ending \0
+			if (ret.length() > 0 && ret[ret.length() - 1] == '\0') {
+				ret = ret.substr(0, ret.length() - 1);
+			}
+			return ret;
+		}
 	}
     throwVCMPError(error, extra);
 	return "";
