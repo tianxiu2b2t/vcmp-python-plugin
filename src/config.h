@@ -34,7 +34,6 @@ string readConfig(ifstream& stream, string key, string defaultValue) {
         std::string linekey = line.substr(0, spiltSpace);
         std::string linevalue = line.substr(spiltSpace + 1);
 
-        logger.debug(linekey + " " + key);
         if (linekey.compare(key) == 0) {
             value = linevalue;
             break;
