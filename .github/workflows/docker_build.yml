@@ -7,9 +7,10 @@ on:
 
 jobs:
   build_and_upload:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest]
         arch: ['x64']
         python-version: ['3.13']
     
@@ -46,10 +47,6 @@ jobs:
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
-          sudo apt-get update 
-          sudo apt-get install -y gcc-12 g++-12 libstdc++6
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-12 100
-          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-12 100
           cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
           strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
           strings /lib/x86_64-linux-gnu/libc.so.6 | grep GLIBC
@@ -65,16 +62,16 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLLs_ubuntu_${{ matrix.arch }}_${{ matrix.python-version }}
+          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
           path: |
             build/*.dll
             build/*.so
 
       - name: Save Artifact Names
-        run: echo "artifact_name=DLLs_ubuntu_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
+        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
     
   build-multiarch:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     needs: build_and_upload
     steps:
       - uses: actions/checkout@v4
