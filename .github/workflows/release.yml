@@ -108,6 +108,11 @@ jobs:
         run: |
           mkdir -p ./vcmp/libraries
           cp -r libraries/* ./vcmp/libraries
+    
+      - name: Copy squirrel extend into vcmp folder
+        run: |
+          mkdir -p ./vcmp/squirrel-extend
+          cp -r ./extend/* ./vcmp/squirrel-extend
           
       - name: List Artifacts after download
         run: ls -a ./libraries
