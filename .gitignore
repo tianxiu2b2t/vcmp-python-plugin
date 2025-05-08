@@ -10,7 +10,7 @@ store/
 server64.exe
 server32.exe
 
-*.py
+/*.py
 start.bat
 
 server_log.txt
