@@ -18,7 +18,11 @@ else()
 endif()
 
 # 添加共享库
-add_library(${PROJECT_NAME} SHARED ./src/main.cpp)
+if (WIN32)
+    add_library(${PROJECT_NAME} SHARED ./src/main.cpp)
+else()
+    add_library(${PROJECT_NAME} MODULE ./src/main.cpp)
+endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE pybind11::embed ${PLATFORM_LIBS})
 
 # 检测 Python 版本
