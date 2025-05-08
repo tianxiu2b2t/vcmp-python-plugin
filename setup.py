@@ -8,6 +8,18 @@ def read_version():
                 return line.split()[2].strip('"')
     return '0.0.0'
 
+def read_requirements():
+    with open('requirements.txt', 'r', encoding='utf-16le') as f:
+        return [
+            ''.join((
+                char for char in line.strip() if char.isascii()
+            ))
+            for line in f.readlines()
+            if not line in (
+                'setuptools'
+            )
+        ]
+
 setup(
     name='vcmp-python-plugin',
     description='A Python plugin for VCMP',
@@ -23,8 +35,5 @@ setup(
     package_data={
         "": ["libraries/*.so", "libraries/*.dll"],
     },
-    install_requires=[
-        'tianxiu2b2t-utils',
-        'anyio'
-    ]
+    install_requires=read_requirements()
 )

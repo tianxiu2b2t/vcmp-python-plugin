@@ -2,11 +2,10 @@ from dataclasses import dataclass
 import math
 from typing import Optional, Type, TypeVar
 
-from vcmp import constant
-
+from . import constant
 from .vec import Vector, Quaterion
 from .__export import calls, funcs, vcmpEntityPool, vcmpPlayerOption, vcmpPlayerState, vcmpVehicleSync, vcmpVehicleOption
-from .stream import WriteStream
+from .streams import WriteStream
 
 T = TypeVar('T')
 
