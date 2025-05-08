@@ -1,3 +1,6 @@
+
+#ifndef ENCODING_H
+#define ENCODING_H
 #include <string>
 #include <vector>
 
@@ -84,3 +87,4 @@ std::string gbk_to_utf8(const std::string& gbk_str) {
 #endif
     return utf8_str;
 }
+#endif // ENCODING_H
