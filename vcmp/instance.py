@@ -1652,7 +1652,7 @@ def _on_post_entity_pool_update(
     
 
 setattr(calls, "on_pre_player_connect", _on_pre_player_connect)
-setattr(calls, "on_post_player_connect", _on_post_player_disconnect)
+setattr(calls, "on_post_player_disconnect", _on_post_player_disconnect)
 setattr(calls, "on_pre_entity_pool_change", _on_pre_entity_pool_update)
 setattr(calls, "on_post_entity_pool_change", _on_post_entity_pool_update)
 
