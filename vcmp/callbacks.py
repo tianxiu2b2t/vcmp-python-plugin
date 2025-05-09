@@ -9,6 +9,7 @@ from .exceptions import FinishedException
 from .events import Event
 from .__export import calls
 from . import events
+import traceback
 
 @dataclass
 class CallbackArg:
@@ -81,7 +82,8 @@ class CallbackManager:
             try:
                 return self._callback(event, args, kwargs)
             except:
-                ...
+                logger.error(f"Error in callback {event}")
+                logger.exception(traceback.format_exc())
             return None
         setattr(self.module_callbacks, f"on_{event}", decorator)
 
@@ -116,7 +118,6 @@ class CallbackManager:
         for idx, field in enumerate(fields):
             setattr(instance, field, args[idx])
             
-        #print(event, args, kwargs)
         res = self._handle(instance)
         if res is None:
             return 1
@@ -152,7 +153,8 @@ class CallbackManager:
                 result = result or matcher._result
                 break
             except:
-                logger.traceback(f"Error in callback {callback.callback.__name__}")
+                logger.error(f"Error in callback {callback.callback.__name__}")
+                logger.exception(traceback.format_exc())
         return result
 
         
