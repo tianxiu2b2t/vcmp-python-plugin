@@ -55,7 +55,7 @@ py::object handlePythonFunction(
 ) {
     std::string name = "on_" + function;
     try {
-        if (!py::hasattr(pcallbacks, name.c_str()) || !py::isinstance<py::function>(pcallbacks.attr(name.c_str()))) {
+        if (!py::hasattr(pcallbacks, name.c_str()) || pcallbacks.attr(name.c_str()).is_none() || !py::isinstance<py::function>(pcallbacks.attr(name.c_str()))) {
             pcallbacks.def(name.c_str(), [](py::args args, py::kwargs kwargs) {
                 // Do nothing
             });
@@ -63,11 +63,11 @@ py::object handlePythonFunction(
         }
         auto func = pcallbacks.attr(name.c_str());
         auto ret = py::none();
-		if (ret.is_none()) {
-            return defaultValue;
-        }
         if (py::isinstance<py::function>(func)) {
             ret = callbacks(func);
+        }
+		if (ret.is_none()) {
+            return defaultValue;
         }
         return ret;
     } catch (...) {
