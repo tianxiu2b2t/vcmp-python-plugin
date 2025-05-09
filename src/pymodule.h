@@ -63,11 +63,11 @@ py::object handlePythonFunction(
         }
         auto func = pcallbacks.attr(name.c_str());
         auto ret = py::none();
+		if (ret.is_none()) {
+            return defaultValue;
+        }
         if (py::isinstance<py::function>(func)) {
             ret = callbacks(func);
-        }
-        if (ret.is_none()) {
-            return defaultValue;
         }
         return ret;
     } catch (...) {
@@ -1492,7 +1492,7 @@ void bindVCMPFunctions() {
 void bindVCMPCallbacks() {
 	vcalls->OnServerInitialise = []() -> uint8_t
 	{
-		logger.info(std::string(PLUGIN_NAME) + " v" + std::string(PLUGIN_VERSION) + " loaded.");
+		logger.info("Loaded " + std::string(PLUGIN_VERSION) + " version " + std::string(PLUGIN_VERSION) + " by " + std::string(AUTHOR) + ". (" + std::string(LICENSE) + " LICENSE)");
 		handlePythonFunction("server_initialise", DEFAULT_RETURN);
         return 1;
 	};
