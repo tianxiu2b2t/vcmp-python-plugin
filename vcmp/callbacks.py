@@ -117,7 +117,10 @@ class CallbackManager:
             setattr(instance, field, args[idx])
             
         #print(event, args, kwargs)
-        return self._handle(instance)
+        res = self._handle(instance)
+        if res is None:
+            return 1
+        return res
 
         
     def _handle(

@@ -4,6 +4,7 @@
 #include "plugin.h"
 #include "logger.h"
 #include <pybind11/embed.h>
+#include "meta.hpp"
 
 namespace py = pybind11;
 
@@ -1489,12 +1490,13 @@ void bindVCMPFunctions() {
 }
 
 void bindVCMPCallbacks() {
-    vcalls->OnServerInitialise = []() -> uint8_t
-    {
-        handlePythonFunction("server_initialise", DEFAULT_RETURN);
+	vcalls->OnServerInitialise = []() -> uint8_t
+	{
+		logger.info(std::string(PLUGIN_NAME) + " v" + std::string(PLUGIN_VERSION) + " loaded.");
+		handlePythonFunction("server_initialise", DEFAULT_RETURN);
         return 1;
-    };
-    vcalls->OnServerShutdown = []() -> void
+	};
+	vcalls->OnServerShutdown = []() -> void
     {
         handlePythonFunction("server_shutdown", py::none(), [](py::object func) {
             return func();

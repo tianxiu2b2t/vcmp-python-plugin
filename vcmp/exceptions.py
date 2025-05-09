@@ -1,18 +1,8 @@
+from typing import Callable
+
+
 class FinishedException(Exception):
     ...
-
-"""
-
-	{vcmpErrorNoSuchEntity, "No such entity."},
-	{vcmpErrorBufferTooSmall, "Buffer too small."},
-	{vcmpErrorTooLargeInput, "Too large input."},
-	{vcmpErrorArgumentOutOfBounds, "Argument out of bounds."},
-	{vcmpErrorNullArgument, "Null argument."},
-	{vcmpErrorPoolExhausted, "Pool exhausted."},
-	{vcmpErrorInvalidName, "Invalid name."},
-	{vcmpErrorRequestDenied, "Request denied."},
-	{forceSizeVcmpError, "Unknown Error"}
-"""
 
 class VCMPError(Exception):
     ...
@@ -59,6 +49,23 @@ mappings = {
 def from_vcmp_exception(
     e: ValueError
 ):
-    message = e.args[0]
+    message: str = e.args[0]
     type, message = message.split(".", 1)
-    return mappings[type + "."](message)
+    type = f"{type}."
+    if type not in mappings:
+        return e
+    return mappings[type](message)
+
+def wrapper_exception(
+    func: Callable,
+    *args,
+    **kwargs
+):
+    try:
+        return func(*args, **kwargs)
+    except ValueError as e:
+        raise from_vcmp_exception(e) from e
+    except Exception as e:
+        raise VCMPErrorUnknown(f"Unknown error: {e}") from e
+    
+    
