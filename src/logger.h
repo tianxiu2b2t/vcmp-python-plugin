@@ -24,7 +24,6 @@ using namespace std;
 
 class Logger {
 private:
-    bool DEBUG;
 #ifdef WIN32
     HANDLE hstdout;
 #else
@@ -122,6 +121,7 @@ private:
     }
 
 public:
+    bool DEBUG;
     Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
         FORMAT = formatter;
         DEBUG = debug;

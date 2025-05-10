@@ -136,7 +136,35 @@ void bindVCMPFunctions() {
     }
     py::module m = pfunctions;
     logger.debug("Start bind VCMP functions to Python module");
-    m.def("get_server_version", []() {
+	m.def("set_vcmp_python_debug", [](bool debug) {
+		logger.setDebug(debug);
+	});
+
+	m.def("get_vcmp_python_debug", []() {
+		return logger.DEBUG;
+	});
+
+	m.def("get_vcmp_python_version", []() {
+		return PLUGIN_VERSION;
+	});
+
+	m.def("get_vcmp_python_author", []() {
+		return AUTHOR;
+	});
+	
+	m.def("get_vcmp_python_license", []() {
+		return LICENSE;
+	});
+
+	m.def("get_vcmp_python_github", []() {
+		return GITHUB;
+	});
+
+	m.def("get_vcmp_python_name", []() {
+		return PLUGIN_NAME;
+	});
+
+	m.def("get_server_version", []() {
 		return funcs->GetServerVersion();
 	});
 
