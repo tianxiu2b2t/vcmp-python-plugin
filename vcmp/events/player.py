@@ -31,10 +31,11 @@ class IncomingConnectionEvent(Event):
     address: str
 
 class ClientScriptDataEvent(PlayerEvent):
-    def __init__(self, id: int, data: bytes):
+    def __init__(self, id: int, data: bytes, size: int):
         super().__init__(id)
         self.data = data
         self.stream = ReadStream(data)
+        self.size = size
 
 class PlayerConnectEvent(PlayerEvent):
     ...
