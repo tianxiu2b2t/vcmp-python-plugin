@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from ..__export import funcs
-from ..exceptions import wrapper_exception
 
 @dataclass
 class PluginInfo:
@@ -33,7 +32,6 @@ def get_plugins() -> list[PluginInfo]:
             pass
     return plugins
 
-@wrapper_exception
 def send_plugin_command(
     command_id: int,
     command: str,

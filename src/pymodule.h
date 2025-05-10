@@ -1341,16 +1341,16 @@ void bindVCMPFunctions() {
 		throwVCMPError(funcs->RotateObjectByEuler(objectId, x, y, z, duration), "Failed to rotate object by Euler.");
 	});
 
-	m.def("get_object_rotation", [](int32_t objectId, float* xOut, float* yOut, float* zOut, float* wOut) {
+	m.def("get_object_rotation", [](int32_t objectId) {
 		float x, y, z, w;
-		throwVCMPError(funcs->GetObjectRotation(objectId, xOut, yOut, zOut, wOut), "Failed to get object rotation.");
+		throwVCMPError(funcs->GetObjectRotation(objectId, &x, &y, &z, &w), "Failed to get object rotation.");
 		return createQuaternion(x, y, z, w);
 	});
 
-	m.def("get_object_rotation_euler", [](int32_t objectId, float* xOut, float* yOut, float* zOut) {
-		float x, y, z, w;
-		throwVCMPError(funcs->GetObjectRotationEuler(objectId, xOut, yOut, zOut), "Failed to get object rotation Euler.");
-		return createQuaternion(x, y, z, w);
+	m.def("get_object_rotation_euler", [](int32_t objectId) {
+		float x, y, z;
+		throwVCMPError(funcs->GetObjectRotationEuler(objectId, &x, &y, &z), "Failed to get object rotation Euler.");
+		return createVector(x, y, z);
 	});
 
 	m.def("set_object_shot_report_enabled", [](int32_t objectId, bool toggle) {

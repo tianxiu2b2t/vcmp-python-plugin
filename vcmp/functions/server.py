@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from ..__export import funcs
-from ..exceptions import wrapper_exception
 
 
 @dataclass
@@ -99,7 +98,6 @@ def get_maxplayers() -> int:
 
     return funcs.get_max_players()
 
-@wrapper_exception
 def get_server_settings() -> ServerSettings:
     """
         Get the server settings.
