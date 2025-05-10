@@ -112,13 +112,11 @@ private:
                 SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
             }
             else {
-                fprintf(stdout, "%s", text, 27);
+                printf("%s", text);
             }
 #else
-            //fprintf(stdout, "%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text, 27);
-            fprintf(stdout, text);
+            printf("%c[%s%dm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
             fflush(stdout);
-            //printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
 #endif
         }
     }
