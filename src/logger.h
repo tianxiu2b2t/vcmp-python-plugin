@@ -118,11 +118,14 @@ private:
             printf("\033[%dm%s", color, text.c_str());
 #endif
         }
+        #ifndef WIN32
+        printf("\033[0m"); // clear color
+        #endif
     }
 
 public:
     bool DEBUG;
-    Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%<clear>\n</clear>", bool debug = false) {
+    Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
         FORMAT = formatter;
         DEBUG = debug;
 
