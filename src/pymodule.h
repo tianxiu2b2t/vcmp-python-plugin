@@ -46,6 +46,32 @@ void raiseException(std::string extra = "") {
     }
 }
 
+py::dict createVector(
+	float x,
+	float y,
+	float z
+) {
+	py::dict ret = py::dict();
+	ret["x"] = x;
+	ret["y"] = y;
+	ret["z"] = z;
+	return ret;
+}
+
+py::dict createQuaternion(
+	float x,
+	float y,
+	float z,
+	float w
+) {
+	py::dict ret = py::dict();
+	ret["x"] = x;
+	ret["y"] = y;
+	ret["z"] = z;
+	ret["w"] = w;
+	return ret;
+}
+
 py::object handlePythonFunction(
     std::string function,
     py::object defaultValue = py::none(),
@@ -701,11 +727,7 @@ void bindVCMPFunctions() {
 	m.def("get_player_position", [](int32_t playerId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetPlayerPosition(playerId, &x, &y, &z), "Failed to get player position.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_player_speed", [](int32_t playerId, float x, float y, float z) {
@@ -715,11 +737,7 @@ void bindVCMPFunctions() {
 	m.def("get_player_speed", [](int32_t playerId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetPlayerSpeed(playerId, &x, &y, &z), "Failed to get player speed.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("add_player_speed", [](int32_t playerId, float x, float y, float z) {
@@ -745,21 +763,13 @@ void bindVCMPFunctions() {
 	m.def("get_player_aim_position", [](int32_t playerId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetPlayerAimPosition(playerId, &x, &y, &z), "Failed to get player aim position.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("get_player_aim_direction", [](int32_t playerId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetPlayerAimDirection(playerId, &x, &y, &z), "Failed to get player aim direction.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("is_player_on_fire", [](int32_t playerId) {
@@ -956,11 +966,7 @@ void bindVCMPFunctions() {
 	m.def("get_vehicle_position", [](int32_t vehicleId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetVehiclePosition(vehicleId, &x, &y, &z), "Failed to get vehicle position.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_vehicle_rotation", [](int32_t vehicleId, float x, float y, float z, float w) {
@@ -974,22 +980,13 @@ void bindVCMPFunctions() {
 	m.def("get_vehicle_rotation", [](int32_t vehicleId, float* xOut, float* yOut, float* zOut, float* wOut) {
 		float x, y, z, w;
 		throwVCMPError(funcs->GetVehicleRotation(vehicleId, &x, &y, &z, &w), "Failed to get vehicle rotation.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		ret["w"] = w;
-		return ret;
+		return createQuaternion(x, y, z, w);
 	});
 
 	m.def("get_vehicle_rotation_euler", [](int32_t vehicleId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetVehicleRotationEuler(vehicleId, &x, &y, &z), "Failed to get vehicle rotation Euler.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_vehicle_speed", [](int32_t vehicleId, float x, float y, float z, uint8_t add, uint8_t relative) {
@@ -999,12 +996,7 @@ void bindVCMPFunctions() {
 	m.def("get_vehicle_speed", [](int32_t vehicleId, bool relative) {
 		float x, y, z;
 		throwVCMPError(funcs->GetVehicleSpeed(vehicleId, &x, &y, &z, relative), "Failed to get vehicle speed.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		ret["relative"] = relative;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_vehicle_turn_speed", [](int32_t vehicleId, float x, float y, float z, uint8_t add, uint8_t relative) {
@@ -1015,12 +1007,7 @@ void bindVCMPFunctions() {
 		float x, y, z;
 		uint8_t relative = 0;
 		throwVCMPError(funcs->GetVehicleTurnSpeed(vehicleId, &x, &y, &z, relative), "Failed to get vehicle turn speed.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		ret["relative"] = relative;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_vehicle_spawn_position", [](int32_t vehicleId, float x, float y, float z) {
@@ -1030,11 +1017,7 @@ void bindVCMPFunctions() {
 	m.def("get_vehicle_spawn_position", [](int32_t vehicleId, float* xOut, float* yOut, float* zOut) {
 		float x, y, z;
 		throwVCMPError(funcs->GetVehicleSpawnPosition(vehicleId, &x, &y, &z), "Failed to get vehicle spawn position.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_vehicle_spawn_rotation", [](int32_t vehicleId, float x, float y, float z, float w) {
@@ -1048,22 +1031,13 @@ void bindVCMPFunctions() {
 	m.def("get_vehicle_spawn_rotation", [](int32_t vehicleId) {
 		float x, y, z, w;
 		throwVCMPError(funcs->GetVehicleSpawnRotation(vehicleId, &x, &y, &z, &w), "Failed to get vehicle spawn rotation.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		ret["w"] = w;
-		return ret;
+		return createQuaternion(x, y, z, w);
 	});
 
 	m.def("get_vehicle_spawn_rotation_euler", [](int32_t vehicleId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetVehicleSpawnRotationEuler(vehicleId, &x, &y, &z), "Failed to get vehicle spawn rotation Euler.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_vehicle_idle_respawn_timer", [](int32_t vehicleId, uint32_t millis) {
@@ -1229,11 +1203,7 @@ void bindVCMPFunctions() {
 	m.def("get_pickup_position", [](int32_t pickupId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetPickupPosition(pickupId, &x, &y, &z), "Failed to get pickup position.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("get_pickup_model", [](int32_t pickupId) {
@@ -1290,11 +1260,7 @@ void bindVCMPFunctions() {
 	m.def("get_check_point_position", [](int32_t checkPointId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetCheckPointPosition(checkPointId, &x, &y, &z), "Failed to get check point position.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("set_check_point_radius", [](int32_t checkPointId, float radius) {
@@ -1356,11 +1322,7 @@ void bindVCMPFunctions() {
 	m.def("get_object_position", [](int32_t objectId, float* xOut, float* yOut, float* zOut) {
 		float x, y, z;
 		throwVCMPError(funcs->GetObjectPosition(objectId, &x, &y, &z), "Failed to get object position.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		return ret;
+		return createVector(x, y, z);
 	});
 
 	m.def("rotate_object_to", [](int32_t objectId, float x, float y, float z, float w, uint32_t duration) {
@@ -1382,23 +1344,13 @@ void bindVCMPFunctions() {
 	m.def("get_object_rotation", [](int32_t objectId, float* xOut, float* yOut, float* zOut, float* wOut) {
 		float x, y, z, w;
 		throwVCMPError(funcs->GetObjectRotation(objectId, xOut, yOut, zOut, wOut), "Failed to get object rotation.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		ret["w"] = w;
-		return ret;
+		return createQuaternion(x, y, z, w);
 	});
 
 	m.def("get_object_rotation_euler", [](int32_t objectId, float* xOut, float* yOut, float* zOut) {
 		float x, y, z, w;
 		throwVCMPError(funcs->GetObjectRotationEuler(objectId, xOut, yOut, zOut), "Failed to get object rotation Euler.");
-		pybind11::dict ret = pybind11::dict();
-		ret["x"] = x;
-		ret["y"] = y;
-		ret["z"] = z;
-		ret["w"] = w;
-		return ret;
+		return createQuaternion(x, y, z, w);
 	});
 
 	m.def("set_object_shot_report_enabled", [](int32_t objectId, bool toggle) {
