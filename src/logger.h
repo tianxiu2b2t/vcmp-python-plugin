@@ -84,15 +84,20 @@ private:
     }
 
     void rawLogger(const std::string level, const std::string message) {
+        fprintf(stderr, "%s", "test");
         if (level == "DEBUG" && !DEBUG) {
             return;
         }
+        fprintf(stderr, "%s", "test1");
     
         try {
             std::vector<std::string> parsed = parseLogMessage(level, message);
+            fprintf(stderr, "%s", "test2");
             std::vector<int> lastColors = {COLORS.at("clear")}; // 使用.at()检查键存在
+            fprintf(stderr, "%s", "test3");
     
             for (const std::string& str : parsed) {
+                fprintf(stderr, "%s", "str");
                 if (str.empty()) continue;
     
                 if (!str.empty() && str[0] == '1') { // 添加空检查
@@ -116,7 +121,7 @@ private:
                     }
                     continue;
                 }
-    
+                fprintf(stderr, "%s", "str1");
                 if (str.size() > 1) { // 确保足够长度
                     const std::string text = str.substr(1);
                     int color = lastColors.empty() ? COLORS.at("clear") : lastColors.back();
