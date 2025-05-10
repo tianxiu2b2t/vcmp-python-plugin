@@ -115,7 +115,8 @@ private:
                 fprintf(stdout, "%s", text, 27);
             }
 #else
-            fprintf(stdout, "%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text, 27);
+            //fprintf(stdout, "%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text, 27);
+            fprintf(stdout, text);
             fflush(stdout);
             //printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
 #endif
