@@ -1,3 +1,4 @@
+from functools import wraps
 from typing import Callable
 
 
@@ -57,15 +58,16 @@ def from_vcmp_exception(
     return mappings[type](message)
 
 def wrapper_exception(
-    func: Callable,
-    *args,
-    **kwargs
 ):
-    try:
-        return func(*args, **kwargs)
-    except ValueError as e:
-        raise from_vcmp_exception(e) from e
-    except Exception as e:
-        raise VCMPErrorUnknown(f"Unknown error: {e}") from e
-    
+    def decorator(func: Callable):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except ValueError as e:
+                raise from_vcmp_exception(e) from e
+            except Exception as e:
+                raise VCMPErrorUnknown(f"Unknown error: {e}") from e
+        return wrapper
+    return decorator
     
