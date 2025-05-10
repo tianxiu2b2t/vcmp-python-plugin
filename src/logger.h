@@ -83,60 +83,67 @@ private:
         return parsedResults;
     }
 
-    void rawLogger(const string level, const string message) {
+    void rawLogger(const std::string level, const std::string message) {
         if (level == "DEBUG" && !DEBUG) {
             return;
         }
-        vector<string> parsed = parseLogMessage(level, message);
-        vector<int> lastColors = {COLORS["clear"]}; // 初始化为默认颜色
     
-        for (const string& str : parsed) {
-            if (str.empty()) continue; // 跳过空字符串
+        try {
+            std::vector<std::string> parsed = parseLogMessage(level, message);
+            std::vector<int> lastColors = {COLORS.at("clear")}; // 使用.at()检查键存在
     
-            if (str.size() >= 1 && str[0] == '1') {
-                if (str.size() > 1) {
-                    int number = stoi(str.substr(1));
-                    if (number == -1) {
-                        if (!lastColors.empty()) {
-                            lastColors.pop_back();
+            for (const std::string& str : parsed) {
+                if (str.empty()) continue;
+    
+                if (!str.empty() && str[0] == '1') { // 添加空检查
+                    if (str.size() > 1) {
+                        int number = 0;
+                        try {
+                            number = std::stoi(str.substr(1));
+                        } catch (const std::exception&) {
+                            number = COLORS.at("clear");
                         }
-                    } else {
-                        lastColors.push_back(number);
-                    }
-                }
-                continue;
-            }
     
-            // 确保有足够的字符进行 substr 操作
-            if (str.size() > 1) {
-                const string text = str.substr(1);
-                int color = lastColors.empty() ? COLORS["clear"] : lastColors.back();
+                        if (number == -1 && !lastColors.empty()) {
+                            lastColors.pop_back();
+                        } else {
+                            if (COLORS_32.find(number) != COLORS_32.end()) { // 检查颜色有效性
+                                lastColors.push_back(number);
+                            } else {
+                                lastColors.push_back(COLORS.at("clear"));
+                            }
+                        }
+                    }
+                    continue;
+                }
     
-    #ifdef WIN32
-                if (hstdout) {
-                    CONSOLE_SCREEN_BUFFER_INFO csbBefore;
-                    GetConsoleScreenBufferInfo(hstdout, &csbBefore);
-                    SetConsoleTextAttribute(hstdout, COLORS_32[color]);
+                if (str.size() > 1) { // 确保足够长度
+                    const std::string text = str.substr(1);
+                    int color = lastColors.empty() ? COLORS.at("clear") : lastColors.back();
+    
+                    #ifdef WIN32
+                    if (hstdout) { // 确保句柄有效
+                        CONSOLE_SCREEN_BUFFER_INFO csbBefore;
+                        GetConsoleScreenBufferInfo(hstdout, &csbBefore);
+                        SetConsoleTextAttribute(hstdout, COLORS_32.at(color)); // 使用.at()
+                        if (!text.empty()) {
+                            fputs(text.c_str(), stdout);
+                        }
+                        SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
+                    }
+                    #else
                     if (!text.empty()) {
-                        fputs(text.c_str(), stdout);
+                        if (COLORS_32.find(color) != COLORS_32.end()) {
+                            printf("\x1b[%sm%s\x1b[0m", COLORS_32.at(color), text.c_str());
+                        } else {
+                            printf("%s", text.c_str());
+                        }
                     }
-                    SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
-                } else {
-                    if (!text.empty()) {
-                        printf("%s", text.c_str());
-                    }
+                    #endif
                 }
-    #else
-                if (!text.empty()) {
-                    // 确保 color 是有效的
-                    if (COLORS_32.find(color) != COLORS_32.end()) {
-                        printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
-                    } else {
-                        printf("%s", text.c_str());
-                    }
-                }
-    #endif
             }
+        } catch (const std::exception& e) {
+            fprintf(stderr, " Logging Error: %s\n", e.what());
         }
     }
 public:
