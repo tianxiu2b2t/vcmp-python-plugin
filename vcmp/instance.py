@@ -3,7 +3,7 @@ import math
 from typing import Optional, Type, TypeVar
 
 from . import constant
-from .vec import Vector, Quaterion
+from .vec import Vector, Quaternion
 from .__export import calls, funcs, vcmpEntityPool, vcmpPlayerOption, vcmpPlayerState, vcmpVehicleSync, vcmpVehicleOption
 from .streams import WriteStream
 
@@ -136,6 +136,14 @@ class Player:
         funcs.set_player_option(self._id, vcmpPlayerOption.vcmpPlayerOptionControllable, controllable)
 
     @property
+    def frozen(self) -> bool:
+        return not self.controllable
+    
+    @frozen.setter
+    def frozen(self, frozen: bool):
+        self.controllable = not frozen
+
+    @property
     def drive_by(self) -> bool:
         return funcs.get_player_option(self._id, vcmpPlayerOption.vcmpPlayerOptionDriveBy)
 
@@ -222,6 +230,14 @@ class Player:
     @secondary_world.setter
     def secondary_world(self, secondary_world: int):
         funcs.set_player_secondary_world(self._id, secondary_world)
+
+    @property
+    def sec_world(self) -> int:
+        return self.secondary_world
+    
+    @sec_world.setter
+    def sec_world(self, secondary_world: int):
+        self.secondary_world = secondary_world
 
     @property
     def unique_world(self) -> int:
@@ -645,6 +661,30 @@ class Player:
         """
         funcs.kill_player(self._id)
 
+    def add_position(self, position: Vector):
+        """
+        Add position to the player position
+        """
+
+        new_pos = Vector(
+            self.position.x + position.x,
+            self.position.y + position.y,
+            self.position.z + position.z
+        )
+        self.position = new_pos
+
+    def add_speed(self, speed: Vector):
+        """
+        Add speed to the player speed
+        """
+
+        new_speed = Vector(
+            self.speed.x + speed.x,
+            self.speed.y + speed.y,
+            self.speed.z + speed.z
+        )
+        self.speed = new_speed
+
     def __repr__(self) -> str:
         return f"Player(id={self.id}, name='{self.name}')"
 
@@ -818,7 +858,9 @@ class Vehicle:
         """
         Get the vehicle position
         """
-        return funcs.get_vehicle_position(self._id)
+        return Vector(
+            **funcs.get_vehicle_position(self._id)
+        )
 
     @position.setter
     def position(self, value: Vector):
@@ -832,10 +874,10 @@ class Vehicle:
         """
         Get the vehicle rotation
         """
-        return Quaterion(**funcs.get_vehicle_rotation(self._id))
+        return Quaternion(**funcs.get_vehicle_rotation(self._id))
 
     @rotation.setter
-    def rotation(self, value: Quaterion):
+    def rotation(self, value: Quaternion):
         """
         Set the vehicle rotation
         """
@@ -860,13 +902,16 @@ class Vehicle:
         """
         Get the vehicle speed
         """
-        return Vector(**funcs.get_vehicle_speed(self._id, False))
+        return Vector(
+            **funcs.get_vehicle_speed(self._id, False)
+        )
     
     @speed.setter
     def speed(self, value: Vector):
         """
         Set the vehicle speed
         """
+        print(value)
         funcs.set_vehicle_speed(self._id, value.x, value.y, value.z, False, False)
 
     @property
@@ -874,7 +919,9 @@ class Vehicle:
         """
         Get the vehicle relative speed
         """
-        return Vector(**funcs.get_vehicle_speed(self._id, True))
+        return Vector(
+            **funcs.get_vehicle_speed(self._id, True)
+        )
     
     @relative_speed.setter
     def relative_speed(self, value: Vector):
@@ -888,7 +935,9 @@ class Vehicle:
         """
         Get the vehicle turn speed
         """
-        return Vector(**funcs.get_vehicle_turn_speed(self._id, False))
+        return Vector(
+            **funcs.get_vehicle_turn_speed(self._id, False)
+        )
 
     @turn_speed.setter
     def turn_speed(self, value: Vector):
@@ -902,7 +951,9 @@ class Vehicle:
         """
         Get the vehicle relative turn speed
         """
-        return Vector(**funcs.get_vehicle_turn_speed(self._id, True))
+        return Vector(
+            **funcs.get_vehicle_turn_speed(self._id, True)
+        )
 
     @relative_turn_speed.setter
     def relative_turn_speed(self, value: Vector):
@@ -916,7 +967,9 @@ class Vehicle:
         """
         Get the vehicle spawn position
         """
-        return Vector(**funcs.get_vehicle_spawn_position(self._id))
+        return Vector(
+            **funcs.get_vehicle_spawn_position(self._id)
+        )
 
     @spawn_position.setter
     def spawn_position(self, value: Vector):
@@ -930,10 +983,10 @@ class Vehicle:
         """
         Get the vehicle spawn rotation
         """
-        return Quaterion(**funcs.get_vehicle_spawn_rotation(self._id))
+        return Quaternion(**funcs.get_vehicle_spawn_rotation(self._id))
 
     @spawn_rotation.setter
-    def spawn_rotation(self, value: Quaterion):
+    def spawn_rotation(self, value: Quaternion):
         """
         Set the vehicle spawn rotation
         """
@@ -944,7 +997,9 @@ class Vehicle:
         """
         Get the vehicle spawn rotation euler
         """
-        return Vector(**funcs.get_vehicle_spawn_rotation_euler(self._id))
+        return Vector(
+            **funcs.get_vehicle_spawn_rotation_euler(self._id)
+        )
     
     @spawn_rotation_euler.setter
     def spawn_rotation_euler(self, value: Vector):
@@ -1182,6 +1237,121 @@ class Vehicle:
         """
         funcs.reset_inst_handling(self._id)
 
+    def add_position(self, position: Vector):
+        """
+        Add position to the vehicle position
+        """
+        new_pos = Vector(
+            self.position.x + position.x,
+            self.position.y + position.y,
+            self.position.z + position.z
+        )
+        self.position = new_pos
+
+    def add_speed(self, speed: Vector):
+        """
+        Add speed to the vehicle speed
+        """
+        new_speed = Vector(
+            self.speed.x + speed.x,
+            self.speed.y + speed.y,
+            self.speed.z + speed.z
+        )
+        self.speed = new_speed
+
+    def add_relative_speed(self, speed: Vector):
+        """
+        Add relative speed to the vehicle speed
+        """
+        new_speed = Vector(
+            self.relative_speed.x + speed.x,
+            self.relative_speed.y + speed.y,
+            self.relative_speed.z + speed.z
+        )
+        self.relative_speed = new_speed
+
+    def add_turn_speed(self, speed: Vector):
+        """
+        Add turn speed to the vehicle turn speed
+        """
+        new_speed = Vector(
+            self.turn_speed.x + speed.x,
+            self.turn_speed.y + speed.y,
+            self.turn_speed.z + speed.z
+        )
+        self.turn_speed = new_speed
+
+    def add_relative_turn_speed(self, speed: Vector):
+        """
+        Add relative turn speed to the vehicle turn speed
+        """
+        new_speed = Vector(
+            self.relative_turn_speed.x + speed.x,
+            self.relative_turn_speed.y + speed.y,
+            self.relative_turn_speed.z + speed.z
+        )
+        self.relative_turn_speed = new_speed
+
+    def add_rotation(self, rotation: Quaternion):
+        """
+        Add rotation to the vehicle rotation
+        """
+        new_rotation = Quaternion(
+            self.rotation.x + rotation.x,
+            self.rotation.y + rotation.y,
+            self.rotation.z + rotation.z,
+            self.rotation.w + rotation.w
+        )
+        self.rotation = new_rotation
+
+    def add_rotation_euler(self, rotation: Vector):
+        """
+        Add rotation to the vehicle rotation
+        """
+        new_rotation = Vector(
+            self.rotation_euler.x + rotation.x,
+            self.rotation_euler.y + rotation.y,
+            self.rotation_euler.z + rotation.z
+        )
+        self.rotation_euler = new_rotation
+
+    def add_spawn_position(self, position: Vector):
+        """
+        Add position to the vehicle spawn position
+        """
+        new_pos = Vector(
+            self.spawn_position.x + position.x,
+            self.spawn_position.y + position.y,
+            self.spawn_position.z + position.z
+        )
+        self.spawn_position = new_pos
+
+    def add_spawn_rotation(self, rotation: Quaternion):
+        """
+        Add rotation to the vehicle spawn rotation
+        """
+        new_rotation = Quaternion(
+            self.spawn_rotation.x + rotation.x,
+            self.spawn_rotation.y + rotation.y,
+            self.spawn_rotation.z + rotation.z,
+            self.spawn_rotation.w + rotation.w
+        )
+        self.spawn_rotation = new_rotation
+
+    def add_spawn_rotation_euler(self, rotation: Vector):
+        """
+        Add rotation to the vehicle spawn rotation
+        """
+        new_rotation = Vector(
+            self.spawn_rotation_euler.x + rotation.x,
+            self.spawn_rotation_euler.y + rotation.y,
+            self.spawn_rotation_euler.z + rotation.z
+        )
+        self.spawn_rotation_euler = new_rotation
+
+    def __repr__(self) -> str:
+        return f"Vehicle(id={self.id}, model={self.model})"
+
     def __del__(self):
         self.delete()
 
@@ -1193,6 +1363,7 @@ class Vehicle:
             vehicle = super().__new__(cls)
             _vehicles.append(vehicle)
         return vehicle
+
 
 class Pickup:
     def __init__(self, pickup_id: int):
@@ -1242,7 +1413,9 @@ class Pickup:
 
     @property
     def position(self):
-        return Vector(**funcs.get_pickup_position(self._id))
+        return Vector(
+            **funcs.get_pickup_position(self._id)
+        )
     
     @position.setter
     def position(self, position: Vector):
@@ -1270,6 +1443,24 @@ class Pickup:
         """
         funcs.refresh_pickup(self._id)
         
+    def is_streamed_for_player(self, player: int | Player) -> bool:
+        """
+        Check if the pickup is streamed for the player
+        """
+        id = player if isinstance(player, int) else player.id
+        return funcs.is_pickup_streamed_for_player(self._id, id)
+    
+    def add_position(self, position: Vector):
+        """
+        Add position to the pickup position
+        """
+        new_pos = Vector(
+            self.position.x + position.x,
+            self.position.y + position.y,
+            self.position.z + position.z
+        )
+        self.position = new_pos
+
     def delete(self):
         """
         Delete the pickup
@@ -1313,7 +1504,9 @@ class CheckPoint:
 
     @property
     def position(self):
-        return Vector(**funcs.get_check_point_position(self._id))
+        return Vector(
+            **funcs.get_check_point_position(self._id)
+        )
 
     @position.setter
     def position(self, position: Vector):
@@ -1351,6 +1544,17 @@ class CheckPoint:
     def is_streamed_for_player(self, player: int | Player) -> bool:
         id = player if isinstance(player, int) else player.id
         return funcs.is_check_point_streamed_for_player(self._id, id)
+
+    def add_position(self, position: Vector):
+        """
+        Add position to the pickup position
+        """
+        new_pos = Vector(
+            self.position.x + position.x,
+            self.position.y + position.y,
+            self.position.z + position.z
+        )
+        self.position = new_pos
 
     def __del__(self):
         self.delete()
@@ -1391,7 +1595,9 @@ class Object:
 
     @property
     def position(self):
-        return Vector(**funcs.get_object_position(self._id))
+        return Vector(
+            **funcs.get_object_position(self._id)
+        )
 
     @position.setter
     def position(self, position: Vector):
@@ -1426,6 +1632,17 @@ class Object:
         id = player if isinstance(player, int) else player.id
         return funcs.is_object_streamed_for_player(self._id, id)
     
+    def add_position(self, position: Vector):
+        """
+        Add position to the pickup position
+        """
+        new_pos = Vector(
+            self.position.x + position.x,
+            self.position.y + position.y,
+            self.position.z + position.z
+        )
+        self.position = new_pos
+
     def set_alpha(self, alpha: int, duration: int = 0):
         funcs.set_object_alpha(self._id, alpha, duration)
 
@@ -1441,8 +1658,7 @@ class Object:
         """
         funcs.move_object_by(self._id, position.x, position.y, position.z, duration)
 
-
-    def rotate_to(self, rotation: Quaterion, duration: int = 0):
+    def rotate_to(self, rotation: Quaternion, duration: int = 0):
         """
         Rotate the object to the given rotation
         """
@@ -1454,7 +1670,7 @@ class Object:
         """
         funcs.rotate_object_to_euler(self._id, rotation.x, rotation.y, rotation.z, duration)
 
-    def rotate_by(self, rotation: Quaterion, duration: int = 0):
+    def rotate_by(self, rotation: Quaternion, duration: int = 0):
         """
         Rotate the object by the given rotation
         """
@@ -1466,7 +1682,6 @@ class Object:
         """
         funcs.rotate_object_by_euler(self._id, rotation.x, rotation.y, rotation.z, duration)
         
-
     def __del__(self):
         self.delete()
 
