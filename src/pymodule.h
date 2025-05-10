@@ -82,7 +82,7 @@ py::object handlePythonFunction(
     std::string name = "on_" + function;
     try {
 		printf("%s\n", "callback");
-        if (!py::hasattr(pcallbacks, name.c_str()) || pcallbacks.attr(name.c_str()).is_none() || !py::isinstance<py::function>(pcallbacks.attr(name.c_str()))) {
+		if (!py::hasattr(pcallbacks, name.c_str()) || pcallbacks.attr(name.c_str()).is_none() || !py::isinstance<py::function>(pcallbacks.attr(name.c_str()))) {
             pcallbacks.def(name.c_str(), [](py::args args, py::kwargs kwargs) {
                 // Do nothing
             });
@@ -1810,7 +1810,7 @@ void initVCMP(PluginFuncs* vcmpFuncs, PluginCallbacks* vcmpCallbacks) {
     vfuncs = vcmpFuncs;
     vcalls = vcmpCallbacks;
     //bindVCMPFunctions();
-    bindVCMPCallbacks();
+    //bindVCMPCallbacks();
 
 }
 
