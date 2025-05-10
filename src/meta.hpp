@@ -4,5 +4,5 @@
 #define AUTHOR "TTB-Network"
 #define GITHUB "https://github.com/tianxiu2b2t/vcmp-python-plugin"
 #define PLUGIN_NAME "vcmp-python-plugin"
-#define PLUGIN_VERSION "1.1.0"
+#define PLUGIN_VERSION "1.1.1"
 #endif

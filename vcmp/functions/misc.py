@@ -76,7 +76,6 @@ def show_all_map_objects():
     """
     funcs.show_all_map_objects()
 
-
 def add_radio_stream(
     id: int,
     name: str,
@@ -110,3 +109,9 @@ def remove_radio_stream(
     except:
         pass
     return False
+
+def get_last_error():
+    """
+        Returns the last error.
+    """
+    return funcs.get_last_error()

@@ -1492,7 +1492,7 @@ void bindVCMPCallbacks() {
 	vcalls->OnServerInitialise = []() -> uint8_t
 	{
 		logger.info("Loaded " + std::string(PLUGIN_NAME) + " version " + std::string(PLUGIN_VERSION) + " by " + std::string(AUTHOR) + ". (" + std::string(LICENSE) + " LICENSE)");
-		handlePythonFunction("server_initialise", DEFAULT_RETURN);
+		handlePythonFunction("server_initialise");
         return 1;
 	};
 	vcalls->OnServerShutdown = []() -> void
