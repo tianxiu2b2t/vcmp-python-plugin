@@ -115,7 +115,7 @@ private:
                 printf("%s", text);
             }
 #else
-            printf("%c[%s%dm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
+            printf("%c[%s%dm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text, 27);
             fflush(stdout);
 #endif
         }
