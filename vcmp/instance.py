@@ -693,10 +693,13 @@ class Vehicle:
     def __init__(self, vehicle_id: int):
         self._id = vehicle_id
 
-
     @property
     def id(self):
         return self._id
+
+    @property
+    def is_alive(self):
+        return funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolVehicle, self._id)
 
     @property
     def doors_locked(self):
@@ -1364,7 +1367,6 @@ class Vehicle:
             _vehicles.append(vehicle)
         return vehicle
 
-
 class Pickup:
     def __init__(self, pickup_id: int):
         self._id = pickup_id
@@ -1372,6 +1374,10 @@ class Pickup:
     @property
     def id(self) -> int:
         return self._id
+
+    @property
+    def is_alive(self) -> bool:
+        return funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolPickup, self._id)
 
     @property
     def world(self):
@@ -1491,6 +1497,10 @@ class CheckPoint:
         return self._id
 
     @property
+    def is_alive(self) -> bool:
+        return funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolCheckPoint, self._id)
+
+    @property
     def sphere(self):
         return funcs.is_check_point_sphere(self._id)
     
@@ -1577,6 +1587,10 @@ class Object:
     def id(self) -> int:
         return self._id
     
+    @property
+    def is_alive(self) -> bool:
+        return funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolObject, self._id)
+
     @property
     def model(self):
         return funcs.get_object_model(self._id)
@@ -1701,6 +1715,10 @@ class Marker:
     @property
     def id(self) -> int:
         return self._id
+
+    @property
+    def is_alive(self) -> bool:
+        return funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolBlip, self._id)
 
     @property
     def world(self):
