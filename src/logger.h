@@ -115,7 +115,7 @@ private:
                 printf("%s", text.c_str());
             }
 #else
-            printf("\033[%dm%s", COLORS_32[color], text.c_str());
+            printf("\033[%dm%s", color, text.c_str());
 #endif
         }
     }
