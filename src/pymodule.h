@@ -8,8 +8,8 @@
 
 namespace py = pybind11;
 
-py::module pfunctions;
-py::module pcallbacks;
+py::module pfunctions = py::module("functions");
+py::module pcallbacks = py::module("callbacks");
 
 PluginFuncs* vfuncs;
 PluginCallbacks* vcalls;
@@ -82,6 +82,7 @@ py::object handlePythonFunction(
     std::string name = "on_" + function;
     try {
 		printf("%s\n", "callback");
+		printf("%s\n", py::str(pcallbacks));
 		if (!py::hasattr(pcallbacks, name.c_str()) || pcallbacks.attr(name.c_str()).is_none() || !py::isinstance<py::function>(pcallbacks.attr(name.c_str()))) {
             pcallbacks.def(name.c_str(), [](py::args args, py::kwargs kwargs) {
                 // Do nothing
@@ -1792,9 +1793,6 @@ void bindVCMPCallbacks() {
 }
 
 PYBIND11_EMBEDDED_MODULE(__vcmp, m) {
-    pfunctions = py::module("functions");
-    pcallbacks = py::module("callbacks");
-
     // setattr
     m.attr("functions") = pfunctions;
     m.attr("callbacks") = pcallbacks;
