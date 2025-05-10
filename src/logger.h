@@ -100,23 +100,24 @@ private:
                 }
                 continue;
             }
-            const string text = str.substr(1);
+            const char* text = str.substr(1).c_str();
             const int color = lastColors.at(lastColors.size() - 1);
-            
+
 #ifdef WIN32
             if (hstdout) {
                 CONSOLE_SCREEN_BUFFER_INFO csbBefore;
                 GetConsoleScreenBufferInfo(hstdout, &csbBefore);
                 SetConsoleTextAttribute(hstdout, COLORS_32[color]);
-                fputs(text.c_str(), stdout);
+                fputs(text, stdout);
                 SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
             }
             else {
-                printf("%s", text.c_str());
+                fprintf(stdout, "%s", text, 27);
             }
 #else
-            fprintf(stderr, "%s\n", text.c_str());
-            printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
+            fprintf(stdout, "%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text, 27);
+            fflush(stdout);
+            //printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
 #endif
         }
     }
