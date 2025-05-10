@@ -82,8 +82,8 @@ py::object handlePythonFunction(
     std::string name = "on_" + function;
     try {
 		printf("%s\n", "callback");
-		printf("%s\n", py::str(m).cast<std::string>().c_str());
 		py::module m = pcallbacks.cast<py::module>();
+		printf("%s\n", py::str(m).cast<std::string>().c_str());
 		if (!py::hasattr(m, name.c_str()) || m.attr(name.c_str()).is_none() || !py::isinstance<py::function>(m.attr(name.c_str()))) {
             m.def(name.c_str(), [](py::args args, py::kwargs kwargs) {
                 // Do nothing
