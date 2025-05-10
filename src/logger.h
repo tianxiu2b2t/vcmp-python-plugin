@@ -83,81 +83,44 @@ private:
         return parsedResults;
     }
 
-    void rawLogger(const std::string level, const std::string message) {
-        fprintf(stderr, "%s\n", "test");
+    void rawLogger(const string level, const string message) {
         if (level == "DEBUG" && !DEBUG) {
             return;
         }
-        fprintf(stderr, "%s\n", "test1");
-    
-        try {
-            std::vector<std::string> parsed = parseLogMessage(level, message);
-            fprintf(stderr, "%s\n", "test2");
-            std::vector<int> lastColors = {COLORS.at("clear")}; // 使用.at()检查键存在
-            fprintf(stderr, "%s\n", "test3");
-    
-            for (const std::string& str : parsed) {
-                fprintf(stderr, "%s\n", "str");
-                if (str.empty()) continue;
-    
-                if (!str.empty() && str[0] == '1') { // 添加空检查
-                    if (str.size() > 1) {
-                        int number = 0;
-                        try {
-                            number = std::stoi(str.substr(1));
-                        } catch (const std::exception&) {
-                            number = COLORS.at("clear");
-                        }
-    
-                        if (number == -1 && !lastColors.empty()) {
-                            lastColors.pop_back();
-                        } else {
-                            if (COLORS_32.find(number) != COLORS_32.end()) { // 检查颜色有效性
-                                lastColors.push_back(number);
-                            } else {
-                                lastColors.push_back(COLORS.at("clear"));
-                            }
-                        }
-                    }
-                    continue;
+        vector<string> parsed = parseLogMessage(level, message);
+        vector<int> lastColors = { COLORS["clear"] };
+        for (string str : parsed) {
+            if (str.substr(0, 1) == "1") {
+                int number = stoi(str.substr(1));
+                if (number == -1) {
+                    lastColors.pop_back();
                 }
-                fprintf(stderr, "%s\n", "str1");
-                if (str.size() > 1) { // 确保足够长度
-                    const std::string text = str.substr(1);
-                    fprintf(stderr, "%s\n%s", "str2", text.c_str());
-                    int color = lastColors.empty() ? COLORS.at("clear") : lastColors.back();
-                    fprintf(stderr, "%s\n", "str3");
-    
-                    #ifdef WIN32
-                    if (hstdout) { // 确保句柄有效
-                        fprintf(stderr, "%s\n", "str4");
-                        CONSOLE_SCREEN_BUFFER_INFO csbBefore;
-                        GetConsoleScreenBufferInfo(hstdout, &csbBefore);
-                        SetConsoleTextAttribute(hstdout, COLORS_32.at(color)); // 使用.at()
-                        if (!text.empty()) {
-                            fputs(text.c_str(), stdout);
-                        }
-                        SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
-                    }
-                    #else
-                    fprintf(stderr, "%s\n", "str5");
-                    if (!text.empty()) {
-                        fprintf(stderr, "%s\n", "str6");
-                        if (COLORS_32.find(color) != COLORS_32.end()) {
-                            fprintf(stderr, "%s\n", "str7");
-                            printf("\x1b[%sm%s\x1b[0m", COLORS_32.at(color), text.c_str());
-                        } else {
-                            fprintf(stderr, "%s\n", "str8");
-                            printf("%s", text.c_str());
-                        }
-                    }
-                    #endif
+                else {
+                    lastColors.push_back(number);
                 }
+                continue;
             }
-        } catch (const std::exception& e) {
-            fprintf(stderr, " Logging Error: %s\n", e.what());
+            const string text = str.substr(1);
+            const int color = lastColors.at(lastColors.size() - 1);
+            if 
+#ifdef WIN32
+            if (hstdout) {
+                CONSOLE_SCREEN_BUFFER_INFO csbBefore;
+                GetConsoleScreenBufferInfo(hstdout, &csbBefore);
+                SetConsoleTextAttribute(hstdout, COLORS_32[color]);
+                fputs(text.c_str(), stdout);
+                SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
+            }
+            else {
+                printf("%s", text.c_str());
+            }
+#else
+            fprintf(stderr, "%s\n", text.c_str());
+            printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
+#endif
         }
     }
+
 public:
     bool DEBUG;
     Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
