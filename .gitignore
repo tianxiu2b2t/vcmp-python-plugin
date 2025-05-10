@@ -1,5 +1,6 @@
 build
 .lh
+.vscode
 converters
 **/__pycache__/
 plugins/

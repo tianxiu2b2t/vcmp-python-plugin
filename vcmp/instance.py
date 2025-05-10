@@ -914,7 +914,6 @@ class Vehicle:
         """
         Set the vehicle speed
         """
-        print(value)
         funcs.set_vehicle_speed(self._id, value.x, value.y, value.z, False, False)
 
     @property

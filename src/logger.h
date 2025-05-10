@@ -88,37 +88,57 @@ private:
             return;
         }
         vector<string> parsed = parseLogMessage(level, message);
-        vector<int> lastColors = { COLORS["clear"] };
-        for (string str : parsed) {
-            if (str.substr(0, 1) == "1") {
-                int number = stoi(str.substr(1));
-                if (number == -1) {
-                    lastColors.pop_back();
-                }
-                else {
-                    lastColors.push_back(number);
+        vector<int> lastColors = {COLORS["clear"]}; // 初始化为默认颜色
+    
+        for (const string& str : parsed) {
+            if (str.empty()) continue; // 跳过空字符串
+    
+            if (str.size() >= 1 && str[0] == '1') {
+                if (str.size() > 1) {
+                    int number = stoi(str.substr(1));
+                    if (number == -1) {
+                        if (!lastColors.empty()) {
+                            lastColors.pop_back();
+                        }
+                    } else {
+                        lastColors.push_back(number);
+                    }
                 }
                 continue;
             }
-            const string text = str.substr(1);
-            const int color = lastColors.at(lastColors.size() - 1);
-#ifdef WIN32
-            if (hstdout) {
-                CONSOLE_SCREEN_BUFFER_INFO csbBefore;
-                GetConsoleScreenBufferInfo(hstdout, &csbBefore);
-                SetConsoleTextAttribute(hstdout, COLORS_32[color]);
-                fputs(text.c_str(), stdout);
-                SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
+    
+            // 确保有足够的字符进行 substr 操作
+            if (str.size() > 1) {
+                const string text = str.substr(1);
+                int color = lastColors.empty() ? COLORS["clear"] : lastColors.back();
+    
+    #ifdef WIN32
+                if (hstdout) {
+                    CONSOLE_SCREEN_BUFFER_INFO csbBefore;
+                    GetConsoleScreenBufferInfo(hstdout, &csbBefore);
+                    SetConsoleTextAttribute(hstdout, COLORS_32[color]);
+                    if (!text.empty()) {
+                        fputs(text.c_str(), stdout);
+                    }
+                    SetConsoleTextAttribute(hstdout, csbBefore.wAttributes);
+                } else {
+                    if (!text.empty()) {
+                        printf("%s", text.c_str());
+                    }
+                }
+    #else
+                if (!text.empty()) {
+                    // 确保 color 是有效的
+                    if (COLORS_32.find(color) != COLORS_32.end()) {
+                        printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
+                    } else {
+                        printf("%s", text.c_str());
+                    }
+                }
+    #endif
             }
-            else {
-                printf("%s", text.c_str());
-            }
-#else
-            printf("%c[%s%sm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
-#endif
         }
     }
-
 public:
     bool DEBUG;
     Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
