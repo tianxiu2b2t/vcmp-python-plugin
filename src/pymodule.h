@@ -977,7 +977,7 @@ void bindVCMPFunctions() {
 		throwVCMPError(funcs->SetVehicleRotationEuler(vehicleId, x, y, z), "Failed to set vehicle rotation Euler.");
 	});
 
-	m.def("get_vehicle_rotation", [](int32_t vehicleId, float* xOut, float* yOut, float* zOut, float* wOut) {
+	m.def("get_vehicle_rotation", [](int32_t vehicleId) {
 		float x, y, z, w;
 		throwVCMPError(funcs->GetVehicleRotation(vehicleId, &x, &y, &z, &w), "Failed to get vehicle rotation.");
 		return createQuaternion(x, y, z, w);
@@ -989,7 +989,7 @@ void bindVCMPFunctions() {
 		return createVector(x, y, z);
 	});
 
-	m.def("set_vehicle_speed", [](int32_t vehicleId, float x, float y, float z, uint8_t add, uint8_t relative) {
+	m.def("set_vehicle_speed", [](int32_t vehicleId, float x, float y, float z, bool add, bool relative) {
 		throwVCMPError(funcs->SetVehicleSpeed(vehicleId, x, y, z, add, relative), "Failed to set vehicle speed.");
 	});
 
@@ -999,13 +999,12 @@ void bindVCMPFunctions() {
 		return createVector(x, y, z);
 	});
 
-	m.def("set_vehicle_turn_speed", [](int32_t vehicleId, float x, float y, float z, uint8_t add, uint8_t relative) {
+	m.def("set_vehicle_turn_speed", [](int32_t vehicleId, float x, float y, float z, bool add, bool relative) {
 		throwVCMPError(funcs->SetVehicleTurnSpeed(vehicleId, x, y, z, add, relative), "Failed to set vehicle turn speed.");
 	});
 
-	m.def("get_vehicle_turn_speed", [](int32_t vehicleId) {
+	m.def("get_vehicle_turn_speed", [](int32_t vehicleId, bool relative) {
 		float x, y, z;
-		uint8_t relative = 0;
 		throwVCMPError(funcs->GetVehicleTurnSpeed(vehicleId, &x, &y, &z, relative), "Failed to get vehicle turn speed.");
 		return createVector(x, y, z);
 	});
@@ -1014,7 +1013,7 @@ void bindVCMPFunctions() {
 		throwVCMPError(funcs->SetVehicleSpawnPosition(vehicleId, x, y, z), "Failed to set vehicle spawn position.");
 	});
 
-	m.def("get_vehicle_spawn_position", [](int32_t vehicleId, float* xOut, float* yOut, float* zOut) {
+	m.def("get_vehicle_spawn_position", [](int32_t vehicleId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetVehicleSpawnPosition(vehicleId, &x, &y, &z), "Failed to get vehicle spawn position.");
 		return createVector(x, y, z);
@@ -1319,7 +1318,7 @@ void bindVCMPFunctions() {
 		throwVCMPError(funcs->SetObjectPosition(objectId, x, y, z), "Failed to set object position.");
 	});
 
-	m.def("get_object_position", [](int32_t objectId, float* xOut, float* yOut, float* zOut) {
+	m.def("get_object_position", [](int32_t objectId) {
 		float x, y, z;
 		throwVCMPError(funcs->GetObjectPosition(objectId, &x, &y, &z), "Failed to get object position.");
 		return createVector(x, y, z);
