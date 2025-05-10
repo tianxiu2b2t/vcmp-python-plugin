@@ -81,9 +81,11 @@ py::object handlePythonFunction(
 ) {
     std::string name = "on_" + function;
     try {
-		printf("%s\n", "callback");
+		if (pcallbacks.is_none()) {
+			logger.error("Callbacks not initialized");
+			return defaultValue;
+		}
 		py::module m = pcallbacks.cast<py::module>();
-		printf("%s\n", py::str(m).cast<std::string>().c_str());
 		if (!py::hasattr(m, name.c_str()) || m.attr(name.c_str()).is_none() || !py::isinstance<py::function>(m.attr(name.c_str()))) {
             m.def(name.c_str(), [](py::args args, py::kwargs kwargs) {
                 // Do nothing
