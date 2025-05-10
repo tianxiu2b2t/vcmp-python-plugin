@@ -18,7 +18,6 @@
 #include <Windows.h>
 #endif
 #define PYBIND11_DETAILED_ERROR_MESSAGES
-#define _CRT_SECURE_NO_WARNINGS
 
 using namespace std;
 
@@ -38,7 +37,7 @@ private:
 
     string getFormattedTime() {
         time_t t = time(nullptr);
-        tm* localTime;
+        tm* localTime = nullptr;
         if ((localTime = localtime(&t)) != nullptr) {
             char buffer[256];
             strftime(buffer, sizeof(buffer), timeFormat.c_str(), localTime);

@@ -23,5 +23,5 @@ namespace py = pybind11;
 #define EXPORT
 #endif
 
-PluginFuncs* funcs;
-PluginCallbacks* calls;
+PluginFuncs* funcs = nullptr;
+PluginCallbacks* calls = nullptr;
