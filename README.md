@@ -126,5 +126,8 @@ def main():
     print(plugin.get_plugins())
 
 if __name__ == '__main__':
-    run(main) # 避免阻塞主线程，也可以在主线程调用 （强烈推荐 run(main) ）
+    #run(main) # 避免阻塞主线程，也可以在主线程调用 （强烈推荐 run(main) ）
+    print(
+        "Python is running by __main__"
+    )
 ```
