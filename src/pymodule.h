@@ -62,14 +62,13 @@ py::object handlePythonFunction(
             logger.debug("Create empty callback " + name);
         }
         auto func = pcallbacks.attr(name.c_str());
-        auto ret = py::none();
         if (py::isinstance<py::function>(func)) {
-            ret = callbacks(func);
+            py::object ret = callbacks(func);
+			if (ret.is_none()) {
+				return defaultValue;
+			}
+			return ret;
         }
-		if (ret.is_none()) {
-            return defaultValue;
-        }
-        return ret;
     } catch (...) {
         raiseException("Failed to call Python callback " + name);
     }
@@ -1492,7 +1491,7 @@ void bindVCMPFunctions() {
 void bindVCMPCallbacks() {
 	vcalls->OnServerInitialise = []() -> uint8_t
 	{
-		logger.info("Loaded " + std::string(PLUGIN_VERSION) + " version " + std::string(PLUGIN_VERSION) + " by " + std::string(AUTHOR) + ". (" + std::string(LICENSE) + " LICENSE)");
+		logger.info("Loaded " + std::string(PLUGIN_NAME) + " version " + std::string(PLUGIN_VERSION) + " by " + std::string(AUTHOR) + ". (" + std::string(LICENSE) + " LICENSE)");
 		handlePythonFunction("server_initialise", DEFAULT_RETURN);
         return 1;
 	};
