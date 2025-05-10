@@ -8,8 +8,8 @@
 
 namespace py = pybind11;
 
-py::module pfunctions = py::module("functions");
-py::module pcallbacks = py::module("callbacks");
+py::object pfunctions = py::none();
+py::object pcallbacks = py::none();
 
 PluginFuncs* vfuncs;
 PluginCallbacks* vcalls;
@@ -80,16 +80,17 @@ py::object handlePythonFunction(
     }
 ) {
     std::string name = "on_" + function;
+	py::module m = pcallbacks.cast<py::module>();
     try {
 		printf("%s\n", "callback");
-		printf("%s\n", py::str(pcallbacks));
-		if (!py::hasattr(pcallbacks, name.c_str()) || pcallbacks.attr(name.c_str()).is_none() || !py::isinstance<py::function>(pcallbacks.attr(name.c_str()))) {
-            pcallbacks.def(name.c_str(), [](py::args args, py::kwargs kwargs) {
+		printf("%s\n", py::str(m).cast<std::string>().c_str());
+		if (!py::hasattr(m, name.c_str()) || m.attr(name.c_str()).is_none() || !py::isinstance<py::function>(m.attr(name.c_str()))) {
+            m.def(name.c_str(), [](py::args args, py::kwargs kwargs) {
                 // Do nothing
             });
             logger.debug("Create empty callback " + name);
         }
-        auto func = pcallbacks.attr(name.c_str());
+        auto func = m.attr(name.c_str());
         if (py::isinstance<py::function>(func)) {
             py::object ret = callbacks(func);
 			if (ret.is_none()) {
@@ -136,7 +137,7 @@ void bindVCMPFunctions() {
         logger.error("Functions not initialized");
         return;
     }
-    py::module m = pfunctions;
+    py::module m = pfunctions.cast<py::module>();
     logger.debug("Start bind VCMP functions to Python module");
 	m.def("set_vcmp_python_debug", [](bool debug) {
 		logger.setDebug(debug);
@@ -1793,6 +1794,8 @@ void bindVCMPCallbacks() {
 }
 
 PYBIND11_EMBEDDED_MODULE(__vcmp, m) {
+	pfunctions = py::module("functions");
+	pcallbacks = py::module("callbacks");
     // setattr
     m.attr("functions") = pfunctions;
     m.attr("callbacks") = pcallbacks;
