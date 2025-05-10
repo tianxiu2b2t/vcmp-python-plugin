@@ -16,4 +16,5 @@ RUN strings /lib/x86_64-linux-gnu/libc.so.6 | grep GLIBC
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -r requirements.txt
+RUN pip install vcmp-python-plugin
 
