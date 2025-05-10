@@ -114,7 +114,25 @@ private:
                 printf("%s", text.c_str());
             }
 #else
-            //printf("%c[%s%dm%s%c[0m", 27, (COLORS_32[color] & 8) == 8 ? "1;" : "", color, text.c_str(), 27);
+            int foreground_color = COLORS_32[color] & 0x0F;  // 获取前景颜色
+            int background_color = (COLORS_32[color] >> 4) & 0x0F;  // 获取背景颜色
+            int intensity = (COLORS_32[color] & 8) ? 1 : 0;  // 获取是否加亮
+
+            // 构建 ANSI 转义序列
+            string ansi_code = "";
+            if (intensity) {
+                ansi_code += "\033[1;";
+            }
+            else {
+                ansi_code += "\033[0;";
+            }
+
+            if (background_color != 0) {
+                ansi_code += std::to_string(background_color + 40) + ";";
+            }
+
+            ansi_code += std::to_string(foreground_color + 30) + "m";
+            printf("%s%s\033[0m", ansi_code.c_str(), text.c_str());
 #endif
         }
     }
