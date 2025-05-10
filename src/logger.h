@@ -101,7 +101,8 @@ private:
                 continue;
             }
             const string text = str.substr(1);
-            const int color = lastColors.at(lastColors.size() - 1);
+            int color = lastColors.at(lastColors.size() - 1);
+            if (color == -1) color = 0;
 #ifdef WIN32
             if (hstdout) {
                 CONSOLE_SCREEN_BUFFER_INFO csbBefore;
@@ -114,19 +115,14 @@ private:
                 printf("%s", text.c_str());
             }
 #else
-            int foreground_color = COLORS_32[color] & 0x0F;  // 获取前景颜色
-
-            // 构建 ANSI 转义序列
-            string ansi_code = "";
-            ansi_code += std::to_string(foreground_color + 30) + "m";
-            printf("\033[0;%s%s\033[0m", ansi_code.c_str(), text.c_str());
+            printf("\033[%dm%s", COLORS_32[color], text.c_str());
 #endif
         }
     }
 
 public:
     bool DEBUG;
-    Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
+    Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%<clear>\n</clear>", bool debug = false) {
         FORMAT = formatter;
         DEBUG = debug;
 
