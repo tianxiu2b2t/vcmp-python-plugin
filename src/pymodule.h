@@ -8,8 +8,8 @@
 
 namespace py = pybind11;
 
-py::module pfunctions = py::none();
-py::module pcallbacks = py::none();
+py::module pfunctions;
+py::module pcallbacks;
 
 PluginFuncs* vfuncs;
 PluginCallbacks* vcalls;
@@ -1803,14 +1803,14 @@ PYBIND11_EMBEDDED_MODULE(__vcmp, m) {
 
     // last call
     bindVCMPFunctions();
-	bindVCMPCallbacks();
+	//bindVCMPCallbacks();
 }
 
 void initVCMP(PluginFuncs* vcmpFuncs, PluginCallbacks* vcmpCallbacks) {
     vfuncs = vcmpFuncs;
     vcalls = vcmpCallbacks;
     //bindVCMPFunctions();
-    //bindVCMPCallbacks();
+    bindVCMPCallbacks();
 
 }
 
