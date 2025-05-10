@@ -375,7 +375,11 @@ class Player:
         if vehicle is not None:
             id = vehicle.id
         if id is not None and funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolVehicle, id):
-            funcs.put_player_in_vehicle(self._id, id, 0, 0, 1)
+            origin_id = funcs.get_player_vehicle_id(self._id)
+            if origin_id != id:
+                # remove from old vehicle
+                funcs.remove_player_from_vehicle(self._id)
+                funcs.put_player_in_vehicle(self._id, id, 0, 0, 1)
         else:
             funcs.remove_player_from_vehicle(self._id)
 
