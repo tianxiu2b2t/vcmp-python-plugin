@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 
-from .constant import EntityQuaternionAction, EntityVectorAction
-
 
 @dataclass
 class Vector:
