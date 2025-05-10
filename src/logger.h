@@ -102,7 +102,7 @@ private:
             }
             const string text = str.substr(1);
             const int color = lastColors.at(lastColors.size() - 1);
-            if 
+            
 #ifdef WIN32
             if (hstdout) {
                 CONSOLE_SCREEN_BUFFER_INFO csbBefore;
