@@ -15,6 +15,7 @@ PluginFuncs* vfuncs;
 PluginCallbacks* vcalls;
 
 #define DEFAULT_RETURN py::int_(1)
+
 map<int, string> vcmpErrorMappings = {
 	{vcmpErrorNoSuchEntity, "No such entity."},
 	{vcmpErrorBufferTooSmall, "Buffer too small."},
@@ -34,8 +35,9 @@ void raiseException(std::string extra = "") {
         bool shutdown = false;
         if (e.matches(PyExc_KeyboardInterrupt) || e.matches(PyExc_SystemExit))
             shutdown = true;
-
-        logger.error("Python error: " + std::string(e.what()) + (extra != "" ? " (Extra message: " + extra + ")" : ""));
+		if (shutdown)
+			logger.debug("Shutting down server due to Python error");
+		else logger.error("Python error: " + std::string(e.what()) + (extra != "" ? " (Extra message: " + extra + ")" : ""));
         if (shutdown) {
             vfuncs->ShutdownServer();
         }
@@ -1491,9 +1493,21 @@ void bindVCMPCallbacks() {
             return func(elapsedTime);
         });
         Py_BEGIN_ALLOW_THREADS Py_END_ALLOW_THREADS;
+		bool shutdown = false;
 		if (PyErr_CheckSignals() == -1) {
-			vfuncs->ShutdownServer();
+			shutdown = true;
 		}
+		if (PyErr_Occurred()) {
+			shutdown = true;
+			logger.error("Python exception occurred.");
+			PyErr_Print();
+		}
+
+		if (shutdown) {
+			logger.info("Shutting down server.");
+			funcs->ShutdownServer();
+		}
+
     };
     
     vcalls->OnPluginCommand = [](uint32_t commandIdentifier, const char* message) -> uint8_t
