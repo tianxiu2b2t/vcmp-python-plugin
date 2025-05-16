@@ -121,9 +121,10 @@ def command(matcher: Matcher, event: PlayerCommandEvent):
         matcher.finish()
 
 def main():
-    server.set_servername(f"Python Test Server of Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
-    print(server.get_server_version(), server.get_servername())
-    print(plugin.get_plugins())
+    #server.set_servername(f"Python Test Server of Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+    #print(server.get_server_version(), server.get_servername())
+    #print(plugin.get_plugins())
+    print(f"Server runs on {server.get_server_version()} version")
 
 if __name__ == '__main__':
     #run(main) # 避免阻塞主线程，也可以在主线程调用 （强烈推荐 run(main) ）
