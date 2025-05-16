@@ -4,11 +4,16 @@
 #include "main.h"
 #include "logger.h"
 #include "pymodule.h"
+#include "update.h"
 
 
 extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCallbacks* pluginCallbacks, PluginInfo* pluginInfo)
 {
 	logger.setDebug(true);
+
+	logger.setPrintCallback([&pluginFunctions](const std::string& msg) {
+		pluginFunctions->LogMessage(msg.c_str());
+	});
 
 	pluginInfo->pluginVersion = 0x110;
 	pluginInfo->apiMajorVersion = PLUGIN_API_MAJOR;
@@ -30,6 +35,9 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 	py::initialize_interpreter(false);
 
 	try {
+		{
+			initCheckUpdate();
+		}
 		// eval py
 		{
 			py::eval_file(cfg.pythonscript.c_str());
@@ -41,6 +49,7 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 	} catch (...) {
 		logger.error("Python script error: unknown error");
 	}
+	//initCheckUpdate();
 
 	return 1;
 }
