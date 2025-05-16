@@ -44,6 +44,15 @@ class RGB:
                 green=(value >> 8) & 0xFF,
                 blue=value & 0xFF
             )
+
+    @staticmethod
+    def from_int_with_alpha(value: int) -> "RGB":
+        return RGB(
+            red=(value >> 24) & 0xFF,
+            green=(value >> 16) & 0xFF,
+            blue=(value >> 8) & 0xFF,
+            alpha=value & 0xFF
+        )
     
 class Player:
     def __init__(
@@ -106,7 +115,7 @@ class Player:
     
     @property
     def color(self) -> RGB:
-        return RGB.from_int(funcs.get_player_colour(self._id))
+        return RGB.from_int_with_alpha(funcs.get_player_colour(self._id))
 
     @color.setter
     def color(self, color: RGB):
@@ -1738,7 +1747,7 @@ class Marker:
     
     @property
     def color(self):
-        return RGB.from_int(funcs.get_coord_blip_info(self._id)[5])
+        return RGB.from_int_with_alpha(funcs.get_coord_blip_info(self._id)[5])
 
     def delete(self):
         """
@@ -1748,7 +1757,7 @@ class Marker:
             return
         funcs.destroy_coord_blip(self._id)
         _markers.remove(self)
-            
+
 _players: list[Player] = []
 _vehicles: list[Vehicle] = []
 _pickups: list[Pickup] = []
@@ -1793,12 +1802,11 @@ def get_checkpoint_from_id(
 ) -> Optional[CheckPoint]:
     return next((checkpoint for checkpoint in _checkpoints if checkpoint.id == checkpoint_id), None)
     
-
 def search_from_pool(
     pool: vcmpEntityPool,
 ) -> list[int]:
     max = _pools_max[pool]
-    return [i for i in range(max) if not funcs.check_entity_exists(pool, i)]
+    return [i for i in range(max) if funcs.check_entity_exists(pool, i)]
 
 def _update_pool(
     pool: vcmpEntityPool,
@@ -1828,8 +1836,6 @@ def update_pool(
             _checkpoints = _update_pool(pool, CheckPoint)
         case vcmpEntityPool.vcmpEntityPoolBlip:
             _markers = _update_pool(pool, Marker)
-            
-
 
 def update_pools():
     for pool in _pools_max.keys():
@@ -1867,7 +1873,6 @@ def _on_pre_entity_pool_update(
             CheckPoint(id)
         case vcmpEntityPool.vcmpEntityPoolBlip:
             Marker(id)
-    
 
 def _on_post_entity_pool_update(
     pool: int,
@@ -1885,7 +1890,6 @@ def _on_post_entity_pool_update(
             instance = next((pickup for pickup in _pickups if pickup.id == id), None)
             if instance is not None:
                 _pickups.remove(instance)
-    
 
 setattr(calls, "on_pre_player_connect", _on_pre_player_connect)
 setattr(calls, "on_post_player_disconnect", _on_post_player_disconnect)
