@@ -101,7 +101,23 @@ class CallbackManager:
             return callback
 
         return decorator
-                
+    
+    def handle_event(
+        self,
+        event: Type[Event],
+        *args,
+        **kwargs
+    ):
+        name = self.convert_name(event.__class__.__name__)
+        return self._callback(name, args, kwargs)
+
+    @staticmethod
+    # cxx_ to _snake
+    def convert_name(name: str):
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', 
+            re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        ).lower()
+
     def _callback(
         self,
         event: str,
@@ -122,8 +138,7 @@ class CallbackManager:
         if res is None:
             return 1
         return res
-
-        
+ 
     def _handle(
         self,
         event: Event
