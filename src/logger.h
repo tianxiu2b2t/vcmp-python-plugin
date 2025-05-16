@@ -1,5 +1,4 @@
 #pragma once
-#define _CRT_SECURE_NO_WARNINGS
 
 #ifndef LOGGER_H
 #define LOGGER_H
@@ -13,6 +12,7 @@
 #include <variant>
 #include <time.h>
 #include <iomanip>
+#include <functional>
 
 #ifdef WIN32
 #include <Windows.h>
@@ -34,6 +34,7 @@ private:
     string FORMAT;
     string timeFormat = "%Y-%m-%d %H:%M:%S";
     regex REGEXP;
+    std::function<void(const string)> PRINTCALLBACK = [](string message) { };
 
     string getFormattedTime() {
         time_t t = time(nullptr);
@@ -125,9 +126,12 @@ private:
 
 public:
     bool DEBUG;
-    Logger(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
+
+    // lambda function<void(std::string)> CALLBACK;
+    Logger(string formatter = "<white>[%datetime%]</white> [VCMPPythonPlugin] <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
         FORMAT = formatter;
         DEBUG = debug;
+        PRINTCALLBACK = [](string message) { };
 
         COLORS = {
             {"red", 31},
@@ -171,6 +175,10 @@ public:
 
     void setDebug(bool debug) {
         DEBUG = debug;
+    }
+
+    void setPrintCallback(function<void(string)> callback) {
+        PRINTCALLBACK = callback;
     }
 
     Logger opt(string formatter = "<white>[%datetime%]</white> <level>[%level%]</level><yellow>:</yellow> <level>%message%\n", bool debug = false) {
