@@ -134,6 +134,9 @@ class CallbackManager:
         cls = self.events[event]
         fields = cls.__fields__
 
+        cls._raw_args = args
+        cls._raw_kwargs = kwargs
+
         instance = cls(*args, **kwargs)
         for idx, field in enumerate(fields):
             setattr(instance, field, args[idx])
