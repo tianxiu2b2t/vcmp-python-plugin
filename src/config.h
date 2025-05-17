@@ -1,3 +1,6 @@
+#ifndef _CONFIG
+#define _CONFIG
+
 #include <fstream>
 #include <string>
 #include <stdio.h>
@@ -10,6 +13,7 @@ typedef struct {
     bool loggerDebug;
     std::string pythonscript;
     std::string pythonpath;
+    bool preloader;
 } config;
 
 config cfg;
@@ -61,7 +65,9 @@ void loadConfig() {
     cfg.pythonscript = readConfig(stream, "pythonscript", "main.py");
     cfg.pythonpath = readConfig(stream, "pythonpath", "");
     cfg.loggerDebug = parseValueToBool(readConfig(stream, "pythonloggerdebug", "false"));
+    cfg.preloader = parseValueToBool(readConfig(stream, "preload", "false"));
 
     // debug
     stream.close();
 }
+#endif

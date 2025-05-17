@@ -38,8 +38,8 @@ def bindkey(
     """Bind a key to trigger event call."""
     keys = [
         key,
-        key2 if key2 is not None else -1,
-        key3 if key3 is not None else -1,
+        key2 if key2 is not None else 0,
+        key3 if key3 is not None else 0,
     ]
     slot = funcs.get_key_bind_unused_slot()
     funcs.register_key_bind(slot, can_release, *keys)

@@ -6,6 +6,7 @@
 #include <pybind11/embed.h>
 #include "meta.hpp"
 #include "update.h"
+#include "config.h"
 
 namespace py = pybind11;
 
@@ -16,6 +17,8 @@ PluginFuncs* vfuncs;
 PluginCallbacks* vcalls;
 
 #define DEFAULT_RETURN py::int_(1)
+
+bool serverStarted = false;
 
 map<int, string> vcmpErrorMappings = {
 	{vcmpErrorNoSuchEntity, "No such entity."},
@@ -85,7 +88,7 @@ py::object handlePythonFunction(
     std::string name = "on_" + function;
     try {
 		if (pcallbacks.is_none()) {
-			logger.error("Callbacks not initialized");
+			logger.debug("Callbacks not initialized, called from " + function);
 			return defaultValue;
 		}
 		py::module m = pcallbacks.cast<py::module>();
@@ -137,9 +140,7 @@ string getSomethingFromVCMP(
 	return "";
 }
 
-void initPythonInterpreter() {
-    py::initialize_interpreter(false);
-
+void loadPythonScript() {
 	try {
 		{
 			initCheckUpdate();
@@ -155,6 +156,14 @@ void initPythonInterpreter() {
 	} catch (...) {
 		logger.error("Python script error: unknown error");
 	}
+}
+
+void initPythonInterpreter() {
+    py::initialize_interpreter(false);
+
+	if (!serverStarted && !cfg.preloader)
+		return;
+	loadPythonScript();
 }
 
 void finalizePythonInterpreter() {
@@ -1507,6 +1516,12 @@ void bindVCMPCallbacks() {
 	vcalls->OnServerInitialise = []() -> uint8_t
 	{
 		logger.info("Loaded " + std::string(PLUGIN_NAME) + " version " + std::string(PLUGIN_VERSION) + " by " + std::string(AUTHOR) + ". (" + std::string(LICENSE) + " LICENSE)");
+		serverStarted = true;
+
+		if (!cfg.preloader) {
+			loadPythonScript();
+		}
+		
 		handlePythonFunction("server_initialise");
         return 1;
 	};
