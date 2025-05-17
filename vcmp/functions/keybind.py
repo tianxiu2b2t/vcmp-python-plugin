@@ -18,7 +18,7 @@ class KeyBind(
 def bindkey(
     can_release: bool,
     key: KeyCode,
-):
+) -> KeyBind:
     ...
 
 @overload
@@ -26,7 +26,7 @@ def bindkey(
     can_release: bool,
     key: KeyCode,
     key2: KeyCode,
-):
+) -> KeyBind:
     ...
 
 def bindkey(
@@ -34,7 +34,7 @@ def bindkey(
     key: KeyCode,
     key2: Optional[KeyCode] = None,
     key3: Optional[KeyCode] = None,
-):
+) -> KeyBind:
     """Bind a key to trigger event call."""
     keys = [
         key,
