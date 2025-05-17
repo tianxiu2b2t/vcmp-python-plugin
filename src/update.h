@@ -29,7 +29,6 @@ def loop_check_update(locals):
                     return
                 latest_release = response.json()
                 latest_version = latest_release["tag_name"]
-                print(f"Latest version: {latest_version}")
                 notice(latest_version)
             except:
                 noticeError()
