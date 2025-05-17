@@ -11,6 +11,9 @@ class KeyBind(
     key2: Optional[KeyCode]
     key3: Optional[KeyCode]
 
+    def __hash__(self) -> int:
+        return self.slot
+
 @overload
 def bindkey(
     can_release: bool,
@@ -39,7 +42,16 @@ def bindkey(
         key3 if key3 is not None else -1,
     ]
     slot = funcs.get_key_bind_unused_slot()
-    return funcs.register_key_bind(slot, can_release, *keys)
+    funcs.register_key_bind(slot, can_release, *keys)
+
+    data = funcs.get_key_bind_data(slot)
+    return KeyBind(
+        slot,
+        data[0],
+        data[1],
+        data[2] if data[2] != -1 else None,
+        data[3] if data[3] != -1 else None,
+    )
 
 def get_bindkey(
     slot: int
