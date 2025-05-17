@@ -150,7 +150,7 @@ void loadPythonScript() {
 			py::eval_file(cfg.pythonscript.c_str());
 		} 
 	} catch (const py::error_already_set& e) {
-		logger.error("Python eval script error: " + std::string(e.what()));
+		raiseException(e, "Python eval script error");
 	} catch (const std::exception& e) {
 		logger.error("Python script error: " + std::string(e.what()));
 	} catch (...) {
