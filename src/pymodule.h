@@ -157,6 +157,10 @@ void initPythonInterpreter() {
 	}
 }
 
+void finalizePythonInterpreter() {
+    py::finalize_interpreter();
+}
+
 void bindVCMPFunctions() {
     if (vfuncs == nullptr) {
         logger.error("Functions not initialized");
