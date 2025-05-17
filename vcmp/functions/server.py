@@ -13,8 +13,6 @@ class ServerSettings:
     password: str
     version: int
 
-
-
 def set_servername(servername: str):
     """
         Set the server name.
@@ -24,7 +22,6 @@ def set_servername(servername: str):
 
     funcs.set_server_name(servername)
 
-
 def get_servername() -> str:
     """
         Get the server name.
@@ -33,7 +30,6 @@ def get_servername() -> str:
     """
 
     return funcs.get_server_name()
-
 
 def set_gamemode(gamemode: str):
     """
@@ -127,4 +123,11 @@ def get_server_version() -> int:
     """
 
     return funcs.get_server_version()
+
+def shutdown_server():
+    """
+        Shutdown the server.
+    """
+
+    funcs.shutdown_server()
 

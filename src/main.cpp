@@ -4,7 +4,6 @@
 #include "main.h"
 #include "logger.h"
 #include "pymodule.h"
-#include "update.h"
 
 
 extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCallbacks* pluginCallbacks, PluginInfo* pluginInfo)
@@ -31,24 +30,7 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 
 	logger.debug("Python script file: " + cfg.pythonscript);
 
-	
-	py::initialize_interpreter(false);
-
-	try {
-		{
-			initCheckUpdate();
-		}
-		// eval py
-		{
-			py::eval_file(cfg.pythonscript.c_str());
-		} 
-	} catch (const py::error_already_set& e) {
-		logger.error("Python eval script error: " + std::string(e.what()));
-	} catch (const std::exception& e) {
-		logger.error("Python script error: " + std::string(e.what()));
-	} catch (...) {
-		logger.error("Python script error: unknown error");
-	}
+	initPythonInterpreter();
 	//initCheckUpdate();
 
 	return 1;

@@ -5,32 +5,37 @@
 namespace py = pybind11;
 
 //pybind11::dict locals = pybind11::dict();
+py::object locals;
 
 void initCheckUpdate() {
-    py::object locals = py::dict();
+    locals = py::dict();
     std::string python_code = R"(
 import threading
 
-def loop_check_update(notice, noticeError, noticeError200):
+def loop_check_update(locals):
+    notice, noticeError, noticeError200 = locals["notice"], locals["noticeError"], locals["noticeError200"]
     import time
     import requests
     url = "https://api.github.com/repos/)" + std::string(GITHUB_REPO) + R"(/releases/latest"
     check_interval = 86400
-    while True:
-        try:
-            response = requests.get(url)
-            if response.status_code != 200:
-                noticeError200()
-                return
-            latest_release = response.json()
-            latest_version = latest_release["tag_name"]
-            print(f"Latest version: {latest_version}")
-            notice(latest_version)
-        except:
-            noticeError()
-        time.sleep(check_interval)
+    last_check_time = time.perf_counter() - check_interval
+    while locals["running"]:
+        if time.perf_counter() - last_check_time >= check_interval:
+            last_check_time = time.perf_counter()
+            try:
+                response = requests.get(url)
+                if response.status_code != 200:
+                    noticeError200()
+                    return
+                latest_release = response.json()
+                latest_version = latest_release["tag_name"]
+                print(f"Latest version: {latest_version}")
+                notice(latest_version)
+            except:
+                noticeError()
+        time.sleep(1)
 
-t = threading.Thread(target=loop_check_update, name="UpdateChecker", daemon=True, args=(notice, noticeError, noticeError200))
+t = threading.Thread(target=loop_check_update, name="UpdateChecker", daemon=True, args=(locals(),))
 t.start()
 )";
     locals["notice"] = py::cpp_function([](py::str version) {
@@ -50,6 +55,7 @@ t.start()
     locals["noticeError200"] = py::cpp_function([]() {
         logger.info("Unable to fetch latest release information.");
     });
+    locals["running"] = 1;
 
     try {
         // 执行Python代码
@@ -58,5 +64,7 @@ t.start()
         // 处理Python异常
         logger.error("Python error: " + std::string(e.what()));
     }
-
+}
+void exitCheckUpdate() {
+    locals["running"] = 0;
 }

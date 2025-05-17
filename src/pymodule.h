@@ -5,6 +5,7 @@
 #include "logger.h"
 #include <pybind11/embed.h>
 #include "meta.hpp"
+#include "update.h"
 
 namespace py = pybind11;
 
@@ -136,6 +137,26 @@ string getSomethingFromVCMP(
 	return "";
 }
 
+void initPythonInterpreter() {
+    py::initialize_interpreter(false);
+
+	try {
+		{
+			initCheckUpdate();
+		}
+		// eval py
+		{
+			py::eval_file(cfg.pythonscript.c_str());
+		} 
+	} catch (const py::error_already_set& e) {
+		logger.error("Python eval script error: " + std::string(e.what()));
+	} catch (const std::exception& e) {
+		logger.error("Python script error: " + std::string(e.what()));
+	} catch (...) {
+		logger.error("Python script error: unknown error");
+	}
+}
+
 void bindVCMPFunctions() {
     if (vfuncs == nullptr) {
         logger.error("Functions not initialized");
@@ -165,6 +186,10 @@ void bindVCMPFunctions() {
 
 	m.def("get_vcmp_python_github", []() {
 		return GITHUB;
+	});
+
+	m.def("get_vcmp_python_repo", []() {
+		return GITHUB_REPO;
 	});
 
 	m.def("get_vcmp_python_name", []() {
@@ -1492,12 +1517,13 @@ void bindVCMPCallbacks() {
         handlePythonFunction("server_frame", py::none(), [&elapsedTime](py::object func) {
             return func(elapsedTime);
         });
-        Py_BEGIN_ALLOW_THREADS Py_END_ALLOW_THREADS;
+		Py_BEGIN_ALLOW_THREADS;
+		Py_END_ALLOW_THREADS;
 		bool shutdown = false;
 		if (PyErr_CheckSignals() == -1) {
 			shutdown = true;
 		}
-		if (PyErr_Occurred()) {
+		if (!shutdown && PyErr_Occurred()) {
 			shutdown = true;
 			logger.error("Python exception occurred.");
 			PyErr_Print();
@@ -1506,8 +1532,8 @@ void bindVCMPCallbacks() {
 		if (shutdown) {
 			logger.info("Shutting down server.");
 			funcs->ShutdownServer();
-		}
-
+			return;
+		} 
     };
     
     vcalls->OnPluginCommand = [](uint32_t commandIdentifier, const char* message) -> uint8_t
