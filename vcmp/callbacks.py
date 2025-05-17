@@ -62,13 +62,17 @@ class CallbackManager:
             if cls == Event:
                 continue
             
-            name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', 
-                re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name[:-5])
-            ).lower()
+            self.register_event(cls)
 
-            self.events[name] = cls
-    
-            self._set_callback(name)
+    def register_event(
+        self,
+        event: Type[Event]
+    ):
+        name = event.__name__
+        name = self.convert_name(name)
+
+        self.events[name] = event
+        self._set_callback(name)
             
 
     def _set_callback(
@@ -108,7 +112,7 @@ class CallbackManager:
         *args,
         **kwargs
     ):
-        name = self.convert_name(event.__class__.__name__)
+        name = self.convert_name(event.__name__[:-5])
         return self._callback(name, args, kwargs)
 
     @staticmethod
