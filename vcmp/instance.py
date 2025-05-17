@@ -1577,11 +1577,11 @@ class CheckPoint:
     def __del__(self):
         self.delete()
 
-    def __new__(cls, pickup_id: int):
-        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolCheckPoint, pickup_id):
+    def __new__(cls, checkpoint_id: int):
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolCheckPoint, checkpoint_id):
             return None
         
-        checkpoint = next((checkpoint for checkpoint in _checkpoints if checkpoint.id == pickup_id), None)
+        checkpoint = next((checkpoint for checkpoint in _checkpoints if checkpoint.id == checkpoint_id), None)
         if checkpoint is None:
             checkpoint = super().__new__(cls)
             _checkpoints.append(checkpoint)
@@ -1707,10 +1707,10 @@ class Object:
     def __del__(self):
         self.delete()
 
-    def __new__(cls, pickup_id: int):
-        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolObject, pickup_id):
+    def __new__(cls, object_id: int):
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolObject, object_id):
             return None
-        object = next((object for object in _objects if object.id == pickup_id), None)
+        object = next((object for object in _objects if object.id == object_id), None)
         if object is None:
             object = super().__new__(cls)
             _objects.append(object)
@@ -1757,6 +1757,15 @@ class Marker:
             return
         funcs.destroy_coord_blip(self._id)
         _markers.remove(self)
+
+    def __new__(cls, marker_id: int) -> Optional['Marker']:
+        if not funcs.check_entity_exists(vcmpEntityPool.vcmpEntityPoolBlip, marker_id):
+            return None
+        marker = next((marker for marker in _markers if marker.id == marker_id), None)
+        if marker is None:
+            marker = super().__new__(cls)
+            _markers.append(marker)
+        return marker
 
 _players: list[Player] = []
 _vehicles: list[Vehicle] = []
