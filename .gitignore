@@ -12,6 +12,7 @@ server64.exe
 server32.exe
 
 /*.py
+/*.nut
 start.bat
 
 server_log.txt
