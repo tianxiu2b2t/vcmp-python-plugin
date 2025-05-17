@@ -69,7 +69,7 @@ class CallbackManager:
         event: Type[Event]
     ):
         name = event.__name__
-        name = self.convert_name(name)
+        name = self.convert_name(name[:-5])
 
         self.events[name] = event
         self._set_callback(name)
