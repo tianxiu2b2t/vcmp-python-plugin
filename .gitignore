@@ -25,3 +25,4 @@ announce.py
 
 .pdm-python
 pdm.lock
+tool/
