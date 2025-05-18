@@ -106,8 +106,8 @@ jobs:
         
       - name: Copy into vcmp libraries folder
         run: |
-          mkdir -p ./vcmp/libraries
-          cp -r libraries/* ./vcmp/libraries
+          mkdir -p ./src/vcmp/libraries
+          cp -r libraries/* ./src/vcmp/libraries
           
       - name: List Artifacts after download
         run: ls -a ./libraries

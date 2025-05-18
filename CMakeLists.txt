@@ -19,9 +19,9 @@ endif()
 
 # 添加共享库
 if (WIN32)
-    add_library(${PROJECT_NAME} SHARED ./src/main.cpp)
+    add_library(${PROJECT_NAME} SHARED ./c_src/main.cpp)
 else()
-    add_library(${PROJECT_NAME} MODULE ./src/main.cpp)
+    add_library(${PROJECT_NAME} MODULE ./c_src/main.cpp)
 endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE pybind11::embed ${PLATFORM_LIBS})
 

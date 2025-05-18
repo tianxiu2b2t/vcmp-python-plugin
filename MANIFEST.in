@@ -1,6 +1,6 @@
-include vcmp/libraries/*.dll
-include vcmp/libraries/*.so
-include vcmp/extend/*.nut
-include vcmp/*.py
-include vcmp/**/*.py
-include __vcmp/*.pyi
+include src/vcmp/libraries/*.dll
+include src/vcmp/libraries/*.so
+include src/vcmp/extend/*.nut
+include src/vcmp/*.py
+include src/vcmp/**/*.py
+include src/__vcmp/*.pyi
