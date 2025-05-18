@@ -119,7 +119,7 @@ class Player:
 
     @color.setter
     def color(self, color: RGB):
-        funcs.set_player_colour(self._id, color.to_alpha())
+        funcs.set_player_colour(self._id, color.to_int())
 
     @property
     def key(self):
@@ -502,7 +502,15 @@ class Player:
         """
         Send message to the player
         """
-        funcs.send_client_message(self._id, RGB(0x0b, 0x5f, 0xa5).to_alpha(), message)
+        return self.send_raw_message(RGB.from_int(0x0b5fa5), message)
+
+    def send_raw_message(self, color: RGB, message: str):
+        """
+        Send message to the player
+        """
+
+        funcs.send_client_message(self._id, color.to_alpha(), message)
+
 
     def send_announce(self, type: int, message: str):
         """
