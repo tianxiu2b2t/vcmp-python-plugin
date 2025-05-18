@@ -22,3 +22,6 @@ server32.cfg
 
 announce.log
 announce.py
+
+.pdm-python
+pdm.lock

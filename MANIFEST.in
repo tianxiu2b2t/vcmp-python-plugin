@@ -1,3 +1,6 @@
 include vcmp/libraries/*.dll
 include vcmp/libraries/*.so
-include vcmp/squirrel-extend/*.nut
+include vcmp/extend/*.nut
+include vcmp/*.py
+include vcmp/**/*.py
+include __vcmp/*.pyi
