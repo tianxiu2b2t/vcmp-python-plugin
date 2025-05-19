@@ -1,5 +1,5 @@
-from .abc import Event
-from ..instance import Pickup, get_player_from_id
+from vcmp.events.abc import Event
+from vcmp.instance import Pickup, get_player_from_id
 
 class PickupEvent(Event):
     def __init__(

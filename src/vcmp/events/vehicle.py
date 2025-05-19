@@ -1,6 +1,6 @@
-from ..__export import vcmpVehicleUpdate
-from .abc import Event
-from ..instance import get_vehicle_from_id
+from vcmp.types import vcmpVehicleUpdate
+from vcmp.events.abc import Event
+from vcmp.instance import get_vehicle_from_id
 
 class VehicleEvent(Event):
     def __init__(

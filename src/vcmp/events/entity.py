@@ -1,5 +1,5 @@
-from vcmp.__export import vcmpEntityPool
-from .abc import Event
+from vcmp.types import vcmpEntityPool
+from vcmp.events.abc import Event
 
 class EntityPoolChangeEvent(Event):
     def __init__(

@@ -1,8 +1,8 @@
-from ..functions.keybind import get_bindkey
-from ..__export import vcmpBodyPart, vcmpDisconnectReason, vcmpPlayerState, vcmpPlayerUpdate
-from .abc import Event
-from ..instance import Player, get_player_from_id, get_vehicle_from_id
-from ..streams import ReadStream
+from vcmp.functions.keybind import get_bindkey
+from vcmp.types import vcmpBodyPart, vcmpDisconnectReason, vcmpPlayerState, vcmpPlayerUpdate
+from vcmp.events.abc import Event
+from vcmp.instance import Player, get_player_from_id, get_vehicle_from_id
+from vcmp.streams import ReadStream
 
 class PlayerEvent(Event):
     id: int

@@ -1,5 +1,5 @@
-from .abc import Event
-from ..instance import CheckPoint, get_player_from_id
+from vcmp.events.abc import Event
+from vcmp.instance import CheckPoint, get_player_from_id
 
 class CheckpointEvent(Event):
     def     __init__(

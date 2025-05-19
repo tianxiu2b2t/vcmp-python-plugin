@@ -1,4 +1,4 @@
-from .abc import Event
+from vcmp.events.abc import Event
 
 class PluginEvent(Event):
     ...

@@ -1,6 +1,4 @@
 import abc
-import inspect
-from typing import Type
 
 
 class Event(
