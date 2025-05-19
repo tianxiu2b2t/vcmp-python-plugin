@@ -1,6 +1,6 @@
-from ..__export import funcs
-from ..vec import Vector
-from ..instance import RGB, Marker
+from vcmp.__export import funcs
+from vcmp.vec import Vector
+from vcmp.instance import RGB, Marker
 
 def create_marker(
     model: int,

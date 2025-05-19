@@ -1,6 +1,6 @@
-from ..__export import funcs
-from ..vec import Vector
-from ..instance import Pickup
+from vcmp.__export import funcs
+from vcmp.vec import Vector
+from vcmp.instance import Pickup
 
 def create_pickup(
     model: int,

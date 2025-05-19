@@ -1,17 +1,6 @@
-from dataclasses import dataclass
-from ..__export import funcs
+from vcmp.types import ServerSettings
+from vcmp.__export import funcs
 
-
-@dataclass
-class ServerSettings:
-    port: int
-    maxplayers: int
-    servername: str
-    flags: int
-    locked: bool
-    gamemode: str
-    password: str
-    version: int
 
 def set_servername(servername: str):
     """

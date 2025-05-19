@@ -1,4 +1,4 @@
-from ..__export import funcs
+from vcmp.__export import funcs
 
 def is_player_connected(
     id: int

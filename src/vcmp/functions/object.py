@@ -1,6 +1,6 @@
-from ..__export import funcs
-from ..vec import Vector
-from ..instance import Object
+from vcmp.__export import funcs
+from vcmp.vec import Vector
+from vcmp.instance import Object
 
 def create_object(
     model: int,

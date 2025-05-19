@@ -1,4 +1,4 @@
-from ..__export import funcs
+from vcmp.__export import funcs
 
 def ban_ip(
     address: str

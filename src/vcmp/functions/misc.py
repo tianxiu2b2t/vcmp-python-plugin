@@ -1,7 +1,7 @@
 import math
 from typing import Optional
-from ..vec import Vector
-from ..__export import funcs
+from vcmp.vec import Vector
+from vcmp.__export import funcs
 
 def create_explosion(
     world_id: int,

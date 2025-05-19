@@ -1,5 +1,5 @@
-from ..enums import WeaponField as Weapon
-from ..__export import funcs
+from vcmp.types import WeaponField as Weapon
+from vcmp.__export import funcs
 
 WeaponField = int | Weapon
 

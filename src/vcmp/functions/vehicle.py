@@ -1,7 +1,7 @@
-from ..util import get_vehicle_random_color
-from ..__export import funcs
-from ..vec import Vector
-from ..instance import Vehicle
+from vcmp.util import get_vehicle_random_color
+from vcmp.__export import funcs
+from vcmp.vec import Vector
+from vcmp.instance import Vehicle
 
 
 def create_vehicle(

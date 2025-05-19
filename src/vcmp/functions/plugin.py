@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from ..__export import funcs
+from vcmp.__export import funcs
 
 @dataclass
 class PluginInfo:

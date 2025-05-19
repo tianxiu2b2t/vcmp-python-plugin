@@ -1,59 +1,35 @@
 from dataclasses import dataclass
 import math
-from typing import Optional, Type, TypeVar
+from typing import (
+    Optional, 
+    Type, 
+    TypeVar
+)
 
-from . import constant
-from .vec import Vector, Quaternion
-from .__export import calls, funcs, vcmpEntityPool, vcmpPlayerOption, vcmpPlayerState, vcmpVehicleSync, vcmpVehicleOption
-from .streams import WriteStream
+from vcmp.vec import (
+    Vector, 
+    Quaternion
+)
+from vcmp.__export import (
+    calls, 
+    funcs
+)
+from vcmp.streams import WriteStream
+from vcmp.types import (
+    vcmpEntityPool, 
+    vcmpPlayerOption, 
+    vcmpPlayerState, 
+    vcmpVehicleSync, 
+    vcmpVehicleOption,
+    MAX_VEHICLES,
+    MAX_OBJECTS,
+    MAX_PICKUPS,
+    MAX_CHECKPOINTS,
+    RGB
+)
 
 T = TypeVar('T')
 
-@dataclass
-class RGB:
-    red: int
-    green: int
-    blue: int
-    alpha: int = 255
-
-    def to_int(self) -> int:
-        return (self.red << 16) | (self.green << 8) | self.blue
-    
-    def to_alpha(self) -> int:
-        return (self.red << 24) | (self.green << 16) | (self.blue << 8) | self.alpha
-    
-    def to_hex(self) -> str:
-        return f"#{self.red:02x}{self.green:02x}{self.blue:02x}"
-    
-    def to_alpha_hex(self) -> str:
-        return f"#{self.red:02x}{self.green:02x}{self.blue:02x}{self.alpha:02x}"
-    
-    @staticmethod
-    def from_int(value: int) -> "RGB":
-        # if is rgba
-        if value > 0xFFFFFF:
-            return RGB(
-                red=(value >> 24) & 0xFF,
-                green=(value >> 16) & 0xFF,
-                blue=(value >> 8) & 0xFF,
-                alpha=value & 0xFF
-            )
-        else:
-            return RGB(
-                red=(value >> 16) & 0xFF,
-                green=(value >> 8) & 0xFF,
-                blue=value & 0xFF
-            )
-
-    @staticmethod
-    def from_int_with_alpha(value: int) -> "RGB":
-        return RGB(
-            red=(value >> 24) & 0xFF,
-            green=(value >> 16) & 0xFF,
-            blue=(value >> 8) & 0xFF,
-            alpha=value & 0xFF
-        )
-    
 class Player:
     def __init__(
         self,
@@ -704,6 +680,12 @@ class Player:
 
     def __repr__(self) -> str:
         return f"Player(id={self.id}, name='{self.name}')"
+
+    def __new__(cls, player_id: int):
+        if player_id in _players:
+            return _players[player_id]
+        else:
+            return super().__new__(cls)
 
 class Vehicle:
     # if vehicle in _vehicles, use it, else create new
@@ -1782,10 +1764,10 @@ _checkpoints: list[CheckPoint] = []
 _objects: list[Object] = []
 _markers: list[Marker] = []
 _pools_max: dict[vcmpEntityPool, int] = {
-    vcmpEntityPool.vcmpEntityPoolVehicle: constant.MAX_VEHICLES,
-    vcmpEntityPool.vcmpEntityPoolPickup: constant.MAX_PICKUPS,
-    vcmpEntityPool.vcmpEntityPoolObject: constant.MAX_OBJECTS,
-    vcmpEntityPool.vcmpEntityPoolCheckPoint: constant.MAX_CHECKPOINTS,
+    vcmpEntityPool.vcmpEntityPoolVehicle: MAX_VEHICLES,
+    vcmpEntityPool.vcmpEntityPoolPickup: MAX_PICKUPS,
+    vcmpEntityPool.vcmpEntityPoolObject: MAX_OBJECTS,
+    vcmpEntityPool.vcmpEntityPoolCheckPoint: MAX_CHECKPOINTS,
     vcmpEntityPool.vcmpEntityPoolBlip: 99999
 }
 

@@ -1,6 +1,8 @@
-from dataclasses import dataclass
 import math
 import random
+from vcmp.types import RGB
+from vcmp.instance import Player
+from vcmp.functions.player import is_player_connected
 
 POLY = tuple[float, float]
 WEAPON_NAMES = {
@@ -409,13 +411,7 @@ SKINS = {
 	193: "Thief #2",
 	194: "Thief #3",
 }
-
-
-@dataclass
-class AreaPoints:
-    x: float
-    y: float
-
+  
 def get_vehicle_random_color(
     color: int
 ):
@@ -516,3 +512,29 @@ def get_district_name(
     elif -1208.21 > x > -578.289 and -241.467 > y > 412.66:
         return "Little Haiti"
     return "Vice City"
+
+def get_players() -> list[Player]:
+    players = []
+    for i in range(100):
+        if not is_player_connected(i):
+            continue
+        players.append(Player(i))
+    return players
+
+def announce_all(
+    type: int,
+    message: str
+):
+    for player in get_players():
+        player.send_announce(type, message)
+
+def message_all(message: str):
+    for player in get_players():
+        player.send_message(message)
+
+def raw_message_all(
+    color: RGB,
+    message: str
+):
+    for player in get_players():
+        player.send_raw_message(color, message)

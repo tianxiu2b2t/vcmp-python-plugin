@@ -1,5 +1,5 @@
 import io
-from .logger import logger
+from vcmp.logger import logger
 import struct
 
 

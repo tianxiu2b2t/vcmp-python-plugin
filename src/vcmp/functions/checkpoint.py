@@ -1,7 +1,7 @@
 from typing import Optional
-from ..__export import funcs
-from ..vec import Vector
-from ..instance import RGB, CheckPoint, Player
+from vcmp.__export import funcs
+from vcmp.vec import Vector
+from vcmp.instance import RGB, CheckPoint, Player
 
 def create_checkpoint(
     world: int,

@@ -4,11 +4,11 @@ import inspect
 import re
 from typing import Any, Callable, Type, Union, get_args, get_type_hints
 
-from .logger import logger
-from .exceptions import FinishedException
-from .events import Event
-from .__export import calls
-from . import events
+from vcmp.logger import logger
+from vcmp.exceptions import FinishedException
+from vcmp.events import Event
+from vcmp.__export import calls
+from vcmp import events
 import traceback
 
 @dataclass

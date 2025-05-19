@@ -1,6 +1,6 @@
 from typing import NamedTuple, Optional, overload, final
-from ..__export import funcs
-from ..enums import KeyCode
+from vcmp.__export import funcs
+from vcmp.types import KeyCode
 
 class KeyBind(
     NamedTuple

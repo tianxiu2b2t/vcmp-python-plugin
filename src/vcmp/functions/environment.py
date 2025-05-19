@@ -1,9 +1,14 @@
 import math
 from typing import overload
-from ..vec import Vector
-from ..instance import RGB
-from ..enums import Weather
-from ..__export import vcmpServerOption, funcs, INT32_MAX
+from vcmp.vec import Vector
+from vcmp.instance import RGB
+from vcmp.__export import funcs
+from vcmp.types import (
+    WastedSettings,
+    vcmpServerOption,
+    Weather,
+    INT32_MAX
+)
 
 def set_taxi_boost_jump(value: bool) -> None:
     """
@@ -740,3 +745,23 @@ def get_fall_timer() -> int:
     """
 
     return funcs.get_fall_timer()
+
+def get_wasted_settings() -> WastedSettings:
+    """
+    Get the wasted settings for the game.
+
+    Returns:
+        WastedSettings: The wasted settings.
+    """
+
+    return WastedSettings(**funcs.get_wasted_settings())
+
+def set_wasted_settings(settings: WastedSettings) -> None:
+    """
+    Set the wasted settings for the game.
+
+    Args:
+        settings (WastedSettings): The new wasted settings.
+    """
+
+    funcs.set_wasted_settings(**settings.to_dict())
