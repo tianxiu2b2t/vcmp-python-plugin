@@ -34,7 +34,7 @@ class WastedSettings(DataclassDict):
     fade_timer: int
     fade_in_speed: float
     fade_out_speed: float
-    fade_colour: int
+    fade_colour: 'RGB'
     corpse_fade_start: int
     corpse_fade_time: int
 
@@ -445,29 +445,25 @@ class RGB:
     def to_alpha_hex(self) -> str:
         return f"#{self.red:02x}{self.green:02x}{self.blue:02x}{self.alpha:02x}"
     
-    @staticmethod
-    def from_int(value: int) -> "RGB":
-        # if is rgba
-        if value > 0xFFFFFF:
-            return RGB(
-                red=(value >> 24) & 0xFF,
-                green=(value >> 16) & 0xFF,
-                blue=(value >> 8) & 0xFF,
-                alpha=value & 0xFF
-            )
-        else:
-            return RGB(
-                red=(value >> 16) & 0xFF,
-                green=(value >> 8) & 0xFF,
-                blue=value & 0xFF
-            )
+    def to_argb(self) -> int:
+        return (self.alpha << 24) | (self.red << 16) | (self.green << 8) | self.blue
+    
+    def to_argb_hex(self) -> str:
+        return f"#{self.alpha:02x}{self.red:02x}{self.green:02x}{self.blue:02x}"
+    
 
     @staticmethod
-    def from_int_with_alpha(value: int) -> "RGB":
-        return RGB(
-            red=(value >> 24) & 0xFF,
-            green=(value >> 16) & 0xFF,
-            blue=(value >> 8) & 0xFF,
-            alpha=value & 0xFF
-        )
- 
+    def from_int(value: int):
+        return RGB((value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF)
+    
+    @staticmethod
+    def from_alpha(value: int):
+        return RGB((value >> 24) & 0xFF, (value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF)
+    
+    @staticmethod
+    def from_argb(value: int):
+        return RGB((value >> 16) & 0xFF, (value >> 8) & 0xFF, value & 0xFF, (value >> 24) & 0xFF)
+
+
+    
+    

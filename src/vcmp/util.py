@@ -1,6 +1,6 @@
 import math
 import random
-from vcmp.types import RGB
+from vcmp.types import RGB, AreaPoints
 from vcmp.instance import Player
 from vcmp.functions.player import is_player_connected
 

@@ -91,7 +91,7 @@ class Player:
     
     @property
     def color(self) -> RGB:
-        return RGB.from_int_with_alpha(funcs.get_player_colour(self._id))
+        return RGB.from_int(funcs.get_player_colour(self._id))
 
     @color.setter
     def color(self, color: RGB):
@@ -478,7 +478,7 @@ class Player:
         """
         Send message to the player
         """
-        return self.send_raw_message(RGB.from_int(0x0b5fa5), message)
+        return self.send_raw_message(RGB.from_alpha(0x0b5fa5ff), message)
 
     def send_raw_message(self, color: RGB, message: str):
         """
@@ -1737,7 +1737,7 @@ class Marker:
     
     @property
     def color(self):
-        return RGB.from_int_with_alpha(funcs.get_coord_blip_info(self._id)[5])
+        return RGB.from_alpha(funcs.get_coord_blip_info(self._id)[5])
 
     def delete(self):
         """
