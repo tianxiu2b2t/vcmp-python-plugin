@@ -1,5 +1,6 @@
 #include <pybind11/embed.h>
 #include "meta.hpp"
+#include "config.h"
 #include "logger.h"
 
 namespace py = pybind11;
@@ -9,6 +10,8 @@ py::object locals;
 
 void initCheckUpdate() {
     locals = py::dict();
+    if (cfg.disableUpdateChecker)
+        return;
     std::string python_code = R"(
 import threading
 
@@ -39,7 +42,7 @@ t.start()
 )";
     locals["notice"] = py::cpp_function([](py::str version) {
         if (version.cast<std::string>() != "v" + std::string(PLUGIN_VERSION)) {
-            logger.success("New version available: " + std::string(version));
+            logger.success("New version available: " + std::string(version) + ". Current version: v" + std::string(PLUGIN_VERSION));
             return;
         } 
         logger.info("This is the latest version.");
