@@ -14,6 +14,7 @@ typedef struct {
     std::string pythonscript;
     std::string pythonpath;
     bool preloader;
+    std::string virualenv;
 } config;
 
 config cfg;
@@ -62,10 +63,11 @@ void loadConfig() {
         logger.debug("Failed to open file: " + string(servercfg));
         return;
     }
-    cfg.pythonscript = readConfig(stream, "pythonscript", "main.py");
-    cfg.pythonpath = readConfig(stream, "pythonpath", "");
-    cfg.loggerDebug = parseValueToBool(readConfig(stream, "pythonloggerdebug", "false"));
-    cfg.preloader = parseValueToBool(readConfig(stream, "preload", "false"));
+    cfg.pythonscript = readConfig(stream, "python_script", "main.py");
+    cfg.pythonpath = readConfig(stream, "python_path", "");
+    cfg.loggerDebug = parseValueToBool(readConfig(stream, "pythonpython_loggerdebug", "false"));
+    cfg.preloader = parseValueToBool(readConfig(stream, "python_preloader", "false"));
+    cfg.virualenv = readConfig(stream, "python_virualenv", "");
 
     // debug
     stream.close();
