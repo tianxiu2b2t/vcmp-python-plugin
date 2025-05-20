@@ -15,6 +15,7 @@ typedef struct {
     std::string pythonpath;
     bool preloader;
     std::string virualenv;
+    bool disableUpdateChecker;
 } config;
 
 config cfg;
@@ -68,6 +69,7 @@ void loadConfig() {
     cfg.loggerDebug = parseValueToBool(readConfig(stream, "python_loggerdebug", "false"));
     cfg.preloader = parseValueToBool(readConfig(stream, "python_preloader", "false"));
     cfg.virualenv = readConfig(stream, "python_virualenv", "");
+    cfg.disableUpdateChecker = parseValueToBool(readConfig(stream, "disable_update_checker", "false"));
 
     // debug
     stream.close();
