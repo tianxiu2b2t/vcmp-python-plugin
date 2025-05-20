@@ -19,6 +19,7 @@ PluginCallbacks* vcalls;
 #define DEFAULT_RETURN py::int_(1)
 
 bool serverStarted = false;
+bool callbackWarned = false;
 
 map<int, string> vcmpErrorMappings = {
 	{vcmpErrorNoSuchEntity, "No such entity."},
@@ -88,7 +89,10 @@ py::object handlePythonFunction(
     std::string name = "on_" + function;
     try {
 		if (pcallbacks.is_none()) {
-			logger.debug("Callbacks not initialized, called from " + function);
+			if (!callbackWarned) {
+				logger.debug("Callbacks not initialized.");
+				callbackWarned = true;
+			} 
 			return defaultValue;
 		}
 		py::module m = pcallbacks.cast<py::module>();
@@ -144,7 +148,7 @@ void showPythonEnvironment() {
 	logger.debug("Python version: " + std::string((char*)Py_GetVersion()));
 	if (!cfg.virualenv.empty()) {
 		logger.debug("Python virtual environment: " + cfg.virualenv);
-	} else logger.debug("Python path: " + std::string((char*)Py_GetPythonHome()));
+	}
 }
 
 void loadVirtualEnvironment() {
