@@ -370,11 +370,6 @@ def get_disable_heli_blade_damage() -> bool:
     """
     return funcs.get_server_option(vcmpServerOption.vcmpServerOptionDisableHeliBladeDamage)
 
-
-"""
-    Time
-"""
-
 def get_time() -> int:
     """
         Get the current time of the game world
@@ -384,7 +379,6 @@ def get_time() -> int:
     """
 
     return funcs.get_hour() * 60 + funcs.get_minute()
-
 
 def set_time(value: int) -> None:
     """
@@ -417,7 +411,6 @@ def set_hour(value: int) -> None:
         value (int): The new hour of the game world.
     """
     funcs.set_hour(value)
-
 
 def get_minute() -> int:
     """
@@ -498,7 +491,6 @@ def set_gravity(value: float) -> None:
 
     funcs.set_gravity(value)
 
-
 def get_gamespeed() -> float:
     """
     Get the current gamespeed of the game world.
@@ -557,7 +549,6 @@ def set_max_flight_altitude(value: float) -> None:
 
     funcs.set_maximum_flight_altitude(value)
 
-
 def set_kill_command_delay(value: int) -> None:
     """
     Set the delay before a player can use the kill command.
@@ -601,7 +592,6 @@ def set_vehicles_forced_respawn_height(value: float) -> None:
     """
 
     funcs.set_vehicles_forced_respawn_height(value)
-
 
 @overload
 def add_player_class(
@@ -661,7 +651,6 @@ def add_player_class(
 
     funcs.add_player_class(team, color.to_alpha(), skin, pos.x, pos.y, pos.z, angle, weapon, ammo, weapon2, ammo2, weapon3, ammo3)
 
-
 def set_spawn_player_position(
     pos: Vector,
 ):
@@ -685,7 +674,6 @@ def set_spawn_camera_position(
     """
 
     funcs.set_spawn_camera_position(pos.x, pos.y, pos.z)
-
 
 def set_spawn_camera_look_at(
     pos: Vector,
@@ -754,7 +742,17 @@ def get_wasted_settings() -> WastedSettings:
         WastedSettings: The wasted settings.
     """
 
-    return WastedSettings(**funcs.get_wasted_settings())
+    settings = funcs.get_wasted_settings()
+
+    return WastedSettings(
+        settings["death_timer"],
+        settings["fade_timer"],
+        settings["fade_in_speed"],
+        settings["fade_out_speed"],
+        RGB.from_int(settings["fade_colour"]),
+        settings["corpse_fade_start"],
+        settings["corpse_fade_time"]
+    )
 
 def set_wasted_settings(settings: WastedSettings) -> None:
     """
@@ -764,4 +762,12 @@ def set_wasted_settings(settings: WastedSettings) -> None:
         settings (WastedSettings): The new wasted settings.
     """
 
-    funcs.set_wasted_settings(**settings.to_dict())
+    funcs.set_wasted_settings(
+        settings.death_timer,
+        settings.fade_timer,
+        settings.fade_in_speed,
+        settings.fade_out_speed,
+        settings.fade_colour.to_int(),
+        settings.corpse_fade_start,
+        settings.corpse_fade_time
+    )
