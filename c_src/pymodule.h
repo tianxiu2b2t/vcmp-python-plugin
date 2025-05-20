@@ -140,8 +140,32 @@ string getSomethingFromVCMP(
 	return "";
 }
 
+void showPythonEnvironment() {
+	logger.debug("Python version: " + std::string((char*)Py_GetVersion()));
+	if (!cfg.virualenv.empty()) {
+		logger.debug("Python virtual environment: " + cfg.virualenv);
+	} else logger.debug("Python path: " + std::string((char*)Py_GetPythonHome()));
+}
+
+void loadVirtualEnvironment() {
+    if (!Py_IsInitialized() || cfg.virualenv.empty()) {
+		return;
+	}
+	logger.debug("Loading virtual environment: " + cfg.virualenv);
+	try {
+		auto runpy = py::module::import("runpy");
+		runpy.attr("run_path")(cfg.virualenv.c_str());
+	} catch (const py::error_already_set& e) {
+		raiseException("Python virtual environment error");
+	}
+	logger.debug("Virtual environment loaded");
+}
+
 void loadPythonScript() {
 	try {
+		{
+			loadVirtualEnvironment();
+		}
 		{
 			initCheckUpdate();
 		}
@@ -159,6 +183,7 @@ void loadPythonScript() {
 }
 
 void initPythonInterpreter() {
+	logger.debug("Init Python interpreter");
     py::initialize_interpreter(false);
 
 	if (!serverStarted && !cfg.preloader)

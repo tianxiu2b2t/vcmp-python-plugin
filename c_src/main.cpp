@@ -29,7 +29,8 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 	//logger.setDebug(cfg.loggerDebug);
 
 	//logger.debug("Python script file: " + cfg.pythonscript);
-
+	showPythonEnvironment();
+	
 	initPythonInterpreter();
 	//initCheckUpdate();
 
