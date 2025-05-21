@@ -477,6 +477,7 @@ void bindVCMPFunctions() {
 
 	m.def("play_sound", [](int32_t worldId, int32_t soundId, float x, float y, float z) {
 		throwVCMPError(
+			// This is not a error, maybe your intelliSense is wrong.
 			funcs->PlaySound(worldId, soundId, x, y, z), "Failed to play sound."
 		);
 	});

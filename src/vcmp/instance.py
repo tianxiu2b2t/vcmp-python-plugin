@@ -522,6 +522,13 @@ class Player:
         """
         funcs.force_player_select(self._id)
 
+    def play_sound(self, sound_id: int, x: float = math.nan, y: float = math.nan, z: float = math.nan):
+        """
+        Play sound to the player
+        """
+        funcs.play_sound(self.unique_world, sound_id, x, y, z)
+        
+
     def set_vehicle_slot(self, vehicle: 'Vehicle', slot: int):
         """
         Set the player vehicle slot
