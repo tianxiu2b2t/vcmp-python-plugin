@@ -8,6 +8,8 @@ namespace py = pybind11;
 //pybind11::dict locals = pybind11::dict();
 py::object locals;
 
+const std::string STRING_PLUGIN_VERSION = "v" + std::string(PLUGIN_VERSION);
+
 void initCheckUpdate() {
     locals = py::dict();
     if (cfg.disableUpdateChecker)
@@ -41,11 +43,11 @@ t = threading.Thread(target=loop_check_update, name="UpdateChecker", daemon=True
 t.start()
 )";
     locals["notice"] = py::cpp_function([](py::str version) {
-        if (version.cast<std::string>() != "v" + std::string(PLUGIN_VERSION)) {
-            logger.success("New version available: " + std::string(version) + ". Current version: v" + std::string(PLUGIN_VERSION));
+        if (version.cast<std::string>() != STRING_PLUGIN_VERSION) {
+            logger.success("New version available: " + std::string(version) + ". Current version: " + STRING_PLUGIN_VERSION);
             return;
         } 
-        logger.info("This is the latest version.");
+        logger.info("This is the latest version (" + STRING_PLUGIN_VERSION + ").");
     });
     locals["noticeError"] = py::cpp_function([]() {
         try {

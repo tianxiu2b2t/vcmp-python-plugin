@@ -14,6 +14,10 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 		pluginFunctions->LogMessage(msg.c_str());
 	});
 
+	// load config
+	loadConfig();
+	logger.setDebug(cfg.loggerDebug);
+
 	pluginInfo->pluginVersion = 0x110;
 	pluginInfo->apiMajorVersion = PLUGIN_API_MAJOR;
 	pluginInfo->apiMinorVersion = PLUGIN_API_MINOR;
@@ -23,10 +27,6 @@ extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCa
 	calls = pluginCallbacks;
 
 	initVCMP(funcs, calls);
-
-	// load config
-	loadConfig();
-	//logger.setDebug(cfg.loggerDebug);
 
 	//logger.debug("Python script file: " + cfg.pythonscript);
 	showPythonEnvironment();
