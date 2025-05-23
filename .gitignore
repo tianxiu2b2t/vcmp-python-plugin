@@ -26,3 +26,6 @@ announce.py
 .pdm-python
 pdm.lock
 tool/
+
+# build
+*.egg-info
