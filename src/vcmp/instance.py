@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 import math
 from typing import (
     Optional, 
@@ -36,6 +35,8 @@ class Player:
         id: int
     ):
         self._id: int = id
+
+        _players.append(self)
 
     # use id as hash
     def __hash__(self) -> int:
