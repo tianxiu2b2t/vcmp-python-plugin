@@ -36,8 +36,6 @@ class Player:
     ):
         self._id: int = id
 
-        _players.append(self)
-
     # use id as hash
     def __hash__(self) -> int:
         return hash(self._id)
@@ -693,10 +691,12 @@ class Player:
         return f"Player(id={self.id}, name='{self.name}')"
 
     def __new__(cls, player_id: int):
-        if player_id in _players:
-            return _players[player_id]
-        else:
-            return super().__new__(cls)
+        plr = get_player_from_id(player_id)
+        if plr is not None:
+            return plr
+        plr = super().__new__(cls)
+        _players.append(plr)
+        return plr
 
 class Vehicle:
     # if vehicle in _vehicles, use it, else create new
