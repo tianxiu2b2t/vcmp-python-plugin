@@ -39,7 +39,12 @@ class Player:
 
     # use id as hash
     def __hash__(self) -> int:
-        return self._id
+        return hash(self._id)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Player):
+            return self._id == value._id
+        return False
 
     @property
     def id(self) -> int:
@@ -487,7 +492,6 @@ class Player:
 
         funcs.send_client_message(self._id, color.to_alpha(), message)
 
-
     def send_announce(self, type: int, message: str):
         """
         Send announce message to the player
@@ -528,7 +532,6 @@ class Player:
         """
         funcs.play_sound(self.unique_world, sound_id, x, y, z)
         
-
     def set_vehicle_slot(self, vehicle: 'Vehicle', slot: int):
         """
         Set the player vehicle slot
@@ -698,6 +701,14 @@ class Vehicle:
     # if vehicle in _vehicles, use it, else create new
     def __init__(self, vehicle_id: int):
         self._id = vehicle_id
+
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Vehicle):
+            return self._id == value._id
+        return False
 
     @property
     def id(self):
@@ -1376,6 +1387,14 @@ class Pickup:
     def __init__(self, pickup_id: int):
         self._id = pickup_id
 
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Pickup):
+            return self._id == value._id
+        return False
+
     @property
     def id(self) -> int:
         return self._id
@@ -1497,6 +1516,14 @@ class CheckPoint:
     def __init__(self, id: int):
         self._id = id
 
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, CheckPoint):
+            return self._id == value._id
+        return False
+
     @property
     def id(self) -> int:
         return self._id
@@ -1587,6 +1614,14 @@ class CheckPoint:
 class Object:
     def __init__(self, id: int):
         self._id = id
+
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Object):
+            return self._id == value._id
+        return False
 
     @property
     def id(self) -> int:
@@ -1716,6 +1751,14 @@ class Object:
 class Marker:
     def __init__(self, id: int):
         self._id = id
+
+    def __hash__(self) -> int:
+        return hash(self._id)
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Marker):
+            return self._id == value._id
+        return False
 
     @property
     def id(self) -> int:
