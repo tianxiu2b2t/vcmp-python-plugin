@@ -1,7 +1,7 @@
 import math
 import random
-from vcmp.types import RGB, AreaPoints
-from vcmp.instance import Player
+from vcmp.types import RGB, AreaPoints, MAX_PLAYERS
+from vcmp.instance import Player, get_player_from_id
 from vcmp.functions.player import is_player_connected
 
 POLY = tuple[float, float]
@@ -515,10 +515,10 @@ def get_district_name(
 
 def get_players() -> list[Player]:
     players = []
-    for i in range(100):
+    for i in range(MAX_PLAYERS + 1):
         if not is_player_connected(i):
             continue
-        players.append(Player(i))
+        players.append(get_player_from_id(i))
     return players
 
 def announce_all(
