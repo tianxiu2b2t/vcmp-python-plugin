@@ -1,7 +1,3 @@
-/// bindgen 生成的绑定
-///
-/// bindgen .\c_src\plugin.h -o .\rs_src\src\bindings.rs  --no-layout-tests --allowlist-item="(vcmp|Server|Plugin|PLUGIN).*"
-#[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 pub mod bindings;
 
 /// 插件入口点
