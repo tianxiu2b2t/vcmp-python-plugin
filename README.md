@@ -8,52 +8,60 @@
 ![GitHub Release](https://img.shields.io/github/v/release/tianxiu2b2t/vcmp-python-plugin)
 ![GitHub Tag](https://img.shields.io/github/v/tag/tianxiu2b2t/vcmp-python-plugin)
 ![GitHub Repo stars](https://img.shields.io/github/stars/tianxiu2b2t/vcmp-python-plugin)
-[![Build](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/build.yml/badge.svg)](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/build.yml)
+<!-- [![Build](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/build.yml/badge.svg)](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/build.yml)
 [![Docker Build](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/docker_build.yml/badge.svg)](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/docker_build.yml)
-[![Release](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/release.yml/badge.svg)](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/release.yml)
+[![Release](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/release.yml/badge.svg)](https://github.com/TTB-Network/python-openbmclapi/actions/workflows/release.yml) -->
 [赞助](https://afdian.net/a/atianxiua)
 </div>
 
-# 许可证
+## 许可证
 
 [MIT](LICENSE)
 
-# 贡献
+## 贡献
 
 如果你有能力，你可以向我们的仓库提交 Pull Request 或 Issue。
 
-# 鸣谢
+### 开发进度
+
+目前 `master` 是主分支, `rwir` 分支上正在将进行 rust 重写的工作, 欢迎贡献
+
+> lets RWIR!
+
+## 鸣谢
 
 [ysc3839](https://github.com/ysc3839/vcmp-python-plugin)
 
-# 使用
-## 如果你是 Linux 用户 (Docker)
+## 使用
+
+### 如果你是 Linux 用户 (Docker)
 
 ```bash
 docker run -d --name vcmp-python -v /path/to/your/server:/app -p 8192:8192 tianxiu2b2t/vcmp-python server
 ```
 
-## 如果你是 Windows 用户
-#### 1. pip 包安装
+### 如果你是 Windows 用户
+
+1. pip 包安装
 ```bash
 pip install vcmp-python-plugin
 ```
 
-#### 2. 下载对应的 python 版本 dll 文件，或在 pip 包中寻找对应的 dll 文件
-#### 3. 将 dll 文件放入你的 VCMP 服务器 plugins 文件夹中
-#### 4. 修改 server.cfg 文件，添加以下内容
+2. 下载对应的 python 版本 dll 文件，或在 pip 包中寻找对应的 dll 文件
+3. 将 dll 文件放入你的 VCMP 服务器 plugins 文件夹中
+4. 修改 server.cfg 文件，添加以下内容
 
 ```cfg
 plugins vcmp-python-plugin-cpy<py_version>-rel64.dll
 pythonscript main.py
 ```
 
-#### 5. 启动你的服务器
+5. 启动你的服务器
 ```bash
 server.exe
 ```
 
-# 示例脚本
+## 示例脚本
 main.py:
 ```python
 import sys
