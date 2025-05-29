@@ -31,3 +31,4 @@ tool/
 *.egg-info
 
 target
+server

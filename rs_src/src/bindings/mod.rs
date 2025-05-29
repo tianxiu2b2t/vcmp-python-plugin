@@ -5,3 +5,8 @@
 pub mod raw;
 
 // TODO: wrapper for bindings
+
+#[derive(Debug, Clone, Copy)]
+pub struct PluginInfo {
+    inner: raw::PluginInfo
+}

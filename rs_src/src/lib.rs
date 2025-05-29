@@ -9,5 +9,5 @@ pub mod bindings;
 /// ```
 #[unsafe(no_mangle)]
 extern "C" fn VcmpPluginInit() -> u32 {
-    return 1;
+    1
 }
