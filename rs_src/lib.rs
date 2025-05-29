@@ -38,12 +38,11 @@ extern "C" fn VcmpPluginInit(plugin_functions: *mut PluginFuncs, plugin_callback
         // 参考 cpp.ing
         info.apiMajorVersion = bindings::API_MAJOR as u16;
         // info.apiMinorVersion = bindings::API_MINOR as u16 - 1; // 难蚌 compat
-        info.apiMinorVersion = 0;
+        info.apiMinorVersion = 0; // 就先 .0了
         info.pluginVersion = PLUGIN_VERSION;
 
         println!("vcmp-plugin-rs info: {:#?}", info);
         println!("vcmp-plugin-rs callback: {:#?}", callbacks);
-        // println!("vcmp-plugin-rs functions: {:?}", functions);
 
         println!("sizeof callback: {}", std::mem::size_of::<PluginCallbacks>());
         println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
@@ -54,9 +53,15 @@ extern "C" fn VcmpPluginInit(plugin_functions: *mut PluginFuncs, plugin_callback
         // get version
         let version: u32 = functions.GetServerVersion.unwrap()();
         println!("server version: {}", version);
+        callbacks.OnServerFrame = Some(on_server_frame);
     }
 
     println!("vcmp-plugin-rs loaded");
 
     1
+}
+
+
+unsafe extern "C" fn on_server_frame(elapsed_time: f32) {
+    println!("[Rust] Server frame callback time: {}", elapsed_time);
 }
