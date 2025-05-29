@@ -17,6 +17,19 @@ extern "C" fn VcmpPluginInit(plugin_functions: *mut PluginFuncs, plugin_callback
     
     println!("loading vcmp-plugin-rs");
 
+    if plugin_functions.is_null() {
+        println!("!!! plugin_functions is null !!!");
+        return 1;
+    }
+    if plugin_callbacks.is_null() {
+        println!("!!! plugin_callbacks is null !!!");
+        return 1;
+    }
+    if plugin_info.is_null() {
+        println!("!!! plugin_info is null !!!");
+        return 1;
+    }
+
     unsafe {
         let functions = &mut *plugin_functions;
         let callbacks = &mut *plugin_callbacks;
@@ -36,8 +49,11 @@ extern "C" fn VcmpPluginInit(plugin_functions: *mut PluginFuncs, plugin_callback
         println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
 
         println!("give sizeof callback: {}", callbacks.structSize);
-        println!("give sizeof functions: {}", functions.structSize)
+        println!("give sizeof functions: {}", functions.structSize);
 
+        // get version
+        let version: u32 = functions.GetServerVersion.unwrap()();
+        println!("server version: {}", version);
     }
 
     println!("vcmp-plugin-rs loaded");
