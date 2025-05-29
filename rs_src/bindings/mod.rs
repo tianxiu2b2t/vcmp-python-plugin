@@ -10,3 +10,6 @@ pub mod raw;
 pub struct PluginInfo {
     inner: raw::PluginInfo
 }
+
+pub use raw::PLUGIN_API_MAJOR as API_MAJOR;
+pub use raw::PLUGIN_API_MINOR as API_MINOR;

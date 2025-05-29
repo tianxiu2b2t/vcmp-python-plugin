@@ -5,7 +5,6 @@ converters
 **/__pycache__/
 plugins/
 logs/
-scripts/
 store/
 
 server64.exe
