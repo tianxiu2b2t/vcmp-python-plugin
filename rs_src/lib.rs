@@ -1,7 +1,8 @@
+use std::ffi::{CStr, c_char};
+
 use bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
 
 pub mod bindings;
-
 
 pub const PLUGIN_VERSION: u32 = 1;
 
@@ -13,8 +14,11 @@ pub const PLUGIN_VERSION: u32 = 1;
 /// extern "C" EXPORT uint32_t VcmpPluginInit(PluginFuncs* pluginFunctions, PluginCallbacks* pluginCallbacks, PluginInfo* pluginInfo);
 /// ```
 #[unsafe(no_mangle)]
-extern "C" fn VcmpPluginInit(plugin_functions: *mut PluginFuncs, plugin_callbacks: *mut PluginCallbacks, plugin_info: *mut PluginInfo) -> u32 {
-    
+extern "C" fn VcmpPluginInit(
+    plugin_functions: *mut PluginFuncs,
+    plugin_callbacks: *mut PluginCallbacks,
+    plugin_info: *mut PluginInfo,
+) -> u32 {
     println!("loading vcmp-plugin-rs");
 
     if plugin_functions.is_null() {
@@ -41,10 +45,15 @@ extern "C" fn VcmpPluginInit(plugin_functions: *mut PluginFuncs, plugin_callback
         info.apiMinorVersion = 0; // 就先 .0了
         info.pluginVersion = PLUGIN_VERSION;
 
+        callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
+
         println!("vcmp-plugin-rs info: {:#?}", info);
         println!("vcmp-plugin-rs callback: {:#?}", callbacks);
 
-        println!("sizeof callback: {}", std::mem::size_of::<PluginCallbacks>());
+        println!(
+            "sizeof callback: {}",
+            std::mem::size_of::<PluginCallbacks>()
+        );
         println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
 
         println!("give sizeof callback: {}", callbacks.structSize);
@@ -61,7 +70,23 @@ extern "C" fn VcmpPluginInit(plugin_functions: *mut PluginFuncs, plugin_callback
     1
 }
 
-
 unsafe extern "C" fn on_server_frame(elapsed_time: f32) {
-    println!("[Rust] Server frame callback time: {}", elapsed_time);
+    // println!("[Rust] Server frame callback time: {}", elapsed_time);
+}
+
+unsafe extern "C" fn on_server_performance_report(
+    entry_count: usize,
+    descriptions: *mut *const c_char,
+    times: *mut u64,
+) {
+    println!("[Rust] Server performance report callback");
+    let c_str_descriptions = unsafe { CStr::from_ptr(*descriptions) };
+    let description = c_str_descriptions
+        .to_str()
+        .unwrap_or("Could not convert description to string");
+    let times = unsafe { *times };
+    println!(
+        "[Rust] Description: {}, entry count: {}, time: {}",
+        description, entry_count, times
+    );
 }
