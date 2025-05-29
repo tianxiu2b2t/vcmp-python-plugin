@@ -2,7 +2,7 @@
    Project: Vice City Multiplayer 0.4 Server / Plugin Kit
    File: plugin.h
 
-   Copyright 2011-2016 Ago Allikmaa (maxorator)
+   Copyright 2011-2019 Ago Allikmaa (maxorator)
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
+
+   https://github.com/VCMP-SqMod/SqMod/blob/master/module/VCMP/vcmp21.h
 */
 
 #pragma once
@@ -31,7 +33,7 @@ typedef struct {
 } ServerSettings;
 
 #define PLUGIN_API_MAJOR 2
-#define PLUGIN_API_MINOR 0
+#define PLUGIN_API_MINOR 1
 
 typedef struct {
 	uint32_t structSize;
@@ -60,6 +62,8 @@ typedef enum {
 	vcmpEntityPoolObject = 2,
 	vcmpEntityPoolPickup = 3,
 	vcmpEntityPoolRadio = 4,
+	vcmpEntityPoolPlayer = 5,
+	vcmpEntityReserved1 = 6,
 	vcmpEntityPoolBlip = 7,
 	vcmpEntityPoolCheckPoint = 8,
 	forceSizeVcmpEntityPool = INT32_MAX
@@ -101,7 +105,7 @@ typedef enum {
 
 typedef enum {
 	vcmpPlayerUpdateNormal = 0,
-	vcmpPlayerUpdateAiming = 1,
+	vcmpPlayerUpdateAimingDeprecated = 1,
 	vcmpPlayerUpdateDriver = 2,
 	vcmpPlayerUpdatePassenger = 3,
 	forceSizeVcmpPlayerUpdate = INT32_MAX
@@ -194,6 +198,31 @@ typedef enum {
 	forceSizeVcmpPickupOption = INT32_MAX
 } vcmpPickupOption;
 
+typedef enum {
+	vcmpNetworkStatisticsOptionDataSentPerSecond = 0,
+	vcmpNetworkStatisticsOptionDataResentPerSecond = 1,
+	vcmpNetworkStatisticsOptionDataReceivedPerSecond = 2,
+	vcmpNetworkStatisticsOptionDataDiscardedPerSecond = 3,
+	vcmpNetworkStatisticsOptionAllBytesSentPerSecond = 4,
+	vcmpNetworkStatisticsOptionAllBytesReceivedPerSecond = 5,
+
+	vcmpNetworkStatisticsOptionDataSentTotal = 6,
+	vcmpNetworkStatisticsOptionDataResentTotal = 7,
+	vcmpNetworkStatisticsOptionDataReceivedTotal = 8,
+	vcmpNetworkStatisticsOptionDataDiscardedTotal = 9,
+	vcmpNetworkStatisticsOptionAllBytesSentTotal = 10,
+	vcmpNetworkStatisticsOptionAllBytesReceivedTotal = 11,
+
+	vcmpNetworkStatisticsOptionMessagesWaiting = 12,
+	vcmpNetworkStatisticsOptionMessagesResending = 13,
+	vcmpNetworkStatisticsOptionBytesResending = 14,
+
+	vcmpNetworkStatisticsOptionPacketLossPerSecond = 15,
+	vcmpNetworkStatisticsOptionPacketLossTotal = 16,
+
+	forceSizeVcmpNetworkStatisticsOption = INT32_MAX
+} vcmpNetworkStatisticsOption;
+
 typedef struct {
 	uint32_t structSize;
 
@@ -211,7 +240,7 @@ typedef struct {
 	uint32_t (*GetNumberOfPlugins) (void);
 	/* vcmpErrorNoSuchEntity, vcmpErrorNullArgument */
 	vcmpError (*GetPluginInfo) (int32_t pluginId, PluginInfo* pluginInfo);
-	/* -1 == vcmpEntityNone */
+	/* Return value of -1 indicates vcmpErrorNoSuchEntity */
 	int32_t (*FindPlugin) (const char* pluginName);
 	/* GetLastError: vcmpErrorNoSuchEntity */
 	const void** (*GetPluginExports) (int32_t pluginId, size_t* exportCount);
@@ -351,7 +380,7 @@ typedef struct {
 	 * Key binds
 	 */
 
-	/* -1 == vcmpEntityNone */
+	/* Return value of -1 indicates vcmpErrorNoSuchEntity */
 	int32_t (*GetKeyBindUnusedSlot) (void);
 	/* vcmpErrorNoSuchEntity */
 	vcmpError (*GetKeyBindData) (int32_t bindId, uint8_t* isCalledOnReleaseOut, int32_t* keyOneOut, int32_t* keyTwoOut, int32_t* keyThreeOut);
@@ -424,7 +453,7 @@ typedef struct {
 	 * Player access and basic info
 	 */
 
-	/* -1 == vcmpEntityNone */
+	/* Return value of -1 indicates vcmpErrorNoSuchEntity */
 	int32_t (*GetPlayerIdFromName) (const char* name);
 	/* success */
 	uint8_t (*IsPlayerConnected) (int32_t playerId);
@@ -894,7 +923,8 @@ typedef struct {
 	/* GetLastError: vcmpErrorNoSuchEntity */
 	uint8_t (*IsObjectTouchedReportEnabled) (int32_t objectId);
 
-	// TODO: MOVE LATER
+	/* 04rel005 SDK functions */
+	/* ---------------------------------------------------------- */
 	vcmpError (*GetPlayerModuleList) (int32_t playerId);
 
 	/* vcmpErrorNoSuchEntity, vcmpErrorArgumentOutOfBounds */
@@ -912,17 +942,19 @@ typedef struct {
 	/* GetLastError: vcmpErrorNoSuchEntity */
 	uint32_t (*GetVehicleLightsData) (int32_t vehicleId);
 
+	/* 04rel007 SDK functions */
+	/* ---------------------------------------------------------- */
 	/* vcmpErrorNoSuchEntity */
 	vcmpError (*KillPlayer) (int32_t playerId);
 
-/* vcmpErrorNoSuchEntity */
-	vcmpError (*SetVehicle3DArrowForPlayer) (int32_t nVehicleId, int32_t nTargetPlayerId, uint8_t bEnabled);
-	/* GetLastError: vcmpErrorNoSuchEntity */
-	uint8_t (*GetVehicle3DArrowForPlayer) (int32_t nVehicleId, int32_t nTargetPlayerId);
 	/* vcmpErrorNoSuchEntity */
-	vcmpError (*SetPlayer3DArrowForPlayer) (int32_t nPlayerId, int32_t nTargetPlayerId, uint8_t bEnabled);
+	vcmpError (*SetVehicle3DArrowForPlayer) (int32_t vehicleId, int32_t targetPlayerId, uint8_t isEnabled);
 	/* GetLastError: vcmpErrorNoSuchEntity */
-	uint8_t (*GetPlayer3DArrowForPlayer) (int32_t nVehicleId, int32_t nTargetPlayerId);
+	uint8_t (*GetVehicle3DArrowForPlayer) (int32_t vehicleId, int32_t targetPlayerId);
+	/* vcmpErrorNoSuchEntity */
+	vcmpError (*SetPlayer3DArrowForPlayer) (int32_t playerId, int32_t targetPlayerId, uint8_t isEnabled);
+	/* GetLastError: vcmpErrorNoSuchEntity */
+	uint8_t (*GetPlayer3DArrowForPlayer) (int32_t playerId, int32_t targetPlayerId);
 
 	/* vcmpErrorNoSuchEntity */
 	vcmpError (*SetPlayerDrunkHandling) (int32_t playerId, uint32_t drunkLevel);
@@ -935,6 +967,9 @@ typedef struct {
 
 	/* vcmpErrorNoSuchEntity, vcmpErrorRequestDenied */
 	vcmpError (*InterpolateCameraLookAt) (int32_t playerId, float lookX, float lookY, float lookZ, uint32_t interpTimeMS);
+
+	/* GetLastError: vcmpErrorNoSuchEntity, vcmpErrorArgumentOutOfBounds */
+	double (*GetNetworkStatistics) (int32_t playerId, vcmpNetworkStatisticsOption option);
 
 } PluginFuncs;
 
@@ -998,7 +1033,12 @@ typedef struct {
 	void (*OnEntityPoolChange) (vcmpEntityPool entityType, int32_t entityId, uint8_t isDeleted);
 	void (*OnServerPerformanceReport) (size_t entryCount, const char** descriptions, uint64_t* times);
 
-	// TODO: MOVE LATER
-	void(*OnPlayerModuleList) (int32_t playerId, const char* list);
+	/* 04rel005 SDK functions */
+	/* ---------------------------------------------------------- */
+	void (*OnPlayerModuleList) (int32_t playerId, const char* list);
+
+	/* 04rel007 SDK functions */
+	/* ---------------------------------------------------------- */
+	void (*OnEntityStreamingChange) (int32_t playerId, int32_t entityId, vcmpEntityPool entityType, uint8_t isDeleted);
 
 } PluginCallbacks;
