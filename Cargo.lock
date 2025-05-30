@@ -5,3 +5,10 @@ version = 4
 [[package]]
 name = "vcmp-plugin-rs"
 version = "0.1.0"
+dependencies = [
+ "vcmp_bindings",
+]
+
+[[package]]
+name = "vcmp_bindings"
+version = "0.1.0"

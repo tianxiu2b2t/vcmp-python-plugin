@@ -1,6 +1,6 @@
 use std::ffi::{CStr, c_char};
 
-use bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
+use vcmp_bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
 
 pub const PLUGIN_VERSION: u32 = 1;
 
@@ -19,49 +19,54 @@ extern "C" fn VcmpPluginInit(
 ) -> u32 {
     println!("loading vcmp-plugin-rs");
 
-    if plugin_functions.is_null() {
-        println!("!!! plugin_functions is null !!!");
-        return 1;
+    {
+        // check null
+        if plugin_functions.is_null() {
+            println!("!!! plugin_functions is null !!!");
+            return 1;
+        }
+        if plugin_callbacks.is_null() {
+            println!("!!! plugin_callbacks is null !!!");
+            return 1;
+        }
+        if plugin_info.is_null() {
+            println!("!!! plugin_info is null !!!");
+            return 1;
+        }
     }
-    if plugin_callbacks.is_null() {
-        println!("!!! plugin_callbacks is null !!!");
-        return 1;
-    }
-    if plugin_info.is_null() {
-        println!("!!! plugin_info is null !!!");
-        return 1;
-    }
 
-    unsafe {
-        let functions = &mut *plugin_functions;
-        let callbacks = &mut *plugin_callbacks;
-        let info = &mut *plugin_info;
+    let (functions, callbacks, info) = unsafe {
+        (
+            &mut *plugin_functions,
+            &mut *plugin_callbacks,
+            &mut *plugin_info,
+        )
+    };
 
-        // 参考 cpp.ing
-        info.apiMajorVersion = bindings::API_MAJOR as u16;
-        // info.apiMinorVersion = bindings::API_MINOR as u16 - 1; // 难蚌 compat
-        info.apiMinorVersion = 0; // 就先 .0了
-        info.pluginVersion = PLUGIN_VERSION;
+    // 参考 cpp.ing
+    info.apiMajorVersion = 2;
+    // info.apiMinorVersion = bindings::API_MINOR as u16 - 1; // 难蚌 compat
+    info.apiMinorVersion = 0; // 就先 .0了
+    info.pluginVersion = PLUGIN_VERSION;
 
-        callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
+    callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
 
-        println!("vcmp-plugin-rs info: {:#?}", info);
-        println!("vcmp-plugin-rs callback: {:#?}", callbacks);
+    println!("vcmp-plugin-rs info: {:#?}", info);
+    println!("vcmp-plugin-rs callback: {:#?}", callbacks);
 
-        println!(
-            "sizeof callback: {}",
-            std::mem::size_of::<PluginCallbacks>()
-        );
-        println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
+    println!(
+        "sizeof callback: {}",
+        std::mem::size_of::<PluginCallbacks>()
+    );
+    println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
 
-        println!("give sizeof callback: {}", callbacks.structSize);
-        println!("give sizeof functions: {}", functions.structSize);
+    println!("give sizeof callback: {}", callbacks.structSize);
+    println!("give sizeof functions: {}", functions.structSize);
 
-        // get version
-        let version: u32 = functions.GetServerVersion.unwrap()();
-        println!("server version: {}", version);
-        callbacks.OnServerFrame = Some(on_server_frame);
-    }
+    // get version
+    let version: u32 = (functions.GetServerVersion)();
+    println!("server version: {}", version);
+    callbacks.OnServerFrame = Some(on_server_frame);
 
     println!("vcmp-plugin-rs loaded");
 
@@ -79,10 +84,10 @@ unsafe extern "C" fn on_server_performance_report(
 ) {
     println!("[Rust] Server performance report callback");
     let c_str_descriptions = unsafe { CStr::from_ptr(*descriptions) };
-    let description = c_str_descriptions
+    let description = c_str_descriptions // array
         .to_str()
         .unwrap_or("Could not convert description to string");
-    let times = unsafe { *times };
+    let times = unsafe { *times }; // array
     println!(
         "[Rust] Description: {}, entry count: {}, time: {}",
         description, entry_count, times

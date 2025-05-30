@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "crates/bindings",
+    "crates/vcmp_bindings",
     "crates/core"
 ]
 resolver = "2"

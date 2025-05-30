@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-vcmp-bindings.workspace = true
+vcmp_bindings = { path = "../vcmp_bindings" }
 
 [lib]
 crate-type = ["cdylib"]
