@@ -19,9 +19,7 @@ PLUGINS = SERVER / "plugins"
 if __name__ == "__main__":
     args = sys.argv
 
-    cmd = ["cargo", "build", "--release"]
-
-    subprocess.run(cmd)
+    subprocess.run(["cargo", "build", "--release"], check=True)
 
     src = TARGET / PLUGIN_NAME
 

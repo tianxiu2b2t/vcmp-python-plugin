@@ -73,11 +73,11 @@ extern "C" fn VcmpPluginInit(
     1
 }
 
-unsafe extern "C" fn on_server_frame(elapsed_time: f32) {
+extern "C" fn on_server_frame(elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
 }
 
-unsafe extern "C" fn on_server_performance_report(
+extern "C" fn on_server_performance_report(
     entry_count: usize,
     descriptions: *mut *const c_char,
     times: *mut u64,
