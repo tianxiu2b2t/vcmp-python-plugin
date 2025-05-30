@@ -2,4 +2,8 @@
 name = "vcmp_bindings"
 version = "0.1.0"
 edition = "2024"
-authors = ["shenjack <3695888@qq.com>", "tianxiu2b2t <administrator@ttb-network.top>"]
+authors = [
+    "shenjack <3695888@qq.com>",
+    "tianxiu2b2t <administrator@ttb-network.top>",
+]
+repository = "https://github.com/tianxiu2b2t/vcmp-python-plugin"

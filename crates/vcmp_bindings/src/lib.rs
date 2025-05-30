@@ -4,9 +4,23 @@
 #[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 pub mod raw;
 
+pub mod error;
+
 // TODO: wrapper for bindings
 
 #[derive(Debug, Clone, Copy)]
 pub struct PluginInfo {
     inner: raw::PluginInfo,
 }
+
+pub struct VcmpFunctions {
+    inner: raw::PluginFuncs,
+}
+
+impl From<raw::PluginFuncs> for VcmpFunctions {
+    fn from(value: raw::PluginFuncs) -> Self {
+        Self { inner: value }
+    }
+}
+
+

@@ -1,4 +1,4 @@
-use std::ffi::{CStr, c_char};
+use std::{ffi::{CStr, c_char}, cell::OnceCell};
 
 use vcmp_bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
 
@@ -76,6 +76,8 @@ extern "C" fn VcmpPluginInit(
 extern "C" fn on_server_frame(elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
 }
+
+// pub fn log_msg_to_vcmp()
 
 extern "C" fn on_server_performance_report(
     entry_count: usize,
