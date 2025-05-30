@@ -191,102 +191,85 @@ pub type vcmpNetworkStatisticsOption = ::std::os::raw::c_int;
 pub struct PluginFuncs {
     pub structSize: u32,
     #[doc = " Plugin system"]
-    pub GetServerVersion: ::std::option::Option<unsafe extern "C" fn() -> u32>,
+    pub GetServerVersion: unsafe extern "C" fn() -> u32,
     pub GetServerSettings:
-        ::std::option::Option<unsafe extern "C" fn(settings: *mut ServerSettings) -> vcmpError>,
-    pub ExportFunctions: ::std::option::Option<
+        unsafe extern "C" fn(settings: *mut ServerSettings) -> vcmpError,
+    pub ExportFunctions: 
         unsafe extern "C" fn(
             pluginId: i32,
             functionList: *mut *const ::std::os::raw::c_void,
             size: usize,
         ) -> vcmpError,
-    >,
-    pub GetNumberOfPlugins: ::std::option::Option<unsafe extern "C" fn() -> u32>,
-    pub GetPluginInfo: ::std::option::Option<
+    pub GetNumberOfPlugins: unsafe extern "C" fn() -> u32,
+    pub GetPluginInfo: 
         unsafe extern "C" fn(pluginId: i32, pluginInfo: *mut PluginInfo) -> vcmpError,
-    >,
-    pub FindPlugin: ::std::option::Option<
+    pub FindPlugin: 
         unsafe extern "C" fn(pluginName: *const ::std::os::raw::c_char) -> i32,
-    >,
-    pub GetPluginExports: ::std::option::Option<
+    pub GetPluginExports: 
         unsafe extern "C" fn(
             pluginId: i32,
             exportCount: *mut usize,
         ) -> *mut *const ::std::os::raw::c_void,
-    >,
-    pub SendPluginCommand: ::std::option::Option<
+    pub SendPluginCommand: 
         unsafe extern "C" fn(
             commandIdentifier: u32,
             format: *const ::std::os::raw::c_char,
             ...
         ) -> vcmpError,
-    >,
-    pub GetTime: ::std::option::Option<unsafe extern "C" fn() -> u64>,
-    pub LogMessage: ::std::option::Option<
+    pub GetTime: unsafe extern "C" fn() -> u64,
+    pub LogMessage: 
         unsafe extern "C" fn(format: *const ::std::os::raw::c_char, ...) -> vcmpError,
-    >,
-    pub GetLastError: ::std::option::Option<unsafe extern "C" fn() -> vcmpError>,
+    pub GetLastError: unsafe extern "C" fn() -> vcmpError,
     #[doc = " Client messages"]
-    pub SendClientScriptData: ::std::option::Option<
+    pub SendClientScriptData: 
         unsafe extern "C" fn(
             playerId: i32,
             data: *const ::std::os::raw::c_void,
             size: usize,
         ) -> vcmpError,
-    >,
-    pub SendClientMessage: ::std::option::Option<
+    pub SendClientMessage: 
         unsafe extern "C" fn(
             playerId: i32,
             colour: u32,
             format: *const ::std::os::raw::c_char,
             ...
         ) -> vcmpError,
-    >,
-    pub SendGameMessage: ::std::option::Option<
+    pub SendGameMessage: 
         unsafe extern "C" fn(
             playerId: i32,
             type_: i32,
             format: *const ::std::os::raw::c_char,
             ...
         ) -> vcmpError,
-    >,
-    pub SetServerName: ::std::option::Option<
+    pub SetServerName: 
         unsafe extern "C" fn(text: *const ::std::os::raw::c_char) -> vcmpError,
-    >,
-    pub GetServerName: ::std::option::Option<
+    pub GetServerName: 
         unsafe extern "C" fn(buffer: *mut ::std::os::raw::c_char, size: usize) -> vcmpError,
-    >,
-    pub SetMaxPlayers: ::std::option::Option<unsafe extern "C" fn(maxPlayers: u32) -> vcmpError>,
-    pub GetMaxPlayers: ::std::option::Option<unsafe extern "C" fn() -> u32>,
-    pub SetServerPassword: ::std::option::Option<
+    pub SetMaxPlayers: unsafe extern "C" fn(maxPlayers: u32) -> vcmpError,
+    pub GetMaxPlayers: unsafe extern "C" fn() -> u32,
+    pub SetServerPassword: 
         unsafe extern "C" fn(password: *const ::std::os::raw::c_char) -> vcmpError,
-    >,
-    pub GetServerPassword: ::std::option::Option<
+    pub GetServerPassword: 
         unsafe extern "C" fn(buffer: *mut ::std::os::raw::c_char, size: usize) -> vcmpError,
-    >,
-    pub SetGameModeText: ::std::option::Option<
+    pub SetGameModeText: 
         unsafe extern "C" fn(gameMode: *const ::std::os::raw::c_char) -> vcmpError,
-    >,
-    pub GetGameModeText: ::std::option::Option<
+    pub GetGameModeText: 
         unsafe extern "C" fn(buffer: *mut ::std::os::raw::c_char, size: usize) -> vcmpError,
-    >,
-    pub ShutdownServer: ::std::option::Option<unsafe extern "C" fn()>,
-    pub SetServerOption: ::std::option::Option<
+    pub ShutdownServer: unsafe extern "C" fn(),
+    pub SetServerOption: 
         unsafe extern "C" fn(option: vcmpServerOption, toggle: u8) -> vcmpError,
-    >,
     pub GetServerOption:
-        ::std::option::Option<unsafe extern "C" fn(option: vcmpServerOption) -> u8>,
+        unsafe extern "C" fn(option: vcmpServerOption) -> u8,
     pub SetWorldBounds:
-        ::std::option::Option<unsafe extern "C" fn(maxX: f32, minX: f32, maxY: f32, minY: f32)>,
-    pub GetWorldBounds: ::std::option::Option<
+        unsafe extern "C" fn(maxX: f32, minX: f32, maxY: f32, minY: f32),
+    pub GetWorldBounds: 
         unsafe extern "C" fn(
             maxXOut: *mut f32,
             minXOut: *mut f32,
             maxYOut: *mut f32,
             minYOut: *mut f32,
         ),
-    >,
-    pub SetWastedSettings: ::std::option::Option<
+    pub SetWastedSettings: 
         unsafe extern "C" fn(
             deathTimer: u32,
             fadeTimer: u32,
@@ -296,8 +279,7 @@ pub struct PluginFuncs {
             corpseFadeStart: u32,
             corpseFadeTime: u32,
         ),
-    >,
-    pub GetWastedSettings: ::std::option::Option<
+    pub GetWastedSettings: 
         unsafe extern "C" fn(
             deathTimerOut: *mut u32,
             fadeTimerOut: *mut u32,
@@ -307,28 +289,27 @@ pub struct PluginFuncs {
             corpseFadeStartOut: *mut u32,
             corpseFadeTimeOut: *mut u32,
         ),
-    >,
-    pub SetTimeRate: ::std::option::Option<unsafe extern "C" fn(timeRate: i32)>,
-    pub GetTimeRate: ::std::option::Option<unsafe extern "C" fn() -> i32>,
-    pub SetHour: ::std::option::Option<unsafe extern "C" fn(hour: i32)>,
-    pub GetHour: ::std::option::Option<unsafe extern "C" fn() -> i32>,
-    pub SetMinute: ::std::option::Option<unsafe extern "C" fn(minute: i32)>,
-    pub GetMinute: ::std::option::Option<unsafe extern "C" fn() -> i32>,
-    pub SetWeather: ::std::option::Option<unsafe extern "C" fn(weather: i32)>,
-    pub GetWeather: ::std::option::Option<unsafe extern "C" fn() -> i32>,
-    pub SetGravity: ::std::option::Option<unsafe extern "C" fn(gravity: f32)>,
-    pub GetGravity: ::std::option::Option<unsafe extern "C" fn() -> f32>,
-    pub SetGameSpeed: ::std::option::Option<unsafe extern "C" fn(gameSpeed: f32)>,
-    pub GetGameSpeed: ::std::option::Option<unsafe extern "C" fn() -> f32>,
-    pub SetWaterLevel: ::std::option::Option<unsafe extern "C" fn(waterLevel: f32)>,
-    pub GetWaterLevel: ::std::option::Option<unsafe extern "C" fn() -> f32>,
-    pub SetMaximumFlightAltitude: ::std::option::Option<unsafe extern "C" fn(height: f32)>,
-    pub GetMaximumFlightAltitude: ::std::option::Option<unsafe extern "C" fn() -> f32>,
-    pub SetKillCommandDelay: ::std::option::Option<unsafe extern "C" fn(delay: i32)>,
-    pub GetKillCommandDelay: ::std::option::Option<unsafe extern "C" fn() -> i32>,
-    pub SetVehiclesForcedRespawnHeight: ::std::option::Option<unsafe extern "C" fn(height: f32)>,
-    pub GetVehiclesForcedRespawnHeight: ::std::option::Option<unsafe extern "C" fn() -> f32>,
-    pub CreateExplosion: ::std::option::Option<
+    pub SetTimeRate: unsafe extern "C" fn(timeRate: i32),
+    pub GetTimeRate: unsafe extern "C" fn() -> i32,
+    pub SetHour: unsafe extern "C" fn(hour: i32),
+    pub GetHour: unsafe extern "C" fn() -> i32,
+    pub SetMinute: unsafe extern "C" fn(minute: i32),
+    pub GetMinute: unsafe extern "C" fn() -> i32,
+    pub SetWeather: unsafe extern "C" fn(weather: i32),
+    pub GetWeather: unsafe extern "C" fn() -> i32,
+    pub SetGravity: unsafe extern "C" fn(gravity: f32),
+    pub GetGravity: unsafe extern "C" fn() -> f32,
+    pub SetGameSpeed: unsafe extern "C" fn(gameSpeed: f32),
+    pub GetGameSpeed: unsafe extern "C" fn() -> f32,
+    pub SetWaterLevel: unsafe extern "C" fn(waterLevel: f32),
+    pub GetWaterLevel: unsafe extern "C" fn() -> f32,
+    pub SetMaximumFlightAltitude: unsafe extern "C" fn(height: f32),
+    pub GetMaximumFlightAltitude: unsafe extern "C" fn() -> f32,
+    pub SetKillCommandDelay: unsafe extern "C" fn(delay: i32),
+    pub GetKillCommandDelay: unsafe extern "C" fn() -> i32,
+    pub SetVehiclesForcedRespawnHeight: unsafe extern "C" fn(height: f32),
+    pub GetVehiclesForcedRespawnHeight: unsafe extern "C" fn() -> f32,
+    pub CreateExplosion: 
         unsafe extern "C" fn(
             worldId: i32,
             type_: i32,
@@ -338,30 +319,25 @@ pub struct PluginFuncs {
             responsiblePlayerId: i32,
             atGroundLevel: u8,
         ) -> vcmpError,
-    >,
-    pub PlaySound: ::std::option::Option<
+    pub PlaySound: 
         unsafe extern "C" fn(worldId: i32, soundId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub HideMapObject: ::std::option::Option<
+    pub HideMapObject: 
         unsafe extern "C" fn(modelId: i32, tenthX: i16, tenthY: i16, tenthZ: i16),
-    >,
-    pub ShowMapObject: ::std::option::Option<
+    pub ShowMapObject: 
         unsafe extern "C" fn(modelId: i32, tenthX: i16, tenthY: i16, tenthZ: i16),
-    >,
-    pub ShowAllMapObjects: ::std::option::Option<unsafe extern "C" fn()>,
-    pub SetWeaponDataValue: ::std::option::Option<
+    pub ShowAllMapObjects: unsafe extern "C" fn(),
+    pub SetWeaponDataValue: 
         unsafe extern "C" fn(weaponId: i32, fieldId: i32, value: f64) -> vcmpError,
-    >,
     pub GetWeaponDataValue:
-        ::std::option::Option<unsafe extern "C" fn(weaponId: i32, fieldId: i32) -> f64>,
+        unsafe extern "C" fn(weaponId: i32, fieldId: i32) -> f64,
     pub ResetWeaponDataValue:
-        ::std::option::Option<unsafe extern "C" fn(weaponId: i32, fieldId: i32) -> vcmpError>,
+        unsafe extern "C" fn(weaponId: i32, fieldId: i32) -> vcmpError,
     pub IsWeaponDataValueModified:
-        ::std::option::Option<unsafe extern "C" fn(weaponId: i32, fieldId: i32) -> u8>,
-    pub ResetWeaponData: ::std::option::Option<unsafe extern "C" fn(weaponId: i32) -> vcmpError>,
-    pub ResetAllWeaponData: ::std::option::Option<unsafe extern "C" fn()>,
-    pub GetKeyBindUnusedSlot: ::std::option::Option<unsafe extern "C" fn() -> i32>,
-    pub GetKeyBindData: ::std::option::Option<
+        unsafe extern "C" fn(weaponId: i32, fieldId: i32) -> u8,
+    pub ResetWeaponData: unsafe extern "C" fn(weaponId: i32) -> vcmpError,
+    pub ResetAllWeaponData: unsafe extern "C" fn(),
+    pub GetKeyBindUnusedSlot: unsafe extern "C" fn() -> i32,
+    pub GetKeyBindData: 
         unsafe extern "C" fn(
             bindId: i32,
             isCalledOnReleaseOut: *mut u8,
@@ -369,8 +345,7 @@ pub struct PluginFuncs {
             keyTwoOut: *mut i32,
             keyThreeOut: *mut i32,
         ) -> vcmpError,
-    >,
-    pub RegisterKeyBind: ::std::option::Option<
+    pub RegisterKeyBind: 
         unsafe extern "C" fn(
             bindId: i32,
             isCalledOnRelease: u8,
@@ -378,10 +353,9 @@ pub struct PluginFuncs {
             keyTwo: i32,
             keyThree: i32,
         ) -> vcmpError,
-    >,
-    pub RemoveKeyBind: ::std::option::Option<unsafe extern "C" fn(bindId: i32) -> vcmpError>,
-    pub RemoveAllKeyBinds: ::std::option::Option<unsafe extern "C" fn()>,
-    pub CreateCoordBlip: ::std::option::Option<
+    pub RemoveKeyBind: unsafe extern "C" fn(bindId: i32) -> vcmpError,
+    pub RemoveAllKeyBinds: unsafe extern "C" fn(),
+    pub CreateCoordBlip: 
         unsafe extern "C" fn(
             index: i32,
             world: i32,
@@ -392,9 +366,8 @@ pub struct PluginFuncs {
             colour: u32,
             sprite: i32,
         ) -> i32,
-    >,
-    pub DestroyCoordBlip: ::std::option::Option<unsafe extern "C" fn(index: i32) -> vcmpError>,
-    pub GetCoordBlipInfo: ::std::option::Option<
+    pub DestroyCoordBlip: unsafe extern "C" fn(index: i32) -> vcmpError,
+    pub GetCoordBlipInfo: 
         unsafe extern "C" fn(
             index: i32,
             worldOut: *mut i32,
@@ -405,17 +378,15 @@ pub struct PluginFuncs {
             colourOut: *mut u32,
             spriteOut: *mut i32,
         ) -> vcmpError,
-    >,
-    pub AddRadioStream: ::std::option::Option<
+    pub AddRadioStream: 
         unsafe extern "C" fn(
             radioId: i32,
             radioName: *const ::std::os::raw::c_char,
             radioUrl: *const ::std::os::raw::c_char,
             isListed: u8,
         ) -> vcmpError,
-    >,
-    pub RemoveRadioStream: ::std::option::Option<unsafe extern "C" fn(radioId: i32) -> vcmpError>,
-    pub AddPlayerClass: ::std::option::Option<
+    pub RemoveRadioStream: unsafe extern "C" fn(radioId: i32) -> vcmpError,
+    pub AddPlayerClass: 
         unsafe extern "C" fn(
             teamId: i32,
             colour: u32,
@@ -431,164 +402,148 @@ pub struct PluginFuncs {
             weaponThree: i32,
             weaponThreeAmmo: i32,
         ) -> i32,
-    >,
-    pub SetSpawnPlayerPosition: ::std::option::Option<unsafe extern "C" fn(x: f32, y: f32, z: f32)>,
-    pub SetSpawnCameraPosition: ::std::option::Option<unsafe extern "C" fn(x: f32, y: f32, z: f32)>,
-    pub SetSpawnCameraLookAt: ::std::option::Option<unsafe extern "C" fn(x: f32, y: f32, z: f32)>,
-    pub IsPlayerAdmin: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
+    pub SetSpawnPlayerPosition: unsafe extern "C" fn(x: f32, y: f32, z: f32),
+    pub SetSpawnCameraPosition: unsafe extern "C" fn(x: f32, y: f32, z: f32),
+    pub SetSpawnCameraLookAt: unsafe extern "C" fn(x: f32, y: f32, z: f32),
+    pub IsPlayerAdmin: unsafe extern "C" fn(playerId: i32) -> u8,
     pub SetPlayerAdmin:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, toggle: u8) -> vcmpError>,
-    pub GetPlayerIP: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, toggle: u8) -> vcmpError,
+    pub GetPlayerIP: 
         unsafe extern "C" fn(
             playerId: i32,
             buffer: *mut ::std::os::raw::c_char,
             size: usize,
         ) -> vcmpError,
-    >,
-    pub GetPlayerUID: ::std::option::Option<
+    pub GetPlayerUID: 
         unsafe extern "C" fn(
             playerId: i32,
             buffer: *mut ::std::os::raw::c_char,
             size: usize,
         ) -> vcmpError,
-    >,
-    pub GetPlayerUID2: ::std::option::Option<
+    pub GetPlayerUID2: 
         unsafe extern "C" fn(
             playerId: i32,
             buffer: *mut ::std::os::raw::c_char,
             size: usize,
         ) -> vcmpError,
-    >,
-    pub KickPlayer: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub BanPlayer: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub BanIP: ::std::option::Option<unsafe extern "C" fn(ipAddress: *mut ::std::os::raw::c_char)>,
+    pub KickPlayer: unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub BanPlayer: unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub BanIP: unsafe extern "C" fn(ipAddress: *mut ::std::os::raw::c_char),
     pub UnbanIP:
-        ::std::option::Option<unsafe extern "C" fn(ipAddress: *mut ::std::os::raw::c_char) -> u8>,
+        unsafe extern "C" fn(ipAddress: *mut ::std::os::raw::c_char) -> u8,
     pub IsIPBanned:
-        ::std::option::Option<unsafe extern "C" fn(ipAddress: *mut ::std::os::raw::c_char) -> u8>,
+        unsafe extern "C" fn(ipAddress: *mut ::std::os::raw::c_char) -> u8,
     pub GetPlayerIdFromName:
-        ::std::option::Option<unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> i32>,
-    pub IsPlayerConnected: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
+        unsafe extern "C" fn(name: *const ::std::os::raw::c_char) -> i32,
+    pub IsPlayerConnected: unsafe extern "C" fn(playerId: i32) -> u8,
     pub IsPlayerStreamedForPlayer:
-        ::std::option::Option<unsafe extern "C" fn(checkedPlayerId: i32, playerId: i32) -> u8>,
-    pub GetPlayerKey: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u32>,
-    pub GetPlayerName: ::std::option::Option<
+        unsafe extern "C" fn(checkedPlayerId: i32, playerId: i32) -> u8,
+    pub GetPlayerKey: unsafe extern "C" fn(playerId: i32) -> u32,
+    pub GetPlayerName: 
         unsafe extern "C" fn(
             playerId: i32,
             buffer: *mut ::std::os::raw::c_char,
             size: usize,
         ) -> vcmpError,
-    >,
-    pub SetPlayerName: ::std::option::Option<
+    pub SetPlayerName: 
         unsafe extern "C" fn(playerId: i32, name: *const ::std::os::raw::c_char) -> vcmpError,
-    >,
     pub GetPlayerState:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpPlayerState>,
-    pub SetPlayerOption: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32) -> vcmpPlayerState,
+    pub SetPlayerOption: 
         unsafe extern "C" fn(playerId: i32, option: vcmpPlayerOption, toggle: u8) -> vcmpError,
-    >,
     pub GetPlayerOption:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, option: vcmpPlayerOption) -> u8>,
+        unsafe extern "C" fn(playerId: i32, option: vcmpPlayerOption) -> u8,
     pub SetPlayerWorld:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, world: i32) -> vcmpError>,
-    pub GetPlayerWorld: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub SetPlayerSecondaryWorld: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, world: i32) -> vcmpError,
+    pub GetPlayerWorld: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub SetPlayerSecondaryWorld: 
         unsafe extern "C" fn(playerId: i32, secondaryWorld: i32) -> vcmpError,
-    >,
-    pub GetPlayerSecondaryWorld: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GetPlayerUniqueWorld: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+    pub GetPlayerSecondaryWorld: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GetPlayerUniqueWorld: unsafe extern "C" fn(playerId: i32) -> i32,
     pub IsPlayerWorldCompatible:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, world: i32) -> u8>,
-    pub GetPlayerClass: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, world: i32) -> u8,
+    pub GetPlayerClass: unsafe extern "C" fn(playerId: i32) -> i32,
     pub SetPlayerTeam:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, teamId: i32) -> vcmpError>,
-    pub GetPlayerTeam: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, teamId: i32) -> vcmpError,
+    pub GetPlayerTeam: unsafe extern "C" fn(playerId: i32) -> i32,
     pub SetPlayerSkin:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, skinId: i32) -> vcmpError>,
-    pub GetPlayerSkin: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, skinId: i32) -> vcmpError,
+    pub GetPlayerSkin: unsafe extern "C" fn(playerId: i32) -> i32,
     pub SetPlayerColour:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, colour: u32) -> vcmpError>,
-    pub GetPlayerColour: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u32>,
-    pub IsPlayerSpawned: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
-    pub ForcePlayerSpawn: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub ForcePlayerSelect: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub ForceAllSelect: ::std::option::Option<unsafe extern "C" fn()>,
-    pub IsPlayerTyping: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
+        unsafe extern "C" fn(playerId: i32, colour: u32) -> vcmpError,
+    pub GetPlayerColour: unsafe extern "C" fn(playerId: i32) -> u32,
+    pub IsPlayerSpawned: unsafe extern "C" fn(playerId: i32) -> u8,
+    pub ForcePlayerSpawn: unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub ForcePlayerSelect: unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub ForceAllSelect: unsafe extern "C" fn(),
+    pub IsPlayerTyping: unsafe extern "C" fn(playerId: i32) -> u8,
     pub GivePlayerMoney:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, amount: i32) -> vcmpError>,
+        unsafe extern "C" fn(playerId: i32, amount: i32) -> vcmpError,
     pub SetPlayerMoney:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, amount: i32) -> vcmpError>,
-    pub GetPlayerMoney: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, amount: i32) -> vcmpError,
+    pub GetPlayerMoney: unsafe extern "C" fn(playerId: i32) -> i32,
     pub SetPlayerScore:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, score: i32) -> vcmpError>,
-    pub GetPlayerScore: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, score: i32) -> vcmpError,
+    pub GetPlayerScore: unsafe extern "C" fn(playerId: i32) -> i32,
     pub SetPlayerWantedLevel:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, level: i32) -> vcmpError>,
-    pub GetPlayerWantedLevel: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GetPlayerPing: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GetPlayerFPS: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> f64>,
+        unsafe extern "C" fn(playerId: i32, level: i32) -> vcmpError,
+    pub GetPlayerWantedLevel: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GetPlayerPing: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GetPlayerFPS: unsafe extern "C" fn(playerId: i32) -> f64,
     pub SetPlayerHealth:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, health: f32) -> vcmpError>,
-    pub GetPlayerHealth: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> f32>,
+        unsafe extern "C" fn(playerId: i32, health: f32) -> vcmpError,
+    pub GetPlayerHealth: unsafe extern "C" fn(playerId: i32) -> f32,
     pub SetPlayerArmour:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, armour: f32) -> vcmpError>,
-    pub GetPlayerArmour: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> f32>,
+        unsafe extern "C" fn(playerId: i32, armour: f32) -> vcmpError,
+    pub GetPlayerArmour: unsafe extern "C" fn(playerId: i32) -> f32,
     pub SetPlayerImmunityFlags:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, flags: u32) -> vcmpError>,
-    pub GetPlayerImmunityFlags: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u32>,
-    pub SetPlayerPosition: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, flags: u32) -> vcmpError,
+    pub GetPlayerImmunityFlags: unsafe extern "C" fn(playerId: i32) -> u32,
+    pub SetPlayerPosition: 
         unsafe extern "C" fn(playerId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetPlayerPosition: ::std::option::Option<
+    pub GetPlayerPosition: 
         unsafe extern "C" fn(
             playerId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub SetPlayerSpeed: ::std::option::Option<
+    pub SetPlayerSpeed: 
         unsafe extern "C" fn(playerId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetPlayerSpeed: ::std::option::Option<
+    pub GetPlayerSpeed: 
         unsafe extern "C" fn(
             playerId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub AddPlayerSpeed: ::std::option::Option<
+    pub AddPlayerSpeed: 
         unsafe extern "C" fn(playerId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
     pub SetPlayerHeading:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, angle: f32) -> vcmpError>,
-    pub GetPlayerHeading: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> f32>,
-    pub SetPlayerAlpha: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, angle: f32) -> vcmpError,
+    pub GetPlayerHeading: unsafe extern "C" fn(playerId: i32) -> f32,
+    pub SetPlayerAlpha: 
         unsafe extern "C" fn(playerId: i32, alpha: i32, fadeTime: u32) -> vcmpError,
-    >,
-    pub GetPlayerAlpha: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GetPlayerAimPosition: ::std::option::Option<
+    pub GetPlayerAlpha: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GetPlayerAimPosition: 
         unsafe extern "C" fn(
             playerId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub GetPlayerAimDirection: ::std::option::Option<
+    pub GetPlayerAimDirection: 
         unsafe extern "C" fn(
             playerId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub IsPlayerOnFire: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
-    pub IsPlayerCrouching: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
-    pub GetPlayerAction: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GetPlayerGameKeys: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u32>,
-    pub PutPlayerInVehicle: ::std::option::Option<
+    pub IsPlayerOnFire: unsafe extern "C" fn(playerId: i32) -> u8,
+    pub IsPlayerCrouching: unsafe extern "C" fn(playerId: i32) -> u8,
+    pub GetPlayerAction: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GetPlayerGameKeys: unsafe extern "C" fn(playerId: i32) -> u32,
+    pub PutPlayerInVehicle: 
         unsafe extern "C" fn(
             playerId: i32,
             vehicleId: i32,
@@ -596,32 +551,29 @@ pub struct PluginFuncs {
             makeRoom: u8,
             warp: u8,
         ) -> vcmpError,
-    >,
     pub RemovePlayerFromVehicle:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
+        unsafe extern "C" fn(playerId: i32) -> vcmpError,
     pub GetPlayerInVehicleStatus:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpPlayerVehicle>,
-    pub GetPlayerInVehicleSlot: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GetPlayerVehicleId: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GivePlayerWeapon: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32) -> vcmpPlayerVehicle,
+    pub GetPlayerInVehicleSlot: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GetPlayerVehicleId: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GivePlayerWeapon: 
         unsafe extern "C" fn(playerId: i32, weaponId: i32, ammo: i32) -> vcmpError,
-    >,
-    pub SetPlayerWeapon: ::std::option::Option<
+    pub SetPlayerWeapon: 
         unsafe extern "C" fn(playerId: i32, weaponId: i32, ammo: i32) -> vcmpError,
-    >,
-    pub GetPlayerWeapon: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub GetPlayerWeaponAmmo: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+    pub GetPlayerWeapon: unsafe extern "C" fn(playerId: i32) -> i32,
+    pub GetPlayerWeaponAmmo: unsafe extern "C" fn(playerId: i32) -> i32,
     pub SetPlayerWeaponSlot:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, slot: i32) -> vcmpError>,
-    pub GetPlayerWeaponSlot: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, slot: i32) -> vcmpError,
+    pub GetPlayerWeaponSlot: unsafe extern "C" fn(playerId: i32) -> i32,
     pub GetPlayerWeaponAtSlot:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, slot: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, slot: i32) -> i32,
     pub GetPlayerAmmoAtSlot:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, slot: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32, slot: i32) -> i32,
     pub RemovePlayerWeapon:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, weaponId: i32) -> vcmpError>,
-    pub RemoveAllWeapons: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub SetCameraPosition: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, weaponId: i32) -> vcmpError,
+    pub RemoveAllWeapons: unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub SetCameraPosition: 
         unsafe extern "C" fn(
             playerId: i32,
             posX: f32,
@@ -631,21 +583,19 @@ pub struct PluginFuncs {
             lookY: f32,
             lookZ: f32,
         ) -> vcmpError,
-    >,
-    pub RestoreCamera: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub IsCameraLocked: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
-    pub SetPlayerAnimation: ::std::option::Option<
+    pub RestoreCamera: unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub IsCameraLocked: unsafe extern "C" fn(playerId: i32) -> u8,
+    pub SetPlayerAnimation: 
         unsafe extern "C" fn(playerId: i32, groupId: i32, animationId: i32) -> vcmpError,
-    >,
     pub GetPlayerStandingOnVehicle:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32) -> i32,
     pub GetPlayerStandingOnObject:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
-    pub IsPlayerAway: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
-    pub GetPlayerSpectateTarget: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> i32>,
+        unsafe extern "C" fn(playerId: i32) -> i32,
+    pub IsPlayerAway: unsafe extern "C" fn(playerId: i32) -> u8,
+    pub GetPlayerSpectateTarget: unsafe extern "C" fn(playerId: i32) -> i32,
     pub SetPlayerSpectateTarget:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, targetId: i32) -> vcmpError>,
-    pub RedirectPlayerToServer: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, targetId: i32) -> vcmpError,
+    pub RedirectPlayerToServer: 
         unsafe extern "C" fn(
             playerId: i32,
             ip: *const ::std::os::raw::c_char,
@@ -654,10 +604,9 @@ pub struct PluginFuncs {
             serverPassword: *const ::std::os::raw::c_char,
             userPassword: *const ::std::os::raw::c_char,
         ) -> vcmpError,
-    >,
     pub CheckEntityExists:
-        ::std::option::Option<unsafe extern "C" fn(entityPool: vcmpEntityPool, index: i32) -> u8>,
-    pub CreateVehicle: ::std::option::Option<
+        unsafe extern "C" fn(entityPool: vcmpEntityPool, index: i32) -> u8,
+    pub CreateVehicle: 
         unsafe extern "C" fn(
             modelIndex: i32,
             world: i32,
@@ -668,33 +617,29 @@ pub struct PluginFuncs {
             primaryColour: i32,
             secondaryColour: i32,
         ) -> i32,
-    >,
-    pub DeleteVehicle: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> vcmpError>,
-    pub SetVehicleOption: ::std::option::Option<
+    pub DeleteVehicle: unsafe extern "C" fn(vehicleId: i32) -> vcmpError,
+    pub SetVehicleOption: 
         unsafe extern "C" fn(vehicleId: i32, option: vcmpVehicleOption, toggle: u8) -> vcmpError,
-    >,
-    pub GetVehicleOption: ::std::option::Option<
+    pub GetVehicleOption: 
         unsafe extern "C" fn(vehicleId: i32, option: vcmpVehicleOption) -> u8,
-    >,
-    pub GetVehicleSyncSource: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> i32>,
+    pub GetVehicleSyncSource: unsafe extern "C" fn(vehicleId: i32) -> i32,
     pub GetVehicleSyncType:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> vcmpVehicleSync>,
+        unsafe extern "C" fn(vehicleId: i32) -> vcmpVehicleSync,
     pub IsVehicleStreamedForPlayer:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, playerId: i32) -> u8>,
+        unsafe extern "C" fn(vehicleId: i32, playerId: i32) -> u8,
     pub SetVehicleWorld:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, world: i32) -> vcmpError>,
-    pub GetVehicleWorld: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> i32>,
-    pub GetVehicleModel: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> i32>,
+        unsafe extern "C" fn(vehicleId: i32, world: i32) -> vcmpError,
+    pub GetVehicleWorld: unsafe extern "C" fn(vehicleId: i32) -> i32,
+    pub GetVehicleModel: unsafe extern "C" fn(vehicleId: i32) -> i32,
     pub GetVehicleOccupant:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, slotIndex: i32) -> i32>,
-    pub RespawnVehicle: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> vcmpError>,
-    pub SetVehicleImmunityFlags: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, slotIndex: i32) -> i32,
+    pub RespawnVehicle: unsafe extern "C" fn(vehicleId: i32) -> vcmpError,
+    pub SetVehicleImmunityFlags: 
         unsafe extern "C" fn(vehicleId: i32, immunityFlags: u32) -> vcmpError,
-    >,
-    pub GetVehicleImmunityFlags: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> u32>,
-    pub ExplodeVehicle: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> vcmpError>,
-    pub IsVehicleWrecked: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> u8>,
-    pub SetVehiclePosition: ::std::option::Option<
+    pub GetVehicleImmunityFlags: unsafe extern "C" fn(vehicleId: i32) -> u32,
+    pub ExplodeVehicle: unsafe extern "C" fn(vehicleId: i32) -> vcmpError,
+    pub IsVehicleWrecked: unsafe extern "C" fn(vehicleId: i32) -> u8,
+    pub SetVehiclePosition: 
         unsafe extern "C" fn(
             vehicleId: i32,
             x: f32,
@@ -702,22 +647,18 @@ pub struct PluginFuncs {
             z: f32,
             removeOccupants: u8,
         ) -> vcmpError,
-    >,
-    pub GetVehiclePosition: ::std::option::Option<
+    pub GetVehiclePosition: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub SetVehicleRotation: ::std::option::Option<
+    pub SetVehicleRotation: 
         unsafe extern "C" fn(vehicleId: i32, x: f32, y: f32, z: f32, w: f32) -> vcmpError,
-    >,
-    pub SetVehicleRotationEuler: ::std::option::Option<
+    pub SetVehicleRotationEuler: 
         unsafe extern "C" fn(vehicleId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetVehicleRotation: ::std::option::Option<
+    pub GetVehicleRotation: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
@@ -725,16 +666,14 @@ pub struct PluginFuncs {
             zOut: *mut f32,
             wOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub GetVehicleRotationEuler: ::std::option::Option<
+    pub GetVehicleRotationEuler: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub SetVehicleSpeed: ::std::option::Option<
+    pub SetVehicleSpeed: 
         unsafe extern "C" fn(
             vehicleId: i32,
             x: f32,
@@ -743,8 +682,7 @@ pub struct PluginFuncs {
             add: u8,
             relative: u8,
         ) -> vcmpError,
-    >,
-    pub GetVehicleSpeed: ::std::option::Option<
+    pub GetVehicleSpeed: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
@@ -752,8 +690,7 @@ pub struct PluginFuncs {
             zOut: *mut f32,
             relative: u8,
         ) -> vcmpError,
-    >,
-    pub SetVehicleTurnSpeed: ::std::option::Option<
+    pub SetVehicleTurnSpeed: 
         unsafe extern "C" fn(
             vehicleId: i32,
             x: f32,
@@ -762,8 +699,7 @@ pub struct PluginFuncs {
             add: u8,
             relative: u8,
         ) -> vcmpError,
-    >,
-    pub GetVehicleTurnSpeed: ::std::option::Option<
+    pub GetVehicleTurnSpeed: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
@@ -771,25 +707,20 @@ pub struct PluginFuncs {
             zOut: *mut f32,
             relative: u8,
         ) -> vcmpError,
-    >,
-    pub SetVehicleSpawnPosition: ::std::option::Option<
+    pub SetVehicleSpawnPosition: 
         unsafe extern "C" fn(vehicleId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetVehicleSpawnPosition: ::std::option::Option<
+    pub GetVehicleSpawnPosition: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub SetVehicleSpawnRotation: ::std::option::Option<
+    pub SetVehicleSpawnRotation: 
         unsafe extern "C" fn(vehicleId: i32, x: f32, y: f32, z: f32, w: f32) -> vcmpError,
-    >,
-    pub SetVehicleSpawnRotationEuler: ::std::option::Option<
+    pub SetVehicleSpawnRotationEuler: 
         unsafe extern "C" fn(vehicleId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetVehicleSpawnRotation: ::std::option::Option<
+    pub GetVehicleSpawnRotation: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
@@ -797,77 +728,68 @@ pub struct PluginFuncs {
             zOut: *mut f32,
             wOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub GetVehicleSpawnRotationEuler: ::std::option::Option<
+    pub GetVehicleSpawnRotationEuler: 
         unsafe extern "C" fn(
             vehicleId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
     pub SetVehicleIdleRespawnTimer:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, millis: u32) -> vcmpError>,
+        unsafe extern "C" fn(vehicleId: i32, millis: u32) -> vcmpError,
     pub GetVehicleIdleRespawnTimer:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> u32>,
+        unsafe extern "C" fn(vehicleId: i32) -> u32,
     pub SetVehicleHealth:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, health: f32) -> vcmpError>,
-    pub GetVehicleHealth: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> f32>,
-    pub SetVehicleColour: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, health: f32) -> vcmpError,
+    pub GetVehicleHealth: unsafe extern "C" fn(vehicleId: i32) -> f32,
+    pub SetVehicleColour: 
         unsafe extern "C" fn(vehicleId: i32, primaryColour: i32, secondaryColour: i32) -> vcmpError,
-    >,
-    pub GetVehicleColour: ::std::option::Option<
+    pub GetVehicleColour: 
         unsafe extern "C" fn(
             vehicleId: i32,
             primaryColourOut: *mut i32,
             secondaryColourOut: *mut i32,
         ) -> vcmpError,
-    >,
-    pub SetVehiclePartStatus: ::std::option::Option<
+    pub SetVehiclePartStatus: 
         unsafe extern "C" fn(vehicleId: i32, partId: i32, status: i32) -> vcmpError,
-    >,
     pub GetVehiclePartStatus:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, partId: i32) -> i32>,
-    pub SetVehicleTyreStatus: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, partId: i32) -> i32,
+    pub SetVehicleTyreStatus: 
         unsafe extern "C" fn(vehicleId: i32, tyreId: i32, status: i32) -> vcmpError,
-    >,
     pub GetVehicleTyreStatus:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, tyreId: i32) -> i32>,
+        unsafe extern "C" fn(vehicleId: i32, tyreId: i32) -> i32,
     pub SetVehicleDamageData:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, damageData: u32) -> vcmpError>,
-    pub GetVehicleDamageData: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> u32>,
+        unsafe extern "C" fn(vehicleId: i32, damageData: u32) -> vcmpError,
+    pub GetVehicleDamageData: unsafe extern "C" fn(vehicleId: i32) -> u32,
     pub SetVehicleRadio:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, radioId: i32) -> vcmpError>,
-    pub GetVehicleRadio: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> i32>,
-    pub GetVehicleTurretRotation: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, radioId: i32) -> vcmpError,
+    pub GetVehicleRadio: unsafe extern "C" fn(vehicleId: i32) -> i32,
+    pub GetVehicleTurretRotation: 
         unsafe extern "C" fn(
             vehicleId: i32,
             horizontalOut: *mut f32,
             verticalOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub ResetAllVehicleHandlings: ::std::option::Option<unsafe extern "C" fn()>,
+    pub ResetAllVehicleHandlings: unsafe extern "C" fn(),
     pub ExistsHandlingRule:
-        ::std::option::Option<unsafe extern "C" fn(modelIndex: i32, ruleIndex: i32) -> u8>,
-    pub SetHandlingRule: ::std::option::Option<
+        unsafe extern "C" fn(modelIndex: i32, ruleIndex: i32) -> u8,
+    pub SetHandlingRule: 
         unsafe extern "C" fn(modelIndex: i32, ruleIndex: i32, value: f64) -> vcmpError,
-    >,
     pub GetHandlingRule:
-        ::std::option::Option<unsafe extern "C" fn(modelIndex: i32, ruleIndex: i32) -> f64>,
+        unsafe extern "C" fn(modelIndex: i32, ruleIndex: i32) -> f64,
     pub ResetHandlingRule:
-        ::std::option::Option<unsafe extern "C" fn(modelIndex: i32, ruleIndex: i32) -> vcmpError>,
-    pub ResetHandling: ::std::option::Option<unsafe extern "C" fn(modelIndex: i32) -> vcmpError>,
+        unsafe extern "C" fn(modelIndex: i32, ruleIndex: i32) -> vcmpError,
+    pub ResetHandling: unsafe extern "C" fn(modelIndex: i32) -> vcmpError,
     pub ExistsInstHandlingRule:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, ruleIndex: i32) -> u8>,
-    pub SetInstHandlingRule: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, ruleIndex: i32) -> u8,
+    pub SetInstHandlingRule: 
         unsafe extern "C" fn(vehicleId: i32, ruleIndex: i32, value: f64) -> vcmpError,
-    >,
     pub GetInstHandlingRule:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, ruleIndex: i32) -> f64>,
+        unsafe extern "C" fn(vehicleId: i32, ruleIndex: i32) -> f64,
     pub ResetInstHandlingRule:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, ruleIndex: i32) -> vcmpError>,
-    pub ResetInstHandling: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> vcmpError>,
-    pub CreatePickup: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, ruleIndex: i32) -> vcmpError,
+    pub ResetInstHandling: unsafe extern "C" fn(vehicleId: i32) -> vcmpError,
+    pub CreatePickup: 
         unsafe extern "C" fn(
             modelIndex: i32,
             world: i32,
@@ -878,38 +800,34 @@ pub struct PluginFuncs {
             alpha: i32,
             isAutomatic: u8,
         ) -> i32,
-    >,
-    pub DeletePickup: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> vcmpError>,
+    pub DeletePickup: unsafe extern "C" fn(pickupId: i32) -> vcmpError,
     pub IsPickupStreamedForPlayer:
-        ::std::option::Option<unsafe extern "C" fn(pickupId: i32, playerId: i32) -> u8>,
+        unsafe extern "C" fn(pickupId: i32, playerId: i32) -> u8,
     pub SetPickupWorld:
-        ::std::option::Option<unsafe extern "C" fn(pickupId: i32, world: i32) -> vcmpError>,
-    pub GetPickupWorld: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> i32>,
+        unsafe extern "C" fn(pickupId: i32, world: i32) -> vcmpError,
+    pub GetPickupWorld: unsafe extern "C" fn(pickupId: i32) -> i32,
     pub SetPickupAlpha:
-        ::std::option::Option<unsafe extern "C" fn(pickupId: i32, alpha: i32) -> vcmpError>,
-    pub GetPickupAlpha: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> i32>,
+        unsafe extern "C" fn(pickupId: i32, alpha: i32) -> vcmpError,
+    pub GetPickupAlpha: unsafe extern "C" fn(pickupId: i32) -> i32,
     pub SetPickupIsAutomatic:
-        ::std::option::Option<unsafe extern "C" fn(pickupId: i32, toggle: u8) -> vcmpError>,
-    pub IsPickupAutomatic: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> u8>,
-    pub SetPickupAutoTimer: ::std::option::Option<
+        unsafe extern "C" fn(pickupId: i32, toggle: u8) -> vcmpError,
+    pub IsPickupAutomatic: unsafe extern "C" fn(pickupId: i32) -> u8,
+    pub SetPickupAutoTimer: 
         unsafe extern "C" fn(pickupId: i32, durationMillis: u32) -> vcmpError,
-    >,
-    pub GetPickupAutoTimer: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> u32>,
-    pub RefreshPickup: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> vcmpError>,
-    pub SetPickupPosition: ::std::option::Option<
+    pub GetPickupAutoTimer: unsafe extern "C" fn(pickupId: i32) -> u32,
+    pub RefreshPickup: unsafe extern "C" fn(pickupId: i32) -> vcmpError,
+    pub SetPickupPosition: 
         unsafe extern "C" fn(pickupId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetPickupPosition: ::std::option::Option<
+    pub GetPickupPosition: 
         unsafe extern "C" fn(
             pickupId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub GetPickupModel: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> i32>,
-    pub GetPickupQuantity: ::std::option::Option<unsafe extern "C" fn(pickupId: i32) -> i32>,
-    pub CreateCheckPoint: ::std::option::Option<
+    pub GetPickupModel: unsafe extern "C" fn(pickupId: i32) -> i32,
+    pub GetPickupQuantity: unsafe extern "C" fn(pickupId: i32) -> i32,
+    pub CreateCheckPoint: 
         unsafe extern "C" fn(
             playerId: i32,
             world: i32,
@@ -923,16 +841,15 @@ pub struct PluginFuncs {
             alpha: i32,
             radius: f32,
         ) -> i32,
-    >,
     pub DeleteCheckPoint:
-        ::std::option::Option<unsafe extern "C" fn(checkPointId: i32) -> vcmpError>,
+        unsafe extern "C" fn(checkPointId: i32) -> vcmpError,
     pub IsCheckPointStreamedForPlayer:
-        ::std::option::Option<unsafe extern "C" fn(checkPointId: i32, playerId: i32) -> u8>,
-    pub IsCheckPointSphere: ::std::option::Option<unsafe extern "C" fn(checkPointId: i32) -> u8>,
+        unsafe extern "C" fn(checkPointId: i32, playerId: i32) -> u8,
+    pub IsCheckPointSphere: unsafe extern "C" fn(checkPointId: i32) -> u8,
     pub SetCheckPointWorld:
-        ::std::option::Option<unsafe extern "C" fn(checkPointId: i32, world: i32) -> vcmpError>,
-    pub GetCheckPointWorld: ::std::option::Option<unsafe extern "C" fn(checkPointId: i32) -> i32>,
-    pub SetCheckPointColour: ::std::option::Option<
+        unsafe extern "C" fn(checkPointId: i32, world: i32) -> vcmpError,
+    pub GetCheckPointWorld: unsafe extern "C" fn(checkPointId: i32) -> i32,
+    pub SetCheckPointColour: 
         unsafe extern "C" fn(
             checkPointId: i32,
             red: i32,
@@ -940,8 +857,7 @@ pub struct PluginFuncs {
             blue: i32,
             alpha: i32,
         ) -> vcmpError,
-    >,
-    pub GetCheckPointColour: ::std::option::Option<
+    pub GetCheckPointColour: 
         unsafe extern "C" fn(
             checkPointId: i32,
             redOut: *mut i32,
@@ -949,23 +865,20 @@ pub struct PluginFuncs {
             blueOut: *mut i32,
             alphaOut: *mut i32,
         ) -> vcmpError,
-    >,
-    pub SetCheckPointPosition: ::std::option::Option<
+    pub SetCheckPointPosition: 
         unsafe extern "C" fn(checkPointId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetCheckPointPosition: ::std::option::Option<
+    pub GetCheckPointPosition: 
         unsafe extern "C" fn(
             checkPointId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
     pub SetCheckPointRadius:
-        ::std::option::Option<unsafe extern "C" fn(checkPointId: i32, radius: f32) -> vcmpError>,
-    pub GetCheckPointRadius: ::std::option::Option<unsafe extern "C" fn(checkPointId: i32) -> f32>,
-    pub GetCheckPointOwner: ::std::option::Option<unsafe extern "C" fn(checkPointId: i32) -> i32>,
-    pub CreateObject: ::std::option::Option<
+        unsafe extern "C" fn(checkPointId: i32, radius: f32) -> vcmpError,
+    pub GetCheckPointRadius: unsafe extern "C" fn(checkPointId: i32) -> f32,
+    pub GetCheckPointOwner: unsafe extern "C" fn(checkPointId: i32) -> i32,
+    pub CreateObject: 
         unsafe extern "C" fn(
             modelIndex: i32,
             world: i32,
@@ -974,36 +887,30 @@ pub struct PluginFuncs {
             z: f32,
             alpha: i32,
         ) -> i32,
-    >,
-    pub DeleteObject: ::std::option::Option<unsafe extern "C" fn(objectId: i32) -> vcmpError>,
+    pub DeleteObject: unsafe extern "C" fn(objectId: i32) -> vcmpError,
     pub IsObjectStreamedForPlayer:
-        ::std::option::Option<unsafe extern "C" fn(objectId: i32, playerId: i32) -> u8>,
-    pub GetObjectModel: ::std::option::Option<unsafe extern "C" fn(objectId: i32) -> i32>,
+        unsafe extern "C" fn(objectId: i32, playerId: i32) -> u8,
+    pub GetObjectModel: unsafe extern "C" fn(objectId: i32) -> i32,
     pub SetObjectWorld:
-        ::std::option::Option<unsafe extern "C" fn(objectId: i32, world: i32) -> vcmpError>,
-    pub GetObjectWorld: ::std::option::Option<unsafe extern "C" fn(objectId: i32) -> i32>,
-    pub SetObjectAlpha: ::std::option::Option<
+        unsafe extern "C" fn(objectId: i32, world: i32) -> vcmpError,
+    pub GetObjectWorld: unsafe extern "C" fn(objectId: i32) -> i32,
+    pub SetObjectAlpha: 
         unsafe extern "C" fn(objectId: i32, alpha: i32, duration: u32) -> vcmpError,
-    >,
-    pub GetObjectAlpha: ::std::option::Option<unsafe extern "C" fn(objectId: i32) -> i32>,
-    pub MoveObjectTo: ::std::option::Option<
+    pub GetObjectAlpha: unsafe extern "C" fn(objectId: i32) -> i32,
+    pub MoveObjectTo: 
         unsafe extern "C" fn(objectId: i32, x: f32, y: f32, z: f32, duration: u32) -> vcmpError,
-    >,
-    pub MoveObjectBy: ::std::option::Option<
+    pub MoveObjectBy: 
         unsafe extern "C" fn(objectId: i32, x: f32, y: f32, z: f32, duration: u32) -> vcmpError,
-    >,
-    pub SetObjectPosition: ::std::option::Option<
+    pub SetObjectPosition: 
         unsafe extern "C" fn(objectId: i32, x: f32, y: f32, z: f32) -> vcmpError,
-    >,
-    pub GetObjectPosition: ::std::option::Option<
+    pub GetObjectPosition: 
         unsafe extern "C" fn(
             objectId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub RotateObjectTo: ::std::option::Option<
+    pub RotateObjectTo: 
         unsafe extern "C" fn(
             objectId: i32,
             x: f32,
@@ -1012,11 +919,9 @@ pub struct PluginFuncs {
             w: f32,
             duration: u32,
         ) -> vcmpError,
-    >,
-    pub RotateObjectToEuler: ::std::option::Option<
+    pub RotateObjectToEuler: 
         unsafe extern "C" fn(objectId: i32, x: f32, y: f32, z: f32, duration: u32) -> vcmpError,
-    >,
-    pub RotateObjectBy: ::std::option::Option<
+    pub RotateObjectBy: 
         unsafe extern "C" fn(
             objectId: i32,
             x: f32,
@@ -1025,11 +930,9 @@ pub struct PluginFuncs {
             w: f32,
             duration: u32,
         ) -> vcmpError,
-    >,
-    pub RotateObjectByEuler: ::std::option::Option<
+    pub RotateObjectByEuler: 
         unsafe extern "C" fn(objectId: i32, x: f32, y: f32, z: f32, duration: u32) -> vcmpError,
-    >,
-    pub GetObjectRotation: ::std::option::Option<
+    pub GetObjectRotation: 
         unsafe extern "C" fn(
             objectId: i32,
             xOut: *mut f32,
@@ -1037,52 +940,47 @@ pub struct PluginFuncs {
             zOut: *mut f32,
             wOut: *mut f32,
         ) -> vcmpError,
-    >,
-    pub GetObjectRotationEuler: ::std::option::Option<
+    pub GetObjectRotationEuler: 
         unsafe extern "C" fn(
             objectId: i32,
             xOut: *mut f32,
             yOut: *mut f32,
             zOut: *mut f32,
         ) -> vcmpError,
-    >,
     pub SetObjectShotReportEnabled:
-        ::std::option::Option<unsafe extern "C" fn(objectId: i32, toggle: u8) -> vcmpError>,
-    pub IsObjectShotReportEnabled: ::std::option::Option<unsafe extern "C" fn(objectId: i32) -> u8>,
+        unsafe extern "C" fn(objectId: i32, toggle: u8) -> vcmpError,
+    pub IsObjectShotReportEnabled: unsafe extern "C" fn(objectId: i32) -> u8,
     pub SetObjectTouchedReportEnabled:
-        ::std::option::Option<unsafe extern "C" fn(objectId: i32, toggle: u8) -> vcmpError>,
+        unsafe extern "C" fn(objectId: i32, toggle: u8) -> vcmpError,
     pub IsObjectTouchedReportEnabled:
-        ::std::option::Option<unsafe extern "C" fn(objectId: i32) -> u8>,
+        unsafe extern "C" fn(objectId: i32) -> u8,
     pub GetPlayerModuleList:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub SetPickupOption: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub SetPickupOption: 
         unsafe extern "C" fn(pickupId: i32, option: vcmpPickupOption, toggle: u8) -> vcmpError,
-    >,
     pub GetPickupOption:
-        ::std::option::Option<unsafe extern "C" fn(pickupId: i32, option: vcmpPickupOption) -> u8>,
-    pub SetFallTimer: ::std::option::Option<unsafe extern "C" fn(timeRate: u16)>,
-    pub GetFallTimer: ::std::option::Option<unsafe extern "C" fn() -> u16>,
+        unsafe extern "C" fn(pickupId: i32, option: vcmpPickupOption) -> u8,
+    pub SetFallTimer: unsafe extern "C" fn(timeRate: u16),
+    pub GetFallTimer: unsafe extern "C" fn() -> u16,
     pub SetVehicleLightsData:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, lightsData: u32) -> vcmpError>,
-    pub GetVehicleLightsData: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32) -> u32>,
-    pub KillPlayer: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> vcmpError>,
-    pub SetVehicle3DArrowForPlayer: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, lightsData: u32) -> vcmpError,
+    pub GetVehicleLightsData: unsafe extern "C" fn(vehicleId: i32) -> u32,
+    pub KillPlayer: unsafe extern "C" fn(playerId: i32) -> vcmpError,
+    pub SetVehicle3DArrowForPlayer: 
         unsafe extern "C" fn(vehicleId: i32, targetPlayerId: i32, isEnabled: u8) -> vcmpError,
-    >,
     pub GetVehicle3DArrowForPlayer:
-        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, targetPlayerId: i32) -> u8>,
-    pub SetPlayer3DArrowForPlayer: ::std::option::Option<
+        unsafe extern "C" fn(vehicleId: i32, targetPlayerId: i32) -> u8,
+    pub SetPlayer3DArrowForPlayer: 
         unsafe extern "C" fn(playerId: i32, targetPlayerId: i32, isEnabled: u8) -> vcmpError,
-    >,
     pub GetPlayer3DArrowForPlayer:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, targetPlayerId: i32) -> u8>,
+        unsafe extern "C" fn(playerId: i32, targetPlayerId: i32) -> u8,
     pub SetPlayerDrunkHandling:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, drunkLevel: u32) -> vcmpError>,
-    pub GetPlayerDrunkHandling: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u32>,
+        unsafe extern "C" fn(playerId: i32, drunkLevel: u32) -> vcmpError,
+    pub GetPlayerDrunkHandling: unsafe extern "C" fn(playerId: i32) -> u32,
     pub SetPlayerDrunkVisuals:
-        ::std::option::Option<unsafe extern "C" fn(playerId: i32, drunkLevel: u8) -> vcmpError>,
-    pub GetPlayerDrunkVisuals: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
-    pub InterpolateCameraLookAt: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, drunkLevel: u8) -> vcmpError,
+    pub GetPlayerDrunkVisuals: unsafe extern "C" fn(playerId: i32) -> u8,
+    pub InterpolateCameraLookAt: 
         unsafe extern "C" fn(
             playerId: i32,
             lookX: f32,
@@ -1090,10 +988,8 @@ pub struct PluginFuncs {
             lookZ: f32,
             interpTimeMS: u32,
         ) -> vcmpError,
-    >,
-    pub GetNetworkStatistics: ::std::option::Option<
+    pub GetNetworkStatistics: 
         unsafe extern "C" fn(playerId: i32, option: vcmpNetworkStatisticsOption) -> f64,
-    >,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

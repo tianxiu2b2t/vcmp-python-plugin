@@ -1,10 +1,6 @@
-[package]
-name = "vcmp-plugin-rs"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-
-[lib]
-path = "rs_src/lib.rs"
-crate-type = ["cdylib"]
+[workspace]
+members = [
+    "crates/bindings",
+    "crates/core"
+]
+resolver = "2"

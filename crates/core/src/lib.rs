@@ -2,8 +2,6 @@ use std::ffi::{CStr, c_char};
 
 use bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
 
-pub mod bindings;
-
 pub const PLUGIN_VERSION: u32 = 1;
 
 /// 插件入口点
