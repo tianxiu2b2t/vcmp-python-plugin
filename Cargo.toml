@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "crates/vcmp_bindings",
+    "crates/core"
+]
+resolver = "2"
