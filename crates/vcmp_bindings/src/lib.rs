@@ -5,6 +5,10 @@
 pub mod raw;
 
 pub mod error;
+/// PluginFunction 的包装
+/// 
+/// 帮你解决好各种 call 问题
+pub mod func;
 
 // TODO: wrapper for bindings
 
@@ -12,15 +16,3 @@ pub mod error;
 pub struct PluginInfo {
     inner: raw::PluginInfo,
 }
-
-pub struct VcmpFunctions {
-    inner: raw::PluginFuncs,
-}
-
-impl From<raw::PluginFuncs> for VcmpFunctions {
-    fn from(value: raw::PluginFuncs) -> Self {
-        Self { inner: value }
-    }
-}
-
-

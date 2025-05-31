@@ -1,4 +1,7 @@
-use std::{ffi::{CStr, c_char}, cell::OnceCell};
+use std::{
+    cell::OnceCell,
+    ffi::{CStr, c_char},
+};
 
 use vcmp_bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
 

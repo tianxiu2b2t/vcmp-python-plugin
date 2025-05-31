@@ -1,5 +1,4 @@
-use std::{error::Error, fmt::Display};
-
+use std::{error::Error, fmt::Display, i32};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VcmpError {
@@ -12,6 +11,8 @@ pub enum VcmpError {
     PoolExhausted,
     InvalidName,
     RequestDenied,
+    ForceSize,
+    Unknown(i32),
 }
 
 impl From<i32> for VcmpError {
@@ -26,7 +27,8 @@ impl From<i32> for VcmpError {
             6 => VcmpError::PoolExhausted,
             7 => VcmpError::InvalidName,
             8 => VcmpError::RequestDenied,
-            _ => VcmpError::None, // 未知错误码视为无错误
+            i32::MAX => VcmpError::ForceSize,
+            _ => VcmpError::Unknown(value),
         }
     }
 }
@@ -39,12 +41,14 @@ impl Display for VcmpError {
             VcmpError::None => write!(f, "无错误"),
             VcmpError::NoSuchEntity => write!(f, "目标实体不存在"),
             VcmpError::BufferTooSmall => write!(f, "缓冲区大小不足"),
-            VcmpError::TooLargeInput => write!(f, "输入数据过大"), 
+            VcmpError::TooLargeInput => write!(f, "输入数据过大"),
             VcmpError::ArgumentOutOfBounds => write!(f, "参数超出有效范围"),
             VcmpError::NullArgument => write!(f, "接收到非法空参数"),
             VcmpError::PoolExhausted => write!(f, "资源池已耗尽"),
             VcmpError::InvalidName => write!(f, "无效名称"),
             VcmpError::RequestDenied => write!(f, "请求被拒绝"),
+            VcmpError::ForceSize => write!(f, "vcmp 不知道发生了什么, 所以丢了个 ForceSize 过来"),
+            VcmpError::Unknown(code) => write!(f, "未知错误码 {}", code),
         }
     }
 }
