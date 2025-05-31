@@ -54,6 +54,14 @@ impl VcmpPluginInfo {
     }
 }
 
+impl From<*mut raw::PluginInfo> for VcmpPluginInfo {
+    fn from(value: *mut raw::PluginInfo) -> Self {
+        Self {
+            inner: unsafe { *value },
+        }
+    }
+}
+
 impl Display for VcmpPluginInfo {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(

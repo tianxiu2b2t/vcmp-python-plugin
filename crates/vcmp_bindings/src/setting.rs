@@ -8,6 +8,18 @@ pub struct VcmpServerSettings {
 }
 
 impl VcmpServerSettings {
+    pub fn new_empty() -> Self {
+        Self {
+            inner: raw::ServerSettings {
+                structSize: 0,
+                serverName: [0; 128],
+                maxPlayers: 0,
+                port: 0,
+                flags: 0,
+            },
+        }
+    }
+
     pub fn server_name(&self) -> String {
         crate::encodes::decode_gbk(
             &(self
@@ -29,18 +41,6 @@ impl VcmpServerSettings {
 
     pub fn flags(&self) -> u32 {
         self.inner.flags
-    }
-
-    pub fn new_empty() -> Self {
-        Self {
-            inner: raw::ServerSettings {
-                structSize: 0,
-                serverName: [0; 128],
-                maxPlayers: 0,
-                port: 0,
-                flags: 0,
-            },
-        }
     }
 
     /// 获取 内部的可变指针

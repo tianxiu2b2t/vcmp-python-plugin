@@ -35,6 +35,24 @@ impl From<i32> for VcmpError {
     }
 }
 
+impl Into<i32> for VcmpError {
+    fn into(self) -> i32 {
+        match self {
+            VcmpError::None => 0,
+            VcmpError::NoSuchEntity => 1,
+            VcmpError::BufferTooSmall => 2,
+            VcmpError::TooLargeInput => 3,
+            VcmpError::ArgumentOutOfBounds => 4,
+            VcmpError::NullArgument => 5,
+            VcmpError::PoolExhausted => 6,
+            VcmpError::InvalidName => 7,
+            VcmpError::RequestDenied => 8,
+            VcmpError::ForceSize => i32::MAX,
+            VcmpError::Unknown(x) => x,
+        }
+    }
+}
+
 impl Error for VcmpError {}
 
 impl Display for VcmpError {

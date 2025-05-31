@@ -20,6 +20,17 @@ pub mod plugin_info;
 pub mod setting;
 
 pub use error::{VcmpError, VcmpResult};
+pub use func::VcmpFunctions;
 pub use plugin_info::VcmpPluginInfo;
 
-// TODO: wrapper for bindings
+use std::sync::OnceLock;
+
+pub static VCMP_FUNC: OnceLock<VcmpFunctions> = OnceLock::new();
+
+pub fn init_vcmp_func(func: VcmpFunctions) -> &'static VcmpFunctions {
+    VCMP_FUNC.get_or_init(|| func)
+}
+
+pub fn vcmp_func() -> &'static VcmpFunctions {
+    VCMP_FUNC.get().unwrap()
+}
