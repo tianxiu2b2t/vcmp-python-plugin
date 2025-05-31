@@ -247,7 +247,7 @@ typedef struct {
 	/* vcmpErrorNullArgument, vcmpErrorTooLargeInput */
 	vcmpError (*SendPluginCommand) (uint32_t commandIdentifier, const char* format, ...);
 	/* success */
-	uint64_t (*GetTime) (void);
+	uint64_t (*GetTime) (void); // os time
 	/* vcmpErrorNullArgument, vcmpErrorTooLargeInput */
 	vcmpError (*LogMessage) (const char* format, ...);
 	/* success */

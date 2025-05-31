@@ -45,7 +45,6 @@ def gen_binding_and_process():
 
     print("处理 unsafe extern 完成")
 
-
     with open(target_file, "w", encoding="utf-8") as bind_file:
         bind_file.write(content)
 
