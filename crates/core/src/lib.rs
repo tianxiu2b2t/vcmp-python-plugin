@@ -3,7 +3,7 @@ use std::{
     ffi::{CStr, c_char},
 };
 
-use vcmp_bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
+use vcmp_bindings::{func::VcmpFunctions, raw::{PluginCallbacks, PluginFuncs, PluginInfo}};
 
 pub const PLUGIN_VERSION: u32 = 1;
 
@@ -38,13 +38,15 @@ extern "C" fn VcmpPluginInit(
         }
     }
 
-    let (functions, callbacks, info) = unsafe {
+    let (callbacks, info) = unsafe {
         (
-            &mut *plugin_functions,
+            
             &mut *plugin_callbacks,
             &mut *plugin_info,
         )
     };
+
+    let functions = VcmpFunctions::from(plugin_functions);
 
     // 参考 cpp.ing
     info.apiMajorVersion = 2;
@@ -64,12 +66,15 @@ extern "C" fn VcmpPluginInit(
     println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
 
     println!("give sizeof callback: {}", callbacks.structSize);
-    println!("give sizeof functions: {}", functions.structSize);
+    println!("give sizeof functions: {}", functions.inner_struct_size());
 
     // get version
-    let version: u32 = (functions.GetServerVersion)();
+    let version: u32 = functions.server_version();
     println!("server version: {}", version);
     callbacks.OnServerFrame = Some(on_server_frame);
+
+    println!("rust 直接输出中文 test");
+    functions.log_message("VCMP 输出中文 test");
 
     println!("vcmp-plugin-rs loaded");
 

@@ -4,11 +4,17 @@
 #[allow(non_camel_case_types, non_snake_case, non_upper_case_globals)]
 pub mod raw;
 
+/// vcmp error & vcmp result
+///
+/// error wrapper
 pub mod error;
 /// PluginFunction 的包装
 ///
 /// 帮你解决好各种 call 问题
 pub mod func;
+
+/// gbk <-> utf8
+pub mod encodes;
 
 pub use error::{VcmpError, VcmpResult};
 
