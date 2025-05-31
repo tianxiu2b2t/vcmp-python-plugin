@@ -326,9 +326,9 @@ void bindVCMPFunctions() {
 		return funcs->GetMaxPlayers();
 	});
 
-	m.def("set_server_password", [](const char* password) {
-		return funcs->SetServerPassword(password);
-	});
+	m.def("set_server_password", [](const char *password)
+		  { throwVCMPError(
+				funcs->SetServerPassword(password), "Failed to set server password."); });
 
 	m.def("get_server_password", []() {
 		return getSomethingFromVCMP(funcs->GetServerPassword, "Failed to get server password.");

@@ -1001,4 +1001,8 @@ typedef struct {
 	// TODO: MOVE LATER
 	void(*OnPlayerModuleList) (int32_t playerId, const char* list);
 
+	// 2.1 API Version
+
+	void (*OnEntityStreamingChange)(int32_t playerId, int32_t entityId, vcmpEntityPool entityType, uint8_t isDeleted);
+
 } PluginCallbacks;
