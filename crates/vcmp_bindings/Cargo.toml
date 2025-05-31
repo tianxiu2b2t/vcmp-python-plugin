@@ -7,3 +7,6 @@ authors = [
     "tianxiu2b2t <administrator@ttb-network.top>",
 ]
 repository = "https://github.com/tianxiu2b2t/vcmp-python-plugin"
+
+[dependencies]
+encoding_rs = "0.8.35"
