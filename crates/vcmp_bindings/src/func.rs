@@ -1,10 +1,14 @@
 use std::ffi::c_void;
 
-use crate::{PluginInfo, ServerSettings, VcmpError, VcmpResult, raw::PluginFuncs};
+use crate::{ServerSettings, VcmpError, VcmpPluginInfo, VcmpResult, raw::PluginFuncs};
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,
 }
+
+unsafe impl Sync for PluginFuncs {}
+
+unsafe impl Send for PluginFuncs {}
 
 impl From<PluginFuncs> for VcmpFunctions {
     fn from(value: PluginFuncs) -> Self {
@@ -36,23 +40,19 @@ impl VcmpFunctions {
     }
 
     /// 获取服务器设置
-    pub fn get_server_settings(&self) -> VcmpResult<ServerSettings> {
+    pub fn get_server_settings(&self) -> Option<ServerSettings> {
         let mut setting = ServerSettings::new_empty();
         let setting_ptr = setting.inner_mut_ptr();
-        let code = (self.inner.GetServerSettings)(setting_ptr);
-        if code != 0 {
-            Err(VcmpError::from(code))
-        } else {
-            Ok(setting)
-        }
+        let _ = (self.inner.GetServerSettings)(setting_ptr);
+        setting
     }
 
     pub fn get_plugin_count(&self) -> u32 {
         (self.inner.GetNumberOfPlugins)()
     }
 
-    pub fn get_plugin_info(&self, plugin_id: i32) -> VcmpResult<PluginInfo> {
-        let mut info = PluginInfo::new_empty();
+    pub fn get_plugin_info(&self, plugin_id: i32) -> VcmpResult<VcmpPluginInfo> {
+        let mut info = VcmpPluginInfo::new_empty();
         let info_ptr = info.inner_mut_ptr();
         let code = (self.inner.GetPluginInfo)(plugin_id, info_ptr);
         if code != 0 {

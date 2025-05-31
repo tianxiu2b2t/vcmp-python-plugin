@@ -1,6 +1,6 @@
 use std::{
-    cell::OnceCell,
     ffi::{CStr, c_char},
+    sync::OnceLock,
 };
 
 use vcmp_bindings::{
@@ -9,6 +9,22 @@ use vcmp_bindings::{
 };
 
 pub const PLUGIN_VERSION: u32 = 1;
+
+pub static VCMP_FUNC: OnceLock<VcmpFunctions> = OnceLock::new();
+
+pub static VCMP_INIT: OnceLock<()> = OnceLock::new();
+
+/// 验证 vcmp 是否初始化
+pub fn vcmp_inited() -> bool {
+    VCMP_INIT.get().is_some()
+}
+
+/// 获取全局的 vcmp 函数
+///
+/// PANIC: 在初始化之前调用会 panic
+pub fn vcmp_func() -> &'static VcmpFunctions {
+    VCMP_FUNC.get().unwrap()
+}
 
 /// 插件入口点
 ///
@@ -24,7 +40,6 @@ extern "C" fn VcmpPluginInit(
     plugin_info: *mut PluginInfo,
 ) -> u32 {
     println!("loading vcmp-plugin-rs");
-
     {
         // check null
         if plugin_functions.is_null() {
@@ -44,6 +59,8 @@ extern "C" fn VcmpPluginInit(
     let (callbacks, info) = unsafe { (&mut *plugin_callbacks, &mut *plugin_info) };
 
     let functions = VcmpFunctions::from(plugin_functions);
+
+    let functions = VCMP_FUNC.get_or_init(move || functions);
 
     // 参考 cpp.ing
     info.apiMajorVersion = 2;
@@ -83,12 +100,16 @@ extern "C" fn VcmpPluginInit(
 
     println!("vcmp-plugin-rs loaded");
 
+    println!("server settings {}", vcmp_func().get_server_settings()); // PANIC!
+
     1
 }
 
 extern "C" fn on_server_init() -> u8 {
     println!("[Rust] Server init callback");
-    
+
+    println!("server settings {}", vcmp_func().get_server_settings()); // PANIC!
+
     1
 }
 
