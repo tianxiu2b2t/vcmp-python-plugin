@@ -5,5 +5,5 @@
 #define GITHUB "https://github.com/tianxiu2b2t/vcmp-python-plugin"
 #define GITHUB_REPO "tianxiu2b2t/vcmp-python-plugin"
 #define PLUGIN_NAME "vcmp-python-plugin"
-#define PLUGIN_VERSION "1.2.10.5"
+#define PLUGIN_VERSION "1.2.10.6"
 #endif

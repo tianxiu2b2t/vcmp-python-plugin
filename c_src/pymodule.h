@@ -17,6 +17,7 @@ PluginFuncs* vfuncs;
 PluginCallbacks* vcalls;
 
 #define DEFAULT_RETURN py::int_(1)
+#define LIMIT_BUFFER_SIZE 1024 * 1024 * 1024
 
 bool serverStarted = false;
 bool callbackWarned = false;
@@ -127,21 +128,18 @@ string getSomethingFromVCMP(
 	function<vcmpError(char*, size_t)> func,
 	string extra = ""
 ) {
-	vcmpError error = vcmpErrorBufferTooSmall;
-	char buffer[256];
-	while (error == vcmpErrorBufferTooSmall) {
-		error = func(buffer, sizeof(buffer));
+	vcmpError error;
+	do {
+		char buf[1024];
+		error = func(buf, sizeof(buf));
 		if (error == vcmpErrorNone) {
-			string ret = gbk_to_utf8(std::string(buffer));
-			// remove ending \0
-			if (ret.length() > 0 && ret[ret.length() - 1] == '\0') {
-				ret = ret.substr(0, ret.length() - 1);
-			}
-			return ret;
+			std::string res = gbk_to_utf8(std::string(buf));
+			// if res ends \0, remove it
+			if (res.back() == '\0') res.pop_back();
+			return res;
 		}
-	}
-    throwVCMPError(error, extra);
-	return "";
+		throwVCMPError(error, extra);
+	} while (error == vcmpErrorBufferTooSmall);
 }
 
 void showPythonEnvironment() {
@@ -340,8 +338,15 @@ void bindVCMPFunctions() {
 		);
 	});
 
-	m.def("get_game_mode_text", []() {
-		return getSomethingFromVCMP(funcs->GetGameModeText, "Failed to get game mode text.");
+	m.def("get_game_mode_text", []() { // special to get it?
+		static char buf[256];
+		funcs->GetGameModeText(buf, sizeof(buf));
+		std::string res = gbk_to_utf8(std::string(buf));
+		// remove ends of \0
+		if (res.back() == '\0') {
+		    res.pop_back();
+		}
+		return gbk_to_utf8(res);
 	});
 
 	m.def("shutdown_server", []() {
