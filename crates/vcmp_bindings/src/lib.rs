@@ -16,6 +16,8 @@ pub mod func;
 /// gbk <-> utf8
 pub mod encodes;
 
+use std::fmt::Display;
+
 pub use error::{VcmpError, VcmpResult};
 
 // TODO: wrapper for bindings
@@ -51,10 +53,28 @@ pub struct ServerSettings {
 }
 
 impl ServerSettings {
-    // pub fn server_name(&self) -> &str {
-    //     // get server name use
-    //     String::from(self.inner.serverName.iter().map(|v| *v as u8).collect::<Vec<u8>>()).unwrap().as_str()
-    // }
+    pub fn server_name(&self) -> String {
+        crate::encodes::decode_gbk(
+            &(self
+                .inner
+                .serverName
+                .iter()
+                .map(|v| *v as u8)
+                .collect::<Vec<u8>>()),
+        )
+    }
+
+    pub fn port(&self) -> u32 {
+        self.inner.port
+    }
+
+    pub fn max_players(&self) -> u32 {
+        self.inner.maxPlayers
+    }
+
+    pub fn flags(&self) -> u32 {
+        self.inner.flags
+    }
 
     pub fn new_empty() -> Self {
         Self {
@@ -77,5 +97,26 @@ impl ServerSettings {
 impl From<raw::ServerSettings> for ServerSettings {
     fn from(value: raw::ServerSettings) -> Self {
         Self { inner: value }
+    }
+}
+
+impl From<*mut raw::ServerSettings> for ServerSettings {
+    fn from(value: *mut raw::ServerSettings) -> Self {
+        Self {
+            inner: unsafe { *value },
+        }
+    }
+}
+
+impl Display for ServerSettings {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "ServerSettings {{ server_name: {}, port: {}, max_players: {}, flags: {} }}",
+            self.server_name(),
+            self.port(),
+            self.max_players(),
+            self.flags()
+        )
     }
 }

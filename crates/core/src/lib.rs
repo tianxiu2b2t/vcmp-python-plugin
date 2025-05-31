@@ -3,7 +3,10 @@ use std::{
     ffi::{CStr, c_char},
 };
 
-use vcmp_bindings::{func::VcmpFunctions, raw::{PluginCallbacks, PluginFuncs, PluginInfo}};
+use vcmp_bindings::{
+    func::VcmpFunctions,
+    raw::{PluginCallbacks, PluginFuncs, PluginInfo},
+};
 
 pub const PLUGIN_VERSION: u32 = 1;
 
@@ -38,13 +41,7 @@ extern "C" fn VcmpPluginInit(
         }
     }
 
-    let (callbacks, info) = unsafe {
-        (
-            
-            &mut *plugin_callbacks,
-            &mut *plugin_info,
-        )
-    };
+    let (callbacks, info) = unsafe { (&mut *plugin_callbacks, &mut *plugin_info) };
 
     let functions = VcmpFunctions::from(plugin_functions);
 
@@ -55,6 +52,7 @@ extern "C" fn VcmpPluginInit(
     info.pluginVersion = PLUGIN_VERSION;
 
     callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
+    callbacks.OnServerInitialise = Some(on_server_init);
 
     println!("vcmp-plugin-rs info: {:#?}", info);
     println!("vcmp-plugin-rs callback: {:#?}", callbacks);
@@ -73,11 +71,24 @@ extern "C" fn VcmpPluginInit(
     println!("server version: {}", version);
     callbacks.OnServerFrame = Some(on_server_frame);
 
+    //println!("ready to getsetting");
+    //let server_settings = functions.get_server_settings();
+    //println!("server settings: {}", server_settings);
+    //functions.set_server_name("测试服务器");
+    //let server_settings = functions.get_server_settings();
+    //println!("server settings: {}", server_settings);
+
     println!("rust 直接输出中文 test");
-    functions.log_message("VCMP 输出中文 test");
+    functions.log_message("VCMP 输出中文 test\n");
 
     println!("vcmp-plugin-rs loaded");
 
+    1
+}
+
+extern "C" fn on_server_init() -> u8 {
+    println!("[Rust] Server init callback");
+    
     1
 }
 
