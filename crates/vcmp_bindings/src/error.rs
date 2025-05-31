@@ -1,5 +1,7 @@
 use std::{error::Error, fmt::Display, i32};
 
+pub type VcmpResult<T> = Result<T, VcmpError>;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum VcmpError {
     None,
