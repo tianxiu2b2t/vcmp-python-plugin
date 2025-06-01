@@ -222,6 +222,11 @@ impl VcmpFunctions {
     环境设置
      */
 
+    /*
+    TODO: SetServerOption
+
+     */
+
     pub fn get_world_bounds(&self) -> (f32, f32, f32, f32) {
         let (mut max_x, mut min_x, mut max_y, mut min_y) = (0f32, 0f32, 0f32, 0f32);
         (self.inner.GetWorldBounds)(&mut max_x, &mut min_x, &mut max_y, &mut min_y);
@@ -233,6 +238,7 @@ impl VcmpFunctions {
     }
 
     pub fn set_wasted_settings(
+        &self,
         death_timer: u32,
         fade_timer: u32,
         fade_in_speed: f32,
@@ -241,6 +247,46 @@ impl VcmpFunctions {
         corpse_fade_start: u32,
         corpse_fade_time: u32,
     ) {
+        (self.inner.SetWastedSettings)(
+            death_timer,
+            fade_timer,
+            fade_in_speed,
+            fade_out_speed,
+            color.into(),
+            corpse_fade_start,
+            corpse_fade_time,
+        )
+    }
+
+    pub fn get_wasted_settings(&self) -> (u32, u32, f32, f32, u32, u32, u32) {
+        let (
+            mut death_timer,
+            mut fade_timer,
+            mut fade_in_speed,
+            mut fade_out_speed,
+            mut color,
+            mut corpse_fade_start,
+            mut corpse_fade_time,
+        ) = (0, 0, 0f32, 0f32, 0, 0, 0);
+        (self.inner.GetWastedSettings)(
+            &mut death_timer,
+            &mut fade_timer,
+            &mut fade_in_speed,
+            &mut fade_out_speed,
+            &mut color,
+            &mut corpse_fade_start,
+            &mut corpse_fade_time,
+        );
+
+        (
+            death_timer,
+            fade_timer,
+            fade_in_speed,
+            fade_out_speed,
+            color,
+            corpse_fade_start,
+            corpse_fade_time,
+        )
     }
 
     pub fn set_time_rate(&self, rate: i32) {
@@ -286,4 +332,101 @@ impl VcmpFunctions {
     pub fn set_gravity(&self, gravity: f32) {
         (self.inner.SetGravity)(gravity);
     }
+
+    pub fn set_gamespeed(&self, gamespeed: f32) {
+        (self.inner.SetGameSpeed)(gamespeed);
+    }
+
+    pub fn get_gamespeed(&self) -> f32 {
+        (self.inner.GetGameSpeed)()
+    }
+
+    pub fn set_maximum_flight_altitude(&self, height: f32) {
+        (self.inner.SetMaximumFlightAltitude)(height);
+    }
+
+    pub fn get_maximum_flight_altitude(&self) -> f32 {
+        (self.inner.GetMaximumFlightAltitude)()
+    }
+
+    pub fn set_kill_command_delay(&self, delay: i32) {
+        (self.inner.SetKillCommandDelay)(delay);
+    }
+
+    pub fn get_kill_command_delay(&self) -> i32 {
+        (self.inner.GetKillCommandDelay)()
+    }
+
+    pub fn disable_kill_command_delay(&self) {
+        self.set_kill_command_delay(2147483647);
+    }
+
+    pub fn set_vehicles_forced_respawn_height(&self, height: f32) {
+        (self.inner.SetVehiclesForcedRespawnHeight)(height);
+    }
+
+    pub fn get_vehicles_forced_respawn_height(&self) -> f32 {
+        (self.inner.GetVehiclesForcedRespawnHeight)()
+    }
+
+    /*
+       misc
+    */
+
+    pub fn create_explosion(
+        &self,
+        world: i32,
+        explosion_type: i32,
+        pos: (f32, f32, f32),
+        responsible_player: i32,
+        on_ground: bool,
+    ) {
+        (self.inner.CreateExplosion)(
+            world,
+            explosion_type,
+            pos.0,
+            pos.1,
+            pos.2,
+            responsible_player,
+            on_ground as u8,
+        );
+    }
+
+    pub fn play_sound(&self, world: i32, sound: i32, x: f32, y: f32, z: f32) {
+        (self.inner.PlaySound)(world, sound, x, y, z);
+    }
+
+    pub fn play_sound_for_player(&self, player_id: i32, sound: i32, pos: Option<(f32, f32, f32)>) {
+        let world = (self.inner.GetPlayerUniqueWorld)(player_id);
+
+        let (x, y, z) = pos.unwrap_or((f32::NAN, f32::NAN, f32::NAN));
+        (self.inner.PlaySound)(world, sound, x, y, z);
+    }
+
+    pub fn hide_map_object(&self, object_id: i32, pos: (f32, f32, f32)) {
+        let (x, y, z) = pos;
+        let x = ((x * 10.0).floor() + 0.5) as i16;
+        let y = ((y * 10.0).floor() + 0.5) as i16;
+        let z = ((z * 10.0).floor() + 0.5) as i16;
+
+        (self.inner.HideMapObject)(object_id, x, y, z);
+    }
+
+    pub fn show_map_object(&self, object_id: i32, pos: (f32, f32, f32)) {
+        let (x, y, z) = pos;
+        let x = ((x * 10.0).floor() + 0.5) as i16;
+        let y = ((y * 10.0).floor() + 0.5) as i16;
+        let z = ((z * 10.0).floor() + 0.5) as i16;
+
+        (self.inner.ShowMapObject)(object_id, x, y, z);
+    }
+
+    pub fn show_all_map_objects(&self) {
+        (self.inner.ShowAllMapObjects)();
+    }
+
+    /*
+       Weapon
+
+    */
 }
