@@ -429,4 +429,67 @@ impl VcmpFunctions {
        Weapon
 
     */
+
+    pub fn set_weapon_data_value(&self, weapon: i32, field: i32, value: f64) {
+        (self.inner.SetWeaponDataValue)(weapon, field, value);
+    }
+
+    pub fn get_weapon_data_value(&self, weapon: i32, field: i32) -> f64 {
+        (self.inner.GetWeaponDataValue)(weapon, field)
+    }
+
+    pub fn reset_weapon_data_value(&self, weapon: i32, field: i32) {
+        (self.inner.ResetWeaponDataValue)(weapon, field);
+    }
+
+    pub fn is_weapon_data_value_modified(&self, weapon: i32, field: i32) -> bool {
+        (self.inner.IsWeaponDataValueModified)(weapon, field) != 0
+    }
+
+    pub fn reset_weapon_data(&self, weapon: i32) {
+        (self.inner.ResetWeaponData)(weapon);
+    }
+
+    pub fn reset_all_weapon_data(&self) {
+        (self.inner.ResetAllWeaponData)();
+    }
+
+    /*
+       Keybind
+    */
+
+    pub fn get_key_bind_unused_slot(&self) -> i32 {
+        (self.inner.GetKeyBindUnusedSlot)()
+    }
+
+    pub fn get_key_bind_data(&self, slot: i32) -> (bool, i32, i32, i32) {
+        let (mut release, mut key1, mut key2, mut key3) = (0_u8, 0, 0, 0);
+        (self.inner.GetKeyBindData)(slot, &mut release, &mut key1, &mut key2, &mut key3);
+        (release != 0, key1, key2, key3)
+    }
+
+    pub fn register_key_bind(
+        &self,
+        slot: i32,
+        release: bool,
+        key1: i32,
+        key2: Option<i32>,
+        key3: Option<i32>,
+    ) {
+        (self.inner.RegisterKeyBind)(
+            slot,
+            release as u8,
+            key1,
+            key2.unwrap_or(0),
+            key3.unwrap_or(0),
+        );
+    }
+
+    pub fn remove_key_bind(&self, slot: i32) {
+        (self.inner.RemoveKeyBind)(slot);
+    }
+
+    pub fn remove_all_key_binds(&self) {
+        (self.inner.RemoveAllKeyBinds)();
+    }
 }
