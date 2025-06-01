@@ -95,27 +95,34 @@ extern "C" fn VcmpPluginInit(
     1
 }
 
-extern "C" fn on_server_init() -> u8 {
+#[unsafe(no_mangle)]
+pub extern "C" fn on_server_init() -> u8 {
     println!("[Rust] Server init callback");
 
     println!("server settings {}", vcmp_func().get_server_settings());
 
-    println!("gamemode: {}", vcmp_func().get_gamemode());
+    // println!("gamemode: {}", vcmp_func().get_gamemode());
 
-    vcmp_func().set_gamemode(&("*".repeat(16))).expect("set gamemode faild");
+    vcmp_func()
+        .set_gamemode(&("*".repeat(63)))
+        .expect("set gamemode faild");
+
+    println!("gamemode: {}", vcmp_func().get_gamemode_text());
 
     println!("gamemode: {}", vcmp_func().get_gamemode());
 
     1
 }
 
-extern "C" fn on_server_frame(elapsed_time: f32) {
+#[unsafe(no_mangle)]
+pub extern "C" fn on_server_frame(elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
 }
 
 // pub fn log_msg_to_vcmp()
 
-extern "C" fn on_server_performance_report(
+#[unsafe(no_mangle)]
+pub extern "C" fn on_server_performance_report(
     entry_count: usize,
     descriptions: *mut *const c_char,
     times: *mut u64,

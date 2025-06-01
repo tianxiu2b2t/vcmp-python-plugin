@@ -173,6 +173,7 @@ impl VcmpFunctions {
     pub fn set_gamemode(&self, gamemode: &str) -> VcmpResult<()> {
         let mut gamemode = encode_to_gbk(gamemode).to_vec();
         gamemode.push(0);
+        println!("setting gamemode to {gamemode:?}");
         let gamemode_ptr = gamemode.as_ptr() as *const i8;
         let code = (self.inner.SetGameModeText)(gamemode_ptr);
         if code != 0 {
@@ -182,45 +183,106 @@ impl VcmpFunctions {
         }
     }
 
+    pub fn get_gamemode_text(&self) -> String {
+        // static char buffer[96];
+
+        let buf = vec![0u8; 96];
+        let buf_ptr = buf.as_ptr() as *mut i8;
+        let code = (self.inner.GetGameModeText)(buf_ptr, 96);
+        println!("{code} - {buf:?}");
+
+        decode_gbk(&(buf
+                .iter()
+                .map(|v| *v as u8)
+                .collect::<Vec<u8>>()),)
+    }
+
     pub fn get_gamemode(&self) -> String {
-        let mut len = 256;
-         loop {
-            let mut buffer = Vec::with_capacity(len);
-            let code = (self.inner.GetGameModeText)(buffer.as_mut_ptr() as *mut i8, len);
-            println!("{code} - {len} {buffer:?}");
-            if code == VcmpError::BufferTooSmall.into() {
-                len += 8;
-                continue;
-            } else if code != 0 {
-                panic!("GetGameModeText error: {}", code);
-            } else {
-                return decode_gbk(&buffer);
+        let mut len = 96;
+        // loop {
+        //     let mut buffer = Vec::with_capacity(len);
+        //     buffer.clear();
+        //     let code = (self.inner.GetGameModeText)(buffer.as_mut_ptr() as *mut i8, len);
+        //     println!("{code} - {len} {buffer:?}");
+        //     if code == VcmpError::BufferTooSmall.into() {
+        //         len *= 2;
+        //         continue;
+        //     } else if code != 0 {
+        //         panic!("GetGameModeText error: {}", code);
+        //     } else {
+        //         return decode_gbk(&buffer);
+        //     }
+        // }
+        const TARGET_OPCODE: &[u8] = &[0x48, 0x8b, 0x0d, 0x34, 0xfa, 0x0e, 0x00];
+
+        fn find_instruction(func_ptr: usize, max_search: usize) -> Option<usize> {
+            unsafe {// qq(?
+                for i in 0..max_search {
+                    let ptr = (func_ptr + i) as *const u8;
+                    if std::slice::from_raw_parts(ptr, TARGET_OPCODE.len()) == TARGET_OPCODE {
+                        return Some(func_ptr + i);
+                    }
+                }
             }
+            None
         }
+        unsafe {
+            let func_ptr = self.inner.GetGameModeText as usize;
+            println!("GetGameModeText: {func_ptr:X}");
+            let mode_text_ptr = func_ptr + 32;
+            let game_mode_text_addr: u64 = u64::from_le(*(mode_text_ptr as *const u64));
+            println!("game_mode_text_addr: {game_mode_text_addr:X}");
+        }
+        unsafe {
+            let func_ptr = self.inner.GetGameModeText as usize;
+
+            // 查找目标指令的地址
+            let target_addr = match find_instruction(func_ptr, 0x100) {
+                Some(addr) => addr,
+                None => panic!("Failed to find target instruction"),
+            };
+
+            // 计算 RIP 值（下一条指令地址）
+            let rip = target_addr + 7; // 当前指令长度为 7 字节
+
+            // 读取 32 位立即数（小端序）
+            let offset = std::ptr::read_unaligned((target_addr + 3) as *const u32);
+            let offset = i32::from_le(offset as i32);
+
+            // 计算全局变量地址：RIP + offset
+            let global_var_address = rip.wrapping_add(offset as usize) + 0x108;
+
+            println!("Global variable address: {global_var_address:X}");
+
+            // 读取全局变量的内容（qword）
+            let value = std::ptr::read_unaligned(global_var_address as *const u64);
+            println!("Value at address: {value:X}");
+        }
+        todo!()
     }
 }
 
 /*
 string getSomethingFromVCMP(
-	function<vcmpError(char*, size_t)> func,
-	string extra = ""
+    function<vcmpError(char*, size_t)> func,
+    string extra = ""
 ) {
-	vcmpError error = vcmpErrorBufferTooSmall;
-	char buffer[256];
-	while (error == vcmpErrorBufferTooSmall) {
-		error = func(buffer, sizeof(buffer));
-		if (error == vcmpErrorNone) {
-			string ret = gbk_to_utf8(std::string(buffer));
-			// remove ending \0
-			if (ret.length() > 0 && ret[ret.length() - 1] == '\0') {
-				ret = ret.substr(0, ret.length() - 1);
-			}
-			return ret;
-		}
+    vcmpError error = vcmpErrorBufferTooSmall;
+    char buffer[256];
+    while (error == vcmpErrorBufferTooSmall) {
+        error = func(buffer, sizeof(buffer));
+        if (error == vcmpErrorNone) {
+            string ret = gbk_to_utf8(std::string(buffer));
+            // remove ending \0
+            if (ret.length() > 0 && ret[ret.length() - 1] == '\0') {
+                ret = ret.substr(0, ret.length() - 1);
+            }
+            return ret;
+        }
         buffer = realloc(buffer, sizeof(buffer) * 2);
-	}
+    }
     throwVCMPError(error, extra);
-	return "";
+    return "";
 }
 
 */
