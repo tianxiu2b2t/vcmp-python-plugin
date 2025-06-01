@@ -148,7 +148,6 @@ impl VcmpFunctions {
     */
 
     pub fn set_server_name(&self, name: &str) -> VcmpResult<()> {
-        // TODO: name need convert to gbk
         let name = encode_to_gbk(name);
         let name_ptr = name.as_ptr() as *const i8;
         let code = (self.inner.SetServerName)(name_ptr);
@@ -157,6 +156,10 @@ impl VcmpFunctions {
         } else {
             Ok(())
         }
+    }
+
+    pub fn get_server_name(&self) -> String {
+        self.get_server_settings().server_name()
     }
 
     pub fn set_server_password(&self, password: &str) -> VcmpResult<()> {
@@ -170,10 +173,17 @@ impl VcmpFunctions {
         }
     }
 
+    pub fn get_server_password(&self) -> String {
+        let buf = vec![0u8; 1024];
+        let buf_ptr = buf.as_ptr() as *mut i8;
+        let _ = (self.inner.GetServerPassword)(buf_ptr, 1024);
+        decode_gbk(&(buf.iter().map(|v| *v as u8).collect::<Vec<u8>>()))
+    }
+
     pub fn set_gamemode(&self, gamemode: &str) -> VcmpResult<()> {
         let mut gamemode = encode_to_gbk(gamemode).to_vec();
         gamemode.push(0);
-        println!("setting gamemode to {gamemode:?}");
+        //println!("setting gamemode to {gamemode:?}");
         let gamemode_ptr = gamemode.as_ptr() as *const i8;
         let code = (self.inner.SetGameModeText)(gamemode_ptr);
         if code != 0 {
@@ -183,106 +193,97 @@ impl VcmpFunctions {
         }
     }
 
-    pub fn get_gamemode_text(&self) -> String {
-        // static char buffer[96];
-
-        let buf = vec![0u8; 96];
-        let buf_ptr = buf.as_ptr() as *mut i8;
-        let code = (self.inner.GetGameModeText)(buf_ptr, 96);
-        println!("{code} - {buf:?}");
-
-        decode_gbk(&(buf
-                .iter()
-                .map(|v| *v as u8)
-                .collect::<Vec<u8>>()),)
-    }
-
     pub fn get_gamemode(&self) -> String {
-        let mut len = 96;
-        // loop {
-        //     let mut buffer = Vec::with_capacity(len);
-        //     buffer.clear();
-        //     let code = (self.inner.GetGameModeText)(buffer.as_mut_ptr() as *mut i8, len);
-        //     println!("{code} - {len} {buffer:?}");
-        //     if code == VcmpError::BufferTooSmall.into() {
-        //         len *= 2;
-        //         continue;
-        //     } else if code != 0 {
-        //         panic!("GetGameModeText error: {}", code);
-        //     } else {
-        //         return decode_gbk(&buffer);
-        //     }
-        // }
-        const TARGET_OPCODE: &[u8] = &[0x48, 0x8b, 0x0d, 0x34, 0xfa, 0x0e, 0x00];
+        let buf = vec![0u8; 1024];
+        let buf_ptr = buf.as_ptr() as *mut i8;
+        let _ = (self.inner.GetGameModeText)(buf_ptr, 1024);
+        decode_gbk(&(buf.iter().map(|v| *v as u8).collect::<Vec<u8>>()))
+    }
+    //
 
-        fn find_instruction(func_ptr: usize, max_search: usize) -> Option<usize> {
-            unsafe {// qq(?
-                for i in 0..max_search {
-                    let ptr = (func_ptr + i) as *const u8;
-                    if std::slice::from_raw_parts(ptr, TARGET_OPCODE.len()) == TARGET_OPCODE {
-                        return Some(func_ptr + i);
-                    }
-                }
-            }
-            None
+    pub fn max_players(&self) -> u32 {
+        (self.inner.GetMaxPlayers)()
+    }
+
+    pub fn set_max_players(&self, max_player: u32) -> VcmpResult<()> {
+        let code = (self.inner.SetMaxPlayers)(max_player);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
         }
-        unsafe {
-            let func_ptr = self.inner.GetGameModeText as usize;
-            println!("GetGameModeText: {func_ptr:X}");
-            let mode_text_ptr = func_ptr + 32;
-            let game_mode_text_addr: u64 = u64::from_le(*(mode_text_ptr as *const u64));
-            println!("game_mode_text_addr: {game_mode_text_addr:X}");
-        }
-        unsafe {
-            let func_ptr = self.inner.GetGameModeText as usize;
+    }
 
-            // 查找目标指令的地址
-            let target_addr = match find_instruction(func_ptr, 0x100) {
-                Some(addr) => addr,
-                None => panic!("Failed to find target instruction"),
-            };
+    pub fn shutdown(&self) {
+        (self.inner.ShutdownServer)()
+    }
 
-            // 计算 RIP 值（下一条指令地址）
-            let rip = target_addr + 7; // 当前指令长度为 7 字节
+    /*
+    环境设置
+     */
 
-            // 读取 32 位立即数（小端序）
-            let offset = std::ptr::read_unaligned((target_addr + 3) as *const u32);
-            let offset = i32::from_le(offset as i32);
+    pub fn get_world_bounds(&self) -> (f32, f32, f32, f32) {
+        let (mut max_x, mut min_x, mut max_y, mut min_y) = (0f32, 0f32, 0f32, 0f32);
+        (self.inner.GetWorldBounds)(&mut max_x, &mut min_x, &mut max_y, &mut min_y);
+        (max_x, min_x, max_y, min_y)
+    }
 
-            // 计算全局变量地址：RIP + offset
-            let global_var_address = rip.wrapping_add(offset as usize) + 0x108;
+    pub fn set_world_bounds(&self, max_x: f32, min_x: f32, max_y: f32, min_y: f32) {
+        (self.inner.SetWorldBounds)(max_x, min_x, max_y, min_y);
+    }
 
-            println!("Global variable address: {global_var_address:X}");
+    pub fn set_wasted_settings(
+        death_timer: u32,
+        fade_timer: u32,
+        fade_in_speed: f32,
+        fade_out_speed: f32,
+        color: impl Into<u32>,
+        corpse_fade_start: u32,
+        corpse_fade_time: u32,
+    ) {
+    }
 
-            // 读取全局变量的内容（qword）
-            let value = std::ptr::read_unaligned(global_var_address as *const u64);
-            println!("Value at address: {value:X}");
-        }
-        todo!()
+    pub fn set_time_rate(&self, rate: i32) {
+        (self.inner.SetTimeRate)(rate);
+    }
+
+    pub fn get_time_rate(&self) -> i32 {
+        (self.inner.GetTimeRate)()
+    }
+
+    pub fn get_time(&self) -> (i32, i32) {
+        ((self.inner.GetHour)(), (self.inner.GetMinute)())
+    }
+
+    pub fn set_hour(&self, hour: i32) {
+        (self.inner.SetHour)(hour);
+    }
+
+    pub fn set_minute(&self, minute: i32) {
+        (self.inner.SetMinute)(minute);
+    }
+
+    pub fn get_water_level(&self) -> f32 {
+        (self.inner.GetWaterLevel)()
+    }
+
+    pub fn set_water_level(&self, level: f32) {
+        (self.inner.SetWaterLevel)(level);
+    }
+
+    pub fn get_weather(&self) -> i32 {
+        (self.inner.GetWeather)()
+    }
+
+    pub fn set_weather(&self, weather: i32) {
+        (self.inner.SetWeather)(weather);
+    }
+
+    pub fn get_gravity(&self) -> f32 {
+        (self.inner.GetGravity)()
+    }
+
+    pub fn set_gravity(&self, gravity: f32) {
+        (self.inner.SetGravity)(gravity);
     }
 }
-
-/*
-string getSomethingFromVCMP(
-    function<vcmpError(char*, size_t)> func,
-    string extra = ""
-) {
-    vcmpError error = vcmpErrorBufferTooSmall;
-    char buffer[256];
-    while (error == vcmpErrorBufferTooSmall) {
-        error = func(buffer, sizeof(buffer));
-        if (error == vcmpErrorNone) {
-            string ret = gbk_to_utf8(std::string(buffer));
-            // remove ending \0
-            if (ret.length() > 0 && ret[ret.length() - 1] == '\0') {
-                ret = ret.substr(0, ret.length() - 1);
-            }
-            return ret;
-        }
-        buffer = realloc(buffer, sizeof(buffer) * 2);
-    }
-    throwVCMPError(error, extra);
-    return "";
-}
-
-*/

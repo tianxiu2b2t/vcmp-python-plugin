@@ -63,17 +63,16 @@ extern "C" fn VcmpPluginInit(
     callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
     callbacks.OnServerInitialise = Some(on_server_init);
 
-    println!("vcmp-plugin-rs info: {:#?}", info);
-    println!("vcmp-plugin-rs callback: {:#?}", callbacks);
+    println!("vcmp-plugin-rs info: {:?}", info);
 
-    println!(
-        "sizeof callback: {}",
-        std::mem::size_of::<PluginCallbacks>()
-    );
-    println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
+    // println!(
+    //     "sizeof callback: {}",
+    //     std::mem::size_of::<PluginCallbacks>()
+    // );
+    // println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
 
-    println!("give sizeof callback: {}", callbacks.structSize);
-    println!("give sizeof functions: {}", functions.inner_struct_size());
+    // println!("give sizeof callback: {}", callbacks.structSize);
+    // println!("give sizeof functions: {}", functions.inner_struct_size());
 
     // get version
     let version: u32 = functions.server_version();
@@ -106,8 +105,6 @@ pub extern "C" fn on_server_init() -> u8 {
     vcmp_func()
         .set_gamemode(&("*".repeat(63)))
         .expect("set gamemode faild");
-
-    println!("gamemode: {}", vcmp_func().get_gamemode_text());
 
     println!("gamemode: {}", vcmp_func().get_gamemode());
 
