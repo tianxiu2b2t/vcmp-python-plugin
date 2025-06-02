@@ -5,6 +5,7 @@ use crate::{VcmpError, VcmpPluginInfo, VcmpResult, raw::PluginFuncs, setting::Vc
 
 use crate::encodes::{decode_gbk, encode_to_gbk};
 
+pub mod environment;
 pub mod query;
 
 pub struct VcmpFunctions {
@@ -2509,6 +2510,7 @@ impl VcmpFunctions {
     }
 
     /// 获取网络统计信息
+    #[inline]
     pub fn get_network_statistics(
         &self,
         player_id: i32,
@@ -2520,12 +2522,13 @@ impl VcmpFunctions {
     /// 获取指定的服务器设置
     ///
     /// 需要啥直接取
+    #[inline]
     pub fn get_server_option(&self, option: VcmpServerOption) -> bool {
         (self.inner.GetServerOption)(option.into()) != 0
-    } // follow 
-    // 你等我想一下
+    }
 
     /// 设置指定的服务器设置
+    #[inline]
     pub fn set_server_option(&self, option: VcmpServerOption, toggle: bool) {
         let _ = (self.inner.SetServerOption)(option.into(), toggle as u8);
     }
