@@ -1526,7 +1526,7 @@ impl VcmpFunctions {
     pub fn get_vehicle_rotation_euler(
         &self,
         vehicle_id: i32,
-    ) -> Result<(f32, f32, f32), VcmpError> {
+    ) -> VcmpResult<(f32, f32, f32)> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehicleRotationEuler)(vehicle_id, &mut x, &mut y, &mut z);
 
