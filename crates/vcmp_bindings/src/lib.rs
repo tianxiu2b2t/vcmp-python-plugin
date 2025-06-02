@@ -14,9 +14,11 @@ pub mod error;
 ///
 /// 帮你解决好各种 call 问题
 pub mod func;
+/// wrapper for option enums
+pub mod options;
 /// wrapper for PluginInfo
 pub mod plugin_info;
-
+/// wrapper for PluginSetting
 pub mod setting;
 
 pub use error::{VcmpError, VcmpResult};
