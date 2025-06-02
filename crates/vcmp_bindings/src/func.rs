@@ -1,8 +1,11 @@
 use std::ffi::c_void;
 
+use crate::options::{VcmpNetworkStatisticsQueryOption, VcmpServerOption};
 use crate::{VcmpError, VcmpPluginInfo, VcmpResult, raw::PluginFuncs, setting::VcmpServerSettings};
 
 use crate::encodes::{decode_gbk, encode_to_gbk};
+
+pub mod query;
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,
@@ -494,8 +497,8 @@ impl VcmpFunctions {
     }
 
     /*
-        Radar map marker
-     */
+       Radar map marker
+    */
 
     pub fn create_marker(
         &self,
@@ -504,7 +507,7 @@ impl VcmpFunctions {
         scale: i32,
         color: impl Into<u32>,
         sprite: i32,
-        index: Option<i32>
+        index: Option<i32>,
     ) -> i32 {
         let idx = index.unwrap_or(-1);
         (self.inner.CreateCoordBlip)(idx, world, pos.0, pos.1, pos.2, scale, color.into(), sprite)
@@ -515,14 +518,24 @@ impl VcmpFunctions {
     }
 
     pub fn get_marker_info(&self, marker: i32) -> (i32, (f32, f32, f32), i32, u32, i32) {
-        let (mut world, mut x, mut y, mut z, mut scale, mut color, mut sprite) = (0, 0.0, 0.0, 0.0, 0, 0, 0);
-        (self.inner.GetCoordBlipInfo)(marker, &mut world, &mut x, &mut y, &mut z, &mut scale, &mut color, &mut sprite);
+        let (mut world, mut x, mut y, mut z, mut scale, mut color, mut sprite) =
+            (0, 0.0, 0.0, 0.0, 0, 0, 0);
+        (self.inner.GetCoordBlipInfo)(
+            marker,
+            &mut world,
+            &mut x,
+            &mut y,
+            &mut z,
+            &mut scale,
+            &mut color,
+            &mut sprite,
+        );
         (world, (x, y, z), scale, color, sprite)
     }
 
     /*
-        radios
-     */
+       radios
+    */
 
     pub fn add_radio_stream(&self, id: i32, name: &str, url: &str, listed: bool) {
         (self.inner.AddRadioStream)(id, name.as_ptr() as _, url.as_ptr() as _, listed as u8);
@@ -560,14 +573,11 @@ impl VcmpFunctions {
             wep2,
             ammo2,
             wep3,
-            ammo3
+            ammo3,
         )
     }
 
-    pub fn set_spawn_player_position(
-        &self,
-        pos: (f32, f32, f32),
-    ) {
+    pub fn set_spawn_player_position(&self, pos: (f32, f32, f32)) {
         let (x, y, z) = pos;
         (self.inner.SetSpawnPlayerPosition)(x, y, z);
     }
@@ -576,15 +586,15 @@ impl VcmpFunctions {
         let (x, y, z) = pos;
         (self.inner.SetSpawnCameraPosition)(x, y, z);
     }
-    
+
     pub fn set_spawn_camera_look_at(&self, pos: (f32, f32, f32)) {
         let (x, y, z) = pos;
         (self.inner.SetSpawnCameraLookAt)(x, y, z);
     }
 
-    /* 
-        Administration
-     */
+    /*
+       Administration
+    */
     pub fn is_player_admin(&self, player: i32) -> bool {
         (self.inner.IsPlayerAdmin)(player) != 0
     }
@@ -592,7 +602,7 @@ impl VcmpFunctions {
     pub fn set_player_admin(&self, player: i32, toggle: bool) {
         (self.inner.SetPlayerAdmin)(player, toggle as u8);
     }
-    
+
     pub fn get_player_ip(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
@@ -658,7 +668,7 @@ impl VcmpFunctions {
     pub fn get_player_name(&self, player_id: i32) -> Result<String, VcmpError> {
         let mut buffer = vec![0i8; 1024];
         let code = (self.inner.GetPlayerName)(player_id, buffer.as_mut_ptr(), buffer.len());
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -716,7 +726,11 @@ impl VcmpFunctions {
     }
 
     /// 设置玩家次级世界
-    pub fn set_player_secondary_world(&self, player_id: i32, secondary_world: i32) -> VcmpResult<()> {
+    pub fn set_player_secondary_world(
+        &self,
+        player_id: i32,
+        secondary_world: i32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetPlayerSecondaryWorld)(player_id, secondary_world);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -949,7 +963,7 @@ impl VcmpFunctions {
     pub fn get_player_position(&self, player_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetPlayerPosition)(player_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -971,7 +985,7 @@ impl VcmpFunctions {
     pub fn get_player_speed(&self, player_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetPlayerSpeed)(player_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1023,7 +1037,7 @@ impl VcmpFunctions {
     pub fn get_player_aim_position(&self, player_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetPlayerAimPosition)(player_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1035,7 +1049,7 @@ impl VcmpFunctions {
     pub fn get_player_aim_direction(&self, player_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetPlayerAimDirection)(player_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1064,8 +1078,21 @@ impl VcmpFunctions {
     }
 
     /// 将玩家放入车辆
-    pub fn put_player_in_vehicle(&self, player_id: i32, vehicle_id: i32, slot_index: i32, make_room: bool, warp: bool) -> VcmpResult<()> {
-        let code = (self.inner.PutPlayerInVehicle)(player_id, vehicle_id, slot_index, make_room as u8, warp as u8);
+    pub fn put_player_in_vehicle(
+        &self,
+        player_id: i32,
+        vehicle_id: i32,
+        slot_index: i32,
+        make_room: bool,
+        warp: bool,
+    ) -> VcmpResult<()> {
+        let code = (self.inner.PutPlayerInVehicle)(
+            player_id,
+            vehicle_id,
+            slot_index,
+            make_room as u8,
+            warp as u8,
+        );
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1174,8 +1201,18 @@ impl VcmpFunctions {
     }
 
     /// 设置摄像机位置
-    pub fn set_camera_position(&self, player_id: i32, pos_x: f32, pos_y: f32, pos_z: f32, look_x: f32, look_y: f32, look_z: f32) -> VcmpResult<()> {
-        let code = (self.inner.SetCameraPosition)(player_id, pos_x, pos_y, pos_z, look_x, look_y, look_z);
+    pub fn set_camera_position(
+        &self,
+        player_id: i32,
+        pos_x: f32,
+        pos_y: f32,
+        pos_z: f32,
+        look_x: f32,
+        look_y: f32,
+        look_z: f32,
+    ) -> VcmpResult<()> {
+        let code =
+            (self.inner.SetCameraPosition)(player_id, pos_x, pos_y, pos_z, look_x, look_y, look_z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1199,7 +1236,12 @@ impl VcmpFunctions {
     }
 
     /// 设置玩家动画
-    pub fn set_player_animation(&self, player_id: i32, group_id: i32, animation_id: i32) -> VcmpResult<()> {
+    pub fn set_player_animation(
+        &self,
+        player_id: i32,
+        group_id: i32,
+        animation_id: i32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetPlayerAnimation)(player_id, group_id, animation_id);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1239,7 +1281,15 @@ impl VcmpFunctions {
     }
 
     /// 重定向玩家到服务器
-    pub fn redirect_player_to_server(&self, player_id: i32, ip: &str, port: u32, nick: &str, server_password: &str, user_password: &str) -> VcmpResult<()> {
+    pub fn redirect_player_to_server(
+        &self,
+        player_id: i32,
+        ip: &str,
+        port: u32,
+        nick: &str,
+        server_password: &str,
+        user_password: &str,
+    ) -> VcmpResult<()> {
         let code = (self.inner.RedirectPlayerToServer)(
             player_id,
             ip.as_ptr() as *mut i8,
@@ -1260,13 +1310,32 @@ impl VcmpFunctions {
         (self.inner.CheckEntityExists)(entity_pool, index) != 0
     }
 
-    /* 
+    /*
      * 车辆相关
      */
 
     /// 创建车辆
-    pub fn create_vehicle(&self, model_index: i32, world: i32, x: f32, y: f32, z: f32, angle: f32, primary_colour: i32, secondary_colour: i32) -> i32 {
-        (self.inner.CreateVehicle)(model_index, world, x, y, z, angle, primary_colour, secondary_colour)
+    pub fn create_vehicle(
+        &self,
+        model_index: i32,
+        world: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        angle: f32,
+        primary_colour: i32,
+        secondary_colour: i32,
+    ) -> i32 {
+        (self.inner.CreateVehicle)(
+            model_index,
+            world,
+            x,
+            y,
+            z,
+            angle,
+            primary_colour,
+            secondary_colour,
+        )
     }
 
     /// 删除车辆
@@ -1345,7 +1414,11 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆免疫标志
-    pub fn set_vehicle_immunity_flags(&self, vehicle_id: i32, immunity_flags: u32) -> VcmpResult<()> {
+    pub fn set_vehicle_immunity_flags(
+        &self,
+        vehicle_id: i32,
+        immunity_flags: u32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleImmunityFlags)(vehicle_id, immunity_flags);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1375,7 +1448,14 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆位置
-    pub fn set_vehicle_position(&self, vehicle_id: i32, x: f32, y: f32, z: f32, remove_occupants: bool) -> VcmpResult<()> {
+    pub fn set_vehicle_position(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        remove_occupants: bool,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehiclePosition)(vehicle_id, x, y, z, remove_occupants as u8);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1388,7 +1468,7 @@ impl VcmpFunctions {
     pub fn get_vehicle_position(&self, vehicle_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehiclePosition)(vehicle_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1397,7 +1477,14 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆旋转
-    pub fn set_vehicle_rotation(&self, vehicle_id: i32, x: f32, y: f32, z: f32, w: f32) -> VcmpResult<()> {
+    pub fn set_vehicle_rotation(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        w: f32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleRotation)(vehicle_id, x, y, z, w);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1407,7 +1494,13 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆欧拉旋转
-    pub fn set_vehicle_rotation_euler(&self, vehicle_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
+    pub fn set_vehicle_rotation_euler(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleRotationEuler)(vehicle_id, x, y, z);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1420,7 +1513,7 @@ impl VcmpFunctions {
     pub fn get_vehicle_rotation(&self, vehicle_id: i32) -> Result<(f32, f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z, mut w) = (0.0f32, 0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehicleRotation)(vehicle_id, &mut x, &mut y, &mut z, &mut w);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1429,10 +1522,13 @@ impl VcmpFunctions {
     }
 
     /// 获取车辆欧拉旋转
-    pub fn get_vehicle_rotation_euler(&self, vehicle_id: i32) -> Result<(f32, f32, f32), VcmpError> {
+    pub fn get_vehicle_rotation_euler(
+        &self,
+        vehicle_id: i32,
+    ) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehicleRotationEuler)(vehicle_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1441,7 +1537,15 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆速度
-    pub fn set_vehicle_speed(&self, vehicle_id: i32, x: f32, y: f32, z: f32, add: bool, relative: bool) -> VcmpResult<()> {
+    pub fn set_vehicle_speed(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        add: bool,
+        relative: bool,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpeed)(vehicle_id, x, y, z, add as u8, relative as u8);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1451,10 +1555,14 @@ impl VcmpFunctions {
     }
 
     /// 获取车辆速度
-    pub fn get_vehicle_speed(&self, vehicle_id: i32, relative: bool) -> Result<(f32, f32, f32), VcmpError> {
+    pub fn get_vehicle_speed(
+        &self,
+        vehicle_id: i32,
+        relative: bool,
+    ) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehicleSpeed)(vehicle_id, &mut x, &mut y, &mut z, relative as u8);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1463,7 +1571,15 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆转向速度
-    pub fn set_vehicle_turn_speed(&self, vehicle_id: i32, x: f32, y: f32, z: f32, add: bool, relative: bool) -> VcmpResult<()> {
+    pub fn set_vehicle_turn_speed(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        add: bool,
+        relative: bool,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleTurnSpeed)(vehicle_id, x, y, z, add as u8, relative as u8);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1473,10 +1589,15 @@ impl VcmpFunctions {
     }
 
     /// 获取车辆转向速度
-    pub fn get_vehicle_turn_speed(&self, vehicle_id: i32, relative: bool) -> Result<(f32, f32, f32), VcmpError> {
+    pub fn get_vehicle_turn_speed(
+        &self,
+        vehicle_id: i32,
+        relative: bool,
+    ) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
-        let code = (self.inner.GetVehicleTurnSpeed)(vehicle_id, &mut x, &mut y, &mut z, relative as u8);
-        
+        let code =
+            (self.inner.GetVehicleTurnSpeed)(vehicle_id, &mut x, &mut y, &mut z, relative as u8);
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1485,7 +1606,13 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆重生位置
-    pub fn set_vehicle_spawn_position(&self, vehicle_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
+    pub fn set_vehicle_spawn_position(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpawnPosition)(vehicle_id, x, y, z);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1495,10 +1622,13 @@ impl VcmpFunctions {
     }
 
     /// 获取车辆重生位置
-    pub fn get_vehicle_spawn_position(&self, vehicle_id: i32) -> Result<(f32, f32, f32), VcmpError> {
+    pub fn get_vehicle_spawn_position(
+        &self,
+        vehicle_id: i32,
+    ) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehicleSpawnPosition)(vehicle_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1507,7 +1637,14 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆重生旋转
-    pub fn set_vehicle_spawn_rotation(&self, vehicle_id: i32, x: f32, y: f32, z: f32, w: f32) -> VcmpResult<()> {
+    pub fn set_vehicle_spawn_rotation(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        w: f32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpawnRotation)(vehicle_id, x, y, z, w);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1517,7 +1654,13 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆重生欧拉旋转
-    pub fn set_vehicle_spawn_rotation_euler(&self, vehicle_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
+    pub fn set_vehicle_spawn_rotation_euler(
+        &self,
+        vehicle_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpawnRotationEuler)(vehicle_id, x, y, z);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1527,10 +1670,13 @@ impl VcmpFunctions {
     }
 
     /// 获取车辆重生旋转
-    pub fn get_vehicle_spawn_rotation(&self, vehicle_id: i32) -> Result<(f32, f32, f32, f32), VcmpError> {
+    pub fn get_vehicle_spawn_rotation(
+        &self,
+        vehicle_id: i32,
+    ) -> Result<(f32, f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z, mut w) = (0.0f32, 0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehicleSpawnRotation)(vehicle_id, &mut x, &mut y, &mut z, &mut w);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1539,10 +1685,13 @@ impl VcmpFunctions {
     }
 
     /// 获取车辆重生欧拉旋转
-    pub fn get_vehicle_spawn_rotation_euler(&self, vehicle_id: i32) -> Result<(f32, f32, f32), VcmpError> {
+    pub fn get_vehicle_spawn_rotation_euler(
+        &self,
+        vehicle_id: i32,
+    ) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetVehicleSpawnRotationEuler)(vehicle_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1581,7 +1730,12 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆颜色
-    pub fn set_vehicle_colour(&self, vehicle_id: i32, primary_colour: i32, secondary_colour: i32) -> VcmpResult<()> {
+    pub fn set_vehicle_colour(
+        &self,
+        vehicle_id: i32,
+        primary_colour: i32,
+        secondary_colour: i32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleColour)(vehicle_id, primary_colour, secondary_colour);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1594,7 +1748,7 @@ impl VcmpFunctions {
     pub fn get_vehicle_colour(&self, vehicle_id: i32) -> Result<(i32, i32), VcmpError> {
         let (mut primary, mut secondary) = (0, 0);
         let code = (self.inner.GetVehicleColour)(vehicle_id, &mut primary, &mut secondary);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1603,7 +1757,12 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆部件状态
-    pub fn set_vehicle_part_status(&self, vehicle_id: i32, part_id: i32, status: i32) -> VcmpResult<()> {
+    pub fn set_vehicle_part_status(
+        &self,
+        vehicle_id: i32,
+        part_id: i32,
+        status: i32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehiclePartStatus)(vehicle_id, part_id, status);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1618,7 +1777,12 @@ impl VcmpFunctions {
     }
 
     /// 设置车辆轮胎状态
-    pub fn set_vehicle_tyre_status(&self, vehicle_id: i32, tyre_id: i32, status: i32) -> VcmpResult<()> {
+    pub fn set_vehicle_tyre_status(
+        &self,
+        vehicle_id: i32,
+        tyre_id: i32,
+        status: i32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleTyreStatus)(vehicle_id, tyre_id, status);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1657,8 +1821,9 @@ impl VcmpFunctions {
     /// 获取车辆炮塔旋转
     pub fn get_vehicle_turret_rotation(&self, vehicle_id: i32) -> Result<(f32, f32), VcmpError> {
         let (mut horizontal, mut vertical) = (0.0f32, 0.0f32);
-        let code = (self.inner.GetVehicleTurretRotation)(vehicle_id, &mut horizontal, &mut vertical);
-        
+        let code =
+            (self.inner.GetVehicleTurretRotation)(vehicle_id, &mut horizontal, &mut vertical);
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1705,7 +1870,12 @@ impl VcmpFunctions {
     }
 
     /// 设置实例操控规则
-    pub fn set_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32, value: f64) -> VcmpError {
+    pub fn set_inst_handling_rule(
+        &self,
+        vehicle_id: i32,
+        rule_index: i32,
+        value: f64,
+    ) -> VcmpError {
         let code = (self.inner.SetInstHandlingRule)(vehicle_id, rule_index, value);
         VcmpError::from(code)
     }
@@ -1727,13 +1897,32 @@ impl VcmpFunctions {
         VcmpError::from(code)
     }
 
-    /* 
+    /*
      * 拾取物相关
      */
 
     /// 创建拾取物
-    pub fn create_pickup(&self, model_index: i32, world: i32, quantity: i32, x: f32, y: f32, z: f32, alpha: i32, is_automatic: bool) -> i32 {
-        (self.inner.CreatePickup)(model_index, world, quantity, x, y, z, alpha, is_automatic as u8)
+    pub fn create_pickup(
+        &self,
+        model_index: i32,
+        world: i32,
+        quantity: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        alpha: i32,
+        is_automatic: bool,
+    ) -> i32 {
+        (self.inner.CreatePickup)(
+            model_index,
+            world,
+            quantity,
+            x,
+            y,
+            z,
+            alpha,
+            is_automatic as u8,
+        )
     }
 
     /// 删除拾取物
@@ -1807,7 +1996,7 @@ impl VcmpFunctions {
     pub fn get_pickup_position(&self, pickup_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetPickupPosition)(pickup_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1825,13 +2014,38 @@ impl VcmpFunctions {
         (self.inner.GetPickupQuantity)(pickup_id)
     }
 
-    /* 
+    /*
      * 检查点相关
      */
 
     /// 创建检查点
-    pub fn create_check_point(&self, player_id: i32, world: i32, is_sphere: bool, x: f32, y: f32, z: f32, red: i32, green: i32, blue: i32, alpha: i32, radius: f32) -> i32 {
-        (self.inner.CreateCheckPoint)(player_id, world, is_sphere as u8, x, y, z, red, green, blue, alpha, radius)
+    pub fn create_check_point(
+        &self,
+        player_id: i32,
+        world: i32,
+        is_sphere: bool,
+        x: f32,
+        y: f32,
+        z: f32,
+        red: i32,
+        green: i32,
+        blue: i32,
+        alpha: i32,
+        radius: f32,
+    ) -> i32 {
+        (self.inner.CreateCheckPoint)(
+            player_id,
+            world,
+            is_sphere as u8,
+            x,
+            y,
+            z,
+            red,
+            green,
+            blue,
+            alpha,
+            radius,
+        )
     }
 
     /// 删除检查点
@@ -1862,16 +2076,26 @@ impl VcmpFunctions {
     }
 
     /// 设置检查点颜色
-    pub fn set_check_point_colour(&self, check_point_id: i32, red: i32, green: i32, blue: i32, alpha: i32) -> VcmpError {
+    pub fn set_check_point_colour(
+        &self,
+        check_point_id: i32,
+        red: i32,
+        green: i32,
+        blue: i32,
+        alpha: i32,
+    ) -> VcmpError {
         let code = (self.inner.SetCheckPointColour)(check_point_id, red, green, blue, alpha);
         VcmpError::from(code)
     }
 
     /// 获取检查点颜色
-    pub fn get_check_point_colour(&self, check_point_id: i32) -> Result<(i32, i32, i32, i32), VcmpError> {
+    pub fn get_check_point_colour(
+        &self,
+        check_point_id: i32,
+    ) -> Result<(i32, i32, i32, i32), VcmpError> {
         let (mut r, mut g, mut b, mut a) = (0, 0, 0, 0);
         let code = (self.inner.GetCheckPointColour)(check_point_id, &mut r, &mut g, &mut b, &mut a);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1880,16 +2104,25 @@ impl VcmpFunctions {
     }
 
     /// 设置检查点位置
-    pub fn set_check_point_position(&self, check_point_id: i32, x: f32, y: f32, z: f32) -> VcmpError {
+    pub fn set_check_point_position(
+        &self,
+        check_point_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+    ) -> VcmpError {
         let code = (self.inner.SetCheckPointPosition)(check_point_id, x, y, z);
         VcmpError::from(code)
     }
 
     /// 获取检查点位置
-    pub fn get_check_point_position(&self, check_point_id: i32) -> Result<(f32, f32, f32), VcmpError> {
+    pub fn get_check_point_position(
+        &self,
+        check_point_id: i32,
+    ) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetCheckPointPosition)(check_point_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1913,12 +2146,20 @@ impl VcmpFunctions {
         (self.inner.GetCheckPointOwner)(check_point_id)
     }
 
-    /* 
+    /*
      * 对象相关
      */
 
     /// 创建对象
-    pub fn create_object(&self, model_index: i32, world: i32, x: f32, y: f32, z: f32, alpha: i32) -> i32 {
+    pub fn create_object(
+        &self,
+        model_index: i32,
+        world: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        alpha: i32,
+    ) -> i32 {
         (self.inner.CreateObject)(model_index, world, x, y, z, alpha)
     }
 
@@ -1961,11 +2202,25 @@ impl VcmpFunctions {
     }
 
     /// 将对象移动到指定位置
-    pub fn move_object_to(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u32) -> VcmpError {
+    pub fn move_object_to(
+        &self,
+        object_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        duration: u32,
+    ) -> VcmpError {
         let code = (self.inner.MoveObjectTo)(object_id, x, y, z, duration);
         VcmpError::from(code)
     }
-pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u32) -> VcmpResult<()> {
+    pub fn move_object_by(
+        &self,
+        object_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        duration: u32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.MoveObjectBy)(object_id, x, y, z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -1988,7 +2243,7 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     pub fn get_object_position(&self, object_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetObjectPosition)(object_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -1997,7 +2252,15 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 将对象旋转到指定方向
-    pub fn rotate_object_to(&self, object_id: i32, x: f32, y: f32, z: f32, w: f32, duration: u32) -> VcmpResult<()> {
+    pub fn rotate_object_to(
+        &self,
+        object_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        w: f32,
+        duration: u32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectTo)(object_id, x, y, z, w, duration);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -2007,7 +2270,14 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 将对象旋转到指定欧拉角
-    pub fn rotate_object_to_euler(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u32) -> VcmpResult<()> {
+    pub fn rotate_object_to_euler(
+        &self,
+        object_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        duration: u32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectToEuler)(object_id, x, y, z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -2017,7 +2287,15 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 将对象按指定方式旋转
-    pub fn rotate_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, w: f32, duration: u32) -> VcmpResult<()> {
+    pub fn rotate_object_by(
+        &self,
+        object_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        w: f32,
+        duration: u32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectBy)(object_id, x, y, z, w, duration);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -2027,7 +2305,14 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 将对象按指定欧拉角旋转
-    pub fn rotate_object_by_euler(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u32) -> VcmpResult<()> {
+    pub fn rotate_object_by_euler(
+        &self,
+        object_id: i32,
+        x: f32,
+        y: f32,
+        z: f32,
+        duration: u32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectByEuler)(object_id, x, y, z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -2040,7 +2325,7 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     pub fn get_object_rotation(&self, object_id: i32) -> Result<(f32, f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z, mut w) = (0.0f32, 0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetObjectRotation)(object_id, &mut x, &mut y, &mut z, &mut w);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -2052,7 +2337,7 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     pub fn get_object_rotation_euler(&self, object_id: i32) -> Result<(f32, f32, f32), VcmpError> {
         let (mut x, mut y, mut z) = (0.0f32, 0.0f32, 0.0f32);
         let code = (self.inner.GetObjectRotationEuler)(object_id, &mut x, &mut y, &mut z);
-        
+
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -2076,7 +2361,11 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 设置对象被触摸报告
-    pub fn set_object_touched_report_enabled(&self, object_id: i32, toggle: bool) -> VcmpResult<()> {
+    pub fn set_object_touched_report_enabled(
+        &self,
+        object_id: i32,
+        toggle: bool,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetObjectTouchedReportEnabled)(object_id, toggle as u8);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -2090,7 +2379,7 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
         (self.inner.IsObjectTouchedReportEnabled)(object_id) != 0
     }
 
-    /* 
+    /*
      * 其他功能
      */
 
@@ -2130,8 +2419,14 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 为玩家设置车辆 3D 箭头
-    pub fn set_vehicle_3d_arrow_for_player(&self, vehicle_id: i32, target_player_id: i32, is_enabled: bool) -> VcmpResult<()> {
-        let code = (self.inner.SetVehicle3DArrowForPlayer)(vehicle_id, target_player_id, is_enabled as u8);
+    pub fn set_vehicle_3d_arrow_for_player(
+        &self,
+        vehicle_id: i32,
+        target_player_id: i32,
+        is_enabled: bool,
+    ) -> VcmpResult<()> {
+        let code =
+            (self.inner.SetVehicle3DArrowForPlayer)(vehicle_id, target_player_id, is_enabled as u8);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -2145,8 +2440,14 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 为玩家设置玩家 3D 箭头
-    pub fn set_player_3d_arrow_for_player(&self, player_id: i32, target_player_id: i32, is_enabled: bool) -> VcmpResult<()> {
-        let code = (self.inner.SetPlayer3DArrowForPlayer)(player_id, target_player_id, is_enabled as u8);
+    pub fn set_player_3d_arrow_for_player(
+        &self,
+        player_id: i32,
+        target_player_id: i32,
+        is_enabled: bool,
+    ) -> VcmpResult<()> {
+        let code =
+            (self.inner.SetPlayer3DArrowForPlayer)(player_id, target_player_id, is_enabled as u8);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -2190,8 +2491,16 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 插值摄像机观察目标
-    pub fn interpolate_camera_look_at(&self, player_id: i32, look_x: f32, look_y: f32, look_z: f32, interp_time_ms: u32) -> VcmpResult<()> {
-        let code = (self.inner.InterpolateCameraLookAt)(player_id, look_x, look_y, look_z, interp_time_ms);
+    pub fn interpolate_camera_look_at(
+        &self,
+        player_id: i32,
+        look_x: f32,
+        look_y: f32,
+        look_z: f32,
+        interp_time_ms: u32,
+    ) -> VcmpResult<()> {
+        let code =
+            (self.inner.InterpolateCameraLookAt)(player_id, look_x, look_y, look_z, interp_time_ms);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -2200,7 +2509,24 @@ pub fn move_object_by(&self, object_id: i32, x: f32, y: f32, z: f32, duration: u
     }
 
     /// 获取网络统计信息
-    pub fn get_network_statistics(&self, player_id: i32, option: i32) -> f64 {
-        (self.inner.GetNetworkStatistics)(player_id, option)
+    pub fn get_network_statistics(
+        &self,
+        player_id: i32,
+        option: VcmpNetworkStatisticsQueryOption,
+    ) -> f64 {
+        (self.inner.GetNetworkStatistics)(player_id, option.into())
+    }
+
+    /// 获取指定的服务器设置
+    ///
+    /// 需要啥直接取
+    pub fn get_server_option(&self, option: VcmpServerOption) -> bool {
+        (self.inner.GetServerOption)(option.into()) != 0
+    } // follow 
+    // 你等我想一下
+
+    /// 设置指定的服务器设置
+    pub fn set_server_option(&self, option: VcmpServerOption, toggle: bool) {
+        let _ = (self.inner.SetServerOption)(option.into(), toggle as u8);
     }
 }
