@@ -1,8 +1,22 @@
-use std::ffi::{CStr, c_char};
+use std::{
+    ffi::{CStr, c_char},
+    sync::OnceLock,
+};
 
-use vcmp_bindings::raw::{PluginCallbacks, PluginFuncs, PluginInfo};
+use vcmp_bindings::{
+    func::VcmpFunctions,
+    raw::{PluginCallbacks, PluginFuncs, PluginInfo},
+    vcmp_func,
+};
 
 pub const PLUGIN_VERSION: u32 = 1;
+
+pub static VCMP_INIT: OnceLock<()> = OnceLock::new();
+
+/// 验证 vcmp 是否初始化
+pub fn vcmp_inited() -> bool {
+    VCMP_INIT.get().is_some()
+}
 
 /// 插件入口点
 ///
@@ -18,7 +32,6 @@ extern "C" fn VcmpPluginInit(
     plugin_info: *mut PluginInfo,
 ) -> u32 {
     println!("loading vcmp-plugin-rs");
-
     {
         // check null
         if plugin_functions.is_null() {
@@ -35,13 +48,11 @@ extern "C" fn VcmpPluginInit(
         }
     }
 
-    let (functions, callbacks, info) = unsafe {
-        (
-            &mut *plugin_functions,
-            &mut *plugin_callbacks,
-            &mut *plugin_info,
-        )
-    };
+    let (callbacks, info) = unsafe { (&mut *plugin_callbacks, &mut *plugin_info) };
+
+    let functions = VcmpFunctions::from(plugin_functions);
+
+    let functions = vcmp_bindings::init_vcmp_func(functions);
 
     // 参考 cpp.ing
     info.apiMajorVersion = 2;
@@ -50,34 +61,65 @@ extern "C" fn VcmpPluginInit(
     info.pluginVersion = PLUGIN_VERSION;
 
     callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
+    callbacks.OnServerInitialise = Some(on_server_init);
 
-    println!("vcmp-plugin-rs info: {:#?}", info);
-    println!("vcmp-plugin-rs callback: {:#?}", callbacks);
+    println!("vcmp-plugin-rs info: {:?}", info);
 
-    println!(
-        "sizeof callback: {}",
-        std::mem::size_of::<PluginCallbacks>()
-    );
-    println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
+    // println!(
+    //     "sizeof callback: {}",
+    //     std::mem::size_of::<PluginCallbacks>()
+    // );
+    // println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
 
-    println!("give sizeof callback: {}", callbacks.structSize);
-    println!("give sizeof functions: {}", functions.structSize);
+    // println!("give sizeof callback: {}", callbacks.structSize);
+    // println!("give sizeof functions: {}", functions.inner_struct_size());
 
     // get version
-    let version: u32 = (functions.GetServerVersion)();
+    let version: u32 = functions.server_version();
     println!("server version: {}", version);
     callbacks.OnServerFrame = Some(on_server_frame);
+
+    //println!("ready to getsetting");
+    //let server_settings = functions.get_server_settings();
+    //println!("server settings: {}", server_settings);
+    //functions.set_server_name("测试服务器");
+    //let server_settings = functions.get_server_settings();
+    //println!("server settings: {}", server_settings);
+
+    println!("rust 直接输出中文 test");
+    functions.log_message("VCMP 输出中文 test\n");
 
     println!("vcmp-plugin-rs loaded");
 
     1
 }
 
-extern "C" fn on_server_frame(elapsed_time: f32) {
+#[unsafe(no_mangle)]
+pub extern "C" fn on_server_init() -> u8 {
+    println!("[Rust] Server init callback");
+
+    println!("server settings {}", vcmp_func().get_server_settings());
+
+    // println!("gamemode: {}", vcmp_func().get_gamemode());
+
+    vcmp_func()
+        .set_gamemode(&("*".repeat(63)))
+        .expect("set gamemode faild");
+
+    println!("gamemode: {}", vcmp_func().get_gamemode());
+
+    1
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn on_server_frame(elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
 }
 
-extern "C" fn on_server_performance_report(
+// pub fn log_msg_to_vcmp()
+
+#[unsafe(no_mangle)]
+pub extern "C" fn on_server_performance_report(
     entry_count: usize,
     descriptions: *mut *const c_char,
     times: *mut u64,
