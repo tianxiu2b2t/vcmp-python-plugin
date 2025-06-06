@@ -65,6 +65,17 @@ extern "C" fn VcmpPluginInit(
 
     println!("vcmp-plugin-rs info: {:?}", info);
 
+    // struct size check
+    if !(functions.inner_ffi_size() == functions.inner_struct_size() && std::mem::size_of<PluginCallbacks>() == callbacks.structSize ) {
+        println!("WARNING!! struct size not matching");
+        if functions.inner_ffi_size() != functions.inner_struct_size() {
+            println!("func expect size: {}, actuall ffi size: {}", functions.inner_ffi_size(), functions.inner_struct_size());
+        }
+        if std::mem::size_of<PluginCallbacks>() != callbacks.structSize {
+            println!("callback expect size: {}, actuall ffi size {}", std::mem::size_of<PluginCallbacks>(), callbacks.structSize);
+        }
+    }
+
     // println!(
     //     "sizeof callback: {}",
     //     std::mem::size_of::<PluginCallbacks>()
