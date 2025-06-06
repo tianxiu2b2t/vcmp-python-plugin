@@ -32,27 +32,27 @@ impl Color {
 
 pub struct ARGBColor(pub Color);
 
-impl From<Color> for ArgbColor {
+impl From<Color> for ARGBColor {
     fn from(value: Color) -> Self {
         Self(value)
     }
 }
 
-impl Into<u32> for ArgbColor {
+impl Into<u32> for ARGBColor {
     fn into(self) -> u32 {
         self.0.to_argb()
     }
 }
 
-pub struct RgbaColor(pub Color);
+pub struct RGBAColor(pub Color);
 
-impl From<Color> for RgbaColor {
+impl From<Color> for RGBAColor {
     fn from(value: Color) -> Self {
         Self(value)
     }
 }
 
-impl Into<u32> for RgbaColor {
+impl Into<u32> for RGBAColor {
     fn into(self) -> u32 {
         self.0.to_rgba()
     }
