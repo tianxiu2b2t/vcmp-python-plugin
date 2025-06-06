@@ -124,14 +124,10 @@ pub extern "C" fn on_server_performance_report(
     descriptions: *mut *const c_char,
     times: *mut u64,
 ) {
-    println!("[Rust] Server performance report callback");
-    let c_str_descriptions = unsafe { CStr::from_ptr(*descriptions) };
-    let description = c_str_descriptions // array
-        .to_str()
-        .unwrap_or("Could not convert description to string");
-    let times = unsafe { *times }; // array
-    println!(
-        "[Rust] Description: {}, entry count: {}, time: {}",
-        description, entry_count, times
-    );
+    // descriptions is array and times is array
+    for i in 0..entry_count {
+        let description = unsafe { CStr::from_ptr(*descriptions.offset(i as isize)) };
+        let time = unsafe { *times.offset(i as isize) };
+        println!("Performance report: {} - {}", description.to_string_lossy(), time);
+    }
 }
