@@ -22,6 +22,7 @@ impl From<PluginFuncs> for VcmpFunctions {
     }
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 impl From<*mut PluginFuncs> for VcmpFunctions {
     fn from(value: *mut PluginFuncs) -> Self {
         let inner = unsafe { *value };

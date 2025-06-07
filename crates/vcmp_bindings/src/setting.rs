@@ -55,6 +55,7 @@ impl From<raw::ServerSettings> for VcmpServerSettings {
     }
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 impl From<*mut raw::ServerSettings> for VcmpServerSettings {
     fn from(value: *mut raw::ServerSettings) -> Self {
         Self {

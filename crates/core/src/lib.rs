@@ -66,13 +66,23 @@ extern "C" fn VcmpPluginInit(
     println!("vcmp-plugin-rs info: {:?}", info);
 
     // struct size check
-    if !(functions.inner_ffi_size() == functions.inner_struct_size() && std::mem::size_of<PluginCallbacks>() == callbacks.structSize ) {
+    if !(functions.inner_ffi_size() == functions.inner_struct_size()
+        && std::mem::size_of::<PluginCallbacks>() == callbacks.structSize as usize)
+    {
         println!("WARNING!! struct size not matching");
         if functions.inner_ffi_size() != functions.inner_struct_size() {
-            println!("func expect size: {}, actuall ffi size: {}", functions.inner_ffi_size(), functions.inner_struct_size());
+            println!(
+                "func expect size: {}, actuall ffi size: {}",
+                functions.inner_ffi_size(),
+                functions.inner_struct_size()
+            );
         }
-        if std::mem::size_of<PluginCallbacks>() != callbacks.structSize {
-            println!("callback expect size: {}, actuall ffi size {}", std::mem::size_of<PluginCallbacks>(), callbacks.structSize);
+        if std::mem::size_of::<PluginCallbacks>() != callbacks.structSize as usize {
+            println!(
+                "callback expect size: {}, actuall ffi size {}",
+                std::mem::size_of::<PluginCallbacks>(),
+                callbacks.structSize
+            );
         }
     }
 
@@ -130,6 +140,7 @@ pub extern "C" fn on_server_frame(elapsed_time: f32) {
 // pub fn log_msg_to_vcmp()
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn on_server_performance_report(
     entry_count: usize,
     descriptions: *mut *const c_char,
@@ -137,8 +148,12 @@ pub extern "C" fn on_server_performance_report(
 ) {
     // descriptions is array and times is array
     for i in 0..entry_count {
-        let description = unsafe { CStr::from_ptr(*descriptions.offset(i as isize)) };
-        let time = unsafe { *times.offset(i as isize) };
-        println!("Performance report: {} - {}", description.to_string_lossy(), time);
+        let description = unsafe { CStr::from_ptr(*descriptions.add(i)) };
+        let time = unsafe { *times.add(i) };
+        println!(
+            "Performance report: {} - {}",
+            description.to_string_lossy(),
+            time
+        );
     }
 }
