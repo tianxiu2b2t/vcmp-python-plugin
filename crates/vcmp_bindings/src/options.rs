@@ -173,6 +173,40 @@ pub enum VcmpPickupOption {
     SingleUse, // 第一个变体，值=0
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum VcmpEntityPool {
+    Vehicle,
+    Object,
+    Pickup,
+    Radio,
+    Player,
+    Reserved1,
+    Blip,
+    CheckPoint,
+}
+
+impl From<i32> for VcmpEntityPool {
+    fn from(value: i32) -> Self {
+        match value {
+            1 => Self::Vehicle,
+            2 => Self::Object,
+            3 => Self::Pickup,
+            4 => Self::Radio,
+            5 => Self::Player,
+            6 => Self::Reserved1,
+            7 => Self::Blip,
+            8 => Self::CheckPoint,
+            _ => Self::Vehicle, // 未知值转为第一个变体
+        }
+    }
+}
+
+impl Into<i32> for VcmpEntityPool {
+    fn into(self) -> i32 {
+        self as i32
+    }
+}
+
 impl From<i32> for VcmpPickupOption {
     fn from(value: i32) -> Self {
         match value {

@@ -63,7 +63,7 @@ extern "C" fn VcmpPluginInit(
     callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
     callbacks.OnServerInitialise = Some(on_server_init);
 
-    println!("vcmp-plugin-rs info: {:?}", info);
+    println!("vcmp-plugin-rs info: {info:?}");
 
     // struct size check
     if !(functions.inner_ffi_size() == functions.inner_struct_size()
@@ -133,6 +133,7 @@ pub extern "C" fn on_server_init() -> u8 {
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn on_server_frame(elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
 }

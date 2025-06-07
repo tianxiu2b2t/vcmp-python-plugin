@@ -1,4 +1,6 @@
-pub struct RGB {
+use std::fmt::Display;
+
+pub struct Color {
     pub r: u8,
     pub g: u8,
     pub b: u8,
@@ -105,6 +107,10 @@ impl Quaternion {
 
 impl Display for Quaternion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Quaternion({}, {}, {}, {})", self.x, self.y, self.z, self.w)
+        write!(
+            f,
+            "Quaternion({}, {}, {}, {})",
+            self.x, self.y, self.z, self.w
+        )
     }
 }

@@ -7,6 +7,7 @@ use crate::encodes::{decode_gbk, encode_to_gbk};
 
 pub mod environment;
 pub mod network;
+pub mod vehicle;
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,
