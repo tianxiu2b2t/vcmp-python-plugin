@@ -201,9 +201,9 @@ impl From<i32> for VcmpEntityPool {
     }
 }
 
-impl Into<i32> for VcmpEntityPool {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpEntityPool> for i32 {
+    fn from(val: VcmpEntityPool) -> Self {
+        val as i32
     }
 }
 
@@ -216,32 +216,32 @@ impl From<i32> for VcmpPickupOption {
     }
 }
 
-impl Into<i32> for VcmpNetworkStatisticsQueryOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpNetworkStatisticsQueryOption> for i32 {
+    fn from(val: VcmpNetworkStatisticsQueryOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpServerOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpServerOption> for i32 {
+    fn from(val: VcmpServerOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpPlayerOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpPlayerOption> for i32 {
+    fn from(val: VcmpPlayerOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpVehicleOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpVehicleOption> for i32 {
+    fn from(val: VcmpVehicleOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpPickupOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpPickupOption> for i32 {
+    fn from(val: VcmpPickupOption) -> Self {
+        val as i32
     }
 }

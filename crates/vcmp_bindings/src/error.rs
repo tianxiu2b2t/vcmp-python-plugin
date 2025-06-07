@@ -35,9 +35,9 @@ impl From<i32> for VcmpError {
     }
 }
 
-impl Into<i32> for VcmpError {
-    fn into(self) -> i32 {
-        match self {
+impl From<VcmpError> for i32 {
+    fn from(val: VcmpError) -> Self {
+        match val {
             VcmpError::None => 0,
             VcmpError::NoSuchEntity => 1,
             VcmpError::BufferTooSmall => 2,

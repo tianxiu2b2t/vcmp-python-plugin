@@ -40,9 +40,9 @@ impl From<Color> for ARGBColor {
     }
 }
 
-impl Into<u32> for ARGBColor {
-    fn into(self) -> u32 {
-        self.0.to_argb()
+impl From<ARGBColor> for u32 {
+    fn from(val: ARGBColor) -> Self {
+        val.0.to_argb()
     }
 }
 
@@ -54,9 +54,9 @@ impl From<Color> for RGBAColor {
     }
 }
 
-impl Into<u32> for RGBAColor {
-    fn into(self) -> u32 {
-        self.0.to_rgba()
+impl From<RGBAColor> for u32 {
+    fn from(val: RGBAColor) -> Self {
+        val.0.to_rgba()
     }
 }
 

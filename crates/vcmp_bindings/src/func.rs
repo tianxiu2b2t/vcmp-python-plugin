@@ -183,7 +183,7 @@ impl VcmpFunctions {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetServerPassword)(buf_ptr, 1024);
-        decode_gbk(&(buf.iter().map(|v| *v as u8).collect::<Vec<u8>>()))
+        decode_gbk(&(buf.iter().map(|v| { *v }).collect::<Vec<u8>>()))
     }
 
     pub fn set_gamemode(&self, gamemode: &str) -> VcmpResult<()> {
@@ -203,7 +203,7 @@ impl VcmpFunctions {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetGameModeText)(buf_ptr, 1024);
-        decode_gbk(&(buf.iter().map(|v| *v as u8).collect::<Vec<u8>>()))
+        decode_gbk(&(buf.iter().map(|v| { *v }).collect::<Vec<u8>>()))
     }
     //
 
@@ -610,21 +610,21 @@ impl VcmpFunctions {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerIP)(player, buf_ptr, 1024);
-        decode_gbk(&(buf.iter().map(|v| *v as u8).collect::<Vec<u8>>()))
+        decode_gbk(&(buf.iter().map(|v| { *v }).collect::<Vec<u8>>()))
     }
 
     pub fn get_player_uid(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerUID)(player, buf_ptr, 1024);
-        decode_gbk(&(buf.iter().map(|v| *v as u8).collect::<Vec<u8>>()))
+        decode_gbk(&(buf.iter().map(|v| { *v }).collect::<Vec<u8>>()))
     }
 
     pub fn get_player_uid2(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerUID2)(player, buf_ptr, 1024);
-        decode_gbk(&(buf.iter().map(|v| *v as u8).collect::<Vec<u8>>()))
+        decode_gbk(&(buf.iter().map(|v| { *v }).collect::<Vec<u8>>()))
     }
     pub fn kick_player(&self, player: i32) {
         (self.inner.KickPlayer)(player);
