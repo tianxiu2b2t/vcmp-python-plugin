@@ -1,9 +1,7 @@
 use crate::func::VcmpFunctions;
 
-pub trait QueryWeapon {
-}
-pub trait SetWeapon {
-}
+pub trait QueryWeapon {}
+pub trait SetWeapon {}
 
 impl SetWeapon for VcmpFunctions {
     fn set_weapon_data_value(&self, weapon: i32, field: i32, value: f64) {

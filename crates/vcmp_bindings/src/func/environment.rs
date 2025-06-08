@@ -1,5 +1,5 @@
-use crate::{options::VcmpServerOption, VcmpFunctions};
 use crate::utils::{Color, WastedSettings, WorldBounds};
+use crate::{VcmpFunctions, options::VcmpServerOption};
 
 pub trait QueryEnvironmentOption {
     fn get_sync_frame_limiter(&self) -> bool;
@@ -219,7 +219,7 @@ pub trait SetEnvironmentWorldBounds {
 }
 impl SetEnvironmentWorldBounds for VcmpFunctions {
     fn set_world_bounds(&self, bounds: WorldBounds) {
-       (self.inner.SetWorldBounds)(bounds.max_x, bounds.min_x, bounds.max_y, bounds.min_y);
+        (self.inner.SetWorldBounds)(bounds.max_x, bounds.min_x, bounds.max_y, bounds.min_y);
     }
 }
 

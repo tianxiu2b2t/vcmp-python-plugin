@@ -1,20 +1,19 @@
-
 use crate::options::{VcmpNetworkStatisticsQueryOption, VcmpServerOption};
 use crate::{VcmpError, raw::PluginFuncs};
 
 use crate::encodes::{decode_gbk, encode_to_gbk};
 
 pub mod environment;
-pub mod network;
-pub mod vehicle;
 pub mod keybind;
 pub mod marker;
 pub mod misc;
-pub mod server;
-pub mod weapon;
-pub mod template;
+pub mod network;
 pub mod player;
 pub mod plugin;
+pub mod server;
+pub mod template;
+pub mod vehicle;
+pub mod weapon;
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,
@@ -60,15 +59,12 @@ impl VcmpFunctions {
         let _ = (self.inner.LogMessage)(msg_ptr);
     }
 
-
-
     pub fn play_sound_for_player(&self, player_id: i32, sound: i32, pos: Option<(f32, f32, f32)>) {
         let world = (self.inner.GetPlayerUniqueWorld)(player_id);
 
         let (x, y, z) = pos.unwrap_or((f32::NAN, f32::NAN, f32::NAN));
         (self.inner.PlaySound)(world, sound, x, y, z);
     }
-
 
     /*
        radios
@@ -167,7 +163,6 @@ impl VcmpFunctions {
     pub fn unban_ip(&self, ip: &str) -> bool {
         (self.inner.UnbanIP)(ip.as_ptr() as *mut i8) != 0
     }
-
 
     /// 获取网络统计信息
     #[inline]

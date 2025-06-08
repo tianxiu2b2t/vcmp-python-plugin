@@ -1,7 +1,6 @@
 use crate::func::VcmpFunctions;
 
-pub trait SetMisc {
-}
+pub trait SetMisc {}
 
 impl SetMisc for VcmpFunctions {
     fn create_explosion(

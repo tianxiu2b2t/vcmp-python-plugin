@@ -1,13 +1,9 @@
 use crate::func::VcmpFunctions;
 
-pub trait QueryPlugin {
-}
-pub trait SetPlugin {
-}
+pub trait QueryPlugin {}
+pub trait SetPlugin {}
 
-impl SetPlugin for VcmpFunctions {
-    
-}
+impl SetPlugin for VcmpFunctions {}
 
 impl QueryPlugin for VcmpFunctions {
     /// 获取插件(加载?)数量
@@ -20,11 +16,7 @@ impl QueryPlugin for VcmpFunctions {
         let mut info = VcmpPluginInfo::new_empty();
         let info_ptr = info.inner_mut_ptr();
         let code = (self.inner.GetPluginInfo)(plugin_id, info_ptr);
-        if code == 0 {
-            None
-        } else {
-            Ok(info)
-        }
+        if code == 0 { None } else { Ok(info) }
     }
     /// 查找插件的 id
     fn find_plugin(&self, plugin_name: &str) -> Option<i32> {
@@ -42,5 +34,4 @@ impl QueryPlugin for VcmpFunctions {
             Ok(())
         }
     }
-
 }

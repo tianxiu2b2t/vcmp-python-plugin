@@ -63,15 +63,17 @@ impl From<RGBAColor> for u32 {
     }
 }
 
-
 impl Display for Color {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Color(r={}, g={}, b={}, a={})", self.r, self.g, self.b, self.a)
+        write!(
+            f,
+            "Color(r={}, g={}, b={}, a={})",
+            self.r, self.g, self.b, self.a
+        )
     }
 }
 
-
-/*  
+/*
     Vector 类
 */
 
@@ -137,12 +139,17 @@ pub struct WorldBounds {
     pub max_x: f32,
     pub max_y: f32,
     pub min_x: f32,
-    pub min_y: f32
+    pub min_y: f32,
 }
 
 impl WorldBounds {
     pub fn new(max_x: f32, max_y: f32, min_x: f32, min_y: f32) -> Self {
-        Self { max_x, max_y, min_x, min_y }
+        Self {
+            max_x,
+            max_y,
+            min_x,
+            min_y,
+        }
     }
 }
 
@@ -171,7 +178,15 @@ pub struct WastedSettings {
 }
 
 impl WastedSettings {
-    pub fn new(death_timer: u32, fade_timer: u32, fade_in_speed: f32, fade_out_speed: f32, color: Color, corpse_fade_start: u32, corpse_fade_time: u32) -> Self {
+    pub fn new(
+        death_timer: u32,
+        fade_timer: u32,
+        fade_in_speed: f32,
+        fade_out_speed: f32,
+        color: Color,
+        corpse_fade_start: u32,
+        corpse_fade_time: u32,
+    ) -> Self {
         Self {
             death_timer,
             fade_timer,
@@ -179,7 +194,7 @@ impl WastedSettings {
             fade_out_speed,
             color,
             corpse_fade_start,
-            corpse_fade_time
+            corpse_fade_time,
         }
     }
 }
@@ -189,7 +204,13 @@ impl Display for WastedSettings {
         write!(
             f,
             "WastedSettings(death_timer={}, fade_timer={}, fade_in_speed={}, fade_out_speed={}, color={}, corpse_fade_start={}, corpse_fade_time={})",
-            self.death_timer, self.fade_timer, self.fade_in_speed, self.fade_out_speed, self.color, self.corpse_fade_start, self.corpse_fade_time
+            self.death_timer,
+            self.fade_timer,
+            self.fade_in_speed,
+            self.fade_out_speed,
+            self.color,
+            self.corpse_fade_start,
+            self.corpse_fade_time
         )
     }
 }
@@ -203,7 +224,7 @@ pub struct Keybind {
     pub can_release: bool,
     pub key: i32,
     pub key2: i32,
-    pub key3: i32
+    pub key3: i32,
 }
 
 impl Keybind {
@@ -213,7 +234,7 @@ impl Keybind {
             can_release,
             key,
             key2,
-            key3
+            key3,
         }
     }
 }
@@ -232,14 +253,21 @@ pub struct Marker {
 }
 
 impl Marker {
-    pub fn new(marker: i32, world: i32, position: Vector, scale: i32, color: Color, sprite: i32) -> Self {
+    pub fn new(
+        marker: i32,
+        world: i32,
+        position: Vector,
+        scale: i32,
+        color: Color,
+        sprite: i32,
+    ) -> Self {
         Self {
             marker,
             world,
             position,
             scale,
             color,
-            sprite
+            sprite,
         }
     }
 }

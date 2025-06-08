@@ -1,10 +1,8 @@
 use crate::func::VcmpFunctions;
 use crate::utils::RGBAColor;
 
-pub trait QueryPlayer {
-}
-pub trait SetPlayer {
-}
+pub trait QueryPlayer {}
+pub trait SetPlayer {}
 
 impl SetPlayer for VcmpFunctions {
     /// 发送 Stream
@@ -36,12 +34,7 @@ impl SetPlayer for VcmpFunctions {
     }
 
     /// 发送公告（）
-    fn send_announce(
-        &self,
-        player_id: i32,
-        announce_type: i32,
-        message: &str,
-    ) -> VcmpResult<()> {
+    fn send_announce(&self, player_id: i32, announce_type: i32, message: &str) -> VcmpResult<()> {
         let msg = message.as_bytes();
         let msg_ptr = msg.as_ptr() as *const i8;
         let code = (self.inner.SendGameMessage)(player_id, announce_type, msg_ptr);
@@ -53,5 +46,4 @@ impl SetPlayer for VcmpFunctions {
     }
 }
 
-impl QueryPlayer for VcmpFunctions {
-}
+impl QueryPlayer for VcmpFunctions {}

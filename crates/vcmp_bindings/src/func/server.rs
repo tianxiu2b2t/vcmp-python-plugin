@@ -5,8 +5,7 @@ use crate::{VcmpError, VcmpResult};
 pub trait QueryServer {
     fn server_version() -> u32;
 }
-pub trait SetServer {
-}
+pub trait SetServer {}
 
 impl SetServer for VcmpFunctions {
     fn set_server_name(&self, name: &str) -> VcmpResult<()> {

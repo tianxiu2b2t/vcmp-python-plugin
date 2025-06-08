@@ -1,9 +1,7 @@
 use crate::func::VcmpFunctions;
 
-pub trait QueryMarker {
-}
-pub trait SetMarker {
-}
+pub trait QueryMarker {}
+pub trait SetMarker {}
 
 impl SetMarker for VcmpFunctions {
     fn create_marker(
@@ -21,7 +19,6 @@ impl SetMarker for VcmpFunctions {
     fn destory_marker(&self, marker: i32) {
         (self.inner.DestroyCoordBlip)(marker);
     }
-    
 }
 
 impl QueryMarker for VcmpFunctions {
@@ -38,19 +35,14 @@ impl QueryMarker for VcmpFunctions {
             &mut color,
             &mut sprite,
         );
-        
+
         Marker {
             marker,
             world,
-            position: Vector {
-                x,
-                y,
-                z,
-            },
+            position: Vector { x, y, z },
             scale,
             color,
             sprite,
         }
-
     }
 }
