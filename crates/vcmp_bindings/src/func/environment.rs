@@ -275,23 +275,6 @@ impl EnvironmentWastedSettings for VcmpFunctions {
     }
 }
 
-pub trait SetEnvironmentWastedSettings {
-    fn set_wasted_settings(&self, settings: WastedSettings);
-}
-impl SetEnvironmentWastedSettings for VcmpFunctions {
-    fn set_wasted_settings(&self, settings: WastedSettings) {
-        (self.inner.SetWastedSettings)(
-            settings.death_timer,
-            settings.fade_timer,
-            settings.fade_in_speed,
-            settings.fade_out_speed,
-            settings.color.as_rgb(),
-            settings.corpse_fade_start,
-            settings.corpse_fade_time,
-        );
-    }
-}
-
 /*
     World
 */
