@@ -227,10 +227,11 @@ impl SetEnvironmentWorldBounds for VcmpFunctions {
     Wasted Settings
 */
 
-pub trait QueryEnvironmentWastedSettings {
+pub trait EnvironmentWastedSettings {
     fn get_wasted_settings(&self) -> WastedSettings;
+    fn set_wasted_settings(&self, settings: WastedSettings);
 }
-impl QueryEnvironmentWastedSettings for VcmpFunctions {
+impl EnvironmentWastedSettings for VcmpFunctions {
     fn get_wasted_settings(&self) -> WastedSettings {
         let (
             mut death_timer,
@@ -260,6 +261,17 @@ impl QueryEnvironmentWastedSettings for VcmpFunctions {
             corpse_fade_start,
             corpse_fade_time,
         }
+    }
+    fn set_wasted_settings(&self, settings: WastedSettings) {
+        (self.inner.SetWastedSettings)(
+            settings.death_timer,
+            settings.fade_timer,
+            settings.fade_in_speed,
+            settings.fade_out_speed,
+            settings.color.as_rgb(),
+            settings.corpse_fade_start,
+            settings.corpse_fade_time,
+        );
     }
 }
 
