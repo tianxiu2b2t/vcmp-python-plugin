@@ -140,9 +140,11 @@ pub extern "C" fn on_server_frame(elapsed_time: f32) {
 
 // pub fn log_msg_to_vcmp()
 
+///
+/// # Safety
+/// it's for ffi
 #[unsafe(no_mangle)]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn on_server_performance_report(
+pub unsafe extern "C" fn on_server_performance_report(
     entry_count: usize,
     descriptions: *mut *const c_char,
     times: *mut u64,

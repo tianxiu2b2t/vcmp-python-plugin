@@ -35,15 +35,17 @@ def gen_binding_and_process():
                     raw_content[: left_newline + 1] + raw_content[right_comma + 3 :]
                 )
 
-    content = content[:raw_start_pos] + raw_content + content[raw_end_pos:]
-
     print("处理 Option 完成")
 
     print("处理 unsafe extern")
 
-    content = content.replace("unsafe extern", "extern")
+    raw_content = raw_content.replace("unsafe extern", "extern")
 
     print("处理 unsafe extern 完成")
+
+    content = content[:raw_start_pos] + raw_content + content[raw_end_pos:]
+
+
 
     with open(target_file, "w", encoding="utf-8") as bind_file:
         bind_file.write(content)
