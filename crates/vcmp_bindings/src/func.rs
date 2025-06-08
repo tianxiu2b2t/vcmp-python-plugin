@@ -1,7 +1,6 @@
-use std::ffi::c_void;
 
 use crate::options::{VcmpNetworkStatisticsQueryOption, VcmpServerOption};
-use crate::{VcmpError, VcmpPluginInfo, VcmpResult, raw::PluginFuncs, setting::VcmpServerSettings};
+use crate::{VcmpError, raw::PluginFuncs};
 
 use crate::encodes::{decode_gbk, encode_to_gbk};
 
