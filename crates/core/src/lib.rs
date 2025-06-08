@@ -97,7 +97,7 @@ extern "C" fn VcmpPluginInit(
 
     // get version
     let version: u32 = functions.server_version();
-    println!("server version: {}", version);
+    println!("server version: {version}");
     callbacks.OnServerFrame = Some(on_server_frame);
 
     //println!("ready to getsetting");
@@ -119,7 +119,7 @@ extern "C" fn VcmpPluginInit(
 pub extern "C" fn on_server_init() -> u8 {
     println!("[Rust] Server init callback");
 
-    println!("server settings {}", vcmp_func().get_server_settings());
+    println!("server settings {}", vcmp_func().server_version());
 
     // println!("gamemode: {}", vcmp_func().get_gamemode());
 

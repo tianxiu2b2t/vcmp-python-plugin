@@ -1,9 +1,15 @@
 use crate::func::VcmpFunctions;
 
-pub trait QueryWeapon {}
-pub trait SetWeapon {}
+pub trait WeaponMethods {
+    fn set_weapon_data_value(&self, weapon: i32, field: i32, value: f64);
+    fn reset_weapon_data_value(&self, weapon: i32, field: i32);
+    fn reset_weapon_data(&self, weapon: i32);
+    fn reset_all_weapon_data(&self);
+    fn get_weapon_data_value(&self, weapon: i32, field: i32) -> f64;
+    fn is_weapon_data_value_modified(&self, weapon: i32, field: i32) -> bool;
+}
 
-impl SetWeapon for VcmpFunctions {
+impl WeaponMethods for VcmpFunctions {
     fn set_weapon_data_value(&self, weapon: i32, field: i32, value: f64) {
         (self.inner.SetWeaponDataValue)(weapon, field, value);
     }
@@ -16,9 +22,6 @@ impl SetWeapon for VcmpFunctions {
     fn reset_all_weapon_data(&self) {
         (self.inner.ResetAllWeaponData)();
     }
-}
-
-impl QueryWeapon for VcmpFunctions {
     fn get_weapon_data_value(&self, weapon: i32, field: i32) -> f64 {
         (self.inner.GetWeaponDataValue)(weapon, field)
     }

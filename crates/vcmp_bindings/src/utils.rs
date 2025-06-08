@@ -11,6 +11,14 @@ pub struct Color {
 }
 
 impl Color {
+    pub fn from_rgb(value: u32, a: Option<u8>) -> Self {
+        Self {
+            r: (value >> 16) as u8,
+            g: (value >> 8) as u8,
+            b: value as u8,
+            a: a.unwrap_or(255),
+        }
+    }
     pub fn from_rgba(value: u32) -> Self {
         Self {
             r: (value >> 24) as u8,
@@ -27,39 +35,14 @@ impl Color {
             b: value as u8,
         }
     }
-    pub fn to_rgba(&self) -> u32 {
+    pub fn as_rgba(&self) -> u32 {
         ((self.r as u32) << 24) | ((self.g as u32) << 16) | ((self.b as u32) << 8) | (self.a as u32)
     }
-    pub fn to_argb(&self) -> u32 {
+    pub fn as_argb(&self) -> u32 {
         ((self.a as u32) << 24) | ((self.r as u32) << 16) | ((self.g as u32) << 8) | (self.b as u32)
     }
-}
-
-pub struct ARGBColor(pub Color);
-
-impl From<Color> for ARGBColor {
-    fn from(value: Color) -> Self {
-        Self(value)
-    }
-}
-
-impl From<ARGBColor> for u32 {
-    fn from(val: ARGBColor) -> Self {
-        val.0.to_argb()
-    }
-}
-
-pub struct RGBAColor(pub Color);
-
-impl From<Color> for RGBAColor {
-    fn from(value: Color) -> Self {
-        Self(value)
-    }
-}
-
-impl From<RGBAColor> for u32 {
-    fn from(val: RGBAColor) -> Self {
-        val.0.to_rgba()
+    pub fn as_rgb(&self) -> u32 {
+        ((self.r as u32) << 16) | ((self.g as u32) << 8) | (self.b as u32)
     }
 }
 

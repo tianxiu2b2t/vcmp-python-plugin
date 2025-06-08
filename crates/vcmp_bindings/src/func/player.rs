@@ -1,10 +1,19 @@
-use crate::func::VcmpFunctions;
-use crate::utils::RGBAColor;
+use std::ffi::c_void;
 
-pub trait QueryPlayer {}
-pub trait SetPlayer {}
+use crate::{VcmpError, VcmpResult, func::VcmpFunctions, utils::Color};
 
-impl SetPlayer for VcmpFunctions {
+pub trait PlayerMethods {
+    /// 发送 Stream
+    fn send_client_script_data(&self, player_id: i32, data: &[u8]) -> VcmpResult<()>;
+
+    /// 发送消息
+    fn send_client_message(&self, player_id: i32, color: Color, message: &str) -> VcmpResult<()>;
+
+    /// 发送公告
+    fn send_announce(&self, player_id: i32, announce_type: i32, message: &str) -> VcmpResult<()>;
+}
+
+impl PlayerMethods for VcmpFunctions {
     /// 发送 Stream
     fn send_client_script_data(&self, player_id: i32, data: &[u8]) -> VcmpResult<()> {
         let msg_ptr = data.as_ptr() as *const c_void;
@@ -17,13 +26,8 @@ impl SetPlayer for VcmpFunctions {
     }
 
     /// 发送消息
-    fn send_client_message(
-        &self,
-        player_id: i32,
-        color: RGBAColor,
-        message: &str,
-    ) -> VcmpResult<()> {
-        let color: u32 = color.into();
+    fn send_client_message(&self, player_id: i32, color: Color, message: &str) -> VcmpResult<()> {
+        let color = color.as_rgba();
         let msg_ptr = message.as_ptr() as *const i8;
         let code = (self.inner.SendClientMessage)(player_id, color, msg_ptr);
         if code != 0 {
@@ -45,5 +49,3 @@ impl SetPlayer for VcmpFunctions {
         }
     }
 }
-
-impl QueryPlayer for VcmpFunctions {}

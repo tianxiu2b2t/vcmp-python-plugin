@@ -256,7 +256,7 @@ impl QueryEnvironmentWastedSettings for VcmpFunctions {
             fade_timer,
             fade_in_speed,
             fade_out_speed,
-            color: Color::from_argb(color),
+            color: Color::from_rgb(color, None),
             corpse_fade_start,
             corpse_fade_time,
         }
@@ -273,7 +273,7 @@ impl SetEnvironmentWastedSettings for VcmpFunctions {
             settings.fade_timer,
             settings.fade_in_speed,
             settings.fade_out_speed,
-            settings.color.to_rgba(),
+            settings.color.as_rgb(),
             settings.corpse_fade_start,
             settings.corpse_fade_time,
         );

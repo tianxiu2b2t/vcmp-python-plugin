@@ -26,7 +26,16 @@ impl MarkerMethods for VcmpFunctions {
         index: Option<i32>,
     ) -> i32 {
         let idx = index.unwrap_or(-1);
-        (self.inner.CreateCoordBlip)(idx, world, pos.0, pos.1, pos.2, scale, color.into(), sprite)
+        (self.inner.CreateCoordBlip)(
+            idx,
+            world,
+            pos.0,
+            pos.1,
+            pos.2,
+            scale,
+            color.as_rgba(),
+            sprite,
+        )
     }
     fn destory_marker(&self, marker: i32) {
         (self.inner.DestroyCoordBlip)(marker);
@@ -51,7 +60,7 @@ impl MarkerMethods for VcmpFunctions {
             world,
             position: Vector { x, y, z },
             scale,
-            color: Color::from_argba,
+            color: Color::from_rgba(color),
             sprite,
         }
     }
