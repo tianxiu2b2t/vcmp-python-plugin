@@ -41,7 +41,7 @@ impl VcmpFunctions {
     pub fn inner_ffi_size(&self) -> usize {
         std::mem::size_of::<PluginFuncs>()
     }
-
+    
     /// 全局性的 last error
     pub fn get_last_error(&self) -> VcmpError {
         VcmpError::from((self.inner.GetLastError)())
@@ -62,144 +62,10 @@ impl VcmpFunctions {
         (self.inner.PlaySound)(world, sound, x, y, z);
     }
 
-    pub fn hide_map_object(&self, object_id: i32, pos: (f32, f32, f32)) {
-        let (x, y, z) = pos;
-        let x = ((x * 10.0).floor() + 0.5) as i16;
-        let y = ((y * 10.0).floor() + 0.5) as i16;
-        let z = ((z * 10.0).floor() + 0.5) as i16;
-
-        (self.inner.HideMapObject)(object_id, x, y, z);
-    }
-
-    pub fn show_map_object(&self, object_id: i32, pos: (f32, f32, f32)) {
-        let (x, y, z) = pos;
-        let x = ((x * 10.0).floor() + 0.5) as i16;
-        let y = ((y * 10.0).floor() + 0.5) as i16;
-        let z = ((z * 10.0).floor() + 0.5) as i16;
-
-        (self.inner.ShowMapObject)(object_id, x, y, z);
-    }
-
-    pub fn show_all_map_objects(&self) {
-        (self.inner.ShowAllMapObjects)();
-    }
-
-    /*
-       Weapon
-
-    */
-
-    pub fn set_weapon_data_value(&self, weapon: i32, field: i32, value: f64) {
-        (self.inner.SetWeaponDataValue)(weapon, field, value);
-    }
-
-    pub fn get_weapon_data_value(&self, weapon: i32, field: i32) -> f64 {
-        (self.inner.GetWeaponDataValue)(weapon, field)
-    }
-
-    pub fn reset_weapon_data_value(&self, weapon: i32, field: i32) {
-        (self.inner.ResetWeaponDataValue)(weapon, field);
-    }
-
-    pub fn is_weapon_data_value_modified(&self, weapon: i32, field: i32) -> bool {
-        (self.inner.IsWeaponDataValueModified)(weapon, field) != 0
-    }
-
-    pub fn reset_weapon_data(&self, weapon: i32) {
-        (self.inner.ResetWeaponData)(weapon);
-    }
-
-    pub fn reset_all_weapon_data(&self) {
-        (self.inner.ResetAllWeaponData)();
-    }
-
-    /*
-       Keybind
-    */
-
-    pub fn get_key_bind_unused_slot(&self) -> i32 {
-        (self.inner.GetKeyBindUnusedSlot)()
-    }
-
-    pub fn get_key_bind_data(&self, slot: i32) -> (bool, i32, i32, i32) {
-        let (mut release, mut key1, mut key2, mut key3) = (0_u8, 0, 0, 0);
-        (self.inner.GetKeyBindData)(slot, &mut release, &mut key1, &mut key2, &mut key3);
-        (release != 0, key1, key2, key3)
-    }
-
-    pub fn register_key_bind(
-        &self,
-        slot: i32,
-        release: bool,
-        key1: i32,
-        key2: Option<i32>,
-        key3: Option<i32>,
-    ) {
-        (self.inner.RegisterKeyBind)(
-            slot,
-            release as u8,
-            key1,
-            key2.unwrap_or(0),
-            key3.unwrap_or(0),
-        );
-    }
-
-    pub fn remove_key_bind(&self, slot: i32) {
-        (self.inner.RemoveKeyBind)(slot);
-    }
-
-    pub fn remove_all_key_binds(&self) {
-        (self.inner.RemoveAllKeyBinds)();
-    }
-
-    /*
-       Radar map marker
-    */
-
-    pub fn create_marker(
-        &self,
-        world: i32,
-        pos: (f32, f32, f32),
-        scale: i32,
-        color: impl Into<u32>,
-        sprite: i32,
-        index: Option<i32>,
-    ) -> i32 {
-        let idx = index.unwrap_or(-1);
-        (self.inner.CreateCoordBlip)(idx, world, pos.0, pos.1, pos.2, scale, color.into(), sprite)
-    }
-
-    pub fn destory_marker(&self, marker: i32) {
-        (self.inner.DestroyCoordBlip)(marker);
-    }
-
-    pub fn get_marker_info(&self, marker: i32) -> (i32, (f32, f32, f32), i32, u32, i32) {
-        let (mut world, mut x, mut y, mut z, mut scale, mut color, mut sprite) =
-            (0, 0.0, 0.0, 0.0, 0, 0, 0);
-        (self.inner.GetCoordBlipInfo)(
-            marker,
-            &mut world,
-            &mut x,
-            &mut y,
-            &mut z,
-            &mut scale,
-            &mut color,
-            &mut sprite,
-        );
-        (world, (x, y, z), scale, color, sprite)
-    }
 
     /*
        radios
     */
-
-    pub fn add_radio_stream(&self, id: i32, name: &str, url: &str, listed: bool) {
-        (self.inner.AddRadioStream)(id, name.as_ptr() as _, url.as_ptr() as _, listed as u8);
-    }
-
-    pub fn remove_radio_stream(&self, id: i32) {
-        (self.inner.RemoveRadioStream)(id);
-    }
 
     pub fn add_player_class(
         &self,
