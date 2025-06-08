@@ -198,10 +198,13 @@ impl SetEnvironmentOption for VcmpFunctions {
 /*
     World Bounds
 */
-pub trait QueryEnvironmentWorldBounds {
+
+pub trait EnvironmentWorldBounds {
     fn get_world_bounds(&self) -> WorldBounds;
+    fn set_world_bounds(&self, bounds: WorldBounds);
 }
-impl QueryEnvironmentWorldBounds for VcmpFunctions {
+
+impl EnvironmentWorldBounds for VcmpFunctions {
     fn get_world_bounds(&self) -> WorldBounds {
         let (mut max_x, mut min_x, mut max_y, mut min_y) = (0f32, 0f32, 0f32, 0f32);
         (self.inner.GetWorldBounds)(&mut max_x, &mut min_x, &mut max_y, &mut min_y);
@@ -212,12 +215,6 @@ impl QueryEnvironmentWorldBounds for VcmpFunctions {
             min_y,
         }
     }
-}
-
-pub trait SetEnvironmentWorldBounds {
-    fn set_world_bounds(&self, bounds: WorldBounds);
-}
-impl SetEnvironmentWorldBounds for VcmpFunctions {
     fn set_world_bounds(&self, bounds: WorldBounds) {
         (self.inner.SetWorldBounds)(bounds.max_x, bounds.min_x, bounds.max_y, bounds.min_y);
     }
