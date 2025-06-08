@@ -1,4 +1,4 @@
-use std::{error::Error, fmt::Display, i32};
+use std::{error::Error, fmt::Display};
 
 pub type VcmpResult<T> = Result<T, VcmpError>;
 
@@ -68,7 +68,7 @@ impl Display for VcmpError {
             VcmpError::InvalidName => write!(f, "无效名称"),
             VcmpError::RequestDenied => write!(f, "请求被拒绝"),
             VcmpError::ForceSize => write!(f, "vcmp 不知道发生了什么, 所以丢了个 ForceSize 过来"),
-            VcmpError::Unknown(code) => write!(f, "未知错误码 {}", code),
+            VcmpError::Unknown(code) => write!(f, "未知错误码 {code}"),
         }
     }
 }
