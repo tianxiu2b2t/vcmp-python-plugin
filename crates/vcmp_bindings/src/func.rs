@@ -11,7 +11,6 @@ pub mod network;
 pub mod player;
 pub mod plugin;
 pub mod server;
-pub mod template;
 pub mod vehicle;
 pub mod weapon;
 
