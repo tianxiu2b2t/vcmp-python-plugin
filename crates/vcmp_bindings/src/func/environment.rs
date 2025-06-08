@@ -1,4 +1,4 @@
-use crate::utils::{Color, WastedSettings, WorldBounds};
+use crate::utils::{Color, Vector, WastedSettings, WorldBounds};
 use crate::{VcmpFunctions, options::VcmpServerOption};
 
 pub trait QueryEnvironmentOption {
@@ -379,5 +379,72 @@ impl QueryEnvironmentWorld for VcmpFunctions {
     }
     fn get_vehicles_forced_respawn_height(&self) -> f32 {
         (self.inner.GetVehiclesForcedRespawnHeight)()
+    }
+}
+
+
+/* 
+    Player Settings
+*/
+
+pub trait EnvironmentPlayerSettings {
+    fn add_player_class(
+        &self,
+        team: i32,
+        color: impl Into<u32>,
+        skin: i32,
+        pos: Vector,
+        angle: f32,
+        weapon: Option<(i32, i32)>,
+        weapon1: Option<(i32, i32)>,
+        weapon2: Option<(i32, i32)>,
+    ) -> i32;
+    fn set_spawn_player_position(&self, pos: Vector);
+    fn set_spawn_camera_position(&self, pos: Vector);
+    fn set_spawn_camera_look_at(&self, pos: Vector);
+}
+
+impl EnvironmentPlayerSettings for VcmpFunctions {
+    fn add_player_class(
+        &self,
+        team: i32,
+        color: impl Into<u32>,
+        skin: i32,
+        pos: Vector,
+        angle: f32,
+        weapon: Option<(i32, i32)>,
+        weapon1: Option<(i32, i32)>,
+        weapon2: Option<(i32, i32)>,
+    ) -> i32 {
+        let (wep1, ammo1) = weapon.unwrap_or((0, 0));
+        let (wep2, ammo2) = weapon1.unwrap_or((0, 0));
+        let (wep3, ammo3) = weapon2.unwrap_or((0, 0));
+        (self.inner.AddPlayerClass)(
+            team,
+            color.into(),
+            skin,
+            pos.x,
+            pos.y,
+            pos.z,
+            angle,
+            wep1,
+            ammo1,
+            wep2,
+            ammo2,
+            wep3,
+            ammo3,
+        )
+    }
+
+    fn set_spawn_player_position(&self, pos: Vector) {
+        (self.inner.SetSpawnPlayerPosition)(pos.x, pos.y, pos.z);
+    }
+
+    fn set_spawn_camera_position(&self, pos: Vector) {
+        (self.inner.SetSpawnCameraPosition)(pos.x, pos.y, pos.z);
+    }
+
+    fn set_spawn_camera_look_at(&self, pos: Vector) {
+        (self.inner.SetSpawnCameraLookAt)(pos.x, pos.y, pos.z);
     }
 }
