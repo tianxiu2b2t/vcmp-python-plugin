@@ -1,6 +1,7 @@
+use crate::utils::{Color, WastedSettings, WorldBounds};
 use crate::{VcmpFunctions, options::VcmpServerOption};
 
-pub trait QueryEnvironment {
+pub trait QueryEnvironmentOption {
     fn get_sync_frame_limiter(&self) -> bool;
     fn get_frame_limiter(&self) -> bool;
     fn get_taxi_boost_jump(&self) -> bool;
@@ -25,8 +26,7 @@ pub trait QueryEnvironment {
     fn get_disable_heli_blade_damage(&self) -> bool;
     fn get_disable_crouch(&self) -> bool;
 }
-
-impl QueryEnvironment for VcmpFunctions {
+impl QueryEnvironmentOption for VcmpFunctions {
     fn get_sync_frame_limiter(&self) -> bool {
         self.get_server_option(VcmpServerOption::SyncFrameLimiter)
     }
@@ -98,7 +98,7 @@ impl QueryEnvironment for VcmpFunctions {
     }
 }
 
-pub trait SetEnvironment {
+pub trait SetEnvironmentOption {
     fn set_sync_frame_limiter(&self, toggle: bool);
     fn set_frame_limiter(&self, toggle: bool);
     fn set_taxi_boost_jump(&self, toggle: bool);
@@ -123,8 +123,7 @@ pub trait SetEnvironment {
     fn set_disable_heli_blade_damage(&self, toggle: bool);
     fn set_disable_crouch(&self, toggle: bool);
 }
-
-impl SetEnvironment for VcmpFunctions {
+impl SetEnvironmentOption for VcmpFunctions {
     fn set_sync_frame_limiter(&self, toggle: bool) {
         self.set_server_option(VcmpServerOption::SyncFrameLimiter, toggle)
     }
@@ -193,5 +192,200 @@ impl SetEnvironment for VcmpFunctions {
     }
     fn set_disable_crouch(&self, toggle: bool) {
         self.set_server_option(VcmpServerOption::DisableCrouch, toggle)
+    }
+}
+
+/*
+    World Bounds
+*/
+pub trait QueryEnvironmentWorldBounds {
+    fn get_world_bounds(&self) -> WorldBounds;
+}
+impl QueryEnvironmentWorldBounds for VcmpFunctions {
+    fn get_world_bounds(&self) -> WorldBounds {
+        let (mut max_x, mut min_x, mut max_y, mut min_y) = (0f32, 0f32, 0f32, 0f32);
+        (self.inner.GetWorldBounds)(&mut max_x, &mut min_x, &mut max_y, &mut min_y);
+        WorldBounds {
+            max_x,
+            min_x,
+            max_y,
+            min_y,
+        }
+    }
+}
+
+pub trait SetEnvironmentWorldBounds {
+    fn set_world_bounds(&self, bounds: WorldBounds);
+}
+impl SetEnvironmentWorldBounds for VcmpFunctions {
+    fn set_world_bounds(&self, bounds: WorldBounds) {
+        (self.inner.SetWorldBounds)(bounds.max_x, bounds.min_x, bounds.max_y, bounds.min_y);
+    }
+}
+
+/*
+    Wasted Settings
+*/
+
+pub trait QueryEnvironmentWastedSettings {
+    fn get_wasted_settings(&self) -> WastedSettings;
+}
+impl QueryEnvironmentWastedSettings for VcmpFunctions {
+    fn get_wasted_settings(&self) -> WastedSettings {
+        let (
+            mut death_timer,
+            mut fade_timer,
+            mut fade_in_speed,
+            mut fade_out_speed,
+            mut color,
+            mut corpse_fade_start,
+            mut corpse_fade_time,
+        ) = (0, 0, 0f32, 0f32, 0, 0, 0);
+        (self.inner.GetWastedSettings)(
+            &mut death_timer,
+            &mut fade_timer,
+            &mut fade_in_speed,
+            &mut fade_out_speed,
+            &mut color,
+            &mut corpse_fade_start,
+            &mut corpse_fade_time,
+        );
+
+        WastedSettings {
+            death_timer,
+            fade_timer,
+            fade_in_speed,
+            fade_out_speed,
+            color: Color::from_rgb(color, None),
+            corpse_fade_start,
+            corpse_fade_time,
+        }
+    }
+}
+
+pub trait SetEnvironmentWastedSettings {
+    fn set_wasted_settings(&self, settings: WastedSettings);
+}
+impl SetEnvironmentWastedSettings for VcmpFunctions {
+    fn set_wasted_settings(&self, settings: WastedSettings) {
+        (self.inner.SetWastedSettings)(
+            settings.death_timer,
+            settings.fade_timer,
+            settings.fade_in_speed,
+            settings.fade_out_speed,
+            settings.color.as_rgb(),
+            settings.corpse_fade_start,
+            settings.corpse_fade_time,
+        );
+    }
+}
+
+/*
+    World
+*/
+
+pub trait SetEnvironmentWorld {
+    fn set_time_rate(&self, rate: i32);
+    fn set_time(&self, time: i32);
+    fn set_hour(&self, hour: i32);
+    fn set_minute(&self, minute: i32);
+    fn set_water_level(&self, level: f32);
+    fn set_weather(&self, weather: i32);
+    fn set_gravity(&self, gravity: f32);
+    fn set_gamespeed(&self, gamespeed: f32);
+    fn set_maximum_flight_altitude(&self, height: f32);
+    fn set_kill_command_delay(&self, delay: i32);
+    fn disable_kill_command_delay(&self);
+    fn set_vehicles_forced_respawn_height(&self, height: f32);
+}
+impl SetEnvironmentWorld for VcmpFunctions {
+    fn set_time_rate(&self, rate: i32) {
+        (self.inner.SetTimeRate)(rate);
+    }
+    fn set_time(&self, time: i32) {
+        // total 1440 = 0
+        let hour = time % 24;
+        let minute = time % 60;
+        self.set_hour(hour);
+        self.set_minute(minute)
+    }
+    fn set_hour(&self, hour: i32) {
+        (self.inner.SetHour)(hour);
+    }
+    fn set_minute(&self, minute: i32) {
+        (self.inner.SetMinute)(minute);
+    }
+    fn set_water_level(&self, level: f32) {
+        (self.inner.SetWaterLevel)(level);
+    }
+    fn set_weather(&self, weather: i32) {
+        (self.inner.SetWeather)(weather);
+    }
+    fn set_gravity(&self, gravity: f32) {
+        (self.inner.SetGravity)(gravity);
+    }
+    fn set_gamespeed(&self, gamespeed: f32) {
+        (self.inner.SetGameSpeed)(gamespeed);
+    }
+    fn set_maximum_flight_altitude(&self, height: f32) {
+        (self.inner.SetMaximumFlightAltitude)(height);
+    }
+    fn set_kill_command_delay(&self, delay: i32) {
+        (self.inner.SetKillCommandDelay)(delay);
+    }
+    fn disable_kill_command_delay(&self) {
+        self.set_kill_command_delay(2147483647);
+    }
+    fn set_vehicles_forced_respawn_height(&self, height: f32) {
+        (self.inner.SetVehiclesForcedRespawnHeight)(height);
+    }
+}
+
+pub trait QueryEnvironmentWorld {
+    fn get_time_rate(&self) -> i32;
+    fn get_time(&self) -> i32;
+    fn get_hour(&self) -> i32;
+    fn get_minute(&self) -> i32;
+    fn get_water_level(&self) -> f32;
+    fn get_weather(&self) -> i32;
+    fn get_gravity(&self) -> f32;
+    fn get_gamespeed(&self) -> f32;
+    fn get_maximum_flight_altitude(&self) -> f32;
+    fn get_kill_command_delay(&self) -> i32;
+    fn get_vehicles_forced_respawn_height(&self) -> f32;
+}
+impl QueryEnvironmentWorld for VcmpFunctions {
+    fn get_time_rate(&self) -> i32 {
+        (self.inner.GetTimeRate)()
+    }
+    fn get_time(&self) -> i32 {
+        self.get_hour() * 60 + self.get_minute()
+    }
+    fn get_hour(&self) -> i32 {
+        (self.inner.GetHour)()
+    }
+    fn get_minute(&self) -> i32 {
+        (self.inner.GetMinute)()
+    }
+    fn get_water_level(&self) -> f32 {
+        (self.inner.GetWaterLevel)()
+    }
+    fn get_weather(&self) -> i32 {
+        (self.inner.GetWeather)()
+    }
+    fn get_gravity(&self) -> f32 {
+        (self.inner.GetGravity)()
+    }
+    fn get_gamespeed(&self) -> f32 {
+        (self.inner.GetGameSpeed)()
+    }
+    fn get_maximum_flight_altitude(&self) -> f32 {
+        (self.inner.GetMaximumFlightAltitude)()
+    }
+    fn get_kill_command_delay(&self) -> i32 {
+        (self.inner.GetKillCommandDelay)()
+    }
+    fn get_vehicles_forced_respawn_height(&self) -> f32 {
+        (self.inner.GetVehiclesForcedRespawnHeight)()
     }
 }

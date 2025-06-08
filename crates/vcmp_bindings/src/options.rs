@@ -173,6 +173,40 @@ pub enum VcmpPickupOption {
     SingleUse, // 第一个变体，值=0
 }
 
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+pub enum VcmpEntityPool {
+    Vehicle,
+    Object,
+    Pickup,
+    Radio,
+    Player,
+    Reserved1,
+    Blip,
+    CheckPoint,
+}
+
+impl From<i32> for VcmpEntityPool {
+    fn from(value: i32) -> Self {
+        match value {
+            1 => Self::Vehicle,
+            2 => Self::Object,
+            3 => Self::Pickup,
+            4 => Self::Radio,
+            5 => Self::Player,
+            6 => Self::Reserved1,
+            7 => Self::Blip,
+            8 => Self::CheckPoint,
+            _ => Self::Vehicle, // 未知值转为第一个变体
+        }
+    }
+}
+
+impl From<VcmpEntityPool> for i32 {
+    fn from(val: VcmpEntityPool) -> Self {
+        val as i32
+    }
+}
+
 impl From<i32> for VcmpPickupOption {
     fn from(value: i32) -> Self {
         match value {
@@ -182,32 +216,32 @@ impl From<i32> for VcmpPickupOption {
     }
 }
 
-impl Into<i32> for VcmpNetworkStatisticsQueryOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpNetworkStatisticsQueryOption> for i32 {
+    fn from(val: VcmpNetworkStatisticsQueryOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpServerOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpServerOption> for i32 {
+    fn from(val: VcmpServerOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpPlayerOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpPlayerOption> for i32 {
+    fn from(val: VcmpPlayerOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpVehicleOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpVehicleOption> for i32 {
+    fn from(val: VcmpVehicleOption) -> Self {
+        val as i32
     }
 }
 
-impl Into<i32> for VcmpPickupOption {
-    fn into(self) -> i32 {
-        self as i32
+impl From<VcmpPickupOption> for i32 {
+    fn from(val: VcmpPickupOption) -> Self {
+        val as i32
     }
 }

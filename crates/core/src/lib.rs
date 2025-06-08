@@ -4,7 +4,7 @@ use std::{
 };
 
 use vcmp_bindings::{
-    func::VcmpFunctions,
+    func::{VcmpFunctions, server::ServerMethods},
     raw::{PluginCallbacks, PluginFuncs, PluginInfo},
     vcmp_func,
 };
@@ -63,7 +63,28 @@ extern "C" fn VcmpPluginInit(
     callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
     callbacks.OnServerInitialise = Some(on_server_init);
 
-    println!("vcmp-plugin-rs info: {:?}", info);
+    println!("vcmp-plugin-rs info: {info:?}");
+
+    // struct size check
+    if !(functions.inner_ffi_size() == functions.inner_struct_size()
+        && std::mem::size_of::<PluginCallbacks>() == callbacks.structSize as usize)
+    {
+        println!("WARNING!! struct size not matching");
+        if functions.inner_ffi_size() != functions.inner_struct_size() {
+            println!(
+                "func expect size: {}, actuall ffi size: {}",
+                functions.inner_ffi_size(),
+                functions.inner_struct_size()
+            );
+        }
+        if std::mem::size_of::<PluginCallbacks>() != callbacks.structSize as usize {
+            println!(
+                "callback expect size: {}, actuall ffi size {}",
+                std::mem::size_of::<PluginCallbacks>(),
+                callbacks.structSize
+            );
+        }
+    }
 
     // println!(
     //     "sizeof callback: {}",
@@ -76,7 +97,7 @@ extern "C" fn VcmpPluginInit(
 
     // get version
     let version: u32 = functions.server_version();
-    println!("server version: {}", version);
+    println!("server version: {version}");
     callbacks.OnServerFrame = Some(on_server_frame);
 
     //println!("ready to getsetting");
@@ -98,7 +119,7 @@ extern "C" fn VcmpPluginInit(
 pub extern "C" fn on_server_init() -> u8 {
     println!("[Rust] Server init callback");
 
-    println!("server settings {}", vcmp_func().get_server_settings());
+    println!("server settings {}", vcmp_func().server_version());
 
     // println!("gamemode: {}", vcmp_func().get_gamemode());
 
@@ -112,6 +133,7 @@ pub extern "C" fn on_server_init() -> u8 {
 }
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn on_server_frame(elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
 }
@@ -119,19 +141,20 @@ pub extern "C" fn on_server_frame(elapsed_time: f32) {
 // pub fn log_msg_to_vcmp()
 
 #[unsafe(no_mangle)]
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn on_server_performance_report(
     entry_count: usize,
     descriptions: *mut *const c_char,
     times: *mut u64,
 ) {
-    println!("[Rust] Server performance report callback");
-    let c_str_descriptions = unsafe { CStr::from_ptr(*descriptions) };
-    let description = c_str_descriptions // array
-        .to_str()
-        .unwrap_or("Could not convert description to string");
-    let times = unsafe { *times }; // array
-    println!(
-        "[Rust] Description: {}, entry count: {}, time: {}",
-        description, entry_count, times
-    );
+    // descriptions is array and times is array
+    for i in 0..entry_count {
+        let description = unsafe { CStr::from_ptr(*descriptions.add(i)) };
+        let time = unsafe { *times.add(i) };
+        println!(
+            "Performance report: {} - {}",
+            description.to_string_lossy(),
+            time
+        );
+    }
 }

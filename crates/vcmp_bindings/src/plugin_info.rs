@@ -54,6 +54,7 @@ impl VcmpPluginInfo {
     }
 }
 
+#[allow(clippy::not_unsafe_ptr_arg_deref)]
 impl From<*mut raw::PluginInfo> for VcmpPluginInfo {
     fn from(value: *mut raw::PluginInfo) -> Self {
         Self {
