@@ -1,13 +1,23 @@
+use crate::encodes::{decode_gbk, encode_to_gbk};
 use crate::func::VcmpFunctions;
-use crate::utils::{Quaternion, Vector};
+use crate::setting::VcmpServerSettings;
 use crate::{VcmpError, VcmpResult};
 
-pub trait QueryServer {
-    fn server_version() -> u32;
+pub trait ServerFuncitons {
+    fn set_server_name(&self, name: &str) -> VcmpResult<()>;
+    fn set_server_password(&self, password: &str) -> VcmpResult<()>;
+    fn set_gamemode(&self, gamemode: &str) -> VcmpResult<()>;
+    fn get_max_players(&self) -> u32;
+    fn shutdown(&self);
+    fn server_version(&self) -> u32;
+    fn server_settings(&self) -> VcmpServerSettings;
+    fn get_server_name(&self) -> String;
+    fn get_server_password(&self) -> String;
+    fn get_gamemode(&self) -> String;
+    fn set_max_players(&self, max_player: u32) -> VcmpResult<()>;
 }
-pub trait SetServer {}
 
-impl SetServer for VcmpFunctions {
+impl ServerFuncitons for VcmpFunctions {
     fn set_server_name(&self, name: &str) -> VcmpResult<()> {
         let name = encode_to_gbk(name);
         let name_ptr = name.as_ptr() as *const i8;
@@ -46,15 +56,12 @@ impl SetServer for VcmpFunctions {
     fn shutdown(&self) {
         (self.inner.ShutdownServer)()
     }
-}
-
-impl QueryServer for VcmpFunctions {
     /// 获取服务器版本
     fn server_version(&self) -> u32 {
         (self.inner.GetServerVersion)()
     }
     /// 获取服务器设置
-    fn server_settings() -> ServerSettings {
+    fn server_settings(&self) -> VcmpServerSettings {
         let mut setting = VcmpServerSettings::new_empty();
         let setting_ptr = setting.inner_mut_ptr();
         let _ = (self.inner.GetServerSettings)(setting_ptr);
