@@ -4,7 +4,7 @@ use std::{
 };
 
 use vcmp_bindings::{
-    func::{VcmpFunctions, server::ServerFuncitons},
+    func::{VcmpFunctions, server::ServerMethods},
     raw::{PluginCallbacks, PluginFuncs, PluginInfo},
     vcmp_func,
 };

@@ -1,8 +1,23 @@
 use crate::func::VcmpFunctions;
 
-pub trait SetMisc {}
+pub trait MiscMethods {
+    fn create_explosion(
+        &self,
+        world: i32,
+        explosion_type: i32,
+        pos: (f32, f32, f32),
+        responsible_player: i32,
+        on_ground: bool,
+    );
+    fn play_sound(&self, world: i32, sound: i32, x: f32, y: f32, z: f32);
+    fn hide_map_object(&self, object_id: i32, pos: (f32, f32, f32));
+    fn show_map_object(&self, object_id: i32, pos: (f32, f32, f32));
+    fn show_all_map_objects(&self);
+    fn add_radio_stream(&self, id: i32, name: &str, url: &str, listed: bool);
+    fn remove_radio_stream(&self, id: i32);
+}
 
-impl SetMisc for VcmpFunctions {
+impl MiscMethods for VcmpFunctions {
     fn create_explosion(
         &self,
         world: i32,

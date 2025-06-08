@@ -3,7 +3,7 @@ use crate::func::VcmpFunctions;
 use crate::setting::VcmpServerSettings;
 use crate::{VcmpError, VcmpResult};
 
-pub trait ServerFuncitons {
+pub trait ServerMethods {
     fn set_server_name(&self, name: &str) -> VcmpResult<()>;
     fn set_server_password(&self, password: &str) -> VcmpResult<()>;
     fn set_gamemode(&self, gamemode: &str) -> VcmpResult<()>;
@@ -17,7 +17,7 @@ pub trait ServerFuncitons {
     fn set_max_players(&self, max_player: u32) -> VcmpResult<()>;
 }
 
-impl ServerFuncitons for VcmpFunctions {
+impl ServerMethods for VcmpFunctions {
     fn set_server_name(&self, name: &str) -> VcmpResult<()> {
         let name = encode_to_gbk(name);
         let name_ptr = name.as_ptr() as *const i8;
