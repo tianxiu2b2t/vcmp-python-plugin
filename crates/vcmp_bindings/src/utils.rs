@@ -1,5 +1,8 @@
 use std::fmt::Display;
 
+/*
+    Color 类
+*/
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -66,6 +69,11 @@ impl Display for Color {
     }
 }
 
+
+/*  
+    Vector 类
+*/
+
 pub struct Vector {
     pub x: f32,
     pub y: f32,
@@ -109,7 +117,7 @@ impl Display for Quaternion {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Quaternion({}, {}, {}, {})",
+            "Quaternion(x={}, y={}, z={}, w={})",
             self.x, self.y, self.z, self.w
         )
     }
