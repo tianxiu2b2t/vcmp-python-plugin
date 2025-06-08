@@ -1,7 +1,7 @@
-use crate::options::{VcmpNetworkStatisticsQueryOption, VcmpServerOption};
-use crate::{VcmpError, raw::PluginFuncs};
+use crate::options::{VcmpNetworkStatisticsQueryOption, VcmpServerOption, VcmpVehicleOption};
+use crate::{VcmpError, raw::PluginFuncs, VcmpResult};
 
-use crate::encodes::{decode_gbk, encode_to_gbk};
+use crate::encodes::{encode_to_gbk};
 
 pub mod environment;
 pub mod keybind;
@@ -58,6 +58,21 @@ impl VcmpFunctions {
         let _ = (self.inner.LogMessage)(msg_ptr);
     }
 
+    /// 载具相关的选项
+    #[inline]
+    pub fn set_vehicle_option(&self, vehicle_id: i32, option: VcmpVehicleOption, toggle: bool) -> VcmpResult<()> {
+        let code = (self.inner.SetVehicleOption)(vehicle_id, option.into(), toggle as u8);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+    /// 获取车辆选项
+    #[inline]
+    pub fn get_vehicle_option(&self, vehicle_id: i32, option: VcmpVehicleOption) -> bool {
+        (self.inner.GetVehicleOption)(vehicle_id, option.into()) != 0
+    }
 
     /// 获取网络统计信息
     #[inline]

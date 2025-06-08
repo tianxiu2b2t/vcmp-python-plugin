@@ -1,35 +1,135 @@
 use crate::func::VcmpFunctions;
-use crate::options::VcmpEntityPool;
+use crate::options::{VcmpEntityPool, VcmpVehicleOption};
 use crate::utils::{Quaternion, Vector};
 use crate::{VcmpError, VcmpResult};
 
-pub trait QueryVehicle {
-    fn is_vehicle_alive(&self, vehicle_id: i32) -> bool;
-    fn is_vehicle_streamed_for_player(&self, player_id: i32, vehicle_id: i32) -> bool;
-    fn get_vehicle_world(&self, vehicle_id: i32) -> i32;
-    fn get_vehicle_model(&self, vehicle_id: i32) -> i32;
-    fn get_vehicle_occupant(&self, vehicle_id: i32, seat_id: i32) -> i32;
-    fn get_vehicle_immunity(&self, vehicle_id: i32) -> u32;
-    fn is_vehicle_wrecked(&self, vehicle_id: i32) -> bool;
-    fn get_vehicle_position(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_rotation(&self, vehicle_id: i32) -> Quaternion;
-    fn get_vehicle_rotation_euler(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_rel_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_turn_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_rel_turn_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_spawn_position(&self, vehicle_id: i32) -> Vector; // Vector3<f32>
-    fn get_vehicle_spawn_rotation(&self, vehicle_id: i32) -> Quaternion;
-    fn get_vehicle_spawn_rotation_euler(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_idle_respawn_timer(&self, vehicle_id: i32) -> u32;
-    fn get_vehicle_health(&self, vehicle_id: i32) -> f32;
-    fn get_vehicle_color(&self, vehicle_id: i32) -> (i32, i32);
-    fn get_vehicle_part_status(&self, vehicle_id: i32, part_id: i32) -> bool;
-    fn get_vehicle_tyre_status(&self, vehicle_id: i32, tyre_id: i32) -> bool;
-    fn get_vehicle_damage_data(&self, vehicle_id: i32) -> u32;
-    fn get_vehicle_radio(&self, vehicle_id: i32) -> i32;
-    fn get_vehicle_turret_rotation(&self, vehicle_id: i32) -> (f32, f32);
+pub trait VehicleMethods {
+    fn create_vehicle(&self, model_index: i32, world: i32, position: Vector, angle: f32, primary_colour: i32, secondary_colour: i32) -> i32;
+    fn delete_vehicle(&self, vehicle_id: i32) -> VcmpResult<()>;
 }
+impl VehicleMethods for VcmpFunctions {
+    fn create_vehicle(
+        &self,
+        model_index: i32,
+        world: i32,
+        position: Vector,
+        angle: f32,
+        primary_colour: i32,
+        secondary_colour: i32,
+    ) -> i32 {
+        (self.inner.CreateVehicle)(
+            model_index,
+            world,
+            position.x,
+            position.y,
+            position.z,
+            angle,
+            primary_colour,
+            secondary_colour,
+        )
+    }
+    fn delete_vehicle(&self, vehicle_id: i32) -> VcmpResult<()> {
+        let code = (self.inner.DeleteVehicle)(vehicle_id);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+    
+}
+
+pub trait QueryVehicleOptions {
+    fn get_vehicle_option_doors_locked(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_alarm(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_lights(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_radio_locked(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_ghost(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_siren(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_single_use(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_engine_disabled(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_boot_open(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_option_bonnet_open(&self, vehicle_id: i32) -> bool;
+}
+impl QueryVehicleOptions for VcmpFunctions {
+    fn get_vehicle_option_doors_locked(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::DoorsLocked)
+    }
+    fn get_vehicle_option_alarm(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::Alarm)
+    }
+    fn get_vehicle_option_lights(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::Lights)
+    }
+    fn get_vehicle_option_radio_locked(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::RadioLocked)
+    }
+    fn get_vehicle_option_ghost(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::Ghost)
+    }
+    fn get_vehicle_option_siren(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::Siren)
+    }
+    fn get_vehicle_option_single_use(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::SingleUse)
+    }
+    fn get_vehicle_option_engine_disabled(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::EngineDisabled)
+    }
+    fn get_vehicle_option_boot_open(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::BootOpen)
+    }
+    fn get_vehicle_option_bonnet_open(&self, vehicle_id: i32) -> bool {
+        self.get_vehicle_option(vehicle_id, VcmpVehicleOption::BonnetOpen)
+    }
+    
+}
+
+pub trait SetVehicleOptions {
+    fn set_vehicle_option_doors_locked(&self, vehicle_id: i32, locked: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_alarm(&self, vehicle_id: i32, alarm: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_lights(&self, vehicle_id: i32, lights: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_radio_locked(&self, vehicle_id: i32, locked: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_ghost(&self, vehicle_id: i32, ghost: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_siren(&self, vehicle_id: i32, siren: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_single_use(&self, vehicle_id: i32, single_use: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_engine_disabled(&self, vehicle_id: i32, disabled: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_boot_open(&self, vehicle_id: i32, open: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_bonnet_open(&self, vehicle_id: i32, open: bool) -> VcmpResult<()>;
+}
+impl SetVehicleOptions for VcmpFunctions {
+    fn set_vehicle_option_doors_locked(&self, vehicle_id: i32, locked: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::DoorsLocked, locked)
+    }
+    fn set_vehicle_option_alarm(&self, vehicle_id: i32, alarm: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::Alarm, alarm)
+    }
+    fn set_vehicle_option_lights(&self, vehicle_id: i32, lights: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::Lights, lights)
+    }
+    fn set_vehicle_option_radio_locked(&self, vehicle_id: i32, locked: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::RadioLocked, locked)
+    }
+    fn set_vehicle_option_ghost(&self, vehicle_id: i32, ghost: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::Ghost, ghost)
+    }
+    fn set_vehicle_option_siren(&self, vehicle_id: i32, siren: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::Siren, siren)
+    }
+    fn set_vehicle_option_single_use(&self, vehicle_id: i32, single_use: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::SingleUse, single_use)
+    }
+    fn set_vehicle_option_engine_disabled(&self, vehicle_id: i32, disabled: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::EngineDisabled, disabled)
+    }
+    fn set_vehicle_option_boot_open(&self, vehicle_id: i32, open: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::BootOpen, open)
+    }
+    fn set_vehicle_option_bonnet_open(&self, vehicle_id: i32, open: bool) -> VcmpResult<()> {
+        self.set_vehicle_option(vehicle_id, VcmpVehicleOption::BonnetOpen, open)
+    }
+}
+
 pub trait SetVehicle {
     fn set_vehicle_world(&self, vehicle_id: i32, world_id: i32) -> VcmpResult<()>;
     fn respawn_vehicle(&self, vehicle_id: i32) -> VcmpResult<()>;
@@ -70,7 +170,6 @@ pub trait SetVehicle {
     fn set_vehicle_damage_data(&self, vehicle_id: i32, data: u32) -> VcmpResult<()>;
     fn set_vehicle_radio(&self, vehicle_id: i32, radio_id: i32) -> VcmpResult<()>;
 }
-
 impl SetVehicle for VcmpFunctions {
     fn set_vehicle_world(&self, vehicle_id: i32, world_id: i32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleWorld)(vehicle_id, world_id);
@@ -312,6 +411,36 @@ impl SetVehicle for VcmpFunctions {
     }
 }
 
+pub trait QueryVehicle {
+    fn is_vehicle_alive(&self, vehicle_id: i32) -> bool;
+    fn is_vehicle_streamed_for_player(&self, player_id: i32, vehicle_id: i32) -> bool;
+    fn get_vehicle_world(&self, vehicle_id: i32) -> i32;
+    fn get_vehicle_model(&self, vehicle_id: i32) -> i32;
+    fn get_vehicle_occupant(&self, vehicle_id: i32, seat_id: i32) -> i32;
+    fn get_vehicle_immunity(&self, vehicle_id: i32) -> u32;
+    fn is_vehicle_wrecked(&self, vehicle_id: i32) -> bool;
+    fn get_vehicle_position(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_rotation(&self, vehicle_id: i32) -> Quaternion;
+    fn get_vehicle_rotation_euler(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_speed(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_rel_speed(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_turn_speed(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_rel_turn_speed(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_spawn_position(&self, vehicle_id: i32) -> Vector; // Vector3<f32>
+    fn get_vehicle_spawn_rotation(&self, vehicle_id: i32) -> Quaternion;
+    fn get_vehicle_spawn_rotation_euler(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_idle_respawn_timer(&self, vehicle_id: i32) -> u32;
+    fn get_vehicle_health(&self, vehicle_id: i32) -> f32;
+    fn get_vehicle_color(&self, vehicle_id: i32) -> (i32, i32);
+    fn get_vehicle_part_status(&self, vehicle_id: i32, part_id: i32) -> bool;
+    fn get_vehicle_tyre_status(&self, vehicle_id: i32, tyre_id: i32) -> bool;
+    fn get_vehicle_damage_data(&self, vehicle_id: i32) -> u32;
+    fn get_vehicle_radio(&self, vehicle_id: i32) -> i32;
+    fn get_vehicle_turret_rotation(&self, vehicle_id: i32) -> (f32, f32);
+
+    fn get_vehicle_sync_source(&self, vehicle_id: i32) -> i32;
+    fn get_vehicle_sync_type(&self, vehicle_id: i32) -> i32;
+}
 impl QueryVehicle for VcmpFunctions {
     fn is_vehicle_alive(&self, vehicle_id: i32) -> bool {
         (self.inner.CheckEntityExists)(VcmpEntityPool::Vehicle.into(), vehicle_id) != 0
@@ -458,5 +587,125 @@ impl QueryVehicle for VcmpFunctions {
         let mut y = 0.0;
         (self.inner.GetVehicleTurretRotation)(vehicle_id, &mut x, &mut y);
         (x, y)
+    }
+
+    fn get_vehicle_sync_source(&self, vehicle_id: i32) -> i32 {
+        (self.inner.GetVehicleSyncSource)(vehicle_id)
+    }
+
+    fn get_vehicle_sync_type(&self, vehicle_id: i32) -> i32 {
+        (self.inner.GetVehicleSyncType)(vehicle_id)
+    }
+}
+
+pub trait VehicleHandlingRule {
+    fn reset_all_vehicle_handlings(&self);
+
+    fn exists_handling_rule(&self, model_index: i32, rule_index: i32) -> bool;
+
+    fn set_handling_rule(&self, model_index: i32, rule_index: i32, value: f64) -> VcmpResult<()>;
+    fn get_handling_rule(&self, model_index: i32, rule_index: i32) -> f64;
+
+    fn reset_handling_rule(&self, model_index: i32, rule_index: i32) -> VcmpResult<()>;
+
+    fn reset_handling(&self, model_index: i32) -> VcmpResult<()>;
+    fn exists_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> bool;
+
+    fn set_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32, value: f64) -> VcmpResult<()>;
+    fn get_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> f64;
+
+    fn reset_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> VcmpResult<()>;
+
+    fn reset_inst_handling(&self, vehicle_id: i32) -> VcmpResult<()>;
+}
+
+impl VehicleHandlingRule for VcmpFunctions {
+    fn reset_all_vehicle_handlings(&self) {
+        (self.inner.ResetAllVehicleHandlings)();
+    }
+
+    /// 检查操控规则是否存在
+    fn exists_handling_rule(&self, model_index: i32, rule_index: i32) -> bool {
+        (self.inner.ExistsHandlingRule)(model_index, rule_index) != 0
+    }
+
+    /// 设置操控规则
+    fn set_handling_rule(&self, model_index: i32, rule_index: i32, value: f64) -> VcmpResult<()> {
+        let code = (self.inner.SetHandlingRule)(model_index, rule_index, value);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// 获取操控规则
+    fn get_handling_rule(&self, model_index: i32, rule_index: i32) -> f64 {
+        (self.inner.GetHandlingRule)(model_index, rule_index)
+    }
+
+    /// 重置操控规则
+    fn reset_handling_rule(&self, model_index: i32, rule_index: i32)-> VcmpResult<()> {
+        let code = (self.inner.ResetHandlingRule)(model_index, rule_index);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// 重置车辆操控设置
+    fn reset_handling(&self, model_index: i32) -> VcmpResult<()> {
+        let code = (self.inner.ResetHandling)(model_index);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// 检查实例操控规则是否存在
+    fn exists_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> bool {
+        (self.inner.ExistsInstHandlingRule)(vehicle_id, rule_index) != 0
+    }
+
+    /// 设置实例操控规则
+    fn set_inst_handling_rule(
+        &self,
+        vehicle_id: i32,
+        rule_index: i32,
+        value: f64,
+    ) -> VcmpResult<()> {
+        let code = (self.inner.SetInstHandlingRule)(vehicle_id, rule_index, value);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// 获取实例操控规则
+    fn get_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> f64 {
+        (self.inner.GetInstHandlingRule)(vehicle_id, rule_index)
+    }
+
+    /// 重置实例操控规则
+    fn reset_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> VcmpResult<()> {
+        let code = (self.inner.ResetInstHandlingRule)(vehicle_id, rule_index);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    /// 重置车辆实例操控设置
+    fn reset_inst_handling(&self, vehicle_id: i32) -> VcmpResult<()> {
+        let code = (self.inner.ResetInstHandling)(vehicle_id);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
     }
 }
