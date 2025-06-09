@@ -1,8 +1,9 @@
 use crate::options::{VcmpNetworkStatisticsQueryOption, VcmpServerOption, VcmpVehicleOption};
-use crate::{VcmpError, raw::PluginFuncs, VcmpResult};
+use crate::{VcmpError, VcmpResult, raw::PluginFuncs};
 
-use crate::encodes::{encode_to_gbk};
+use crate::encodes::encode_to_gbk;
 
+pub mod admin;
 pub mod environment;
 pub mod keybind;
 pub mod marker;
@@ -13,7 +14,6 @@ pub mod plugin;
 pub mod server;
 pub mod vehicle;
 pub mod weapon;
-pub mod admin;
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,
@@ -61,7 +61,12 @@ impl VcmpFunctions {
 
     /// 载具相关的选项
     #[inline]
-    pub fn set_vehicle_option(&self, vehicle_id: i32, option: VcmpVehicleOption, toggle: bool) -> VcmpResult<()> {
+    pub fn set_vehicle_option(
+        &self,
+        vehicle_id: i32,
+        option: VcmpVehicleOption,
+        toggle: bool,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleOption)(vehicle_id, option.into(), toggle as u8);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -710,5 +715,4 @@ impl VcmpFunctions {
             }
         }
     */
-
 }

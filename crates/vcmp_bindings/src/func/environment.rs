@@ -382,8 +382,7 @@ impl QueryEnvironmentWorld for VcmpFunctions {
     }
 }
 
-
-/* 
+/*
     Player Settings
 */
 

@@ -20,6 +20,7 @@ pub mod options;
 pub mod plugin_info;
 /// wrapper for PluginSetting
 pub mod setting;
+pub mod states;
 pub mod utils;
 
 pub use error::{VcmpError, VcmpResult};

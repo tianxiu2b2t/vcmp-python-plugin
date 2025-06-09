@@ -1,4 +1,4 @@
-use crate::{func::VcmpFunctions};
+use crate::func::VcmpFunctions;
 
 pub trait Administration {
     fn ban_ip(&self, ip: &str);

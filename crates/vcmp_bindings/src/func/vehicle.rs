@@ -4,7 +4,15 @@ use crate::utils::{Quaternion, Vector};
 use crate::{VcmpError, VcmpResult};
 
 pub trait VehicleMethods {
-    fn create_vehicle(&self, model_index: i32, world: i32, position: Vector, angle: f32, primary_colour: i32, secondary_colour: i32) -> i32;
+    fn create_vehicle(
+        &self,
+        model_index: i32,
+        world: i32,
+        position: Vector,
+        angle: f32,
+        primary_colour: i32,
+        secondary_colour: i32,
+    ) -> i32;
     fn delete_vehicle(&self, vehicle_id: i32) -> VcmpResult<()>;
 }
 impl VehicleMethods for VcmpFunctions {
@@ -36,7 +44,6 @@ impl VehicleMethods for VcmpFunctions {
             Ok(())
         }
     }
-    
 }
 
 pub trait QueryVehicleOptions {
@@ -82,7 +89,6 @@ impl QueryVehicleOptions for VcmpFunctions {
     fn get_vehicle_option_bonnet_open(&self, vehicle_id: i32) -> bool {
         self.get_vehicle_option(vehicle_id, VcmpVehicleOption::BonnetOpen)
     }
-    
 }
 
 pub trait SetVehicleOptions {
@@ -93,7 +99,8 @@ pub trait SetVehicleOptions {
     fn set_vehicle_option_ghost(&self, vehicle_id: i32, ghost: bool) -> VcmpResult<()>;
     fn set_vehicle_option_siren(&self, vehicle_id: i32, siren: bool) -> VcmpResult<()>;
     fn set_vehicle_option_single_use(&self, vehicle_id: i32, single_use: bool) -> VcmpResult<()>;
-    fn set_vehicle_option_engine_disabled(&self, vehicle_id: i32, disabled: bool) -> VcmpResult<()>;
+    fn set_vehicle_option_engine_disabled(&self, vehicle_id: i32, disabled: bool)
+    -> VcmpResult<()>;
     fn set_vehicle_option_boot_open(&self, vehicle_id: i32, open: bool) -> VcmpResult<()>;
     fn set_vehicle_option_bonnet_open(&self, vehicle_id: i32, open: bool) -> VcmpResult<()>;
 }
@@ -119,7 +126,11 @@ impl SetVehicleOptions for VcmpFunctions {
     fn set_vehicle_option_single_use(&self, vehicle_id: i32, single_use: bool) -> VcmpResult<()> {
         self.set_vehicle_option(vehicle_id, VcmpVehicleOption::SingleUse, single_use)
     }
-    fn set_vehicle_option_engine_disabled(&self, vehicle_id: i32, disabled: bool) -> VcmpResult<()> {
+    fn set_vehicle_option_engine_disabled(
+        &self,
+        vehicle_id: i32,
+        disabled: bool,
+    ) -> VcmpResult<()> {
         self.set_vehicle_option(vehicle_id, VcmpVehicleOption::EngineDisabled, disabled)
     }
     fn set_vehicle_option_boot_open(&self, vehicle_id: i32, open: bool) -> VcmpResult<()> {
@@ -611,7 +622,12 @@ pub trait VehicleHandlingRule {
     fn reset_handling(&self, model_index: i32) -> VcmpResult<()>;
     fn exists_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> bool;
 
-    fn set_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32, value: f64) -> VcmpResult<()>;
+    fn set_inst_handling_rule(
+        &self,
+        vehicle_id: i32,
+        rule_index: i32,
+        value: f64,
+    ) -> VcmpResult<()>;
     fn get_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> f64;
 
     fn reset_inst_handling_rule(&self, vehicle_id: i32, rule_index: i32) -> VcmpResult<()>;
@@ -645,7 +661,7 @@ impl VehicleHandlingRule for VcmpFunctions {
     }
 
     /// 重置操控规则
-    fn reset_handling_rule(&self, model_index: i32, rule_index: i32)-> VcmpResult<()> {
+    fn reset_handling_rule(&self, model_index: i32, rule_index: i32) -> VcmpResult<()> {
         let code = (self.inner.ResetHandlingRule)(model_index, rule_index);
         if code != 0 {
             Err(VcmpError::from(code))

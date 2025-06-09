@@ -8,7 +8,7 @@ pub enum VcmpPlayerState {
     EnterDriver,
     EnterPassenger,
     Exit,
-    Unspawned
+    Unspawned,
 }
 
 impl From<i32> for VcmpPlayerState {
@@ -27,4 +27,3 @@ impl From<i32> for VcmpPlayerState {
         }
     }
 }
-

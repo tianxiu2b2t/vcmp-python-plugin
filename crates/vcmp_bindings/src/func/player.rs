@@ -1,6 +1,9 @@
 use std::ffi::c_void;
 
-use crate::{encodes::decode_gbk, func::VcmpFunctions, utils::{Color, Vector}, VcmpError, VcmpResult};
+use crate::options::VcmpPlayerOption;
+use crate::states::VcmpPlayerState;
+use crate::utils::{Color, Vector};
+use crate::{VcmpError, VcmpResult, encodes::decode_gbk, func::VcmpFunctions};
 
 pub trait PlayerMethods {
     /// 发送 Stream
@@ -11,7 +14,6 @@ pub trait PlayerMethods {
 
     /// 发送公告
     fn send_announce(&self, player_id: i32, announce_type: i32, message: &str) -> VcmpResult<()>;
-
 
     fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vector>);
 
@@ -26,6 +28,21 @@ pub trait PlayerMethods {
     fn get_player_uid2(&self, player: i32) -> String;
     fn kick_player(&self, player_id: i32);
     fn ban_player(&self, player_id: i32);
+
+    fn is_player_connected(&self, player: i32) -> bool;
+    fn is_player_streamed_for_target(&self, player: i32, target: i32) -> bool;
+
+    fn get_player_key(&self, player: i32) -> u32;
+
+    fn get_player_name(&self, player: i32) -> String;
+
+    fn set_player_name(&self, player: i32, name: &str);
+
+    fn get_player_state(&self, player: i32) -> VcmpPlayerState;
+
+    fn set_player_option(&self, player: i32, option: VcmpPlayerOption, value: bool);
+
+    fn get_player_option(&self, player: i32, option: VcmpPlayerOption) -> bool;
 }
 
 impl PlayerMethods for VcmpFunctions {
@@ -65,20 +82,24 @@ impl PlayerMethods for VcmpFunctions {
     }
 
     /*
-    
-     */
+
+    */
 
     fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vector>) {
         let world = (self.inner.GetPlayerUniqueWorld)(player_id);
 
-        let pos = position.unwrap_or(Vector { x: f32::NAN, y: f32::NAN, z: f32::NAN });
+        let pos = position.unwrap_or(Vector {
+            x: f32::NAN,
+            y: f32::NAN,
+            z: f32::NAN,
+        });
         let (x, y, z) = (pos.x, pos.y, pos.z);
         (self.inner.PlaySound)(world, sound, x, y, z);
     }
 
     /*
-        Admins?
-     */
+       Admins?
+    */
 
     fn is_player_admin(&self, player_id: i32) -> bool {
         (self.inner.IsPlayerAdmin)(player_id) != 0
@@ -113,4 +134,38 @@ impl PlayerMethods for VcmpFunctions {
         (self.inner.BanPlayer)(player);
     }
 
+    fn is_player_connected(&self, player: i32) -> bool {
+        (self.inner.IsPlayerConnected)(player) != 0
+    }
+    fn is_player_streamed_for_target(&self, player: i32, target: i32) -> bool {
+        (self.inner.IsPlayerStreamedForPlayer)(player, target) != 0
+    }
+
+    fn get_player_key(&self, player: i32) -> u32 {
+        (self.inner.GetPlayerKey)(player)
+    }
+
+    fn get_player_name(&self, player: i32) -> String {
+        let buf = vec![0u8; 1024];
+        let buf_ptr = buf.as_ptr() as *mut i8;
+        let _ = (self.inner.GetPlayerUID)(player, buf_ptr, 1024);
+        decode_gbk(&buf)
+    }
+
+    fn set_player_name(&self, player: i32, name: &str) {
+        let name_ptr = name.as_ptr() as *const i8;
+        (self.inner.SetPlayerName)(player, name_ptr);
+    }
+
+    fn get_player_state(&self, player: i32) -> VcmpPlayerState {
+        VcmpPlayerState::from((self.inner.GetPlayerState)(player))
+    }
+
+    fn set_player_option(&self, player: i32, option: VcmpPlayerOption, value: bool) {
+        (self.inner.SetPlayerOption)(player, option.into(), value as u8);
+    }
+
+    fn get_player_option(&self, player: i32, option: VcmpPlayerOption) -> bool {
+        (self.inner.GetPlayerOption)(player, option.into()) != 0
+    }
 }
