@@ -44,7 +44,7 @@ pub trait PlayerMethods {
 
     fn get_player_option(&self, player: i32, option: VcmpPlayerOption) -> bool;
 
-        fn set_player_world(&self, player: i32, world: i32) -> VcmpResult<()>;
+    fn set_player_world(&self, player: i32, world: i32) -> VcmpResult<()>;
     fn get_player_world(&self, player: i32) -> i32;
     fn set_player_select_world(&self, player: i32, world: i32) -> VcmpResult<()>;
     fn get_player_select_world(&self, player: i32) -> i32;
@@ -59,7 +59,7 @@ pub trait PlayerMethods {
     fn get_player_color(&self, player: i32) -> Color;
     fn is_player_spawned(&self, player: i32) -> bool;
     fn spawn_player(&self, player: i32) -> VcmpResult<()>;
-    fn force_player_select(&self, player: i32)-> VcmpResult<()>;
+    fn force_player_select(&self, player: i32) -> VcmpResult<()>;
     fn force_all_select(&self);
     fn is_player_typing(&self, player: i32) -> bool;
     fn give_player_money(&self, player: i32, amount: i32) -> VcmpResult<()>;
@@ -116,7 +116,8 @@ pub trait PlayerMethods {
     fn set_camera_position(&self, player: i32, position: Vector, look: Vector) -> VcmpResult<()>;
     fn restore_camera(&self, player: i32) -> VcmpResult<()>;
     fn is_camera_locked(&self, player: i32) -> bool;
-    fn set_player_animation(&self, player: i32, group_id: i32, animation_id: i32) -> VcmpResult<()>;
+    fn set_player_animation(&self, player: i32, group_id: i32, animation_id: i32)
+    -> VcmpResult<()>;
     fn get_player_standing_on_vehicle(&self, player: i32) -> i32;
     fn get_player_standing_on_object(&self, player: i32) -> i32;
     fn is_player_away(&self, player: i32) -> bool;
@@ -544,7 +545,7 @@ impl PlayerMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector {x, y, z})
+            Ok(Vector { x, y, z })
         }
     }
 
@@ -556,7 +557,7 @@ impl PlayerMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector {x, y, z})
+            Ok(Vector { x, y, z })
         }
     }
 
@@ -678,13 +679,10 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn set_camera_position(
-        &self,
-        player: i32,
-        position: Vector,
-        look: Vector,
-    ) -> VcmpResult<()> {
-        let code = (self.inner.SetCameraPosition)(player, position.x, position.y, position.z, look.x, look.y, look.z);
+    fn set_camera_position(&self, player: i32, position: Vector, look: Vector) -> VcmpResult<()> {
+        let code = (self.inner.SetCameraPosition)(
+            player, position.x, position.y, position.z, look.x, look.y, look.z,
+        );
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -705,7 +703,12 @@ impl PlayerMethods for VcmpFunctions {
         (self.inner.IsCameraLocked)(player) != 0
     }
 
-    fn set_player_animation(&self, player: i32, group_id: i32, animation_id: i32) -> VcmpResult<()> {
+    fn set_player_animation(
+        &self,
+        player: i32,
+        group_id: i32,
+        animation_id: i32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetPlayerAnimation)(player, group_id, animation_id);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -770,6 +773,4 @@ impl PlayerMethods for VcmpFunctions {
             Ok(())
         }
     }
-
-
 }
