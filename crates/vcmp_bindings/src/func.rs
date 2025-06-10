@@ -9,6 +9,7 @@ pub mod keybind;
 pub mod marker;
 pub mod misc;
 pub mod network;
+pub mod pickup;
 pub mod player;
 pub mod plugin;
 pub mod server;
