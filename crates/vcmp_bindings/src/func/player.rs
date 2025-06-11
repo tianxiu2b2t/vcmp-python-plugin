@@ -237,7 +237,7 @@ impl PlayerMethods for VcmpFunctions {
     fn get_player_name(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
-        let _ = (self.inner.GetPlayerUID)(player, buf_ptr, 1024);
+        let _ = (self.inner.GetPlayerName)(player, buf_ptr, 1024);
         decode_gbk(&buf)
     }
 
