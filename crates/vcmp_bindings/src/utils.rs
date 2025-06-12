@@ -60,13 +60,13 @@ impl Display for Color {
     Vector 类
 */
 
-pub struct Vector {
+pub struct Vectorf32 {
     pub x: f32,
     pub y: f32,
     pub z: f32,
 }
 
-impl Vector {
+impl Vectorf32 {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
     }
@@ -81,7 +81,7 @@ impl Vector {
     }
 }
 
-impl Display for Vector {
+impl Display for Vectorf32 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Vector(x={}, y={}, z={})", self.x, self.y, self.z)
     }
@@ -91,20 +91,20 @@ impl Display for Vector {
     Quaternion 类
 */
 
-pub struct Quaternion {
+pub struct Quaternionf32 {
     pub x: f32,
     pub y: f32,
     pub z: f32,
     pub w: f32,
 }
 
-impl Quaternion {
+impl Quaternionf32 {
     pub fn new(x: f32, y: f32, z: f32, w: f32) -> Self {
         Self { x, y, z, w }
     }
 }
 
-impl Display for Quaternion {
+impl Display for Quaternionf32 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -229,7 +229,7 @@ impl Keybind {
 pub struct Marker {
     pub marker: i32,
     pub world: i32,
-    pub position: Vector,
+    pub position: Vectorf32,
     pub scale: i32,
     pub color: Color,
     pub sprite: i32,
@@ -239,7 +239,7 @@ impl Marker {
     pub fn new(
         marker: i32,
         world: i32,
-        position: Vector,
+        position: Vectorf32,
         scale: i32,
         color: Color,
         sprite: i32,
@@ -260,7 +260,7 @@ pub struct Pickup {
     pub model: i32,
     pub world: i32,
     pub quantity: i32,
-    pub position: Vector,
+    pub position: Vectorf32,
     pub alpha: i32,
     pub automatic: bool,
 }
@@ -270,7 +270,7 @@ impl Pickup {
         model: i32,
         world: i32,
         quantity: i32,
-        position: Vector,
+        position: Vectorf32,
         alpha: i32,
         automatic: bool,
     ) -> Self {

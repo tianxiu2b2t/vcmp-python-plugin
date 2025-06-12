@@ -2,7 +2,7 @@ use std::ffi::c_void;
 
 use crate::options::VcmpPlayerOption;
 use crate::states::VcmpPlayerState;
-use crate::utils::{Color, Vector};
+use crate::utils::{Color, Vectorf32};
 use crate::{VcmpError, VcmpResult, encodes::decode_gbk, func::VcmpFunctions};
 
 pub trait PlayerMethods {
@@ -15,7 +15,7 @@ pub trait PlayerMethods {
     /// 发送公告
     fn send_announce(&self, player_id: i32, announce_type: i32, message: &str) -> VcmpResult<()>;
 
-    fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vector>);
+    fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vectorf32>);
 
     /*
         Admins?
@@ -77,17 +77,17 @@ pub trait PlayerMethods {
     fn get_player_armour(&self, player: i32) -> f32;
     fn set_player_immunity(&self, player: i32, flags: u32) -> VcmpResult<()>;
     fn get_player_immunity(&self, player: i32) -> u32;
-    fn set_player_position(&self, player: i32, position: Vector) -> VcmpResult<()>;
-    fn get_player_position(&self, player: i32) -> VcmpResult<Vector>;
+    fn set_player_position(&self, player: i32, position: Vectorf32) -> VcmpResult<()>;
+    fn get_player_position(&self, player: i32) -> VcmpResult<Vectorf32>;
     fn set_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
-    fn get_player_speed(&self, player: i32) -> VcmpResult<Vector>;
+    fn get_player_speed(&self, player: i32) -> VcmpResult<Vectorf32>;
     fn add_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
     fn set_player_angle(&self, player: i32, angle: f32) -> VcmpResult<()>;
     fn get_player_angle(&self, player: i32) -> f32;
     fn set_player_alpha(&self, player: i32, alpha: i32, fade_time: u32) -> VcmpResult<()>;
     fn get_player_alpha(&self, player: i32) -> i32;
-    fn get_player_aim_position(&self, player: i32) -> VcmpResult<Vector>;
-    fn get_player_aim_direction(&self, player: i32) -> VcmpResult<Vector>;
+    fn get_player_aim_position(&self, player: i32) -> VcmpResult<Vectorf32>;
+    fn get_player_aim_direction(&self, player: i32) -> VcmpResult<Vectorf32>;
     fn is_player_on_fire(&self, player: i32) -> bool;
     fn is_player_crouching(&self, player: i32) -> bool;
     fn get_player_action(&self, player: i32) -> i32;
@@ -113,7 +113,7 @@ pub trait PlayerMethods {
     fn get_player_ammo_at_slot(&self, player: i32, slot: i32) -> i32;
     fn remove_player_weapon(&self, player: i32, weapon_id: i32) -> VcmpResult<()>;
     fn remove_all_weapons(&self, player: i32) -> VcmpResult<()>;
-    fn set_camera_position(&self, player: i32, position: Vector, look: Vector) -> VcmpResult<()>;
+    fn set_camera_position(&self, player: i32, position: Vectorf32, look: Vectorf32) -> VcmpResult<()>;
     fn restore_camera(&self, player: i32) -> VcmpResult<()>;
     fn is_camera_locked(&self, player: i32) -> bool;
     fn set_player_animation(&self, player: i32, group_id: i32, animation_id: i32)
@@ -152,7 +152,7 @@ pub trait PlayerMethods {
 
     fn is_player_3d_arrow_for_target(&self, player: i32, target: i32) -> bool;
 
-    fn interpolate_camera_look_at(&self, player: i32, look: Vector, time: u32) -> VcmpResult<()>;
+    fn interpolate_camera_look_at(&self, player: i32, look: Vectorf32, time: u32) -> VcmpResult<()>;
 }
 
 impl PlayerMethods for VcmpFunctions {
@@ -195,10 +195,10 @@ impl PlayerMethods for VcmpFunctions {
 
     */
 
-    fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vector>) {
+    fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vectorf32>) {
         let world = (self.inner.GetPlayerUniqueWorld)(player_id);
 
-        let pos = position.unwrap_or(Vector {
+        let pos = position.unwrap_or(Vectorf32 {
             x: f32::NAN,
             y: f32::NAN,
             z: f32::NAN,
@@ -481,7 +481,7 @@ impl PlayerMethods for VcmpFunctions {
         (self.inner.GetPlayerImmunityFlags)(player)
     }
 
-    fn set_player_position(&self, player: i32, position: Vector) -> VcmpResult<()> {
+    fn set_player_position(&self, player: i32, position: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetPlayerPosition)(player, position.x, position.y, position.z);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -490,7 +490,7 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn get_player_position(&self, player: i32) -> VcmpResult<Vector> {
+    fn get_player_position(&self, player: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -498,7 +498,7 @@ impl PlayerMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 
@@ -511,7 +511,7 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn get_player_speed(&self, player: i32) -> VcmpResult<Vector> {
+    fn get_player_speed(&self, player: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -519,7 +519,7 @@ impl PlayerMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 
@@ -558,7 +558,7 @@ impl PlayerMethods for VcmpFunctions {
         (self.inner.GetPlayerAlpha)(player)
     }
 
-    fn get_player_aim_position(&self, player: i32) -> VcmpResult<Vector> {
+    fn get_player_aim_position(&self, player: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -566,11 +566,11 @@ impl PlayerMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 
-    fn get_player_aim_direction(&self, player: i32) -> VcmpResult<Vector> {
+    fn get_player_aim_direction(&self, player: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -578,7 +578,7 @@ impl PlayerMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 
@@ -700,7 +700,7 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn set_camera_position(&self, player: i32, position: Vector, look: Vector) -> VcmpResult<()> {
+    fn set_camera_position(&self, player: i32, position: Vectorf32, look: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetCameraPosition)(
             player, position.x, position.y, position.z, look.x, look.y, look.z,
         );
@@ -855,7 +855,7 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn interpolate_camera_look_at(&self, player: i32, look: Vector, time: u32) -> VcmpResult<()> {
+    fn interpolate_camera_look_at(&self, player: i32, look: Vectorf32, time: u32) -> VcmpResult<()> {
         let code = (self.inner.InterpolateCameraLookAt)(player, look.x, look.y, look.z, time);
         if code != 0 {
             Err(VcmpError::from(code))

@@ -18,6 +18,21 @@ pub mod server;
 pub mod vehicle;
 pub mod weapon;
 
+// use 所有的 trait
+pub use admin::AdministrationMethods;
+pub use checkpoint::CheckPointMethods;
+pub use environment::{EnvironmentMethods, QueryEnvironmentOption, SetEnvironmentOption};
+pub use keybind::KeybindMethods;
+pub use marker::MarkerMethods;
+pub use misc::MiscMethods;
+pub use network::QueryNetworkStatistics;
+pub use object::ObjectMethods;
+pub use pickup::PickupMethods;
+pub use player::PlayerMethods;
+pub use plugin::PluginMethods;
+pub use server::ServerMethods;
+pub use vehicle::VehicleMethods;
+
 pub struct VcmpFunctions {
     inner: PluginFuncs,
 }

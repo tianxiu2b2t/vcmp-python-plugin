@@ -1,11 +1,11 @@
 use crate::{
     VcmpError, VcmpResult,
     func::VcmpFunctions,
-    utils::{Quaternion, Vector},
+    utils::{Quaternionf32, Vectorf32},
 };
 
 pub trait ObjectMethods {
-    fn create_object(&self, model_index: i32, world: i32, position: Vector, alpha: i32) -> i32;
+    fn create_object(&self, model_index: i32, world: i32, position: Vectorf32, alpha: i32) -> i32;
 
     fn delete_object(&self, object_id: i32) -> VcmpResult<()>;
 
@@ -41,39 +41,39 @@ pub trait ObjectMethods {
 
     fn set_object_position(&self, object_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
 
-    fn get_object_position(&self, object_id: i32) -> VcmpResult<Vector>;
+    fn get_object_position(&self, object_id: i32) -> VcmpResult<Vectorf32>;
 
     fn rotate_object_to(
         &self,
         object_id: i32,
-        rotation: Quaternion,
+        rotation: Quaternionf32,
         duration: u32,
     ) -> VcmpResult<()>;
 
     fn rotate_object_to_euler(
         &self,
         object_id: i32,
-        rotation: Vector,
+        rotation: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()>;
 
     fn rotate_object_by(
         &self,
         object_id: i32,
-        rotation: Quaternion,
+        rotation: Quaternionf32,
         duration: u32,
     ) -> VcmpResult<()>;
 
     fn rotate_object_by_euler(
         &self,
         object_id: i32,
-        rotation: Vector,
+        rotation: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()>;
 
-    fn get_object_rotation(&self, object_id: i32) -> VcmpResult<Quaternion>;
+    fn get_object_rotation(&self, object_id: i32) -> VcmpResult<Quaternionf32>;
 
-    fn get_object_rotation_euler(&self, object_id: i32) -> VcmpResult<Vector>;
+    fn get_object_rotation_euler(&self, object_id: i32) -> VcmpResult<Vectorf32>;
 
     fn set_object_shot_report_enabled(&self, object_id: i32, toggle: bool) -> VcmpResult<()>;
 
@@ -85,7 +85,7 @@ pub trait ObjectMethods {
 }
 
 impl ObjectMethods for VcmpFunctions {
-    fn create_object(&self, model_index: i32, world: i32, position: Vector, alpha: i32) -> i32 {
+    fn create_object(&self, model_index: i32, world: i32, position: Vectorf32, alpha: i32) -> i32 {
         (self.inner.CreateObject)(
             model_index,
             world,
@@ -180,7 +180,7 @@ impl ObjectMethods for VcmpFunctions {
         }
     }
 
-    fn get_object_position(&self, object_id: i32) -> VcmpResult<Vector> {
+    fn get_object_position(&self, object_id: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -188,14 +188,14 @@ impl ObjectMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 
     fn rotate_object_to(
         &self,
         object_id: i32,
-        rotation: Quaternion,
+        rotation: Quaternionf32,
         duration: u32,
     ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectTo)(
@@ -211,7 +211,7 @@ impl ObjectMethods for VcmpFunctions {
     fn rotate_object_to_euler(
         &self,
         object_id: i32,
-        rotation: Vector,
+        rotation: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectToEuler)(
@@ -227,7 +227,7 @@ impl ObjectMethods for VcmpFunctions {
     fn rotate_object_by(
         &self,
         object_id: i32,
-        rotation: Quaternion,
+        rotation: Quaternionf32,
         duration: u32,
     ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectBy)(
@@ -243,7 +243,7 @@ impl ObjectMethods for VcmpFunctions {
     fn rotate_object_by_euler(
         &self,
         object_id: i32,
-        rotation: Vector,
+        rotation: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()> {
         let code = (self.inner.RotateObjectByEuler)(
@@ -256,7 +256,7 @@ impl ObjectMethods for VcmpFunctions {
         }
     }
 
-    fn get_object_rotation(&self, object_id: i32) -> VcmpResult<Quaternion> {
+    fn get_object_rotation(&self, object_id: i32) -> VcmpResult<Quaternionf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -265,11 +265,11 @@ impl ObjectMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Quaternion { x, y, z, w })
+            Ok(Quaternionf32 { x, y, z, w })
         }
     }
 
-    fn get_object_rotation_euler(&self, object_id: i32) -> VcmpResult<Vector> {
+    fn get_object_rotation_euler(&self, object_id: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -277,7 +277,7 @@ impl ObjectMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 
