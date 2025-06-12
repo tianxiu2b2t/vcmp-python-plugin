@@ -1,3 +1,4 @@
+from collections import defaultdict
 from pathlib import Path
 
 
@@ -11,12 +12,11 @@ SRC_FILES = [
     Path("./crates/vcmp_bindings/src/func")
 ]
 
-refs: list[str] = []
+refs: defaultdict[str, int] = defaultdict(int)
 
 def find_ref(content: str):
     for func in funcs:
-        if f".{func})" in content:
-            refs.append(func)
+        refs[func] += content.count(f".{func})")
     
 def open_and_find_ref(file: Path):
     with open(file, "r", encoding="utf-8") as f:
@@ -40,7 +40,6 @@ if __name__ == "__main__":
         funcs.append(func)
         content = content[end_pos + 1 :]
 
-    refs = []
 
     files = []
     for src_file in SRC_FILES:
@@ -54,6 +53,6 @@ if __name__ == "__main__":
     for file in files:
         open_and_find_ref(file)
 
-    unref = set(funcs) - set(refs)
-    print(unref)
+    for func, count in refs.items():
+        print(f"{func}: {count}")
 
