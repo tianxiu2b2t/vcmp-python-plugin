@@ -16,6 +16,7 @@ pub mod plugin;
 pub mod server;
 pub mod vehicle;
 pub mod weapon;
+pub mod object;
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,
