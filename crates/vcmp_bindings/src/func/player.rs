@@ -132,6 +132,22 @@ pub trait PlayerMethods {
         server_password: &str,
         user_password: &str,
     ) -> VcmpResult<()>;
+
+    fn get_player_module_list(&self, player: i32) -> VcmpResult<()>;
+    fn kill_player(&self, player: i32) -> VcmpResult<()>;
+    fn set_player_drunk_handling(&self, player: i32, drunk_level: u32) -> VcmpResult<()>;
+
+    fn get_player_drunk_handling(&self, player: i32) -> u32;
+
+    fn set_player_drunk_visuals(&self, player: i32, drunk: bool) -> VcmpResult<()>;
+
+    fn get_player_drunk_visuals(&self, player: i32) -> bool;
+
+    fn set_player_3d_arrow_for_target(&self, player: i32, target: i32, show: bool) -> VcmpResult<()>;
+
+    fn is_player_3d_arrow_for_target(&self, player: i32, target: i32) -> bool;
+
+    fn interpolate_camera_look_at(&self, player: i32, look: Vector, time: u32) -> VcmpResult<()>;
 }
 
 impl PlayerMethods for VcmpFunctions {
@@ -767,6 +783,70 @@ impl PlayerMethods for VcmpFunctions {
             c_user_password.as_ptr(),
         );
 
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn get_player_module_list(&self, player: i32) -> VcmpResult<()> {
+        let code = (self.inner.GetPlayerModuleList)(player);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+    fn kill_player(&self, player: i32) -> VcmpResult<()> {
+        let code = (self.inner.KillPlayer)(player);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+    fn set_player_drunk_handling(&self, player: i32, drunk_level: u32) -> VcmpResult<()> {
+        let code = (self.inner.SetPlayerDrunkHandling)(player, drunk_level);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn get_player_drunk_handling(&self, player: i32) -> u32 {
+        (self.inner.GetPlayerDrunkHandling)(player)
+    }
+
+    fn set_player_drunk_visuals(&self, player: i32, drunk: bool) -> VcmpResult<()> {
+        let code = (self.inner.SetPlayerDrunkVisuals)(player, drunk as u8);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn get_player_drunk_visuals(&self, player: i32) -> bool {
+        (self.inner.GetPlayerDrunkVisuals)(player) != 0
+    }
+
+    fn is_player_3d_arrow_for_target(&self, player: i32, target: i32) -> bool {
+        (self.inner.GetPlayer3DArrowForPlayer)(player, target) != 0
+    }
+
+    fn set_player_3d_arrow_for_target(&self, player: i32, target: i32, show: bool) -> VcmpResult<()> {
+        let code = (self.inner.SetPlayer3DArrowForPlayer)(player, target, show as u8);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
+
+    fn interpolate_camera_look_at(&self, player: i32, look: Vector, time: u32) -> VcmpResult<()> {
+        let code = (self.inner.InterpolateCameraLookAt)(player, look.x, look.y, look.z, time);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
