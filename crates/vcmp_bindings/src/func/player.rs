@@ -113,7 +113,12 @@ pub trait PlayerMethods {
     fn get_player_ammo_at_slot(&self, player: i32, slot: i32) -> i32;
     fn remove_player_weapon(&self, player: i32, weapon_id: i32) -> VcmpResult<()>;
     fn remove_all_weapons(&self, player: i32) -> VcmpResult<()>;
-    fn set_camera_position(&self, player: i32, position: Vectorf32, look: Vectorf32) -> VcmpResult<()>;
+    fn set_camera_position(
+        &self,
+        player: i32,
+        position: Vectorf32,
+        look: Vectorf32,
+    ) -> VcmpResult<()>;
     fn restore_camera(&self, player: i32) -> VcmpResult<()>;
     fn is_camera_locked(&self, player: i32) -> bool;
     fn set_player_animation(&self, player: i32, group_id: i32, animation_id: i32)
@@ -152,7 +157,8 @@ pub trait PlayerMethods {
 
     fn is_player_3d_arrow_for_target(&self, player: i32, target: i32) -> bool;
 
-    fn interpolate_camera_look_at(&self, player: i32, look: Vectorf32, time: u32) -> VcmpResult<()>;
+    fn interpolate_camera_look_at(&self, player: i32, look: Vectorf32, time: u32)
+    -> VcmpResult<()>;
 }
 
 impl PlayerMethods for VcmpFunctions {
@@ -700,7 +706,12 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn set_camera_position(&self, player: i32, position: Vectorf32, look: Vectorf32) -> VcmpResult<()> {
+    fn set_camera_position(
+        &self,
+        player: i32,
+        position: Vectorf32,
+        look: Vectorf32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetCameraPosition)(
             player, position.x, position.y, position.z, look.x, look.y, look.z,
         );
@@ -855,7 +866,12 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn interpolate_camera_look_at(&self, player: i32, look: Vectorf32, time: u32) -> VcmpResult<()> {
+    fn interpolate_camera_look_at(
+        &self,
+        player: i32,
+        look: Vectorf32,
+        time: u32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.InterpolateCameraLookAt)(player, look.x, look.y, look.z, time);
         if code != 0 {
             Err(VcmpError::from(code))

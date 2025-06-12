@@ -31,7 +31,11 @@ pub use pickup::PickupMethods;
 pub use player::PlayerMethods;
 pub use plugin::PluginMethods;
 pub use server::ServerMethods;
-pub use vehicle::VehicleMethods;
+pub use vehicle::{
+    QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods,
+    VehicleMethods,
+};
+pub use weapon::WeaponMethods;
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,

@@ -190,9 +190,16 @@ pub trait SetVehicle {
     fn set_vehicle_add_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
     fn set_vehicle_add_rel_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
     fn set_vehicle_spawn_position(&self, vehicle_id: i32, position: Vectorf32) -> VcmpResult<()>;
-    fn set_vehicle_spawn_rotation(&self, vehicle_id: i32, rotation: Quaternionf32) -> VcmpResult<()>;
-    fn set_vehicle_spawn_rotation_euler(&self, vehicle_id: i32, rotation: Vectorf32)
-    -> VcmpResult<()>;
+    fn set_vehicle_spawn_rotation(
+        &self,
+        vehicle_id: i32,
+        rotation: Quaternionf32,
+    ) -> VcmpResult<()>;
+    fn set_vehicle_spawn_rotation_euler(
+        &self,
+        vehicle_id: i32,
+        rotation: Vectorf32,
+    ) -> VcmpResult<()>;
     fn set_vehicle_idle_respawn_timer(&self, vehicle_id: i32, timer: u32) -> VcmpResult<()>;
     fn set_vehicle_health(&self, vehicle_id: i32, health: f32) -> VcmpResult<()>;
     fn set_vehicle_color(
@@ -353,7 +360,11 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_spawn_rotation(&self, vehicle_id: i32, rotation: Quaternionf32) -> VcmpResult<()> {
+    fn set_vehicle_spawn_rotation(
+        &self,
+        vehicle_id: i32,
+        rotation: Quaternionf32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpawnRotation)(
             vehicle_id, rotation.x, rotation.y, rotation.z, rotation.w,
         );
@@ -651,7 +662,7 @@ impl QueryVehicle for VcmpFunctions {
     }
 }
 
-pub trait VehicleHandlingRule {
+pub trait VehicleHandlingMethods {
     fn reset_all_vehicle_handlings(&self);
 
     fn exists_handling_rule(&self, model_index: i32, rule_index: i32) -> bool;
@@ -677,7 +688,7 @@ pub trait VehicleHandlingRule {
     fn reset_inst_handling(&self, vehicle_id: i32) -> VcmpResult<()>;
 }
 
-impl VehicleHandlingRule for VcmpFunctions {
+impl VehicleHandlingMethods for VcmpFunctions {
     fn reset_all_vehicle_handlings(&self) {
         (self.inner.ResetAllVehicleHandlings)();
     }
