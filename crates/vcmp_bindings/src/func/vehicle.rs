@@ -49,7 +49,7 @@ impl VehicleMethods for VcmpFunctions {
         }
     }
 
-    fn get_vehicle_3d_arrow_for_player(&self, vehicle_id: i32, player_id: i32) -> bool {
+    fn is_vehicle_3d_arrow_for_player(&self, vehicle_id: i32, player_id: i32) -> bool {
         (self.inner.GetVehicle3DArrowForPlayer)(vehicle_id, player_id) != 0
     }
 
@@ -197,6 +197,7 @@ pub trait SetVehicle {
     -> VcmpResult<()>;
     fn set_vehicle_damage_data(&self, vehicle_id: i32, data: u32) -> VcmpResult<()>;
     fn set_vehicle_radio(&self, vehicle_id: i32, radio_id: i32) -> VcmpResult<()>;
+    fn set_vehicle_lights_data(&self, vehicle_id: i32, data: u32) -> VcmpResult<()>;
 }
 impl SetVehicle for VcmpFunctions {
     fn set_vehicle_world(&self, vehicle_id: i32, world_id: i32) -> VcmpResult<()> {
@@ -437,6 +438,15 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
+
+    fn set_vehicle_lights_data(&self, vehicle_id: i32, data: u32) -> VcmpResult<()> {
+        let code = (self.inner.SetVehicleLightsData)(vehicle_id, data);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
+    }
 }
 
 pub trait QueryVehicle {
@@ -468,6 +478,7 @@ pub trait QueryVehicle {
 
     fn get_vehicle_sync_source(&self, vehicle_id: i32) -> i32;
     fn get_vehicle_sync_type(&self, vehicle_id: i32) -> i32;
+    fn get_vehicle_lights_data(&self, vehicle_id: i32) -> u32;
 }
 impl QueryVehicle for VcmpFunctions {
     fn is_vehicle_alive(&self, vehicle_id: i32) -> bool {
@@ -623,6 +634,10 @@ impl QueryVehicle for VcmpFunctions {
 
     fn get_vehicle_sync_type(&self, vehicle_id: i32) -> i32 {
         (self.inner.GetVehicleSyncType)(vehicle_id)
+    }
+
+    fn get_vehicle_lights_data(&self, vehicle_id: i32) -> u32 {
+        (self.inner.GetVehicleLightsData)(vehicle_id)
     }
 }
 
