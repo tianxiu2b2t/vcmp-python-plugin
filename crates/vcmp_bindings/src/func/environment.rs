@@ -436,7 +436,3 @@ impl QueryEnvironmentWorld for VcmpFunctions {
         (self.inner.GetVehiclesForcedRespawnHeight)()
     }
 }
-
-/*
-    Player Settings
-*/
