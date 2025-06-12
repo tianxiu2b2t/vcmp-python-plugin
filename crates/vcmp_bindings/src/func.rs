@@ -10,13 +10,13 @@ pub mod keybind;
 pub mod marker;
 pub mod misc;
 pub mod network;
+pub mod object;
 pub mod pickup;
 pub mod player;
 pub mod plugin;
 pub mod server;
 pub mod vehicle;
 pub mod weapon;
-pub mod object;
 
 pub struct VcmpFunctions {
     inner: PluginFuncs,
@@ -106,5 +106,4 @@ impl VcmpFunctions {
     pub fn set_server_option(&self, option: VcmpServerOption, toggle: bool) {
         let _ = (self.inner.SetServerOption)(option.into(), toggle as u8);
     }
-
 }

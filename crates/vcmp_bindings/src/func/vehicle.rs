@@ -17,7 +17,12 @@ pub trait VehicleMethods {
 
     fn is_vehicle_3d_arrow_for_player(&self, vehicle_id: i32, player_id: i32) -> bool;
 
-    fn set_vehicle_3d_arrow_for_player(&self, vehicle_id: i32, player_id: i32, show: bool) -> VcmpResult<()>;
+    fn set_vehicle_3d_arrow_for_player(
+        &self,
+        vehicle_id: i32,
+        player_id: i32,
+        show: bool,
+    ) -> VcmpResult<()>;
 }
 impl VehicleMethods for VcmpFunctions {
     fn create_vehicle(
@@ -53,7 +58,12 @@ impl VehicleMethods for VcmpFunctions {
         (self.inner.GetVehicle3DArrowForPlayer)(vehicle_id, player_id) != 0
     }
 
-    fn set_vehicle_3d_arrow_for_player(&self, vehicle_id: i32, player_id: i32, show: bool) -> VcmpResult<()> {
+    fn set_vehicle_3d_arrow_for_player(
+        &self,
+        vehicle_id: i32,
+        player_id: i32,
+        show: bool,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicle3DArrowForPlayer)(vehicle_id, player_id, show as u8);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -756,5 +766,4 @@ impl VehicleHandlingRule for VcmpFunctions {
             Ok(())
         }
     }
-    
 }

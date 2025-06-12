@@ -143,7 +143,12 @@ pub trait PlayerMethods {
 
     fn get_player_drunk_visuals(&self, player: i32) -> bool;
 
-    fn set_player_3d_arrow_for_target(&self, player: i32, target: i32, show: bool) -> VcmpResult<()>;
+    fn set_player_3d_arrow_for_target(
+        &self,
+        player: i32,
+        target: i32,
+        show: bool,
+    ) -> VcmpResult<()>;
 
     fn is_player_3d_arrow_for_target(&self, player: i32, target: i32) -> bool;
 
@@ -836,7 +841,12 @@ impl PlayerMethods for VcmpFunctions {
         (self.inner.GetPlayer3DArrowForPlayer)(player, target) != 0
     }
 
-    fn set_player_3d_arrow_for_target(&self, player: i32, target: i32, show: bool) -> VcmpResult<()> {
+    fn set_player_3d_arrow_for_target(
+        &self,
+        player: i32,
+        target: i32,
+        show: bool,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetPlayer3DArrowForPlayer)(player, target, show as u8);
         if code != 0 {
             Err(VcmpError::from(code))

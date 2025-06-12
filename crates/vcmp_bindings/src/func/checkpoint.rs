@@ -1,7 +1,11 @@
-use crate::{func::VcmpFunctions, utils::{Color, Vector}, VcmpError, VcmpResult};
+use crate::{
+    VcmpError, VcmpResult,
+    func::VcmpFunctions,
+    utils::{Color, Vector},
+};
 
 pub trait CheckPointMethods {
-fn create_check_point(
+    fn create_check_point(
         &self,
         player_id: Option<i32>,
         world: i32,
@@ -21,19 +25,11 @@ fn create_check_point(
 
     fn get_check_point_world(&self, check_point_id: i32) -> i32;
 
-    fn set_check_point_colour(
-        &self,
-        check_point_id: i32,
-        color: Color,
-    ) -> VcmpResult<()>;
+    fn set_check_point_colour(&self, check_point_id: i32, color: Color) -> VcmpResult<()>;
 
     fn get_check_point_colour(&self, check_point_id: i32) -> VcmpResult<Color>;
 
-    fn set_check_point_position(
-        &self,
-        check_point_id: i32,
-        position: Vector
-    ) -> VcmpResult<()>;
+    fn set_check_point_position(&self, check_point_id: i32, position: Vector) -> VcmpResult<()>;
 
     fn get_check_point_position(&self, check_point_id: i32) -> VcmpResult<Vector>;
 
@@ -99,12 +95,14 @@ impl CheckPointMethods for VcmpFunctions {
         (self.inner.GetCheckPointWorld)(check_point_id)
     }
 
-    fn set_check_point_colour(
-        &self,
-        check_point_id: i32,
-        color: Color,
-    ) -> VcmpResult<()> {
-        let code = (self.inner.SetCheckPointColour)(check_point_id, color.r as i32, color.g as i32, color.b as i32, color.a as i32);
+    fn set_check_point_colour(&self, check_point_id: i32, color: Color) -> VcmpResult<()> {
+        let code = (self.inner.SetCheckPointColour)(
+            check_point_id,
+            color.r as i32,
+            color.g as i32,
+            color.b as i32,
+            color.a as i32,
+        );
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -136,12 +134,9 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn set_check_point_position(
-        &self,
-        check_point_id: i32,
-        position: Vector
-    ) -> VcmpResult<()> {
-        let code = (self.inner.SetCheckPointPosition)(check_point_id, position.x, position.y, position.z);
+    fn set_check_point_position(&self, check_point_id: i32, position: Vector) -> VcmpResult<()> {
+        let code =
+            (self.inner.SetCheckPointPosition)(check_point_id, position.x, position.y, position.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -157,7 +152,7 @@ impl CheckPointMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector {x, y, z})
+            Ok(Vector { x, y, z })
         }
     }
 
