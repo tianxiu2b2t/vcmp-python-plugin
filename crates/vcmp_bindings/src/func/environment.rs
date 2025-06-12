@@ -25,6 +25,7 @@ pub trait QueryEnvironmentOption {
     fn get_disable_backface_culling(&self) -> bool;
     fn get_disable_heli_blade_damage(&self) -> bool;
     fn get_disable_crouch(&self) -> bool;
+    fn get_fall_timer(&self) -> u16;
 }
 impl QueryEnvironmentOption for VcmpFunctions {
     fn get_sync_frame_limiter(&self) -> bool {
@@ -96,6 +97,9 @@ impl QueryEnvironmentOption for VcmpFunctions {
     fn get_disable_crouch(&self) -> bool {
         self.get_server_option(VcmpServerOption::DisableCrouch)
     }
+    fn get_fall_timer(&self) -> u16 {
+        (self.inner.GetFallTimer)()
+    }
 }
 
 pub trait SetEnvironmentOption {
@@ -122,6 +126,7 @@ pub trait SetEnvironmentOption {
     fn set_disable_backface_culling(&self, toggle: bool);
     fn set_disable_heli_blade_damage(&self, toggle: bool);
     fn set_disable_crouch(&self, toggle: bool);
+    fn set_fall_timer(&self, timer: u16);
 }
 impl SetEnvironmentOption for VcmpFunctions {
     fn set_sync_frame_limiter(&self, toggle: bool) {
@@ -192,6 +197,9 @@ impl SetEnvironmentOption for VcmpFunctions {
     }
     fn set_disable_crouch(&self, toggle: bool) {
         self.set_server_option(VcmpServerOption::DisableCrouch, toggle)
+    }
+    fn set_fall_timer(&self, timer: u16) {
+        (self.inner.SetFallTimer)(timer);
     }
 }
 
