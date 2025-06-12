@@ -41,6 +41,10 @@ trait PickupMethods {
     fn get_pickup_model(&self, pickup_id: i32) -> i32;
 
     fn get_pickup_quantity(&self, pickup_id: i32) -> i32;
+
+    fn is_pickup_single_use(&self, pickup_id: i32) -> bool;
+
+    fn set_pickup_single_use(&self, pickup_id: i32, toggle: bool) -> VcmpResult<()>;
 }
 
 impl PickupMethods for VcmpFunctions {
@@ -166,5 +170,18 @@ impl PickupMethods for VcmpFunctions {
 
     fn get_pickup_quantity(&self, pickup_id: i32) -> i32 {
         (self.inner.GetPickupQuantity)(pickup_id)
+    }
+
+    fn is_pickup_single_use(&self, pickup_id: i32) -> bool {
+        (self.inner.GetPickupOption)(pickup_id, 0) != 0
+    }
+
+    fn set_pickup_single_use(&self, pickup_id: i32, toggle: bool) -> VcmpResult<()> {
+        let code = (self.inner.SetPickupOption)(pickup_id, 0, toggle as u8);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(())
+        }
     }
 }
