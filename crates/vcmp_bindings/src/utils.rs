@@ -265,7 +265,7 @@ pub struct Pickup {
     pub automatic: bool,
 }
 impl Pickup {
-    fn new(
+    pub fn new(
         id: i32,
         model: i32,
         world: i32,

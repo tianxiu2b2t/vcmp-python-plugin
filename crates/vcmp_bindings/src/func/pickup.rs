@@ -2,7 +2,7 @@ use crate::func::VcmpFunctions;
 use crate::utils::Vector;
 use crate::{VcmpError, VcmpResult};
 
-trait PickupMethods {
+pub trait PickupMethods {
     fn create_pickup(
         &self,
         model_index: i32,
