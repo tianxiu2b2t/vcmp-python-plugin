@@ -4,6 +4,7 @@ use crate::{VcmpError, VcmpResult, raw::PluginFuncs};
 use crate::encodes::encode_to_gbk;
 
 pub mod admin;
+pub mod checkpoint;
 pub mod environment;
 pub mod keybind;
 pub mod marker;
