@@ -7,9 +7,12 @@ pub mod var;
 pub mod callbacks;
 pub mod functions;
 
+pub mod cfg;
+pub mod py;
+
 use var::{PLUGIN_VERSION};
 
-use crate::callbacks::init_callbacks;
+use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
 
 /// 插件入口点
 ///
@@ -54,6 +57,9 @@ extern "C" fn VcmpPluginInit(
     info.pluginVersion = PLUGIN_VERSION;
 
     println!("vcmp-plugin-rs info: {info:?}");
+
+    init_config();
+    init_py();
 
     // struct size check
     if !(functions.inner_ffi_size() == functions.inner_struct_size()
