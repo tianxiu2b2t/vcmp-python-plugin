@@ -9,6 +9,7 @@ authors = [
 repository = "https://github.com/tianxiu2b2t/vcmp-python-plugin"
 
 [dependencies]
+pyo3 = "0.25.1"
 vcmp_bindings = { path = "../vcmp_bindings" }
 
 [lib]

@@ -35,6 +35,10 @@ pub fn init_vcmp_func(func: VcmpFunctions) -> &'static VcmpFunctions {
     VCMP_FUNC.get_or_init(|| func)
 }
 
+pub fn is_initialized_func() -> bool {
+    VCMP_FUNC.get().is_some()
+}
+
 pub fn vcmp_func() -> &'static VcmpFunctions {
     VCMP_FUNC.get().unwrap()
 }

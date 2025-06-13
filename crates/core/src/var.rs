@@ -1,0 +1,1 @@
+pub const PLUGIN_VERSION: u32 = 1;
