@@ -1,6 +1,6 @@
 use crate::func::VcmpFunctions;
 use crate::options::{VcmpEntityPool, VcmpVehicleOption};
-use crate::utils::{Quaternion, Vector};
+use crate::utils::{Quaternionf32, Vectorf32};
 use crate::{VcmpError, VcmpResult};
 
 pub trait VehicleMethods {
@@ -8,7 +8,7 @@ pub trait VehicleMethods {
         &self,
         model_index: i32,
         world: i32,
-        position: Vector,
+        position: Vectorf32,
         angle: f32,
         primary_colour: i32,
         secondary_colour: i32,
@@ -29,7 +29,7 @@ impl VehicleMethods for VcmpFunctions {
         &self,
         model_index: i32,
         world: i32,
-        position: Vector,
+        position: Vectorf32,
         angle: f32,
         primary_colour: i32,
         secondary_colour: i32,
@@ -176,23 +176,30 @@ pub trait SetVehicle {
     fn set_vehicle_position(
         &self,
         vehicle_id: i32,
-        position: Vector,
+        position: Vectorf32,
         remove_occupants: Option<bool>,
     ) -> VcmpResult<()>;
-    fn set_vehicle_rotation(&self, vehicle_id: i32, rotation: Quaternion) -> VcmpResult<()>;
-    fn set_vehicle_rotation_euler(&self, vehicle_id: i32, rotation: Vector) -> VcmpResult<()>;
-    fn set_vehicle_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_rel_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_rel_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_add_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_add_rel_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_add_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_add_rel_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()>;
-    fn set_vehicle_spawn_position(&self, vehicle_id: i32, position: Vector) -> VcmpResult<()>;
-    fn set_vehicle_spawn_rotation(&self, vehicle_id: i32, rotation: Quaternion) -> VcmpResult<()>;
-    fn set_vehicle_spawn_rotation_euler(&self, vehicle_id: i32, rotation: Vector)
-    -> VcmpResult<()>;
+    fn set_vehicle_rotation(&self, vehicle_id: i32, rotation: Quaternionf32) -> VcmpResult<()>;
+    fn set_vehicle_rotation_euler(&self, vehicle_id: i32, rotation: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_rel_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_rel_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_add_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_add_rel_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_add_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_add_rel_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_spawn_position(&self, vehicle_id: i32, position: Vectorf32) -> VcmpResult<()>;
+    fn set_vehicle_spawn_rotation(
+        &self,
+        vehicle_id: i32,
+        rotation: Quaternionf32,
+    ) -> VcmpResult<()>;
+    fn set_vehicle_spawn_rotation_euler(
+        &self,
+        vehicle_id: i32,
+        rotation: Vectorf32,
+    ) -> VcmpResult<()>;
     fn set_vehicle_idle_respawn_timer(&self, vehicle_id: i32, timer: u32) -> VcmpResult<()>;
     fn set_vehicle_health(&self, vehicle_id: i32, health: f32) -> VcmpResult<()>;
     fn set_vehicle_color(
@@ -245,7 +252,7 @@ impl SetVehicle for VcmpFunctions {
     fn set_vehicle_position(
         &self,
         vehicle_id: i32,
-        position: Vector,
+        position: Vectorf32,
         remove_occupants: Option<bool>,
     ) -> VcmpResult<()> {
         let code = (self.inner.SetVehiclePosition)(
@@ -261,7 +268,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_rotation(&self, vehicle_id: i32, rotation: Quaternion) -> VcmpResult<()> {
+    fn set_vehicle_rotation(&self, vehicle_id: i32, rotation: Quaternionf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleRotation)(
             vehicle_id, rotation.x, rotation.y, rotation.z, rotation.w,
         );
@@ -271,7 +278,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_rotation_euler(&self, vehicle_id: i32, rotation: Vector) -> VcmpResult<()> {
+    fn set_vehicle_rotation_euler(&self, vehicle_id: i32, rotation: Vectorf32) -> VcmpResult<()> {
         let code =
             (self.inner.SetVehicleRotationEuler)(vehicle_id, rotation.x, rotation.y, rotation.z);
         if code != 0 {
@@ -280,7 +287,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpeed)(vehicle_id, speed.x, speed.y, speed.z, 0, 0);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -288,7 +295,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_rel_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_rel_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpeed)(vehicle_id, speed.x, speed.y, speed.z, 0, 1);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -296,7 +303,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleTurnSpeed)(vehicle_id, speed.x, speed.y, speed.z, 0, 0);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -304,7 +311,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_rel_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_rel_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleTurnSpeed)(vehicle_id, speed.x, speed.y, speed.z, 0, 1);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -312,7 +319,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_add_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_add_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpeed)(vehicle_id, speed.x, speed.y, speed.z, 1, 0);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -320,7 +327,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_add_rel_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_add_rel_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpeed)(vehicle_id, speed.x, speed.y, speed.z, 1, 1);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -328,7 +335,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_add_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_add_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleTurnSpeed)(vehicle_id, speed.x, speed.y, speed.z, 1, 0);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -336,7 +343,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_add_rel_turn_speed(&self, vehicle_id: i32, speed: Vector) -> VcmpResult<()> {
+    fn set_vehicle_add_rel_turn_speed(&self, vehicle_id: i32, speed: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleTurnSpeed)(vehicle_id, speed.x, speed.y, speed.z, 1, 1);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -344,7 +351,7 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_spawn_position(&self, vehicle_id: i32, position: Vector) -> VcmpResult<()> {
+    fn set_vehicle_spawn_position(&self, vehicle_id: i32, position: Vectorf32) -> VcmpResult<()> {
         let code =
             (self.inner.SetVehicleSpawnPosition)(vehicle_id, position.x, position.y, position.z);
         if code != 0 {
@@ -353,7 +360,11 @@ impl SetVehicle for VcmpFunctions {
             Ok(())
         }
     }
-    fn set_vehicle_spawn_rotation(&self, vehicle_id: i32, rotation: Quaternion) -> VcmpResult<()> {
+    fn set_vehicle_spawn_rotation(
+        &self,
+        vehicle_id: i32,
+        rotation: Quaternionf32,
+    ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpawnRotation)(
             vehicle_id, rotation.x, rotation.y, rotation.z, rotation.w,
         );
@@ -366,7 +377,7 @@ impl SetVehicle for VcmpFunctions {
     fn set_vehicle_spawn_rotation_euler(
         &self,
         vehicle_id: i32,
-        rotation: Vector,
+        rotation: Vectorf32,
     ) -> VcmpResult<()> {
         let code = (self.inner.SetVehicleSpawnRotationEuler)(
             vehicle_id, rotation.x, rotation.y, rotation.z,
@@ -467,16 +478,16 @@ pub trait QueryVehicle {
     fn get_vehicle_occupant(&self, vehicle_id: i32, seat_id: i32) -> i32;
     fn get_vehicle_immunity(&self, vehicle_id: i32) -> u32;
     fn is_vehicle_wrecked(&self, vehicle_id: i32) -> bool;
-    fn get_vehicle_position(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_rotation(&self, vehicle_id: i32) -> Quaternion;
-    fn get_vehicle_rotation_euler(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_rel_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_turn_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_rel_turn_speed(&self, vehicle_id: i32) -> Vector;
-    fn get_vehicle_spawn_position(&self, vehicle_id: i32) -> Vector; // Vector3<f32>
-    fn get_vehicle_spawn_rotation(&self, vehicle_id: i32) -> Quaternion;
-    fn get_vehicle_spawn_rotation_euler(&self, vehicle_id: i32) -> Vector;
+    fn get_vehicle_position(&self, vehicle_id: i32) -> Vectorf32;
+    fn get_vehicle_rotation(&self, vehicle_id: i32) -> Quaternionf32;
+    fn get_vehicle_rotation_euler(&self, vehicle_id: i32) -> Vectorf32;
+    fn get_vehicle_speed(&self, vehicle_id: i32) -> Vectorf32;
+    fn get_vehicle_rel_speed(&self, vehicle_id: i32) -> Vectorf32;
+    fn get_vehicle_turn_speed(&self, vehicle_id: i32) -> Vectorf32;
+    fn get_vehicle_rel_turn_speed(&self, vehicle_id: i32) -> Vectorf32;
+    fn get_vehicle_spawn_position(&self, vehicle_id: i32) -> Vectorf32; // Vector3<f32>
+    fn get_vehicle_spawn_rotation(&self, vehicle_id: i32) -> Quaternionf32;
+    fn get_vehicle_spawn_rotation_euler(&self, vehicle_id: i32) -> Vectorf32;
     fn get_vehicle_idle_respawn_timer(&self, vehicle_id: i32) -> u32;
     fn get_vehicle_health(&self, vehicle_id: i32) -> f32;
     fn get_vehicle_color(&self, vehicle_id: i32) -> (i32, i32);
@@ -518,86 +529,86 @@ impl QueryVehicle for VcmpFunctions {
         (self.inner.IsVehicleWrecked)(vehicle_id) != 0
     }
 
-    fn get_vehicle_position(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_position(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehiclePosition)(vehicle_id, &mut x, &mut y, &mut z);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
-    fn get_vehicle_rotation(&self, vehicle_id: i32) -> Quaternion {
+    fn get_vehicle_rotation(&self, vehicle_id: i32) -> Quaternionf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         let mut w = 0.0;
         (self.inner.GetVehicleRotation)(vehicle_id, &mut x, &mut y, &mut z, &mut w);
-        Quaternion::new(x, y, z, w)
+        Quaternionf32::new(x, y, z, w)
     }
 
-    fn get_vehicle_rotation_euler(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_rotation_euler(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehicleRotationEuler)(vehicle_id, &mut x, &mut y, &mut z);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
-    fn get_vehicle_speed(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_speed(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehicleSpeed)(vehicle_id, &mut x, &mut y, &mut z, 0);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
-    fn get_vehicle_rel_speed(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_rel_speed(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehicleSpeed)(vehicle_id, &mut x, &mut y, &mut z, 0);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
-    fn get_vehicle_turn_speed(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_turn_speed(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehicleTurnSpeed)(vehicle_id, &mut x, &mut y, &mut z, 0);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
-    fn get_vehicle_rel_turn_speed(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_rel_turn_speed(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehicleTurnSpeed)(vehicle_id, &mut x, &mut y, &mut z, 1);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
-    fn get_vehicle_spawn_position(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_spawn_position(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehicleSpawnPosition)(vehicle_id, &mut x, &mut y, &mut z);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
-    fn get_vehicle_spawn_rotation(&self, vehicle_id: i32) -> Quaternion {
+    fn get_vehicle_spawn_rotation(&self, vehicle_id: i32) -> Quaternionf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         let mut w = 0.0;
         (self.inner.GetVehicleSpawnRotation)(vehicle_id, &mut x, &mut y, &mut z, &mut w);
-        Quaternion::new(x, y, z, w)
+        Quaternionf32::new(x, y, z, w)
     }
 
-    fn get_vehicle_spawn_rotation_euler(&self, vehicle_id: i32) -> Vector {
+    fn get_vehicle_spawn_rotation_euler(&self, vehicle_id: i32) -> Vectorf32 {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
         (self.inner.GetVehicleSpawnRotationEuler)(vehicle_id, &mut x, &mut y, &mut z);
-        Vector::new(x, y, z)
+        Vectorf32::new(x, y, z)
     }
 
     fn get_vehicle_idle_respawn_timer(&self, vehicle_id: i32) -> u32 {
@@ -651,7 +662,7 @@ impl QueryVehicle for VcmpFunctions {
     }
 }
 
-pub trait VehicleHandlingRule {
+pub trait VehicleHandlingMethods {
     fn reset_all_vehicle_handlings(&self);
 
     fn exists_handling_rule(&self, model_index: i32, rule_index: i32) -> bool;
@@ -677,7 +688,7 @@ pub trait VehicleHandlingRule {
     fn reset_inst_handling(&self, vehicle_id: i32) -> VcmpResult<()>;
 }
 
-impl VehicleHandlingRule for VcmpFunctions {
+impl VehicleHandlingMethods for VcmpFunctions {
     fn reset_all_vehicle_handlings(&self) {
         (self.inner.ResetAllVehicleHandlings)();
     }

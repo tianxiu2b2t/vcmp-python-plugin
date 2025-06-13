@@ -1,7 +1,7 @@
 use crate::{
     VcmpError, VcmpResult,
     func::VcmpFunctions,
-    utils::{Color, Vector},
+    utils::{Color, Vectorf32},
 };
 
 pub trait CheckPointMethods {
@@ -10,7 +10,7 @@ pub trait CheckPointMethods {
         player_id: Option<i32>,
         world: i32,
         is_sphere: bool,
-        position: Vector,
+        position: Vectorf32,
         color: Color,
         radius: f32,
     ) -> i32;
@@ -29,9 +29,9 @@ pub trait CheckPointMethods {
 
     fn get_check_point_colour(&self, check_point_id: i32) -> VcmpResult<Color>;
 
-    fn set_check_point_position(&self, check_point_id: i32, position: Vector) -> VcmpResult<()>;
+    fn set_check_point_position(&self, check_point_id: i32, position: Vectorf32) -> VcmpResult<()>;
 
-    fn get_check_point_position(&self, check_point_id: i32) -> VcmpResult<Vector>;
+    fn get_check_point_position(&self, check_point_id: i32) -> VcmpResult<Vectorf32>;
 
     fn set_check_point_radius(&self, check_point_id: i32, radius: f32) -> VcmpResult<()>;
 
@@ -46,7 +46,7 @@ impl CheckPointMethods for VcmpFunctions {
         player_id: Option<i32>,
         world: i32,
         is_sphere: bool,
-        position: Vector,
+        position: Vectorf32,
         color: Color,
         radius: f32,
     ) -> i32 {
@@ -134,7 +134,7 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn set_check_point_position(&self, check_point_id: i32, position: Vector) -> VcmpResult<()> {
+    fn set_check_point_position(&self, check_point_id: i32, position: Vectorf32) -> VcmpResult<()> {
         let code =
             (self.inner.SetCheckPointPosition)(check_point_id, position.x, position.y, position.z);
         if code != 0 {
@@ -144,7 +144,7 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn get_check_point_position(&self, check_point_id: i32) -> VcmpResult<Vector> {
+    fn get_check_point_position(&self, check_point_id: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -152,7 +152,7 @@ impl CheckPointMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 

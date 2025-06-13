@@ -1,12 +1,12 @@
 use crate::func::VcmpFunctions;
 
-pub trait Administration {
+pub trait AdministrationMethods {
     fn ban_ip(&self, ip: &str);
     fn unban_ip(&self, ip: &str) -> bool;
     fn is_ip_banned(&self, ip: &str) -> bool;
 }
 
-impl Administration for VcmpFunctions {
+impl AdministrationMethods for VcmpFunctions {
     fn ban_ip(&self, ip: &str) {
         (self.inner.BanIP)(ip.as_ptr() as *mut i8);
     }

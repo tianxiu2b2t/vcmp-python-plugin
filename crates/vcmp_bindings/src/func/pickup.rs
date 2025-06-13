@@ -1,14 +1,14 @@
 use crate::func::VcmpFunctions;
-use crate::utils::Vector;
+use crate::utils::Vectorf32;
 use crate::{VcmpError, VcmpResult};
 
-trait PickupMethods {
+pub trait PickupMethods {
     fn create_pickup(
         &self,
         model_index: i32,
         world: i32,
         quantity: i32,
-        position: Vector,
+        position: Vectorf32,
         alpha: i32,
         is_automatic: bool,
     ) -> i32;
@@ -34,9 +34,9 @@ trait PickupMethods {
 
     fn refresh_pickup(&self, pickup_id: i32) -> VcmpResult<()>;
 
-    fn set_pickup_position(&self, pickup_id: i32, position: Vector) -> VcmpResult<()>;
+    fn set_pickup_position(&self, pickup_id: i32, position: Vectorf32) -> VcmpResult<()>;
 
-    fn get_pickup_position(&self, pickup_id: i32) -> VcmpResult<Vector>;
+    fn get_pickup_position(&self, pickup_id: i32) -> VcmpResult<Vectorf32>;
 
     fn get_pickup_model(&self, pickup_id: i32) -> i32;
 
@@ -53,7 +53,7 @@ impl PickupMethods for VcmpFunctions {
         model_index: i32,
         world: i32,
         quantity: i32,
-        position: Vector,
+        position: Vectorf32,
         alpha: i32,
         is_automatic: bool,
     ) -> i32 {
@@ -143,7 +143,7 @@ impl PickupMethods for VcmpFunctions {
         }
     }
 
-    fn set_pickup_position(&self, pickup_id: i32, position: Vector) -> VcmpResult<()> {
+    fn set_pickup_position(&self, pickup_id: i32, position: Vectorf32) -> VcmpResult<()> {
         let code = (self.inner.SetPickupPosition)(pickup_id, position.x, position.y, position.z);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -152,7 +152,7 @@ impl PickupMethods for VcmpFunctions {
         }
     }
 
-    fn get_pickup_position(&self, pickup_id: i32) -> VcmpResult<Vector> {
+    fn get_pickup_position(&self, pickup_id: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
@@ -160,7 +160,7 @@ impl PickupMethods for VcmpFunctions {
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
-            Ok(Vector { x, y, z })
+            Ok(Vectorf32 { x, y, z })
         }
     }
 
