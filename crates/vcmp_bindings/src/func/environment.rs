@@ -1,4 +1,4 @@
-use crate::utils::{Color, WastedSettings, WorldBounds};
+use crate::utils::{Color, Vectorf32, WastedSettings, WorldBounds};
 use crate::{VcmpFunctions, options::VcmpServerOption};
 
 pub trait QueryEnvironmentOption {
@@ -25,6 +25,7 @@ pub trait QueryEnvironmentOption {
     fn get_disable_backface_culling(&self) -> bool;
     fn get_disable_heli_blade_damage(&self) -> bool;
     fn get_disable_crouch(&self) -> bool;
+    fn get_fall_timer(&self) -> u16;
 }
 impl QueryEnvironmentOption for VcmpFunctions {
     fn get_sync_frame_limiter(&self) -> bool {
@@ -96,6 +97,9 @@ impl QueryEnvironmentOption for VcmpFunctions {
     fn get_disable_crouch(&self) -> bool {
         self.get_server_option(VcmpServerOption::DisableCrouch)
     }
+    fn get_fall_timer(&self) -> u16 {
+        (self.inner.GetFallTimer)()
+    }
 }
 
 pub trait SetEnvironmentOption {
@@ -122,6 +126,7 @@ pub trait SetEnvironmentOption {
     fn set_disable_backface_culling(&self, toggle: bool);
     fn set_disable_heli_blade_damage(&self, toggle: bool);
     fn set_disable_crouch(&self, toggle: bool);
+    fn set_fall_timer(&self, timer: u16);
 }
 impl SetEnvironmentOption for VcmpFunctions {
     fn set_sync_frame_limiter(&self, toggle: bool) {
@@ -193,15 +198,37 @@ impl SetEnvironmentOption for VcmpFunctions {
     fn set_disable_crouch(&self, toggle: bool) {
         self.set_server_option(VcmpServerOption::DisableCrouch, toggle)
     }
+    fn set_fall_timer(&self, timer: u16) {
+        (self.inner.SetFallTimer)(timer);
+    }
 }
 
 /*
     World Bounds
 */
-pub trait QueryEnvironmentWorldBounds {
+
+pub trait EnvironmentMethods {
     fn get_world_bounds(&self) -> WorldBounds;
+    fn set_world_bounds(&self, bounds: WorldBounds);
+    fn get_wasted_settings(&self) -> WastedSettings;
+    fn set_wasted_settings(&self, settings: WastedSettings);
+    fn add_player_class(
+        &self,
+        team: i32,
+        color: impl Into<u32>,
+        skin: i32,
+        pos: Vectorf32,
+        angle: f32,
+        weapon: Option<(i32, i32)>,
+        weapon1: Option<(i32, i32)>,
+        weapon2: Option<(i32, i32)>,
+    ) -> i32;
+    fn set_spawn_player_position(&self, pos: Vectorf32);
+    fn set_spawn_camera_position(&self, pos: Vectorf32);
+    fn set_spawn_camera_look_at(&self, pos: Vectorf32);
 }
-impl QueryEnvironmentWorldBounds for VcmpFunctions {
+
+impl EnvironmentMethods for VcmpFunctions {
     fn get_world_bounds(&self) -> WorldBounds {
         let (mut max_x, mut min_x, mut max_y, mut min_y) = (0f32, 0f32, 0f32, 0f32);
         (self.inner.GetWorldBounds)(&mut max_x, &mut min_x, &mut max_y, &mut min_y);
@@ -212,25 +239,9 @@ impl QueryEnvironmentWorldBounds for VcmpFunctions {
             min_y,
         }
     }
-}
-
-pub trait SetEnvironmentWorldBounds {
-    fn set_world_bounds(&self, bounds: WorldBounds);
-}
-impl SetEnvironmentWorldBounds for VcmpFunctions {
     fn set_world_bounds(&self, bounds: WorldBounds) {
         (self.inner.SetWorldBounds)(bounds.max_x, bounds.min_x, bounds.max_y, bounds.min_y);
     }
-}
-
-/*
-    Wasted Settings
-*/
-
-pub trait QueryEnvironmentWastedSettings {
-    fn get_wasted_settings(&self) -> WastedSettings;
-}
-impl QueryEnvironmentWastedSettings for VcmpFunctions {
     fn get_wasted_settings(&self) -> WastedSettings {
         let (
             mut death_timer,
@@ -261,12 +272,6 @@ impl QueryEnvironmentWastedSettings for VcmpFunctions {
             corpse_fade_time,
         }
     }
-}
-
-pub trait SetEnvironmentWastedSettings {
-    fn set_wasted_settings(&self, settings: WastedSettings);
-}
-impl SetEnvironmentWastedSettings for VcmpFunctions {
     fn set_wasted_settings(&self, settings: WastedSettings) {
         (self.inner.SetWastedSettings)(
             settings.death_timer,
@@ -277,6 +282,48 @@ impl SetEnvironmentWastedSettings for VcmpFunctions {
             settings.corpse_fade_start,
             settings.corpse_fade_time,
         );
+    }
+    fn add_player_class(
+        &self,
+        team: i32,
+        color: impl Into<u32>,
+        skin: i32,
+        pos: Vectorf32,
+        angle: f32,
+        weapon: Option<(i32, i32)>,
+        weapon1: Option<(i32, i32)>,
+        weapon2: Option<(i32, i32)>,
+    ) -> i32 {
+        let (wep1, ammo1) = weapon.unwrap_or((0, 0));
+        let (wep2, ammo2) = weapon1.unwrap_or((0, 0));
+        let (wep3, ammo3) = weapon2.unwrap_or((0, 0));
+        (self.inner.AddPlayerClass)(
+            team,
+            color.into(),
+            skin,
+            pos.x,
+            pos.y,
+            pos.z,
+            angle,
+            wep1,
+            ammo1,
+            wep2,
+            ammo2,
+            wep3,
+            ammo3,
+        )
+    }
+
+    fn set_spawn_player_position(&self, pos: Vectorf32) {
+        (self.inner.SetSpawnPlayerPosition)(pos.x, pos.y, pos.z);
+    }
+
+    fn set_spawn_camera_position(&self, pos: Vectorf32) {
+        (self.inner.SetSpawnCameraPosition)(pos.x, pos.y, pos.z);
+    }
+
+    fn set_spawn_camera_look_at(&self, pos: Vectorf32) {
+        (self.inner.SetSpawnCameraLookAt)(pos.x, pos.y, pos.z);
     }
 }
 

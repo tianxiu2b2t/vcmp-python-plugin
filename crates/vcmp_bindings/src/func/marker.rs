@@ -1,5 +1,5 @@
 use crate::func::VcmpFunctions;
-use crate::utils::{Color, Marker, Vector};
+use crate::utils::{Color, Marker, Vectorf32};
 
 pub trait MarkerMethods {
     fn create_marker(
@@ -58,7 +58,7 @@ impl MarkerMethods for VcmpFunctions {
         Marker {
             marker,
             world,
-            position: Vector { x, y, z },
+            position: Vectorf32 { x, y, z },
             scale,
             color: Color::from_rgba(color),
             sprite,

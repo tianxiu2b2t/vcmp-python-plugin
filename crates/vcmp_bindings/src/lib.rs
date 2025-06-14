@@ -20,6 +20,7 @@ pub mod options;
 pub mod plugin_info;
 /// wrapper for PluginSetting
 pub mod setting;
+pub mod states;
 pub mod utils;
 
 pub use error::{VcmpError, VcmpResult};
@@ -32,6 +33,10 @@ pub static VCMP_FUNC: OnceLock<VcmpFunctions> = OnceLock::new();
 
 pub fn init_vcmp_func(func: VcmpFunctions) -> &'static VcmpFunctions {
     VCMP_FUNC.get_or_init(|| func)
+}
+
+pub fn is_initialized_func() -> bool {
+    VCMP_FUNC.get().is_some()
 }
 
 pub fn vcmp_func() -> &'static VcmpFunctions {

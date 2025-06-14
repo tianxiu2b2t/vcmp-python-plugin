@@ -727,14 +727,14 @@ pub struct PluginFuncs {
 #[derive(Debug, Copy, Clone)]
 pub struct PluginCallbacks {
     pub structSize: u32,
-    pub OnServerInitialise: ::std::option::Option<extern "C" fn() -> u8>,
-    pub OnServerShutdown: ::std::option::Option<extern "C" fn()>,
-    pub OnServerFrame: ::std::option::Option<extern "C" fn(elapsedTime: f32)>,
+    pub OnServerInitialise: ::std::option::Option<unsafe extern "C" fn() -> u8>,
+    pub OnServerShutdown: ::std::option::Option<unsafe extern "C" fn()>,
+    pub OnServerFrame: ::std::option::Option<unsafe extern "C" fn(elapsedTime: f32)>,
     pub OnPluginCommand: ::std::option::Option<
-        extern "C" fn(commandIdentifier: u32, message: *const ::std::os::raw::c_char) -> u8,
+        unsafe extern "C" fn(commandIdentifier: u32, message: *const ::std::os::raw::c_char) -> u8,
     >,
     pub OnIncomingConnection: ::std::option::Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             playerName: *mut ::std::os::raw::c_char,
             nameBufferSize: usize,
             userPassword: *const ::std::os::raw::c_char,
@@ -742,87 +742,102 @@ pub struct PluginCallbacks {
         ) -> u8,
     >,
     pub OnClientScriptData:
-        ::std::option::Option<extern "C" fn(playerId: i32, data: *const u8, size: usize)>,
-    pub OnPlayerConnect: ::std::option::Option<extern "C" fn(playerId: i32)>,
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, data: *const u8, size: usize)>,
+    pub OnPlayerConnect: ::std::option::Option<unsafe extern "C" fn(playerId: i32)>,
     pub OnPlayerDisconnect:
-        ::std::option::Option<extern "C" fn(playerId: i32, reason: vcmpDisconnectReason)>,
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, reason: vcmpDisconnectReason)>,
     pub OnPlayerRequestClass:
-        ::std::option::Option<extern "C" fn(playerId: i32, offset: i32) -> u8>,
-    pub OnPlayerRequestSpawn: ::std::option::Option<extern "C" fn(playerId: i32) -> u8>,
-    pub OnPlayerSpawn: ::std::option::Option<extern "C" fn(playerId: i32)>,
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, offset: i32) -> u8>,
+    pub OnPlayerRequestSpawn: ::std::option::Option<unsafe extern "C" fn(playerId: i32) -> u8>,
+    pub OnPlayerSpawn: ::std::option::Option<unsafe extern "C" fn(playerId: i32)>,
     pub OnPlayerDeath: ::std::option::Option<
-        extern "C" fn(playerId: i32, killerId: i32, reason: i32, bodyPart: vcmpBodyPart),
+        unsafe extern "C" fn(playerId: i32, killerId: i32, reason: i32, bodyPart: vcmpBodyPart),
     >,
     pub OnPlayerUpdate:
-        ::std::option::Option<extern "C" fn(playerId: i32, updateType: vcmpPlayerUpdate)>,
-    pub OnPlayerRequestEnterVehicle:
-        ::std::option::Option<extern "C" fn(playerId: i32, vehicleId: i32, slotIndex: i32) -> u8>,
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, updateType: vcmpPlayerUpdate)>,
+    pub OnPlayerRequestEnterVehicle: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, vehicleId: i32, slotIndex: i32) -> u8,
+    >,
     pub OnPlayerEnterVehicle:
-        ::std::option::Option<extern "C" fn(playerId: i32, vehicleId: i32, slotIndex: i32)>,
-    pub OnPlayerExitVehicle: ::std::option::Option<extern "C" fn(playerId: i32, vehicleId: i32)>,
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, vehicleId: i32, slotIndex: i32)>,
+    pub OnPlayerExitVehicle:
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, vehicleId: i32)>,
     pub OnPlayerNameChange: ::std::option::Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             playerId: i32,
             oldName: *const ::std::os::raw::c_char,
             newName: *const ::std::os::raw::c_char,
         ),
     >,
     pub OnPlayerStateChange: ::std::option::Option<
-        extern "C" fn(playerId: i32, oldState: vcmpPlayerState, newState: vcmpPlayerState),
+        unsafe extern "C" fn(playerId: i32, oldState: vcmpPlayerState, newState: vcmpPlayerState),
     >,
     pub OnPlayerActionChange:
-        ::std::option::Option<extern "C" fn(playerId: i32, oldAction: i32, newAction: i32)>,
-    pub OnPlayerOnFireChange: ::std::option::Option<extern "C" fn(playerId: i32, isOnFire: u8)>,
-    pub OnPlayerCrouchChange: ::std::option::Option<extern "C" fn(playerId: i32, isCrouching: u8)>,
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, oldAction: i32, newAction: i32)>,
+    pub OnPlayerOnFireChange:
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, isOnFire: u8)>,
+    pub OnPlayerCrouchChange:
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, isCrouching: u8)>,
     pub OnPlayerGameKeysChange:
-        ::std::option::Option<extern "C" fn(playerId: i32, oldKeys: u32, newKeys: u32)>,
-    pub OnPlayerBeginTyping: ::std::option::Option<extern "C" fn(playerId: i32)>,
-    pub OnPlayerEndTyping: ::std::option::Option<extern "C" fn(playerId: i32)>,
-    pub OnPlayerAwayChange: ::std::option::Option<extern "C" fn(playerId: i32, isAway: u8)>,
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, oldKeys: u32, newKeys: u32)>,
+    pub OnPlayerBeginTyping: ::std::option::Option<unsafe extern "C" fn(playerId: i32)>,
+    pub OnPlayerEndTyping: ::std::option::Option<unsafe extern "C" fn(playerId: i32)>,
+    pub OnPlayerAwayChange: ::std::option::Option<unsafe extern "C" fn(playerId: i32, isAway: u8)>,
     pub OnPlayerMessage: ::std::option::Option<
-        extern "C" fn(playerId: i32, message: *const ::std::os::raw::c_char) -> u8,
+        unsafe extern "C" fn(playerId: i32, message: *const ::std::os::raw::c_char) -> u8,
     >,
     pub OnPlayerCommand: ::std::option::Option<
-        extern "C" fn(playerId: i32, message: *const ::std::os::raw::c_char) -> u8,
+        unsafe extern "C" fn(playerId: i32, message: *const ::std::os::raw::c_char) -> u8,
     >,
     pub OnPlayerPrivateMessage: ::std::option::Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             playerId: i32,
             targetPlayerId: i32,
             message: *const ::std::os::raw::c_char,
         ) -> u8,
     >,
-    pub OnPlayerKeyBindDown: ::std::option::Option<extern "C" fn(playerId: i32, bindId: i32)>,
-    pub OnPlayerKeyBindUp: ::std::option::Option<extern "C" fn(playerId: i32, bindId: i32)>,
-    pub OnPlayerSpectate: ::std::option::Option<extern "C" fn(playerId: i32, targetPlayerId: i32)>,
-    pub OnPlayerCrashReport:
-        ::std::option::Option<extern "C" fn(playerId: i32, report: *const ::std::os::raw::c_char)>,
+    pub OnPlayerKeyBindDown:
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, bindId: i32)>,
+    pub OnPlayerKeyBindUp: ::std::option::Option<unsafe extern "C" fn(playerId: i32, bindId: i32)>,
+    pub OnPlayerSpectate:
+        ::std::option::Option<unsafe extern "C" fn(playerId: i32, targetPlayerId: i32)>,
+    pub OnPlayerCrashReport: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, report: *const ::std::os::raw::c_char),
+    >,
     pub OnVehicleUpdate:
-        ::std::option::Option<extern "C" fn(vehicleId: i32, updateType: vcmpVehicleUpdate)>,
-    pub OnVehicleExplode: ::std::option::Option<extern "C" fn(vehicleId: i32)>,
-    pub OnVehicleRespawn: ::std::option::Option<extern "C" fn(vehicleId: i32)>,
+        ::std::option::Option<unsafe extern "C" fn(vehicleId: i32, updateType: vcmpVehicleUpdate)>,
+    pub OnVehicleExplode: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32)>,
+    pub OnVehicleRespawn: ::std::option::Option<unsafe extern "C" fn(vehicleId: i32)>,
     pub OnObjectShot:
-        ::std::option::Option<extern "C" fn(objectId: i32, playerId: i32, weaponId: i32)>,
-    pub OnObjectTouched: ::std::option::Option<extern "C" fn(objectId: i32, playerId: i32)>,
+        ::std::option::Option<unsafe extern "C" fn(objectId: i32, playerId: i32, weaponId: i32)>,
+    pub OnObjectTouched: ::std::option::Option<unsafe extern "C" fn(objectId: i32, playerId: i32)>,
     pub OnPickupPickAttempt:
-        ::std::option::Option<extern "C" fn(pickupId: i32, playerId: i32) -> u8>,
-    pub OnPickupPicked: ::std::option::Option<extern "C" fn(pickupId: i32, playerId: i32)>,
-    pub OnPickupRespawn: ::std::option::Option<extern "C" fn(pickupId: i32)>,
-    pub OnCheckpointEntered: ::std::option::Option<extern "C" fn(checkPointId: i32, playerId: i32)>,
-    pub OnCheckpointExited: ::std::option::Option<extern "C" fn(checkPointId: i32, playerId: i32)>,
+        ::std::option::Option<unsafe extern "C" fn(pickupId: i32, playerId: i32) -> u8>,
+    pub OnPickupPicked: ::std::option::Option<unsafe extern "C" fn(pickupId: i32, playerId: i32)>,
+    pub OnPickupRespawn: ::std::option::Option<unsafe extern "C" fn(pickupId: i32)>,
+    pub OnCheckpointEntered:
+        ::std::option::Option<unsafe extern "C" fn(checkPointId: i32, playerId: i32)>,
+    pub OnCheckpointExited:
+        ::std::option::Option<unsafe extern "C" fn(checkPointId: i32, playerId: i32)>,
     pub OnEntityPoolChange: ::std::option::Option<
-        extern "C" fn(entityType: vcmpEntityPool, entityId: i32, isDeleted: u8),
+        unsafe extern "C" fn(entityType: vcmpEntityPool, entityId: i32, isDeleted: u8),
     >,
     pub OnServerPerformanceReport: ::std::option::Option<
-        extern "C" fn(
+        unsafe extern "C" fn(
             entryCount: usize,
             descriptions: *mut *const ::std::os::raw::c_char,
             times: *mut u64,
         ),
     >,
-    pub OnPlayerModuleList:
-        ::std::option::Option<extern "C" fn(playerId: i32, list: *const ::std::os::raw::c_char)>,
+    pub OnPlayerModuleList: ::std::option::Option<
+        unsafe extern "C" fn(playerId: i32, list: *const ::std::os::raw::c_char),
+    >,
     pub OnEntityStreamingChange: ::std::option::Option<
-        extern "C" fn(playerId: i32, entityId: i32, entityType: vcmpEntityPool, isDeleted: u8),
+        unsafe extern "C" fn(
+            playerId: i32,
+            entityId: i32,
+            entityType: vcmpEntityPool,
+            isDeleted: u8,
+        ),
     >,
 }

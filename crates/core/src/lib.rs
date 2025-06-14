@@ -1,22 +1,24 @@
-use std::{
-    ffi::{CStr, c_char},
-    sync::OnceLock,
-};
-
 use vcmp_bindings::{
     func::{VcmpFunctions, server::ServerMethods},
     raw::{PluginCallbacks, PluginFuncs, PluginInfo},
-    vcmp_func,
 };
 
-pub const PLUGIN_VERSION: u32 = 1;
+pub mod callbacks;
+pub mod consts;
+pub mod func;
 
-pub static VCMP_INIT: OnceLock<()> = OnceLock::new();
+pub mod cfg;
+pub mod event;
+pub mod pool;
+pub mod py;
 
-/// 验证 vcmp 是否初始化
-pub fn vcmp_inited() -> bool {
-    VCMP_INIT.get().is_some()
-}
+/// 插件版本
+///
+/// semver:
+/// xx yy zz
+pub const PLUGIN_VERSION: u32 = 00_01_00;
+
+use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
 
 /// 插件入口点
 ///
@@ -60,10 +62,10 @@ extern "C" fn VcmpPluginInit(
     info.apiMinorVersion = 0; // 就先 .0了
     info.pluginVersion = PLUGIN_VERSION;
 
-    callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
-    callbacks.OnServerInitialise = Some(on_server_init);
-
     println!("vcmp-plugin-rs info: {info:?}");
+
+    init_config();
+    init_py();
 
     // struct size check
     if !(functions.inner_ffi_size() == functions.inner_struct_size()
@@ -98,7 +100,6 @@ extern "C" fn VcmpPluginInit(
     // get version
     let version: u32 = functions.server_version();
     println!("server version: {version}");
-    callbacks.OnServerFrame = Some(on_server_frame);
 
     //println!("ready to getsetting");
     //let server_settings = functions.get_server_settings();
@@ -107,54 +108,9 @@ extern "C" fn VcmpPluginInit(
     //let server_settings = functions.get_server_settings();
     //println!("server settings: {}", server_settings);
 
-    println!("rust 直接输出中文 test");
-    functions.log_message("VCMP 输出中文 test\n");
+    init_callbacks(callbacks);
 
     println!("vcmp-plugin-rs loaded");
 
     1
-}
-
-#[unsafe(no_mangle)]
-pub extern "C" fn on_server_init() -> u8 {
-    println!("[Rust] Server init callback");
-
-    println!("server settings {}", vcmp_func().server_version());
-
-    // println!("gamemode: {}", vcmp_func().get_gamemode());
-
-    vcmp_func()
-        .set_gamemode(&("*".repeat(63)))
-        .expect("set gamemode faild");
-
-    println!("gamemode: {}", vcmp_func().get_gamemode());
-
-    1
-}
-
-#[unsafe(no_mangle)]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn on_server_frame(elapsed_time: f32) {
-    // println!("[Rust] Server frame callback time: {}", elapsed_time);
-}
-
-// pub fn log_msg_to_vcmp()
-
-#[unsafe(no_mangle)]
-#[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn on_server_performance_report(
-    entry_count: usize,
-    descriptions: *mut *const c_char,
-    times: *mut u64,
-) {
-    // descriptions is array and times is array
-    for i in 0..entry_count {
-        let description = unsafe { CStr::from_ptr(*descriptions.add(i)) };
-        let time = unsafe { *times.add(i) };
-        println!(
-            "Performance report: {} - {}",
-            description.to_string_lossy(),
-            time
-        );
-    }
 }

@@ -35,7 +35,7 @@ if __name__ == "__main__":
 
     os.chdir(SERVER)
     try:
-        subprocess.run(["./server64.exe"])
+        subprocess.run(["./server64.exe", *sys.argv[1:]])
 
     except KeyboardInterrupt:
         print("Exiting...")

@@ -1,6 +1,6 @@
 use crate::{VcmpError, VcmpPluginInfo, VcmpResult, func::VcmpFunctions};
 
-pub trait PluginFunctions {
+pub trait PluginMethods {
     /// 获取插件(加载?)数量
     fn get_plugin_count(&self) -> u32;
 
@@ -13,7 +13,7 @@ pub trait PluginFunctions {
     fn send_plugin_command(&self, command_identifier: i32, command: &str) -> VcmpResult<()>;
 }
 
-impl PluginFunctions for VcmpFunctions {
+impl PluginMethods for VcmpFunctions {
     /// 获取插件(加载?)数量
     fn get_plugin_count(&self) -> u32 {
         (self.inner.GetNumberOfPlugins)()
