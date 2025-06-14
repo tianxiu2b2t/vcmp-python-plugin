@@ -5,7 +5,6 @@ use vcmp_bindings::{
     func::server::ServerMethods, options::VcmpEntityPool, raw::PluginCallbacks, vcmp_func,
 };
 
-use crate::func::player::PlayerPy;
 use crate::pool::ENTITY_POOL;
 
 #[unsafe(no_mangle)]
@@ -54,14 +53,17 @@ pub unsafe extern "C" fn on_server_performance_report(
     }
 }
 
+/// # Safety
+///
+/// ffi!
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_entity_pool_change(c_entity_type: i32, entity_id: i32, is_deleted: u8) {
     let entity_type = VcmpEntityPool::from(c_entity_type);
     let deleted = is_deleted != 0;
     println!("Entity pool change");
-    println!("entity type: {:?}", entity_type);
-    println!("entity id: {}", entity_id);
-    println!("deleted: {}", deleted);
+    println!("entity type: {entity_type:?}");
+    println!("entity id: {entity_id}");
+    println!("deleted: {deleted}");
 
     let mut pool = ENTITY_POOL.lock().expect("pool is poisoned");
 

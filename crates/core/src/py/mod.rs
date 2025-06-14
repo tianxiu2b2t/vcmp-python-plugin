@@ -40,6 +40,8 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 /// WARNING: 这个函数需要在 Python 初始化之前调用，否则会导致报错
 ///
 /// The code by shenjack
+///
+/// https://github.com/shenjackyuanjie/icalingua-bridge-bot/blob/d827f6c36e7787693f47f0b9167324fa24fb0538/ica-rs/src/py/class.rs#L94-L110
 pub fn init_py_module() {
     unsafe {
         // 单纯没用 macro 而已
