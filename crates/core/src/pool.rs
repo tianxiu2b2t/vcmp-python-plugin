@@ -6,7 +6,10 @@ use std::{
 
 use vcmp_bindings::options::VcmpEntityPool;
 
-use crate::{consts::EntityId, func::player::PlayerPy};
+use crate::{
+    consts::EntityId,
+    func::{player::PlayerPy, vehicle::VehiclePy},
+};
 
 pub trait EntityPoolTrait: Debug + Clone {
     fn entity_pool_type() -> VcmpEntityPool;
@@ -53,12 +56,14 @@ impl<E: EntityPoolTrait> AnEntityPool<E> {
 /// 实体池
 pub struct EntityPool {
     players: AnEntityPool<PlayerPy>,
+    vehicles: AnEntityPool<VehiclePy>,
 }
 
 impl EntityPool {
     fn new() -> Self {
         Self {
             players: AnEntityPool::new(),
+            vehicles: AnEntityPool::new(),
         }
     }
 
@@ -66,6 +71,9 @@ impl EntityPool {
         match entity_type {
             VcmpEntityPool::Player => {
                 self.players.insert_raw_entity(entity_id);
+            }
+            VcmpEntityPool::Vehicle => {
+                self.vehicles.insert_raw_entity(entity_id);
             }
             _ => {
                 todo!()
@@ -76,6 +84,9 @@ impl EntityPool {
         match entity_type {
             VcmpEntityPool::Player => {
                 self.players.remove_entity(entity_id);
+            }
+            VcmpEntityPool::Vehicle => {
+                self.vehicles.remove_entity(entity_id);
             }
             _ => {
                 todo!()
