@@ -5,9 +5,7 @@ use pyo3::{Bound, Py, PyResult, Python, pymodule};
 
 use pyo3::types::{PyModule, PyModuleMethods};
 
-use crate::{cfg::CONFIG, func::util::module_define as util_define, py::util::create_submodule};
-
-pub mod util;
+use crate::{cfg::CONFIG, func::util};
 
 #[cfg(target_os = "linux")]
 fn get_wchar_t(content: &str) -> Vec<i32> {
@@ -30,7 +28,9 @@ fn get_wchar_t(content: &str) -> Vec<u16> {
 #[pymodule]
 #[pyo3(name = "vcmp")]
 fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_submodule(&create_submodule(py, "util", util_define))?;
+    let util_module = PyModule::new(py, "util")?;
+    util::module_define(py, &util_module)?;
+    m.add_submodule(&util_module)?;
 
     Ok(())
 }

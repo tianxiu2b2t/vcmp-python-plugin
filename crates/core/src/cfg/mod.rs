@@ -59,8 +59,12 @@ impl Display for Config {
 
 pub static CONFIG: OnceLock<Config> = OnceLock::new();
 
+// support cfg and toml
+// 优先 toml
+// secondary cfg
+
 pub fn init_config() {
-    let mut config = Config::new();
+    let mut config = Config::new(); // dev... toml
     config = Config::new();
     config.set_script_path("./main.py".to_string());
     config.set_virtual_env("../.venv/Lib/site-packages".to_string());
