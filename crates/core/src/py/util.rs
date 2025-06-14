@@ -14,3 +14,13 @@ pub fn py_run(code: &str) {
         }
     })
 }
+
+pub fn create_submodule<'p>(
+    py: Python<'p>,
+    name: &str,
+    func: fn(Python<'p>, &Bound<'_, PyModule>) -> PyResult<()>,
+) -> Bound<'p, PyModule> {
+    let submodule = PyModule::new(py, name).expect("Failed to create submodule");
+    func(py, &submodule).expect("Failed to initialize submodule");
+    submodule
+}
