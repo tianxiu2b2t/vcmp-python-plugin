@@ -10,6 +10,8 @@ pub mod var;
 pub mod cfg;
 pub mod py;
 
+pub mod event;
+
 use var::PLUGIN_VERSION;
 
 use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};

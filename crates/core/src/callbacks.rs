@@ -1,7 +1,9 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-use vcmp_bindings::{func::server::ServerMethods, raw::PluginCallbacks, vcmp_func};
+use vcmp_bindings::{func::server::ServerMethods, options::VcmpEntityPool, raw::PluginCallbacks, vcmp_func};
+
+use crate::var::{get_pool, Pools, POOLS};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
@@ -49,8 +51,31 @@ pub unsafe extern "C" fn on_server_performance_report(
     }
 }
 
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_entity_pool_change(
+    c_entity_type: i32, entity_id: i32, is_deleted: u8
+) {
+    let entity_type = VcmpEntityPool::from(c_entity_type);
+    let deleted = is_deleted != 0;
+    println!("Entity pool change");
+    println!("entity type: {:?}", entity_type);
+    println!("entity id: {}", entity_id);
+    println!("deleted: {}", deleted);
+
+    match entity_type {
+        VcmpEntityPool::Player => {
+            if deleted {
+                get_pool().remove_player(entity_id);
+            }
+        },
+        _ => println!("other"),
+    }
+
+}
+
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);
     callbacks.OnServerFrame = Some(on_server_frame);
     callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
+    callbacks.OnEntityPoolChange = Some(on_entity_pool_change);
 }
