@@ -1,9 +1,7 @@
 use std::ffi::CStr;
 use std::os::raw::c_char;
 
-use vcmp_bindings::{
-    func::server::ServerMethods, raw::PluginCallbacks, vcmp_func
-};
+use vcmp_bindings::{func::server::ServerMethods, raw::PluginCallbacks, vcmp_func};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
@@ -50,7 +48,6 @@ pub unsafe extern "C" fn on_server_performance_report(
         );
     }
 }
-
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);

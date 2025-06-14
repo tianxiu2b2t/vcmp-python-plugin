@@ -3,14 +3,14 @@ use vcmp_bindings::{
     raw::{PluginCallbacks, PluginFuncs, PluginInfo},
 };
 
-pub mod var;
 pub mod callbacks;
-pub mod functions;
+pub mod func;
+pub mod var;
 
 pub mod cfg;
 pub mod py;
 
-use var::{PLUGIN_VERSION};
+use var::PLUGIN_VERSION;
 
 use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
 

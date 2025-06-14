@@ -1,17 +1,15 @@
-// template cfg
-
 use std::{
-    fmt::{Display, Formatter}, 
-    sync::{OnceLock}
+    fmt::{Display, Formatter},
+    sync::OnceLock,
 };
 
 pub mod cli_env;
 
 pub struct Config {
-    pub preloader: bool, // 直接在 VcmpPluginInit 时候加载
+    pub preloader: bool,     // 直接在 VcmpPluginInit 时候加载
     pub script_path: String, // 脚本路径
     pub virtual_env: String, // 虚拟环境路径 (建议是包)
-    pub debug: bool, // 是否调试
+    pub debug: bool,         // 是否调试
 }
 
 impl Config {
@@ -42,13 +40,20 @@ impl Config {
 
 impl Display for Config {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, r#"Config {{
+        write!(
+            f,
+            r#"Config {{
             preloader: {},
             script_path: "{}",
             virtual_env: {:?},
             debug: {}
         }}
-        "#, self.preloader, self.script_path, self.virtual_env.clone(), self.debug)
+        "#,
+            self.preloader,
+            self.script_path,
+            self.virtual_env.clone(),
+            self.debug
+        )
     }
 }
 
