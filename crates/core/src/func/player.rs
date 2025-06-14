@@ -1,9 +1,8 @@
 use pyo3::{pyclass, pymethods};
 
+use crate::pool::EntityPoolTrait;
 use vcmp_bindings::func::PlayerMethods;
 use vcmp_bindings::vcmp_func;
-
-use crate::pool::EntityPoolTrait;
 
 #[pyclass]
 #[pyo3(name = "Player")]
@@ -15,6 +14,12 @@ pub struct PlayerPy {
 impl PlayerPy {
     pub fn new(id: i32) -> Self {
         Self { id }
+    }
+}
+
+impl Into<PlayerPy> for i32 {
+    fn into(self) -> PlayerPy {
+        PlayerPy::new(self)
     }
 }
 

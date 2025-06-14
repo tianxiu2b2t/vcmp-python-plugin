@@ -1,4 +1,4 @@
-use pyo3::types::{IntoPyDict, PyDict, PyDictMethods, PyModuleMethods};
+use pyo3::types::{PyDict, PyDictMethods, PyModuleMethods};
 use pyo3::{Bound, PyResult, Python, pyfunction, types::PyModule, wrap_pyfunction};
 
 pub const SKINS: [(i32, &str); 193] = [
@@ -194,7 +194,7 @@ pub const SKINS: [(i32, &str); 193] = [
     (191, "Deformed Lance Vance"),
     (192, "Thief #1"),
     (193, "Thief #2"),
-    (194, "Thief #3")
+    (194, "Thief #3"),
 ];
 
 pub const VEHICLE_NAMES: [(i32, &str); 104] = [
@@ -301,10 +301,10 @@ pub const VEHICLE_NAMES: [(i32, &str); 104] = [
     (233, "Hotring Racer #3"),
     (234, "Bloodring Banger #1"),
     (235, "Bloodring Banger #2"),
-    (236, "Cheetah #2")
+    (236, "Cheetah #2"),
 ];
 
-pub const WEAPON_NAMES: [(i32, &str); 46]= [
+pub const WEAPON_NAMES: [(i32, &str); 46] = [
     (0, "Fists"),
     (1, "Brass Knuckles"),
     (2, "Screwdriver"),
@@ -353,7 +353,7 @@ pub const WEAPON_NAMES: [(i32, &str); 46]= [
     (70, "Suicide"),
 ];
 
-pub const WEAPON_MODELS: [(i32, i32); 35]= [
+pub const WEAPON_MODELS: [(i32, i32); 35] = [
     (0, 293),
     (1, 259),
     (2, 260),
@@ -388,7 +388,7 @@ pub const WEAPON_MODELS: [(i32, i32); 35]= [
     (31, 288),
     (32, 289),
     (33, 290),
-    (36, 292)
+    (36, 292),
 ];
 
 #[pyfunction(signature = (x, y, *polies))]
@@ -478,7 +478,7 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_district_name, m)?)?;
     m.add_function(wrap_pyfunction!(distance_from_point, m)?)?;
     m.add_function(wrap_pyfunction!(in_poly, m)?)?;
-    
+
     let skin_dict = PyDict::new(py);
     SKINS.iter().for_each(|(k, v)| {
         let _ = skin_dict.set_item(*k, *v);
@@ -493,7 +493,7 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     WEAPON_NAMES.iter().for_each(|(k, v)| {
         let _ = weapon_name_dict.set_item(*k, *v);
     });
-    
+
     let weapon_model_dict = PyDict::new(py);
     WEAPON_MODELS.iter().for_each(|(k, v)| {
         let _ = weapon_model_dict.set_item(*k, *v);
@@ -501,9 +501,9 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add("SKINS", skin_dict)?;
     m.add("VEHICLE_NAMES", vehicle_dict)?;
-    m.add("WEAPON_NAMES", weapon_name_dict)?;    
+    m.add("WEAPON_NAMES", weapon_name_dict)?;
 
-        m.add("WEAPON_MODELS", weapon_model_dict)?;
+    m.add("WEAPON_MODELS", weapon_model_dict)?;
     m.add(
         "VEHICLE_CLASSIC_CAR",
         [

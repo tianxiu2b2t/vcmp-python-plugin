@@ -8,7 +8,7 @@ use vcmp_bindings::options::VcmpEntityPool;
 
 use crate::{consts::EntityId, func::player::PlayerPy};
 
-pub trait EntityPoolTrait {
+pub trait EntityPoolTrait: Debug + Clone {
     fn entity_pool_type() -> VcmpEntityPool;
     fn entity_id(&self) -> EntityId;
 }
@@ -16,12 +16,12 @@ pub trait EntityPoolTrait {
 #[derive(Debug, Clone)]
 pub struct AnEntityPool<E>
 where
-    E: EntityPoolTrait + Debug + Clone,
+    E: EntityPoolTrait,
 {
     pool: HashMap<EntityId, E>,
 }
 
-impl<E: EntityPoolTrait + Debug + Clone> AnEntityPool<E> {
+impl<E: EntityPoolTrait> AnEntityPool<E> {
     pub fn pool_type(&self) -> VcmpEntityPool {
         E::entity_pool_type()
     }
@@ -32,6 +32,14 @@ impl<E: EntityPoolTrait + Debug + Clone> AnEntityPool<E> {
 
     pub fn remove_entity(&mut self, entity_id: EntityId) {
         self.pool.remove(&entity_id);
+    }
+
+    pub fn have_entity(&self, entity_id: EntityId) -> bool {
+        self.pool.contains_key(&entity_id)
+    }
+
+    pub fn insert_raw_entity(&mut self, entity: impl Into<E>) {
+        self.add_entity(entity.into());
     }
 
     pub fn new() -> Self {
@@ -57,28 +65,21 @@ impl EntityPool {
     pub fn insert(&mut self, entity_type: VcmpEntityPool, entity_id: EntityId) {
         match entity_type {
             VcmpEntityPool::Player => {
-                self.insert_raw_player(entity_id);
+                self.players.insert_raw_entity(entity_id);
             }
             _ => {
                 todo!()
             }
         }
     }
-    pub fn remove(&self, entity_type: VcmpEntityPool, entity_id: EntityId) {}
-    pub fn get_players(&self) -> Vec<&PlayerPy> {
-        self.players.values().collect()
-    }
-    pub fn insert_raw_player(&mut self, player_id: i32) {
-        let plr = PlayerPy::new(player_id);
-        self.insert_player(plr);
-    }
-    pub fn remove_player(&mut self, player_id: i32) -> bool {
-        // check if player exists
-        if self.players.contains_key(&player_id) {
-            self.players.remove(&player_id);
-            true
-        } else {
-            false
+    pub fn remove(&mut self, entity_type: VcmpEntityPool, entity_id: EntityId) {
+        match entity_type {
+            VcmpEntityPool::Player => {
+                self.players.remove_entity(entity_id);
+            }
+            _ => {
+                todo!()
+            }
         }
     }
 }
