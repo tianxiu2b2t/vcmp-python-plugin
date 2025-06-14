@@ -2,113 +2,110 @@ use std::collections::HashMap;
 use std::sync::LazyLock;
 
 use pyo3::prelude::*;
-use pyo3::types::{IntoPyDict};
-use pyo3::{
-    Bound, PyResult, Python, pyfunction, types::PyModule, wrap_pyfunction,
-};
-
+use pyo3::types::IntoPyDict;
+use pyo3::{Bound, PyResult, Python, pyfunction, types::PyModule, wrap_pyfunction};
 
 pub static SKINS: LazyLock<HashMap<i32, &str>> = LazyLock::new(|| {
     let mut skins = HashMap::new();
-    skins.insert(0,   "Tommy Vercetti");
-    skins.insert(1,   "Cop");
-    skins.insert(2,   "SWAT");
-    skins.insert(3,   "FBI");
-    skins.insert(4,   "Army");
-    skins.insert(5,   "Paramedic");
-    skins.insert(6,   "Firefighter");
-    skins.insert(7,   "Golf Guy #1");
-    skins.insert(9,   "Bum Lady #1");
-    skins.insert(10,  "Bum Lady #2");
-    skins.insert(11,  "Punk #1");
-    skins.insert(12,  "Lawyer");
-    skins.insert(13,  "Spanish Lady #1");
-    skins.insert(14,  "Spanish Lady #2");
-    skins.insert(15,  "Cool Guy #1");
-    skins.insert(16,  "Arabic Guy");
-    skins.insert(17,  "Beach Lady #1");
-    skins.insert(18,  "Beach Lady #2");
-    skins.insert(19,  "Beach Guy #1");
-    skins.insert(20,  "Beach Guy #2");
-    skins.insert(21,  "Office Lady #1");
-    skins.insert(22,  "Waitress #1");
-    skins.insert(23,  "Food Lady");
-    skins.insert(24,  "Prostitute #1");
-    skins.insert(25,  "Bum Lady #3");
-    skins.insert(26,  "Bum Guy #1");
-    skins.insert(27,  "Garbageman #1");
-    skins.insert(28,  "Taxi Driver #1");
-    skins.insert(29,  "Haitian #1");
-    skins.insert(30,  "Criminal #1");
-    skins.insert(31,  "Hood Lady");
-    skins.insert(32,  "Granny #1");
-    skins.insert(33,  "Businessman #1");
-    skins.insert(34,  "Church Guy");
-    skins.insert(35,  "Club Lady");
-    skins.insert(36,  "Church Lady");
-    skins.insert(37,  "Pimp");
-    skins.insert(38,  "Beach Lady #3");
-    skins.insert(39,  "Beach Guy #3");
-    skins.insert(40,  "Beach Lady #4");
-    skins.insert(41,  "Beach Guy #4");
-    skins.insert(42,  "Businessman #2");
-    skins.insert(43,  "Prostitute #2");
-    skins.insert(44,  "Bum Lady #4");
-    skins.insert(45,  "Bum Guy #2");
-    skins.insert(46,  "Haitian #2");
-    skins.insert(47,  "Construction Worker #1");
-    skins.insert(48,  "Punk #2");
-    skins.insert(49,  "Prostitute #3");
-    skins.insert(50,  "Granny #2");
-    skins.insert(51,  "Punk #3");
-    skins.insert(52,  "Businessman #3");
-    skins.insert(53,  "Spanish Lady #3");
-    skins.insert(54,  "Spanish Lady #4");
-    skins.insert(55,  "Cool Guy #2");
-    skins.insert(56,  "Businessman #4");
-    skins.insert(57,  "Beach Lady #5");
-    skins.insert(58,  "Beach Guy #5");
-    skins.insert(59,  "Beach Lady #6");
-    skins.insert(60,  "Beach Guy #6");
-    skins.insert(61,  "Construction Worker #2");
-    skins.insert(62,  "Golf Guy #2");
-    skins.insert(63,  "Golf Lady");
-    skins.insert(64,  "Golf Guy #3");
-    skins.insert(65,  "Beach Lady #7");
-    skins.insert(66,  "Beach Guy #7");
-    skins.insert(67,  "Office Lady #2");
-    skins.insert(68,  "Businessman #5");
-    skins.insert(69,  "Businessman #6");
-    skins.insert(70,  "Prostitute #2");
-    skins.insert(71,  "Bum Lady #4");
-    skins.insert(72,  "Bum Guy #3");
-    skins.insert(73,  "Spanish Guy");
-    skins.insert(74,  "Taxi Driver #2");
-    skins.insert(75,  "Gym Lady");
-    skins.insert(76,  "Gym Guy");
-    skins.insert(77,  "Skate Lady");
-    skins.insert(78,  "Skate Guy");
-    skins.insert(79,  "Shopper #1");
-    skins.insert(80,  "Shopper #2");
-    skins.insert(81,  "Tourist #1");
-    skins.insert(82,  "Tourist #2");
-    skins.insert(83,  "Cuban #1");
-    skins.insert(84,  "Cuban #2");
-    skins.insert(85,  "Haitian #3");
-    skins.insert(86,  "Haitian #4");
-    skins.insert(87,  "Shark #1");
-    skins.insert(88,  "Shark #2");
-    skins.insert(89,  "Diaz Guy #1");
-    skins.insert(90,  "Diaz Guy #2");
-    skins.insert(91,  "DBP Security #1");
-    skins.insert(92,  "DBP Security #2");
-    skins.insert(93,  "Biker #1");
-    skins.insert(94,  "Biker #2");
-    skins.insert(95,  "Vercetti Guy #1");
-    skins.insert(96,  "Vercetti Guy #2");
-    skins.insert(97,  "Undercover Cop #1");
-    skins.insert(98,  "Undercover Cop #2");
-    skins.insert(99,  "Undercover Cop #3");
+    skins.insert(0, "Tommy Vercetti");
+    skins.insert(1, "Cop");
+    skins.insert(2, "SWAT");
+    skins.insert(3, "FBI");
+    skins.insert(4, "Army");
+    skins.insert(5, "Paramedic");
+    skins.insert(6, "Firefighter");
+    skins.insert(7, "Golf Guy #1");
+    skins.insert(9, "Bum Lady #1");
+    skins.insert(10, "Bum Lady #2");
+    skins.insert(11, "Punk #1");
+    skins.insert(12, "Lawyer");
+    skins.insert(13, "Spanish Lady #1");
+    skins.insert(14, "Spanish Lady #2");
+    skins.insert(15, "Cool Guy #1");
+    skins.insert(16, "Arabic Guy");
+    skins.insert(17, "Beach Lady #1");
+    skins.insert(18, "Beach Lady #2");
+    skins.insert(19, "Beach Guy #1");
+    skins.insert(20, "Beach Guy #2");
+    skins.insert(21, "Office Lady #1");
+    skins.insert(22, "Waitress #1");
+    skins.insert(23, "Food Lady");
+    skins.insert(24, "Prostitute #1");
+    skins.insert(25, "Bum Lady #3");
+    skins.insert(26, "Bum Guy #1");
+    skins.insert(27, "Garbageman #1");
+    skins.insert(28, "Taxi Driver #1");
+    skins.insert(29, "Haitian #1");
+    skins.insert(30, "Criminal #1");
+    skins.insert(31, "Hood Lady");
+    skins.insert(32, "Granny #1");
+    skins.insert(33, "Businessman #1");
+    skins.insert(34, "Church Guy");
+    skins.insert(35, "Club Lady");
+    skins.insert(36, "Church Lady");
+    skins.insert(37, "Pimp");
+    skins.insert(38, "Beach Lady #3");
+    skins.insert(39, "Beach Guy #3");
+    skins.insert(40, "Beach Lady #4");
+    skins.insert(41, "Beach Guy #4");
+    skins.insert(42, "Businessman #2");
+    skins.insert(43, "Prostitute #2");
+    skins.insert(44, "Bum Lady #4");
+    skins.insert(45, "Bum Guy #2");
+    skins.insert(46, "Haitian #2");
+    skins.insert(47, "Construction Worker #1");
+    skins.insert(48, "Punk #2");
+    skins.insert(49, "Prostitute #3");
+    skins.insert(50, "Granny #2");
+    skins.insert(51, "Punk #3");
+    skins.insert(52, "Businessman #3");
+    skins.insert(53, "Spanish Lady #3");
+    skins.insert(54, "Spanish Lady #4");
+    skins.insert(55, "Cool Guy #2");
+    skins.insert(56, "Businessman #4");
+    skins.insert(57, "Beach Lady #5");
+    skins.insert(58, "Beach Guy #5");
+    skins.insert(59, "Beach Lady #6");
+    skins.insert(60, "Beach Guy #6");
+    skins.insert(61, "Construction Worker #2");
+    skins.insert(62, "Golf Guy #2");
+    skins.insert(63, "Golf Lady");
+    skins.insert(64, "Golf Guy #3");
+    skins.insert(65, "Beach Lady #7");
+    skins.insert(66, "Beach Guy #7");
+    skins.insert(67, "Office Lady #2");
+    skins.insert(68, "Businessman #5");
+    skins.insert(69, "Businessman #6");
+    skins.insert(70, "Prostitute #2");
+    skins.insert(71, "Bum Lady #4");
+    skins.insert(72, "Bum Guy #3");
+    skins.insert(73, "Spanish Guy");
+    skins.insert(74, "Taxi Driver #2");
+    skins.insert(75, "Gym Lady");
+    skins.insert(76, "Gym Guy");
+    skins.insert(77, "Skate Lady");
+    skins.insert(78, "Skate Guy");
+    skins.insert(79, "Shopper #1");
+    skins.insert(80, "Shopper #2");
+    skins.insert(81, "Tourist #1");
+    skins.insert(82, "Tourist #2");
+    skins.insert(83, "Cuban #1");
+    skins.insert(84, "Cuban #2");
+    skins.insert(85, "Haitian #3");
+    skins.insert(86, "Haitian #4");
+    skins.insert(87, "Shark #1");
+    skins.insert(88, "Shark #2");
+    skins.insert(89, "Diaz Guy #1");
+    skins.insert(90, "Diaz Guy #2");
+    skins.insert(91, "DBP Security #1");
+    skins.insert(92, "DBP Security #2");
+    skins.insert(93, "Biker #1");
+    skins.insert(94, "Biker #2");
+    skins.insert(95, "Vercetti Guy #1");
+    skins.insert(96, "Vercetti Guy #2");
+    skins.insert(97, "Undercover Cop #1");
+    skins.insert(98, "Undercover Cop #2");
+    skins.insert(99, "Undercover Cop #3");
     skins.insert(100, "Undercover Cop #4");
     skins.insert(101, "Undercover Cop #5");
     skins.insert(102, "Undercover Cop #6");
@@ -313,7 +310,6 @@ pub static VEHICLE_NAMES: LazyLock<HashMap<u32, &str>> = LazyLock::new(|| {
     vehicles.insert(235, "Bloodring Banger #2");
     vehicles.insert(236, "Cheetah #2");
     vehicles
-
 });
 
 pub static WEAPON_NAMES: LazyLock<HashMap<i32, &str>> = LazyLock::new(|| {
@@ -498,20 +494,20 @@ pub fn submodule_util(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("VEHICLE_NAMES", VEHICLE_NAMES.clone().into_py_dict(py)?)?;
     m.add("WEAPON_NAMES", WEAPON_NAMES.clone().into_py_dict(py)?)?;
     m.add("WEAPON_MODELS", WEAPON_MODELS.clone().into_py_dict(py)?)?;
-    m.add("VEHICLE_CLASSIC_CAR", [
-        130, 131, 132, 133, 134, 135, 137, 138, 139,
-        140, 141, 142, 143, 144, 145, 146, 147, 148, 149,
-        150, 151, 152, 153, 154, 156, 157, 158, 159,
-        161, 162, 163, 164, 167, 168, 169,
-        170, 172, 173, 174, 175, 179,
-        185, 186, 187, 188, 189,
-        196, 197,
-        200, 201, 204, 205, 206, 207, 208, 209,
-        210, 211, 212, 213, 215, 216, 219,
-        220, 221, 222, 224, 225, 226, 228, 229,
-        230, 232, 233, 234, 235, 236
-    ])?;
-    m.add("VEHICLE_CLASSIC_BOAT", [136, 160, 176, 182, 183, 184, 190, 202, 203, 214, 223])?;
+    m.add(
+        "VEHICLE_CLASSIC_CAR",
+        [
+            130, 131, 132, 133, 134, 135, 137, 138, 139, 140, 141, 142, 143, 144, 145, 146, 147,
+            148, 149, 150, 151, 152, 153, 154, 156, 157, 158, 159, 161, 162, 163, 164, 167, 168,
+            169, 170, 172, 173, 174, 175, 179, 185, 186, 187, 188, 189, 196, 197, 200, 201, 204,
+            205, 206, 207, 208, 209, 210, 211, 212, 213, 215, 216, 219, 220, 221, 222, 224, 225,
+            226, 228, 229, 230, 232, 233, 234, 235, 236,
+        ],
+    )?;
+    m.add(
+        "VEHICLE_CLASSIC_BOAT",
+        [136, 160, 176, 182, 183, 184, 190, 202, 203, 214, 223],
+    )?;
     m.add("VEHICLE_CLASSIC_AIR", [155, 177, 199, 217, 218, 227])?;
     m.add("VEHICLE_CLASSIC_BIKE", [166, 178, 191, 192, 193, 198])?;
     m.add("VEHICLE_CLASSIC_RC", [171, 194, 195, 231])?;

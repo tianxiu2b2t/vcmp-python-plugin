@@ -196,7 +196,7 @@ impl From<i32> for VcmpEntityPool {
             6 => Self::Reserved1,
             7 => Self::Blip,
             8 => Self::CheckPoint,
-            _ => Self::Vehicle, // 未知值转为第一个变体
+            _ => Self::Reserved1, // 未知值转为第一个变体
         }
     }
 }

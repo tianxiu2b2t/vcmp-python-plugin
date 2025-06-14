@@ -4,15 +4,19 @@ use vcmp_bindings::{
 };
 
 pub mod callbacks;
+pub mod consts;
 pub mod func;
-pub mod var;
 
 pub mod cfg;
+pub mod event;
+pub mod pool;
 pub mod py;
 
-pub mod event;
-
-use var::PLUGIN_VERSION;
+/// 插件版本
+///
+/// semver:
+/// xx yy zz
+pub const PLUGIN_VERSION: u32 = 00_01_00;
 
 use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
 
