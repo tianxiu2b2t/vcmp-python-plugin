@@ -1,10 +1,10 @@
 use std::{
-    fmt::{Display, Formatter},
-    sync::OnceLock,
+    fmt::{Display, Formatter}, path::Path, sync::OnceLock
 };
 
 pub mod cli_env;
 
+#[derive(Debug, Clone)]
 pub struct Config {
     pub preloader: bool,     // 直接在 VcmpPluginInit 时候加载
     pub script_path: String, // 脚本路径
@@ -63,12 +63,44 @@ pub static CONFIG: OnceLock<Config> = OnceLock::new();
 // 优先 toml
 // secondary cfg
 
-pub fn init_config() {
+fn init_config_from_cfg() -> Option<Config> {
+    // default server.cfg
     let mut config = Config::new(); // dev... toml
-    config = Config::new();
-    config.set_script_path("./main.py".to_string());
-    config.set_virtual_env("../.venv/Lib/site-packages".to_string());
-    CONFIG.get_or_init(|| config);
+
+    let cfg_file = Path::new("./server.cfg");
+    if !cfg_file.exists() || !cfg_file.is_file() || cfg_file.metadata().unwrap().len() == 0 {
+        return None;
+    }
+
+    let content = std::fs::read_to_string(cfg_file).unwrap();
+    
+    let find_value = | key: &str | {
+        let mut value = String::new();
+        for line in content.lines() {
+            if line.starts_with(key) {
+                value = line.split(' ').nth(1).unwrap().trim().to_string();
+                break;
+            }
+        }
+        value
+    };
+
+    config.debug = find_value("python_debug").parse().unwrap_or(false);
+    config.preloader = find_value("python_preloader").parse().unwrap_or(false);
+    config.script_path = find_value("python_script_path").to_string();
+    config.virtual_env = find_value("python_virtual_env").to_string();
+
+    Some(config)
+}
+
+fn init_config_from_toml() -> Option<Config> {
+    return None;
+}
+
+pub fn init_config() {
+    CONFIG.get_or_init(|| init_config_from_toml().unwrap_or(
+        init_config_from_cfg().unwrap_or(Config::new())
+    ));
 
     println!("{}", CONFIG.get().unwrap());
 }

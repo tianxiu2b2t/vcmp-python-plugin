@@ -8,7 +8,7 @@ use vcmp_bindings::options::VcmpEntityPool;
 
 use crate::{
     consts::EntityId,
-    func::{player::PlayerPy, vehicle::VehiclePy},
+    functions::{player::PlayerPy, vehicle::VehiclePy},
 };
 
 pub trait EntityPoolTrait: Debug + Clone {

@@ -5,7 +5,7 @@ use vcmp_bindings::{
 
 pub mod callbacks;
 pub mod consts;
-pub mod func;
+pub mod functions;
 
 pub mod cfg;
 pub mod event;
