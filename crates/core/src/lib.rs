@@ -8,7 +8,6 @@ pub mod consts;
 pub mod functions;
 
 pub mod cfg;
-pub mod event;
 pub mod pool;
 pub mod py;
 

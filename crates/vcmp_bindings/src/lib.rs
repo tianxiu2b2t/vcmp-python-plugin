@@ -10,6 +10,8 @@ pub mod encodes;
 ///
 /// error wrapper
 pub mod error;
+/// callback event
+pub mod events;
 /// PluginFunction 的包装
 ///
 /// 帮你解决好各种 call 问题

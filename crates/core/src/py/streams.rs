@@ -1,7 +1,9 @@
 use pyo3::{
-    pyclass, pymethods, types::{
-        PyAny, PyAnyMethods, PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods, PyModule, PyModuleMethods,
-    }, Bound, Py, PyResult, Python
+    Bound, Py, PyResult, Python, pyclass, pymethods,
+    types::{
+        PyAny, PyAnyMethods, PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods, PyModule,
+        PyModuleMethods,
+    },
 };
 use std::fmt::{Display, Formatter};
 use std::io::{Cursor, Read, Write};
