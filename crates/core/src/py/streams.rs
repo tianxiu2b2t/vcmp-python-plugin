@@ -1,6 +1,8 @@
-use pyo3::prelude::*;
-use pyo3::pymethods;
-use pyo3::types::{PyAny, PyByteArray, PyBytes};
+use pyo3::{
+    pyclass, pymethods, types::{
+        PyAny, PyAnyMethods, PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods, PyModule, PyModuleMethods,
+    }, Bound, Py, PyResult, Python
+};
 use std::fmt::{Display, Formatter};
 use std::io::{Cursor, Read, Write};
 use vcmp_bindings::encodes::{decode_gbk, encode_to_gbk};
@@ -23,7 +25,6 @@ impl WriteStream {
         format!("WriteStream({})", bytes_repr(self.get_raw_buffer()))
     }
 
-    #[pyo3(signature = (data))]
     fn write_bytes(&mut self, py: Python<'_>, data: Py<PyAny>) -> PyResult<()> {
         let bound_data = data.bind(py);
 
@@ -128,6 +129,15 @@ struct ReadStream {
     buffer: Cursor<Vec<u8>>,
 }
 
+impl ReadStream {
+    pub fn read(&mut self, length: usize) -> Vec<u8> {
+        let mut buf = vec![0u8; length];
+        let bytes_read = self.buffer.read(&mut buf).unwrap();
+        buf.truncate(bytes_read);
+        buf
+    }
+}
+
 #[pymethods]
 impl ReadStream {
     #[new]
@@ -146,33 +156,22 @@ impl ReadStream {
         )
     }
 
-    fn read(&mut self, py: Python<'_>, length: usize) -> Py<PyBytes> {
-        let mut buf = vec![0u8; length];
-        let bytes_read = self.buffer.read(&mut buf).unwrap();
-        buf.truncate(bytes_read);
-        PyBytes::new(py, &buf).unbind()
-    }
-
     fn read_byte(&mut self) -> i8 {
-        let mut buf = [0u8; 1];
-        self.buffer.read_exact(&mut buf).unwrap();
-        buf[0] as i8
+        self.read(1)[0] as i8
     }
 
-    fn read_bytes(&mut self, py: Python<'_>, length: usize) -> Py<PyBytes> {
-        let mut buf = vec![0u8; length];
-        let bytes_read = self.buffer.read(&mut buf).unwrap();
-        buf.truncate(bytes_read);
-        PyBytes::new(py, &buf).unbind()
+    fn read_bytes<'a>(&mut self, py: Python<'a>, length: usize) -> Bound<'a, PyBytes> {
+        let buf = self.read(length);
+        PyBytes::new(py, &buf)
     }
-
-    fn read_int(&mut self) -> i32 {
+    // read_int
+    fn read_i32(&mut self) -> i32 {
         let mut buf = [0u8; 4];
         self.buffer.read_exact(&mut buf).unwrap();
         i32::from_be_bytes(buf)
     }
-
-    fn read_long(&mut self) -> i64 {
+    // var int avro encode
+    fn read_i64(&mut self) -> i64 {
         let mut datum = 0i64;
         let mut shift = 0;
         loop {
@@ -199,7 +198,7 @@ impl ReadStream {
     }
 
     fn read_string(&mut self) -> String {
-        let length = self.read_long() as usize;
+        let length = self.read_i64() as usize;
         let mut data = vec![0u8; length];
         self.buffer.read_exact(&mut data).unwrap();
 
