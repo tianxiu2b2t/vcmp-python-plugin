@@ -1,9 +1,12 @@
-use pyo3::{pyfunction, types::{PyModule, PyModuleMethods}, wrap_pyfunction, Bound, PyResult, Python};
+use pyo3::{
+    Bound, PyResult, Python, pyfunction,
+    types::{PyModule, PyModuleMethods},
+    wrap_pyfunction,
+};
 
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
 use crate::py::types::ServerSettingsPy;
-
 
 #[pyfunction]
 pub fn set_server_name(server_name: &str) {
@@ -60,7 +63,6 @@ pub fn get_server_settings() -> ServerSettingsPy {
     ServerSettingsPy::from(vcmp_func().server_settings())
 }
 
-
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(set_server_name, m)?)?;
     m.add_function(wrap_pyfunction!(get_server_name, m)?)?;
@@ -74,5 +76,4 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(shutdown_server, m)?)?;
     m.add_function(wrap_pyfunction!(get_server_settings, m)?)?;
     Ok(())
-
 }

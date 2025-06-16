@@ -1,5 +1,7 @@
 use std::{
-    fmt::{Display, Formatter}, path::Path, sync::OnceLock
+    fmt::{Display, Formatter},
+    path::Path,
+    sync::OnceLock,
 };
 
 pub mod cli_env;
@@ -73,8 +75,8 @@ fn init_config_from_cfg() -> Option<Config> {
     }
 
     let content = std::fs::read_to_string(cfg_file).unwrap();
-    
-    let find_value = | key: &str | {
+
+    let find_value = |key: &str| {
         let mut value = String::new();
         for line in content.lines() {
             if line.starts_with(key) {
@@ -98,9 +100,9 @@ fn init_config_from_toml() -> Option<Config> {
 }
 
 pub fn init_config() {
-    CONFIG.get_or_init(|| init_config_from_toml().unwrap_or(
-        init_config_from_cfg().unwrap_or(Config::new())
-    ));
+    CONFIG.get_or_init(|| {
+        init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or(Config::new()))
+    });
 
     println!("{}", CONFIG.get().unwrap());
 }

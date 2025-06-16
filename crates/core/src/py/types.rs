@@ -1,6 +1,9 @@
-use pyo3::{pyclass, pymethods, types::{PyModule, PyModuleMethods}, Bound, PyResult, Python};
+use pyo3::{
+    Bound, PyResult, Python, pyclass, pymethods,
+    types::{PyModule, PyModuleMethods},
+};
 
-use vcmp_bindings::{setting::VcmpServerSettings};
+use vcmp_bindings::setting::VcmpServerSettings;
 
 #[derive(Clone)]
 #[pyclass]
@@ -11,9 +14,7 @@ pub struct ServerSettingsPy {
 
 impl ServerSettingsPy {
     pub fn from(value: VcmpServerSettings) -> Self {
-        Self {
-            inner: value,
-        }
+        Self { inner: value }
     }
 }
 
@@ -40,12 +41,17 @@ impl ServerSettingsPy {
     }
 
     fn __repr__(&self) -> String {
-        format!(r#"ServerSettings(server_name='{}', max_players={}, port={}, flags={})"#, self.inner.server_name(), self.inner.max_players(), self.inner.port(), self.inner.flags())
+        format!(
+            r#"ServerSettings(server_name='{}', max_players={}, port={}, flags={})"#,
+            self.inner.server_name(),
+            self.inner.max_players(),
+            self.inner.port(),
+            self.inner.flags()
+        )
     }
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ServerSettingsPy>()?;
     Ok(())
-
 }

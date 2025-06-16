@@ -1,8 +1,6 @@
-use pyo3::{prelude::*};
+use pyo3::prelude::*;
+use pyo3::pymethods;
 use pyo3::types::{PyDict, PyTuple};
-use pyo3::{
-    pymethods
-};
 
 #[pyclass(subclass)]
 #[derive(Debug)]
@@ -18,8 +16,11 @@ impl Event {
     fn new(py: Python<'_>, args: Py<PyTuple>, kwargs: Option<Py<PyDict>>) -> Self {
         let raw_args = args;
         let raw_kwargs = kwargs.unwrap_or_else(|| PyDict::new(py).unbind());
-        
-        Event { raw_args, raw_kwargs }
+
+        Event {
+            raw_args,
+            raw_kwargs,
+        }
     }
 
     #[getter]
@@ -35,7 +36,7 @@ impl Event {
     /*fn __repr__(&self, py: Python<'_>) -> PyResult<String> {
         let self_type = self.clone().into_pyobject(py).unwrap().get_type();
         let class_name = self_type.name().unwrap().unbind();
-        
+
         // 尝试获取 __fields__ 属性
         let fields = match self_type.getattr("__fields__") {
             Ok(fields_attr) => {

@@ -1,9 +1,7 @@
 use pyo3::prelude::*;
+use pyo3::pymethods;
 use pyo3::types::{PyAny, PyByteArray, PyBytes};
-use pyo3::{pymethods};
-use std::fmt::{
-    Display, Formatter
-};
+use std::fmt::{Display, Formatter};
 use std::io::{Cursor, Read, Write};
 use vcmp_bindings::encodes::{decode_gbk, encode_to_gbk};
 
@@ -141,7 +139,11 @@ impl ReadStream {
 
     fn __repr__(&self) -> String {
         let binding = self.buffer.get_ref().to_vec();
-        format!("ReadStream(buffer={}, position={})", bytes_repr(binding), self.buffer.position())
+        format!(
+            "ReadStream(buffer={}, position={})",
+            bytes_repr(binding),
+            self.buffer.position()
+        )
     }
 
     fn read(&mut self, py: Python<'_>, length: usize) -> Py<PyBytes> {
@@ -221,7 +223,6 @@ impl ReadStream {
     }
 }
 
-
 impl Display for WriteStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "WriteStream({})", bytes_repr(self.get_raw_buffer()))
@@ -230,7 +231,12 @@ impl Display for WriteStream {
 
 impl Display for ReadStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ReadStream(buffer={}, position={})", bytes_repr(self.get_raw_buffer()), self.buffer.position())
+        write!(
+            f,
+            "ReadStream(buffer={}, position={})",
+            bytes_repr(self.get_raw_buffer()),
+            self.buffer.position()
+        )
     }
 }
 

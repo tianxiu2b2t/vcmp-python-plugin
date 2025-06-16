@@ -5,14 +5,12 @@ use pyo3::{Bound, Py, PyResult, Python, pymodule};
 
 use pyo3::types::{PyModule, PyModuleMethods};
 
+use crate::cfg::CONFIG;
 use crate::functions;
-use crate::{
-    cfg::CONFIG,
-};
 
 pub mod streams;
-pub mod util;
 pub mod types;
+pub mod util;
 
 #[cfg(target_os = "linux")]
 fn get_wchar_t(content: &str) -> Vec<i32> {
@@ -145,10 +143,9 @@ pub fn raw_load_script_as_module(script: &Path) -> PyResult<Py<PyModule>> {
     })
 }
 
-
 pub fn bytes_repr(data: Vec<u8>) -> String {
     let mut result = String::from("b'");
-    
+
     for &byte in data.iter() {
         match byte {
             // 常见转义字符
@@ -165,7 +162,7 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
             _ => result.push_str(&format!("\\x{:02x}", byte)),
         }
     }
-    
+
     result.push('\'');
     result
 }
