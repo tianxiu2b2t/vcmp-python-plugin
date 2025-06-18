@@ -73,8 +73,7 @@ pub unsafe extern "C" fn on_entity_pool_change(c_entity_type: i32, entity_id: i3
 
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_client_script_data(_client_id: i32, _data: *const u8, _size: usize) {
-    let event = ClientScriptDataEvent::from((_client_id, _data, _size));
-    println!("Client script data event: {event:?}");
+    let _ = ClientScriptDataEvent::from((_client_id, _data, _size));
 }
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
