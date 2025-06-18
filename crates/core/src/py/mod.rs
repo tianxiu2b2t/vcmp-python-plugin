@@ -5,7 +5,12 @@ use pyo3::{Bound, Py, PyResult, Python, pymodule};
 
 use pyo3::types::{PyModule, PyModuleMethods};
 
-use crate::{cfg::CONFIG, func::util};
+use crate::cfg::CONFIG;
+use crate::functions;
+
+pub mod streams;
+pub mod types;
+pub mod util;
 
 #[cfg(target_os = "linux")]
 fn get_wchar_t(content: &str) -> Vec<i32> {
@@ -31,6 +36,18 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let util_module = PyModule::new(py, "util")?;
     util::module_define(py, &util_module)?;
     m.add_submodule(&util_module)?;
+
+    let streams_module = PyModule::new(py, "streams")?;
+    streams::module_define(py, &streams_module)?;
+    m.add_submodule(&streams_module)?;
+
+    let types_module = PyModule::new(py, "types")?;
+    types::module_define(py, &types_module)?;
+    m.add_submodule(&types_module)?;
+
+    let funcs_module = PyModule::new(py, "functions")?;
+    functions::module_define(py, &funcs_module)?;
+    m.add_submodule(&funcs_module)?;
 
     Ok(())
 }
@@ -89,15 +106,25 @@ pub fn init_py() {
 
     println!("Python init");
 
-    let script_path = CONFIG.get().unwrap().script_path.as_str();
-
-    load_script_as_module(Path::new(script_path)).unwrap();
+    if CONFIG.get().unwrap().preloader {
+        load_script_as_module();
+    }
 }
 
-pub fn load_script_as_module(script: &Path) -> PyResult<Py<PyModule>> {
+pub fn load_script_as_module() {
+    let script_path = CONFIG.get().unwrap().script_path.as_str();
+    let res = raw_load_script_as_module(Path::new(script_path));
+    if let Err(e) = res {
+        println!("Error: {}", e);
+    } else {
+        println!("Script loaded");
+    }
+}
+
+pub fn raw_load_script_as_module(script: &Path) -> PyResult<Py<PyModule>> {
     // check exists
     if !script.exists() {
-        return Err(pyo3::exceptions::PyRuntimeError::new_err(
+        return Err(pyo3::exceptions::PyRuntimeWarning::new_err(
             "Script not found",
         ));
     }
@@ -114,4 +141,28 @@ pub fn load_script_as_module(script: &Path) -> PyResult<Py<PyModule>> {
         )?;
         Ok(module.unbind())
     })
+}
+
+pub fn bytes_repr(data: Vec<u8>) -> String {
+    let mut result = String::from("b'");
+
+    for &byte in data.iter() {
+        match byte {
+            // 常见转义字符
+            b'\n' => result.push_str("\\n"),
+            b'\r' => result.push_str("\\r"),
+            b'\t' => result.push_str("\\t"),
+            b'\\' => result.push_str("\\\\"),
+            b'\'' => result.push_str("\\'"),
+            b'"' => result.push_str("\\\""),
+            b'\0' => result.push_str("\\0"),
+            // 可打印ASCII字符（32-126）
+            32..=126 => result.push(byte as char),
+            // 其他字节用十六进制表示
+            _ => result.push_str(&format!("\\x{:02x}", byte)),
+        }
+    }
+
+    result.push('\'');
+    result
 }

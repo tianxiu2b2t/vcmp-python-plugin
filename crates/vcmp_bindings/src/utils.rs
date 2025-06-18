@@ -254,34 +254,3 @@ impl Marker {
         }
     }
 }
-
-pub struct Pickup {
-    pub id: i32,
-    pub model: i32,
-    pub world: i32,
-    pub quantity: i32,
-    pub position: Vectorf32,
-    pub alpha: i32,
-    pub automatic: bool,
-}
-impl Pickup {
-    pub fn new(
-        id: i32,
-        model: i32,
-        world: i32,
-        quantity: i32,
-        position: Vectorf32,
-        alpha: i32,
-        automatic: bool,
-    ) -> Self {
-        Self {
-            id,
-            model,
-            world,
-            quantity,
-            position,
-            alpha,
-            automatic,
-        }
-    }
-}

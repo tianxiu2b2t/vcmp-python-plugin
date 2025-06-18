@@ -2,10 +2,11 @@ use std::ffi::CStr;
 use std::os::raw::c_char;
 
 use vcmp_bindings::{
-    func::server::ServerMethods, options::VcmpEntityPool, raw::PluginCallbacks, vcmp_func,
+    events::player::ClientScriptDataEvent, func::server::ServerMethods, options::VcmpEntityPool,
+    raw::PluginCallbacks, vcmp_func,
 };
 
-use crate::pool::ENTITY_POOL;
+use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
@@ -15,18 +16,15 @@ pub extern "C" fn on_server_init() -> u8 {
 
     // println!("gamemode: {}", vcmp_func().get_gamemode());
 
-    vcmp_func()
-        .set_gamemode(&("*".repeat(63)))
-        .expect("set gamemode faild");
-
-    println!("gamemode: {}", vcmp_func().get_gamemode());
-
+    if !CONFIG.get().unwrap().preloader {
+        load_script_as_module();
+    }
     1
 }
 
 #[unsafe(no_mangle)]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
-pub extern "C" fn on_server_frame(elapsed_time: f32) {
+pub extern "C" fn on_server_frame(_elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
 }
 
@@ -74,9 +72,16 @@ pub unsafe extern "C" fn on_entity_pool_change(c_entity_type: i32, entity_id: i3
     }
 }
 
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_client_script_data(_client_id: i32, _data: *const u8, _size: usize) {
+    let _ = ClientScriptDataEvent::from((_client_id, _data, _size));
+}
+
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);
     callbacks.OnServerFrame = Some(on_server_frame);
     callbacks.OnServerPerformanceReport = Some(on_server_performance_report);
     callbacks.OnEntityPoolChange = Some(on_entity_pool_change);
+
+    callbacks.OnClientScriptData = Some(on_client_script_data);
 }

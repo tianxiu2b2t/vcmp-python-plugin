@@ -3,31 +3,41 @@ use std::ffi::c_void;
 use crate::options::VcmpPlayerOption;
 use crate::states::VcmpPlayerState;
 use crate::utils::{Color, Vectorf32};
-use crate::{VcmpError, VcmpResult, encodes::decode_gbk, func::VcmpFunctions};
+use crate::{PlayerId, VcmpError, VcmpResult, VehicleId, encodes::decode_gbk, func::VcmpFunctions};
 
 pub trait PlayerMethods {
     /// 发送 Stream
-    fn send_client_script_data(&self, player_id: i32, data: &[u8]) -> VcmpResult<()>;
+    fn send_client_script_data(&self, player_id: PlayerId, data: &[u8]) -> VcmpResult<()>;
 
     /// 发送消息
-    fn send_client_message(&self, player_id: i32, color: Color, message: &str) -> VcmpResult<()>;
+    fn send_client_message(
+        &self,
+        player_id: PlayerId,
+        color: Color,
+        message: &str,
+    ) -> VcmpResult<()>;
 
     /// 发送公告
-    fn send_announce(&self, player_id: i32, announce_type: i32, message: &str) -> VcmpResult<()>;
+    fn send_announce(
+        &self,
+        player_id: PlayerId,
+        announce_type: i32,
+        message: &str,
+    ) -> VcmpResult<()>;
 
-    fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vectorf32>);
+    fn play_sound_for_player(&self, player_id: PlayerId, sound: i32, position: Option<Vectorf32>);
 
     /*
         Admins?
     */
-    fn is_player_admin(&self, player_id: i32) -> bool;
+    fn is_player_admin(&self, player_id: PlayerId) -> bool;
 
-    fn set_player_admin(&self, player_id: i32, admin: bool);
+    fn set_player_admin(&self, player_id: PlayerId, admin: bool);
     fn get_player_ip(&self, player: i32) -> String;
     fn get_player_uid(&self, player: i32) -> String;
     fn get_player_uid2(&self, player: i32) -> String;
-    fn kick_player(&self, player_id: i32);
-    fn ban_player(&self, player_id: i32);
+    fn kick_player(&self, player_id: PlayerId);
+    fn ban_player(&self, player_id: PlayerId);
 
     fn is_player_connected(&self, player: i32) -> bool;
     fn is_player_streamed_for_target(&self, player: i32, target: i32) -> bool;
@@ -95,7 +105,7 @@ pub trait PlayerMethods {
     fn put_player_in_vehicle(
         &self,
         player: i32,
-        vehicle_id: i32,
+        vehicle_id: VehicleId,
         slot_index: i32,
         make_room: u8,
         warp: u8,
@@ -163,7 +173,7 @@ pub trait PlayerMethods {
 
 impl PlayerMethods for VcmpFunctions {
     /// 发送 Stream
-    fn send_client_script_data(&self, player_id: i32, data: &[u8]) -> VcmpResult<()> {
+    fn send_client_script_data(&self, player_id: PlayerId, data: &[u8]) -> VcmpResult<()> {
         let msg_ptr = data.as_ptr() as *const c_void;
         let code = (self.inner.SendClientScriptData)(player_id, msg_ptr, data.len());
         if code != 0 {
@@ -174,7 +184,12 @@ impl PlayerMethods for VcmpFunctions {
     }
 
     /// 发送消息
-    fn send_client_message(&self, player_id: i32, color: Color, message: &str) -> VcmpResult<()> {
+    fn send_client_message(
+        &self,
+        player_id: PlayerId,
+        color: Color,
+        message: &str,
+    ) -> VcmpResult<()> {
         let color = color.as_rgba();
         let msg_ptr = message.as_ptr() as *const i8;
         let code = (self.inner.SendClientMessage)(player_id, color, msg_ptr);
@@ -186,7 +201,12 @@ impl PlayerMethods for VcmpFunctions {
     }
 
     /// 发送公告（）
-    fn send_announce(&self, player_id: i32, announce_type: i32, message: &str) -> VcmpResult<()> {
+    fn send_announce(
+        &self,
+        player_id: PlayerId,
+        announce_type: i32,
+        message: &str,
+    ) -> VcmpResult<()> {
         let msg = message.as_bytes();
         let msg_ptr = msg.as_ptr() as *const i8;
         let code = (self.inner.SendGameMessage)(player_id, announce_type, msg_ptr);
@@ -201,7 +221,7 @@ impl PlayerMethods for VcmpFunctions {
 
     */
 
-    fn play_sound_for_player(&self, player_id: i32, sound: i32, position: Option<Vectorf32>) {
+    fn play_sound_for_player(&self, player_id: PlayerId, sound: i32, position: Option<Vectorf32>) {
         let world = (self.inner.GetPlayerUniqueWorld)(player_id);
 
         let pos = position.unwrap_or(Vectorf32 {
@@ -217,11 +237,11 @@ impl PlayerMethods for VcmpFunctions {
        Admins?
     */
 
-    fn is_player_admin(&self, player_id: i32) -> bool {
+    fn is_player_admin(&self, player_id: PlayerId) -> bool {
         (self.inner.IsPlayerAdmin)(player_id) != 0
     }
 
-    fn set_player_admin(&self, player_id: i32, admin: bool) {
+    fn set_player_admin(&self, player_id: PlayerId, admin: bool) {
         (self.inner.SetPlayerAdmin)(player_id, admin as u8);
     }
 
@@ -607,7 +627,7 @@ impl PlayerMethods for VcmpFunctions {
     fn put_player_in_vehicle(
         &self,
         player: i32,
-        vehicle_id: i32,
+        vehicle_id: VehicleId,
         slot_index: i32,
         make_room: u8,
         warp: u8,

@@ -4,6 +4,7 @@ use crate::pool::EntityPoolTrait;
 
 #[pyclass]
 #[derive(Debug, Clone, Copy)]
+#[pyo3(name = "Vehicle")]
 pub struct VehiclePy {
     id: i32,
 }

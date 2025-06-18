@@ -1,5 +1,5 @@
 use crate::{
-    VcmpError, VcmpResult,
+    PlayerId, VcmpError, VcmpResult,
     func::VcmpFunctions,
     utils::{Quaternionf32, Vectorf32},
 };
@@ -9,7 +9,7 @@ pub trait ObjectMethods {
 
     fn delete_object(&self, object_id: i32) -> VcmpResult<()>;
 
-    fn is_object_streamed_for_player(&self, object_id: i32, player_id: i32) -> bool;
+    fn is_object_streamed_for_player(&self, object_id: i32, player_id: PlayerId) -> bool;
 
     fn get_object_model(&self, object_id: i32) -> i32;
 
@@ -105,7 +105,7 @@ impl ObjectMethods for VcmpFunctions {
         }
     }
 
-    fn is_object_streamed_for_player(&self, object_id: i32, player_id: i32) -> bool {
+    fn is_object_streamed_for_player(&self, object_id: i32, player_id: PlayerId) -> bool {
         (self.inner.IsObjectStreamedForPlayer)(object_id, player_id) != 0
     }
 
