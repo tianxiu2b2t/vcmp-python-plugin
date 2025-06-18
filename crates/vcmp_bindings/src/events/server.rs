@@ -1,19 +1,3 @@
-pub struct ServerInitialiseEvent;
-
-impl From<()> for ServerInitialiseEvent {
-    fn from(_: ()) -> Self {
-        Self {}
-    }
-}
-
-pub struct ServerShutdownEvent;
-
-impl From<()> for ServerShutdownEvent {
-    fn from(_: ()) -> Self {
-        Self {}
-    }
-}
-
 pub struct ServerFrameEvent {
     pub elapsed_time: f32,
 }

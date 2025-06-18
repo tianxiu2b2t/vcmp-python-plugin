@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct VehicleUpdateEvent {
     pub vehicle_id: i32,
     pub update_type: i32,
@@ -12,6 +13,7 @@ impl From<(i32, i32)> for VehicleUpdateEvent {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct VehicleExplodeEvent {
     pub vehicle_id: i32,
 }
@@ -22,6 +24,7 @@ impl From<i32> for VehicleExplodeEvent {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct VehicleRespawnEvent {
     pub vehicle_id: i32,
 }

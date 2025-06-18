@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct ObjectShotEvent {
     pub object_id: i32,
     pub player_id: i32,
@@ -14,6 +15,7 @@ impl From<(i32, i32, i32)> for ObjectShotEvent {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ObjectTouchedEvent {
     pub object_id: i32,
     pub player_id: i32,

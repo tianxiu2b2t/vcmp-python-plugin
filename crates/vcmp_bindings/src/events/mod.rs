@@ -25,6 +25,7 @@ impl From<(u32, *const c_char)> for PluginCommandEvent {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct EntityStreamingChangeEvent {
     pub player_id: i32,
     pub entity_id: i32,
@@ -43,6 +44,7 @@ impl From<(i32, i32, i32, u8)> for EntityStreamingChangeEvent {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct EntityPoolChangeEvent {
     pub entity_type: i32,
     pub entity_id: i32,

@@ -1,3 +1,4 @@
+#[derive(Debug, Clone)]
 pub struct CheckpointEnteredEvent {
     pub check_point_id: i32,
     pub player_id: i32,
@@ -12,6 +13,7 @@ impl From<(i32, i32)> for CheckpointEnteredEvent {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct CheckpointExitedEvent {
     pub check_point_id: i32,
     pub player_id: i32,
