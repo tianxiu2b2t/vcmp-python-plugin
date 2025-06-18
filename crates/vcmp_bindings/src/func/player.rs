@@ -3,7 +3,7 @@ use std::ffi::c_void;
 use crate::options::VcmpPlayerOption;
 use crate::states::VcmpPlayerState;
 use crate::utils::{Color, Vectorf32};
-use crate::{VcmpError, VcmpResult, encodes::decode_gbk, func::VcmpFunctions};
+use crate::{PlayerId, VcmpError, VcmpResult, VehicleId, encodes::decode_gbk, func::VcmpFunctions};
 
 pub trait PlayerMethods {
     /// 发送 Stream

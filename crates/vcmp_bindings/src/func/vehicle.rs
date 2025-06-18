@@ -1,7 +1,7 @@
 use crate::func::VcmpFunctions;
 use crate::options::{VcmpEntityPool, VcmpVehicleOption};
 use crate::utils::{Quaternionf32, Vectorf32};
-use crate::{VcmpError, VcmpResult};
+use crate::{PlayerId, VcmpError, VcmpResult, VehicleId};
 
 pub trait VehicleMethods {
     fn create_vehicle(

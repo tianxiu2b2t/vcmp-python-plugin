@@ -1,5 +1,5 @@
 use crate::{
-    VcmpError, VcmpResult,
+    PlayerId, VcmpError, VcmpResult,
     func::VcmpFunctions,
     utils::{Color, Vectorf32},
 };

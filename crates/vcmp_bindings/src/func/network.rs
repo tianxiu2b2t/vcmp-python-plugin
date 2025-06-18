@@ -1,4 +1,4 @@
-use crate::{VcmpFunctions, options::VcmpNetworkStatisticsQueryOption};
+use crate::{PlayerId, VcmpFunctions, options::VcmpNetworkStatisticsQueryOption};
 
 pub trait QueryNetworkStatistics {
     fn data_sent_per_second(&self, player_id: PlayerId) -> f64;

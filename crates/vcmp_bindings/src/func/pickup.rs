@@ -1,6 +1,6 @@
 use crate::func::VcmpFunctions;
 use crate::utils::Vectorf32;
-use crate::{VcmpError, VcmpResult};
+use crate::{PlayerId, VcmpError, VcmpResult};
 
 pub trait PickupMethods {
     fn create_pickup(
