@@ -2,8 +2,7 @@ pub struct ServerInitialiseEvent;
 
 impl From<()> for ServerInitialiseEvent {
     fn from(_: ()) -> Self {
-        Self {
-        }
+        Self {}
     }
 }
 
@@ -32,7 +31,6 @@ pub struct ServerPerformanceReportEvent {
     pub descriptions: Vec<String>,
     pub times: Vec<u64>,
 }
-
 
 impl From<(usize, *mut *const ::std::os::raw::c_char, *mut u64)> for ServerPerformanceReportEvent {
     fn from(value: (usize, *mut *const ::std::os::raw::c_char, *mut u64)) -> Self {

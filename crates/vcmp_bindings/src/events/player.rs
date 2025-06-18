@@ -1,5 +1,6 @@
 use std::{
-    ffi::{c_char, CString}, str::FromStr
+    ffi::{CString, c_char},
+    str::FromStr,
 };
 
 pub struct IncomingConnectionEvent {
@@ -132,8 +133,8 @@ pub struct PlayerDeathEvent {
     pub player_id: i32,
     pub killer_id: i32,
     pub reason: i32,
-    pub body: i32
-} 
+    pub body: i32,
+}
 
 impl From<(i32, i32, i32, i32)> for PlayerDeathEvent {
     fn from(value: (i32, i32, i32, i32)) -> Self {
@@ -141,7 +142,7 @@ impl From<(i32, i32, i32, i32)> for PlayerDeathEvent {
             player_id: value.0,
             killer_id: value.1,
             reason: value.2,
-            body: value.3
+            body: value.3,
         }
     }
 }
@@ -463,7 +464,7 @@ impl From<(i32, *const c_char)> for PlayerCrashReportEvent {
 
 pub struct PlayerModuleListEvent {
     pub player_id: i32,
-    pub modules: String
+    pub modules: String,
 }
 
 impl From<(i32, *const c_char)> for PlayerModuleListEvent {

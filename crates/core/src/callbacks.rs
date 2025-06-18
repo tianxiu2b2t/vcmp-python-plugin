@@ -2,7 +2,8 @@ use std::ffi::CStr;
 use std::os::raw::c_char;
 
 use vcmp_bindings::{
-    events::player::ClientScriptDataEvent, func::server::ServerMethods, options::VcmpEntityPool, raw::PluginCallbacks, vcmp_func
+    events::player::ClientScriptDataEvent, func::server::ServerMethods, options::VcmpEntityPool,
+    raw::PluginCallbacks, vcmp_func,
 };
 
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};

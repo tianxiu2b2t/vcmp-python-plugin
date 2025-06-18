@@ -5,10 +5,10 @@ pub struct PluginCommandEvent {
     pub message: String,
 }
 
-pub mod player;
 pub mod checkpoint;
 pub mod object;
 pub mod pickup;
+pub mod player;
 pub mod server;
 pub mod vehicle;
 
@@ -28,7 +28,7 @@ impl From<(u32, *const c_char)> for PluginCommandEvent {
 pub struct EntityStreamingChangeEvent {
     pub player_id: i32,
     pub entity_id: i32,
-    pub entity_type: i32, 
+    pub entity_type: i32,
     pub deleted: bool,
 }
 
@@ -38,13 +38,13 @@ impl From<(i32, i32, i32, u8)> for EntityStreamingChangeEvent {
             player_id: value.0,
             entity_id: value.1,
             entity_type: value.2,
-            deleted: value.3 != 0
+            deleted: value.3 != 0,
         }
     }
 }
 
 pub struct EntityPoolChangeEvent {
-    pub entity_type: i32, 
+    pub entity_type: i32,
     pub entity_id: i32,
     pub deleted: bool,
 }
