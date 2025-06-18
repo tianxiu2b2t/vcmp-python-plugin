@@ -202,7 +202,7 @@ impl ReadStream {
     }
 
     fn read_string(&mut self) -> String {
-        let length = self.read_i64() as usize;
+        let length = self.read_long() as usize;
         let mut data = vec![0u8; length];
         self.buffer.read_exact(&mut data).unwrap();
 
