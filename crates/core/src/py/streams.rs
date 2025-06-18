@@ -167,13 +167,15 @@ impl ReadStream {
         PyBytes::new(py, &buf)
     }
     // read_int
-    fn read_i32(&mut self) -> i32 {
+    // from old api
+    fn read_int(&mut self) -> i32 {
         let mut buf = [0u8; 4];
         self.buffer.read_exact(&mut buf).unwrap();
         i32::from_be_bytes(buf)
     }
     // var int avro encode
-    fn read_i64(&mut self) -> i64 {
+    // from old api
+    fn read_long(&mut self) -> i64 {
         let mut datum = 0i64;
         let mut shift = 0;
         loop {
