@@ -36,6 +36,11 @@ impl EntityPoolTrait for PlayerPy {
 #[pymethods]
 impl PlayerPy {
     #[getter]
+    pub fn get_id(&self) -> i32 {
+        self.id
+    }
+
+    #[getter]
     fn get_name(&self) -> String {
         vcmp_func().get_player_name(self.id)
     }
@@ -46,7 +51,17 @@ impl PlayerPy {
     }
 
     #[getter]
-    pub fn get_id(&self) -> i32 {
-        self.id
+    fn get_is_alive(&self) -> bool {
+        vcmp_func().is_player_connected(self.id)
+    }
+
+    #[getter]
+    fn get_admin(&self) -> bool {
+        vcmp_func().is_player_admin(self.id)
+    }
+
+    #[setter]
+    fn set_admin(&self, admin: bool) {
+        vcmp_func().set_player_admin(self.id, admin);
     }
 }
