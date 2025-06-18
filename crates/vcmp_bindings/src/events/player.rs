@@ -359,17 +359,24 @@ impl From<(i32, *const c_char)> for PlayerMessageEvent {
 pub struct PlayerCommandEvent {
     pub player_id: i32,
     pub command: String,
+    pub text: String,
 }
 
 impl From<(i32, *const c_char)> for PlayerCommandEvent {
     fn from(value: (i32, *const c_char)) -> Self {
-        unsafe {
-            Self {
-                player_id: value.0,
-                command: std::ffi::CStr::from_ptr(value.1)
-                    .to_string_lossy()
-                    .to_string(),
-            }
+        let command = unsafe {
+            std::ffi::CStr::from_ptr(value.1)
+                .to_string_lossy()
+                .to_string()
+        };
+        // command is in the format "command text" or "command"
+        let mut split = command.splitn(2, ' ');
+        let command = split.next().unwrap();
+        let text = split.next().unwrap_or("");
+        Self {
+            player_id: value.0,
+            command: command.to_string(),
+            text: text.to_string(),
         }
     }
 }
