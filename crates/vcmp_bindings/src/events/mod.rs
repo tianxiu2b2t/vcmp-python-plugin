@@ -1,3 +1,4 @@
+use crate::PlayerId;
 use std::ffi::c_char;
 
 pub struct PluginCommandEvent {
@@ -27,7 +28,7 @@ impl From<(u32, *const c_char)> for PluginCommandEvent {
 
 #[derive(Debug, Clone)]
 pub struct EntityStreamingChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub entity_id: i32,
     pub entity_type: i32,
     pub deleted: bool,

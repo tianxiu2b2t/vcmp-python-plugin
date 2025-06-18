@@ -1,5 +1,5 @@
 use crate::options::{VcmpNetworkStatisticsQueryOption, VcmpServerOption, VcmpVehicleOption};
-use crate::{VcmpError, VcmpResult, raw::PluginFuncs};
+use crate::{PlayerId, VcmpError, VcmpResult, VehicleId, raw::PluginFuncs};
 
 use crate::encodes::encode_to_gbk;
 
@@ -85,7 +85,7 @@ impl VcmpFunctions {
     #[inline]
     pub fn set_vehicle_option(
         &self,
-        vehicle_id: i32,
+        vehicle_id: VehicleId,
         option: VcmpVehicleOption,
         toggle: bool,
     ) -> VcmpResult<()> {
@@ -98,7 +98,7 @@ impl VcmpFunctions {
     }
     /// 获取车辆选项
     #[inline]
-    pub fn get_vehicle_option(&self, vehicle_id: i32, option: VcmpVehicleOption) -> bool {
+    pub fn get_vehicle_option(&self, vehicle_id: VehicleId, option: VcmpVehicleOption) -> bool {
         (self.inner.GetVehicleOption)(vehicle_id, option.into()) != 0
     }
 
@@ -106,7 +106,7 @@ impl VcmpFunctions {
     #[inline]
     pub fn get_network_statistics(
         &self,
-        player_id: i32,
+        player_id: PlayerId,
         option: VcmpNetworkStatisticsQueryOption,
     ) -> f64 {
         (self.inner.GetNetworkStatistics)(player_id, option.into())

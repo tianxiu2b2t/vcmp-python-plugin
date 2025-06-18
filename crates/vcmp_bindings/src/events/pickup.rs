@@ -1,7 +1,9 @@
+use crate::PlayerId;
+
 #[derive(Debug, Clone)]
 pub struct PickupPickAttemptEvent {
     pub pickup_id: i32,
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub is_allowed: bool,
 }
 
@@ -18,7 +20,7 @@ impl From<(i32, i32, u8)> for PickupPickAttemptEvent {
 #[derive(Debug, Clone)]
 pub struct PickupPickedEvent {
     pub pickup_id: i32,
-    pub player_id: i32,
+    pub player_id: PlayerId,
 }
 
 impl From<(i32, i32)> for PickupPickedEvent {

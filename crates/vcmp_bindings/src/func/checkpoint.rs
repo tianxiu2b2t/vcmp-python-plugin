@@ -17,7 +17,7 @@ pub trait CheckPointMethods {
 
     fn delete_check_point(&self, check_point_id: i32) -> VcmpResult<()>;
 
-    fn is_check_point_streamed_for_player(&self, check_point_id: i32, player_id: i32) -> bool;
+    fn is_check_point_streamed_for_player(&self, check_point_id: i32, player_id: PlayerId) -> bool;
 
     fn is_check_point_sphere(&self, check_point_id: i32) -> bool;
 
@@ -74,7 +74,7 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn is_check_point_streamed_for_player(&self, check_point_id: i32, player_id: i32) -> bool {
+    fn is_check_point_streamed_for_player(&self, check_point_id: i32, player_id: PlayerId) -> bool {
         (self.inner.IsCheckPointStreamedForPlayer)(check_point_id, player_id) != 0
     }
 

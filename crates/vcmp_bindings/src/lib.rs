@@ -23,11 +23,14 @@ pub mod plugin_info;
 /// wrapper for PluginSetting
 pub mod setting;
 pub mod states;
+/// 类型 wrapper
+pub mod types;
 pub mod utils;
 
 pub use error::{VcmpError, VcmpResult};
 pub use func::VcmpFunctions;
 pub use plugin_info::VcmpPluginInfo;
+pub use types::{PlayerId, VehicleId};
 
 use std::sync::OnceLock;
 

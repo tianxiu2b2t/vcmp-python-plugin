@@ -15,7 +15,7 @@ pub trait PickupMethods {
 
     fn delete_pickup(&self, pickup_id: i32) -> VcmpResult<()>;
 
-    fn is_pickup_streamed_for_player(&self, pickup_id: i32, player_id: i32) -> bool;
+    fn is_pickup_streamed_for_player(&self, pickup_id: i32, player_id: PlayerId) -> bool;
 
     fn set_pickup_world(&self, pickup_id: i32, world: i32) -> VcmpResult<()>;
 
@@ -78,7 +78,7 @@ impl PickupMethods for VcmpFunctions {
         }
     }
 
-    fn is_pickup_streamed_for_player(&self, pickup_id: i32, player_id: i32) -> bool {
+    fn is_pickup_streamed_for_player(&self, pickup_id: i32, player_id: PlayerId) -> bool {
         (self.inner.IsPickupStreamedForPlayer)(pickup_id, player_id) != 0
     }
 

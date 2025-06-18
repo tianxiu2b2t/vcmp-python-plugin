@@ -3,6 +3,8 @@ use std::{
     str::FromStr,
 };
 
+use crate::{PlayerId, VehicleId};
+
 #[derive(Debug, Clone)]
 pub struct IncomingConnectionEvent {
     player_name: String,
@@ -58,7 +60,7 @@ impl From<(*mut c_char, usize, *const c_char, *const c_char)> for IncomingConnec
 
 #[derive(Debug, Clone)]
 pub struct ClientScriptDataEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub data: Vec<u8>,
 }
 
@@ -75,7 +77,7 @@ impl From<(i32, *const u8, usize)> for ClientScriptDataEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerConnectEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
 }
 
 impl From<i32> for PlayerConnectEvent {
@@ -86,7 +88,7 @@ impl From<i32> for PlayerConnectEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerDisconnectEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub reason: i32,
 }
 
@@ -101,7 +103,7 @@ impl From<(i32, i32)> for PlayerDisconnectEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerRequestClassEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub class_id: i32,
 }
 
@@ -116,7 +118,7 @@ impl From<(i32, i32)> for PlayerRequestClassEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerSpawnEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
 }
 
 impl From<i32> for PlayerSpawnEvent {
@@ -127,7 +129,7 @@ impl From<i32> for PlayerSpawnEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerRequestSpawn {
-    pub player_id: i32,
+    pub player_id: PlayerId,
 }
 
 impl From<i32> for PlayerRequestSpawn {
@@ -138,7 +140,7 @@ impl From<i32> for PlayerRequestSpawn {
 
 #[derive(Debug, Clone)]
 pub struct PlayerDeathEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub killer_id: i32,
     pub reason: i32,
     pub body: i32,
@@ -157,7 +159,7 @@ impl From<(i32, i32, i32, i32)> for PlayerDeathEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerUpdateEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub update: i32,
 }
 
@@ -172,8 +174,8 @@ impl From<(i32, i32)> for PlayerUpdateEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerRequestEnterVehicleEvent {
-    pub player_id: i32,
-    pub vehicle_id: i32,
+    pub player_id: PlayerId,
+    pub vehicle_id: VehicleId,
     pub slot_index: i32,
 }
 
@@ -189,8 +191,8 @@ impl From<(i32, i32, i32)> for PlayerRequestEnterVehicleEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerEnterVehicleEvent {
-    pub player_id: i32,
-    pub vehicle_id: i32,
+    pub player_id: PlayerId,
+    pub vehicle_id: VehicleId,
     pub slot_index: i32,
 }
 
@@ -206,8 +208,8 @@ impl From<(i32, i32, i32)> for PlayerEnterVehicleEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerExitVehicleEvent {
-    pub player_id: i32,
-    pub vehicle_id: i32,
+    pub player_id: PlayerId,
+    pub vehicle_id: VehicleId,
 }
 
 impl From<(i32, i32)> for PlayerExitVehicleEvent {
@@ -221,7 +223,7 @@ impl From<(i32, i32)> for PlayerExitVehicleEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerNameChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub old_name: String,
     pub new_name: String,
 }
@@ -244,7 +246,7 @@ impl From<(i32, *const c_char, *const c_char)> for PlayerNameChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerStateChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub old_state: i32,
     pub new_state: i32,
 }
@@ -261,7 +263,7 @@ impl From<(i32, i32, i32)> for PlayerStateChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerActionChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub old_action: i32,
     pub new_action: i32,
 }
@@ -278,7 +280,7 @@ impl From<(i32, i32, i32)> for PlayerActionChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerOnFireChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub is_on_fire: bool,
 }
 
@@ -293,7 +295,7 @@ impl From<(i32, u8)> for PlayerOnFireChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerCrouchChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub is_crouching: bool,
 }
 
@@ -308,7 +310,7 @@ impl From<(i32, u8)> for PlayerCrouchChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerGameKeysChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub old_keys: u32,
     pub new_keys: u32,
 }
@@ -325,7 +327,7 @@ impl From<(i32, u32, u32)> for PlayerGameKeysChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerBeginTypingEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
 }
 
 impl From<i32> for PlayerBeginTypingEvent {
@@ -336,7 +338,7 @@ impl From<i32> for PlayerBeginTypingEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerEndTypingEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
 }
 
 impl From<i32> for PlayerEndTypingEvent {
@@ -347,7 +349,7 @@ impl From<i32> for PlayerEndTypingEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerAwayChangeEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub is_away: bool,
 }
 
@@ -362,7 +364,7 @@ impl From<(i32, u8)> for PlayerAwayChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerMessageEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub message: String,
 }
 
@@ -381,7 +383,7 @@ impl From<(i32, *const c_char)> for PlayerMessageEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerCommandEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub command: String,
     pub text: String,
 }
@@ -407,8 +409,8 @@ impl From<(i32, *const c_char)> for PlayerCommandEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerPrivateMessageEvent {
-    pub player_id: i32,
-    pub target_player_id: i32,
+    pub player_id: PlayerId,
+    pub target_player_id: PlayerId,
     pub message: String,
 }
 
@@ -428,7 +430,7 @@ impl From<(i32, i32, *const c_char)> for PlayerPrivateMessageEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerKeyBindDownEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub bind_id: i32,
 }
 
@@ -443,7 +445,7 @@ impl From<(i32, i32)> for PlayerKeyBindDownEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerKeyBindUpEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub bind_id: i32,
 }
 
@@ -458,8 +460,8 @@ impl From<(i32, i32)> for PlayerKeyBindUpEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerSpectateEvent {
-    pub player_id: i32,
-    pub target_player_id: i32,
+    pub player_id: PlayerId,
+    pub target_player_id: PlayerId,
 }
 
 impl From<(i32, i32)> for PlayerSpectateEvent {
@@ -473,7 +475,7 @@ impl From<(i32, i32)> for PlayerSpectateEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerCrashReportEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub report: String,
 }
 
@@ -492,7 +494,7 @@ impl From<(i32, *const c_char)> for PlayerCrashReportEvent {
 
 #[derive(Debug, Clone)]
 pub struct PlayerModuleListEvent {
-    pub player_id: i32,
+    pub player_id: PlayerId,
     pub modules: String,
 }
 
