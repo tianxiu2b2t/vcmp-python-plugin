@@ -30,10 +30,11 @@ pub mod utils;
 pub use error::{VcmpError, VcmpResult};
 pub use func::VcmpFunctions;
 pub use plugin_info::VcmpPluginInfo;
-pub use types::{PlayerId, VehicleId};
+pub use types::{CheckpointId, MarkerId, ObjectId, PlayerId, RadioId, VehicleId, WeaponId};
 
 use std::sync::OnceLock;
 
+/// 全局的 VcmpFunctions
 pub static VCMP_FUNC: OnceLock<VcmpFunctions> = OnceLock::new();
 
 pub fn init_vcmp_func(func: VcmpFunctions) -> &'static VcmpFunctions {

@@ -8,6 +8,7 @@ use pyo3::types::{PyModule, PyModuleMethods};
 use crate::cfg::CONFIG;
 use crate::functions;
 
+pub mod events;
 pub mod streams;
 pub mod types;
 pub mod util;

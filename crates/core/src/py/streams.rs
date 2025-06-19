@@ -44,15 +44,9 @@ impl WriteStream {
             return Ok(());
         }
 
-        // 最后尝试处理 int 类型
-        if let Ok(int_val) = bound_data.extract::<u8>() {
-            self.buffer.push(int_val);
-            return Ok(());
-        }
-
         // 如果都不匹配，返回错误
         Err(pyo3::exceptions::PyTypeError::new_err(
-            "data must be bytes, bytearray, or an integer (0-255)",
+            "data must be bytes or bytearray.",
         ))
     }
 
@@ -83,21 +77,27 @@ impl WriteStream {
         Ok(())
     }
 
-    fn write_sq_string(&mut self, value: &str) -> PyResult<()> {
+    /// 写入字符串
+    ///
+    /// why 4095:
+    ///
+    /// https://bitbucket.org/stormeus/0.4-squirrel/src/3303346a7f41f99bb33e7bd3d840a7155d8bcf86/CStream.cpp#lines-183
+    fn write_sq_string(&mut self, value: &str) -> PyResult<bool> {
         let binding = encode_to_gbk(value);
         let data = binding.as_ref();
 
-        if data.len() > 4096 {
-            self.buffer.write_all(&(4096i16).to_be_bytes()).unwrap();
-            self.buffer.write_all(&data[0..4096])?;
-            println!("String is too long, truncated to 4096 bytes");
+        if data.len() > 4095 {
+            self.buffer.write_all(&(4095i16).to_be_bytes()).unwrap();
+            self.buffer.write_all(&data[0..4095])?;
+            println!("String is too long, truncated to 4095 bytes");
+            Ok(false)
         } else {
             self.buffer
                 .write_all(&(data.len() as i16).to_be_bytes())
                 .unwrap();
             self.buffer.write_all(data)?;
+            Ok(true)
         }
-        Ok(())
     }
 
     fn write_string(&mut self, value: &str) -> PyResult<()> {
@@ -110,14 +110,24 @@ impl WriteStream {
         Ok(())
     }
 
+    fn write_bool(&mut self, value: bool) -> PyResult<()> {
+        self.buffer.write_all(&[value as u8])?;
+        Ok(())
+    }
+
     fn write_boolean(&mut self, value: bool) -> PyResult<()> {
-        self.buffer.write_all(&[if value { 1 } else { 0 }])?;
+        self.write_bool(value)?;
         Ok(())
     }
 
     fn write_float(&mut self, value: f32) -> PyResult<()> {
         let data = value.to_be_bytes();
         self.buffer.write_all(&data)?;
+        Ok(())
+    }
+
+    fn write_f32(&mut self, value: f32) -> PyResult<()> {
+        self.write_float(value)?;
         Ok(())
     }
 
@@ -209,10 +219,14 @@ impl ReadStream {
         decode_gbk(&data)
     }
 
-    fn read_boolean(&mut self) -> bool {
+    fn read_bool(&mut self) -> bool {
         let mut buf = [0u8; 1];
         self.buffer.read_exact(&mut buf).unwrap();
         buf[0] != 0
+    }
+
+    fn read_boolean(&mut self) -> bool {
+        self.read_bool()
     }
 
     fn read_float(&mut self) -> f32 {
