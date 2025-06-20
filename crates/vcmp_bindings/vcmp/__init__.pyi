@@ -1,7 +1,10 @@
-from typing import NewType
+from typing import NewType, TYPE_CHECKING
 
-from . import util
-from . import streams
+if TYPE_CHECKING:
+    from . import util
+    from . import streams
+
+__all__ = ["util", "streams"]
 
 u8 = NewType('u8', int)
 u16 = NewType('u16', int)
