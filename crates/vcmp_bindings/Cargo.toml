@@ -1,6 +1,6 @@
 [package]
 name = "vcmp_bindings"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 authors = [
     "shenjack <3695888@qq.com>",
@@ -9,4 +9,4 @@ authors = [
 repository = "https://github.com/tianxiu2b2t/vcmp-python-plugin"
 
 [dependencies]
-encoding_rs = "0.8.35"
+encoding_rs = "0.8"

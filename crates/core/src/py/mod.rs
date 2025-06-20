@@ -8,6 +8,7 @@ use pyo3::types::{PyModule, PyModuleMethods};
 use crate::cfg::CONFIG;
 use crate::functions;
 
+pub mod events;
 pub mod streams;
 pub mod types;
 pub mod util;
@@ -76,7 +77,7 @@ pub fn init_py() {
     let mut config;
     unsafe {
         config = std::mem::zeroed::<pyo3::ffi::PyConfig>();
-        let config_ptr = &mut config as *mut pyo3::ffi::PyConfig; // let config_ptr = &mut config as *mut pyo3::ffi::PyConfig;
+        let config_ptr = &mut config as *mut pyo3::ffi::PyConfig;
         pyo3::ffi::PyConfig_InitPythonConfig(config_ptr);
 
         if !virtual_env.is_empty() {
@@ -115,7 +116,7 @@ pub fn load_script_as_module() {
     let script_path = CONFIG.get().unwrap().script_path.as_str();
     let res = raw_load_script_as_module(Path::new(script_path));
     if let Err(e) = res {
-        println!("Error: {}", e);
+        println!("Error: {e}");
     } else {
         println!("Script loaded");
     }
@@ -159,7 +160,7 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
             // 可打印ASCII字符（32-126）
             32..=126 => result.push(byte as char),
             // 其他字节用十六进制表示
-            _ => result.push_str(&format!("\\x{:02x}", byte)),
+            _ => result.push_str(&format!("\\x{byte:02x}")),
         }
     }
 

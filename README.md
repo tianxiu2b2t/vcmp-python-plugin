@@ -28,6 +28,8 @@
 
 > lets RWIR!
 
+> 注：目前 `master` 分支暂不维护，目前 `Release` 版本为 `1.2.10.6` 处于稳定状态
+
 ## 鸣谢
 
 [ysc3839](https://github.com/ysc3839/vcmp-python-plugin)

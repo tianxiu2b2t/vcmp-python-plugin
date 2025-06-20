@@ -1,5 +1,7 @@
 use std::fmt::Display;
 
+use crate::{MarkerId, types::WorldId};
+
 /*
     Color 类
 */
@@ -227,8 +229,8 @@ impl Keybind {
 */
 
 pub struct Marker {
-    pub marker: i32,
-    pub world: i32,
+    pub marker: MarkerId,
+    pub world: WorldId,
     pub position: Vectorf32,
     pub scale: i32,
     pub color: Color,
@@ -237,8 +239,8 @@ pub struct Marker {
 
 impl Marker {
     pub fn new(
-        marker: i32,
-        world: i32,
+        marker: MarkerId,
+        world: WorldId,
         position: Vectorf32,
         scale: i32,
         color: Color,

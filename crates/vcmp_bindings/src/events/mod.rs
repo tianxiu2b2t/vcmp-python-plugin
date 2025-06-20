@@ -1,4 +1,4 @@
-use crate::PlayerId;
+use crate::{PlayerId, options::VcmpEntityPool};
 use std::ffi::c_char;
 
 pub struct PluginCommandEvent {
@@ -30,7 +30,7 @@ impl From<(u32, *const c_char)> for PluginCommandEvent {
 pub struct EntityStreamingChangeEvent {
     pub player_id: PlayerId,
     pub entity_id: i32,
-    pub entity_type: i32,
+    pub entity_type: VcmpEntityPool,
     pub deleted: bool,
 }
 
@@ -39,7 +39,7 @@ impl From<(i32, i32, i32, u8)> for EntityStreamingChangeEvent {
         Self {
             player_id: value.0,
             entity_id: value.1,
-            entity_type: value.2,
+            entity_type: VcmpEntityPool::from(value.2),
             deleted: value.3 != 0,
         }
     }
@@ -47,7 +47,7 @@ impl From<(i32, i32, i32, u8)> for EntityStreamingChangeEvent {
 
 #[derive(Debug, Clone)]
 pub struct EntityPoolChangeEvent {
-    pub entity_type: i32,
+    pub entity_type: VcmpEntityPool,
     pub entity_id: i32,
     pub deleted: bool,
 }
@@ -55,7 +55,7 @@ pub struct EntityPoolChangeEvent {
 impl From<(i32, i32, u8)> for EntityPoolChangeEvent {
     fn from(value: (i32, i32, u8)) -> Self {
         Self {
-            entity_type: value.0,
+            entity_type: VcmpEntityPool::from(value.0),
             entity_id: value.1,
             deleted: value.2 != 0,
         }
