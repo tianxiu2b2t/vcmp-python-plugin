@@ -40,12 +40,8 @@ impl From<(usize, *mut *const ::std::os::raw::c_char, *mut u64)> for ServerPerfo
         };
 
         // 将时间数据指针数组转换为 Vec<u64>
-        let times: Vec<u64> = unsafe {
-            std::slice::from_raw_parts(times_ptr, entry_count)
-                .iter()
-                .cloned()
-                .collect()
-        };
+        let times: Vec<u64> =
+            unsafe { std::slice::from_raw_parts(times_ptr, entry_count).to_vec() };
 
         Self {
             entry_count,

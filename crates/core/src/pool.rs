@@ -52,6 +52,12 @@ impl<E: EntityPoolTrait> AnEntityPool<E> {
     }
 }
 
+impl<E: EntityPoolTrait> Default for AnEntityPool<E> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 #[derive(Debug, Clone)]
 /// 实体池
 pub struct EntityPool {

@@ -212,6 +212,7 @@ pub trait EnvironmentMethods {
     fn set_world_bounds(&self, bounds: WorldBounds);
     fn get_wasted_settings(&self) -> WastedSettings;
     fn set_wasted_settings(&self, settings: WastedSettings);
+    #[allow(clippy::too_many_arguments)]
     fn add_player_class(
         &self,
         team: i32,
