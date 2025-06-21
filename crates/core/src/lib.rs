@@ -19,6 +19,11 @@ pub const PLUGIN_VERSION: u32 = 00_01_00;
 
 use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
 
+/// 日志
+/// 
+
+pub mod logger;
+
 /// 插件入口点
 ///
 /// 好消息: 反正也没别的需要 extern 的函数了
@@ -32,6 +37,10 @@ extern "C" fn VcmpPluginInit(
     plugin_callbacks: *mut PluginCallbacks,
     plugin_info: *mut PluginInfo,
 ) -> u32 {
+    // first logger init
+    logger::init();
+
+    logger::event!(logger::Level::INFO, "vcmp-plugin-rs init");
     println!("loading vcmp-plugin-rs");
     {
         // check null
