@@ -21,19 +21,9 @@ pub trait ObjectMethods {
 
     fn get_object_alpha(&self, object_id: i32) -> i32;
 
-    fn move_object_to(
-        &self,
-        object_id: i32,
-        position: Vectorf32,
-        duration: u32,
-    ) -> VcmpResult<()>;
+    fn move_object_to(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()>;
 
-    fn move_object_by(
-        &self,
-        object_id: i32,
-        position: Vectorf32,
-        duration: u32,
-    ) -> VcmpResult<()>;
+    fn move_object_by(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()>;
 
     fn set_object_position(&self, object_id: i32, position: Vectorf32) -> VcmpResult<()>;
 
@@ -135,13 +125,9 @@ impl ObjectMethods for VcmpFunctions {
         (self.inner.GetObjectAlpha)(object_id)
     }
 
-    fn move_object_to(
-        &self,
-        object_id: i32,
-        position: Vectorf32,
-        duration: u32,
-    ) -> VcmpResult<()> {
-        let code = (self.inner.MoveObjectTo)(object_id, position.x, position.y, position.z, duration);
+    fn move_object_to(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()> {
+        let code =
+            (self.inner.MoveObjectTo)(object_id, position.x, position.y, position.z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -149,13 +135,9 @@ impl ObjectMethods for VcmpFunctions {
         }
     }
 
-    fn move_object_by(
-        &self,
-        object_id: i32,
-        position: Vectorf32,
-        duration: u32,
-    ) -> VcmpResult<()> {
-        let code = (self.inner.MoveObjectBy)(object_id, position.x, position.y, position.z, duration);
+    fn move_object_by(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()> {
+        let code =
+            (self.inner.MoveObjectBy)(object_id, position.x, position.y, position.z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {

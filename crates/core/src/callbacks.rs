@@ -6,14 +6,18 @@ use vcmp_bindings::{
     raw::PluginCallbacks, vcmp_func,
 };
 
-use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
 use crate::logger;
+use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
     logger::event!(logger::Level::DEBUG, "[Rust] Server init callback");
 
-    logger::event!(logger::Level::DEBUG, "server settings {}", vcmp_func().server_version());
+    logger::event!(
+        logger::Level::DEBUG,
+        "server settings {}",
+        vcmp_func().server_version()
+    );
 
     // println!("gamemode: {}", vcmp_func().get_gamemode());
 
@@ -44,7 +48,8 @@ pub unsafe extern "C" fn on_server_performance_report(
     for i in 0..entry_count {
         let description = unsafe { CStr::from_ptr(*descriptions.add(i)) };
         let time = unsafe { *times.add(i) };
-        logger::event!(logger::Level::DEBUG,
+        logger::event!(
+            logger::Level::DEBUG,
             "Performance report: {} - {}",
             description.to_string_lossy(),
             time

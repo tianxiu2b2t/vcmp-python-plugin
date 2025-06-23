@@ -15,13 +15,12 @@ pub mod py;
 ///
 /// semver:
 /// xx yy zz
+#[allow(clippy::zero_prefixed_literal)]
 pub const PLUGIN_VERSION: u32 = 00_01_00;
 
 use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
 
 /// 日志
-/// 
-
 pub mod logger;
 
 /// 插件入口点
@@ -80,14 +79,16 @@ extern "C" fn VcmpPluginInit(
     {
         logger::event!(logger::Level::WARN, "WARNING!! struct size not matching");
         if functions.inner_ffi_size() != functions.inner_struct_size() {
-            logger::event!(logger::Level::WARN, 
+            logger::event!(
+                logger::Level::WARN,
                 "func expect size: {}, actuall ffi size: {}",
                 functions.inner_ffi_size(),
                 functions.inner_struct_size()
             );
         }
         if std::mem::size_of::<PluginCallbacks>() != callbacks.structSize as usize {
-            logger::event!(logger::Level::WARN,
+            logger::event!(
+                logger::Level::WARN,
                 "callback expect size: {}, actuall ffi size {}",
                 std::mem::size_of::<PluginCallbacks>(),
                 callbacks.structSize

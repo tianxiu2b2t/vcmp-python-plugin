@@ -1,8 +1,9 @@
 use pyo3::{
-    pyclass, pymethods, types::{
+    Bound, Py, PyResult, Python, pyclass, pymethods,
+    types::{
         PyAny, PyAnyMethods, PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods, PyModule,
         PyModuleMethods,
-    }, Bound, Py, PyResult, Python
+    },
 };
 use std::fmt::{Display, Formatter};
 use std::io::{Cursor, Read, Write};
@@ -98,7 +99,10 @@ impl WriteStream {
         if data.len() > 4095 {
             self.buffer.write_all(&(4095i16).to_be_bytes()).unwrap();
             self.buffer.write_all(&data[0..4095])?;
-            logger::event!(logger::Level::WARN, "String is too long, truncated to 4095 bytes");
+            logger::event!(
+                logger::Level::WARN,
+                "String is too long, truncated to 4095 bytes"
+            );
             Ok(false)
         } else {
             self.buffer

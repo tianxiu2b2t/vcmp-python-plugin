@@ -3,8 +3,16 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use vcmp_bindings::{func::{CheckPointMethods, MarkerMethods, ObjectMethods, PickupMethods, PlayerMethods, QueryVehicle, SetVehicle}, setting::VcmpServerSettings, utils::Vectorf32, vcmp_func};
 use vcmp_bindings::utils::Color;
+use vcmp_bindings::{
+    func::{
+        CheckPointMethods, MarkerMethods, ObjectMethods, PickupMethods, PlayerMethods,
+        QueryVehicle, SetVehicle,
+    },
+    setting::VcmpServerSettings,
+    utils::Vectorf32,
+    vcmp_func,
+};
 
 use crate::consts::EntityId;
 
@@ -115,7 +123,6 @@ impl RGBPy {
         self.inner.r = value;
     }
 
-
     #[staticmethod]
     pub fn from_rgb(value: u32, a: Option<u8>) -> Self {
         Self {
@@ -167,7 +174,7 @@ pub enum EntityVectorType {
     PickupPosition = 7,
     CheckPointPosition = 8,
     MarkerPosition = 9,
-    Ignore = -1
+    Ignore = -1,
 }
 
 #[derive(Clone)]
@@ -181,10 +188,10 @@ pub struct VectorPy {
 
 impl From<(EntityVectorType, EntityId)> for VectorPy {
     fn from(value: (EntityVectorType, EntityId)) -> Self {
-        Self { 
+        Self {
             entity_type: value.0,
             entity_id: value.1,
-            inner: None
+            inner: None,
         }
     }
 }
@@ -205,7 +212,7 @@ impl VectorPy {
                 } else {
                     Vectorf32::new(0.0, 0.0, 0.0)
                 }
-            },
+            }
             EntityVectorType::PlayerSpeed => {
                 let res = vcmp_func().get_player_speed(self.entity_id);
                 if let Ok(res) = res {
@@ -213,11 +220,13 @@ impl VectorPy {
                 } else {
                     Vectorf32::new(0.0, 0.0, 0.0)
                 }
-            },
+            }
             EntityVectorType::VehiclePosition => vcmp_func().get_vehicle_position(self.entity_id),
             EntityVectorType::VehicleSpeed => vcmp_func().get_vehicle_speed(self.entity_id),
             EntityVectorType::VehicleRelSpeed => vcmp_func().get_vehicle_rel_speed(self.entity_id),
-            EntityVectorType::VehicleRelTurnSpeed => vcmp_func().get_vehicle_rel_turn_speed(self.entity_id),
+            EntityVectorType::VehicleRelTurnSpeed => {
+                vcmp_func().get_vehicle_rel_turn_speed(self.entity_id)
+            }
             EntityVectorType::ObjectPosition => {
                 let res = vcmp_func().get_object_position(self.entity_id);
                 if let Ok(res) = res {
@@ -225,7 +234,7 @@ impl VectorPy {
                 } else {
                     Vectorf32::new(0.0, 0.0, 0.0)
                 }
-            },
+            }
             EntityVectorType::PickupPosition => {
                 let res = vcmp_func().get_pickup_position(self.entity_id);
                 if let Ok(res) = res {
@@ -233,7 +242,7 @@ impl VectorPy {
                 } else {
                     Vectorf32::new(0.0, 0.0, 0.0)
                 }
-            },
+            }
             EntityVectorType::CheckPointPosition => {
                 let res = vcmp_func().get_check_point_position(self.entity_id);
                 if let Ok(res) = res {
@@ -241,21 +250,14 @@ impl VectorPy {
                 } else {
                     Vectorf32::new(0.0, 0.0, 0.0)
                 }
-            },
+            }
             EntityVectorType::MarkerPosition => {
                 let info = vcmp_func().get_marker_info(self.entity_id);
                 info.position
-            },
+            }
             EntityVectorType::Ignore => {
-                let mut inner = &self.inner;
-                if inner.is_none() {
-                    inner = Some(Vectorf32::default())
-                }
-                &self.inner.unwrap()
-            },
-            _ => {
-                todo!()
-                //Vectorf32::new(0.0, 0.0, 0.0)
+                self.inner.clone().unwrap_or_default()
+
             }
         }
     }
@@ -275,38 +277,38 @@ impl VectorPy {
         match self.entity_type {
             EntityVectorType::PlayerPosition => {
                 let _ = vcmp_func().set_player_position(self.entity_id, origin);
-            },
+            }
             EntityVectorType::PlayerSpeed => {
                 let _ = vcmp_func().set_player_speed(self.entity_id, origin);
-            },
+            }
             EntityVectorType::VehiclePosition => {
                 let _ = vcmp_func().set_vehicle_position(self.entity_id, origin, Some(false));
-            },
+            }
             EntityVectorType::VehicleSpeed => {
                 let _ = vcmp_func().set_vehicle_speed(self.entity_id, origin);
-            },
+            }
             EntityVectorType::VehicleRelSpeed => {
                 let _ = vcmp_func().set_vehicle_rel_speed(self.entity_id, origin);
-            },
+            }
             EntityVectorType::VehicleRelTurnSpeed => {
                 let _ = vcmp_func().set_vehicle_rel_turn_speed(self.entity_id, origin);
-            },
+            }
             EntityVectorType::ObjectPosition => {
                 let _ = vcmp_func().set_object_position(self.entity_id, origin);
-            },
+            }
             EntityVectorType::PickupPosition => {
                 let _ = vcmp_func().set_pickup_position(self.entity_id, origin);
-            },
+            }
             EntityVectorType::CheckPointPosition => {
                 let _ = vcmp_func().set_check_point_position(self.entity_id, origin);
-            },
+            }
             EntityVectorType::MarkerPosition => {
                 // ignore
-            },
+            }
             EntityVectorType::Ignore => {
                 self.inner = Some(origin);
                 // ignore
-            },
+            }
         };
     }
 }
@@ -345,15 +347,9 @@ impl VectorPy {
 
     fn __repr__(&self) -> String {
         let pos = self.get_entity_pos();
-        format!(
-            "Vector(x={}, y={}, z={})",
-            pos.x,
-            pos.y,
-            pos.z
-        )
+        format!("Vector(x={}, y={}, z={})", pos.x, pos.y, pos.z)
     }
 }
-
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ServerSettingsPy>()?;

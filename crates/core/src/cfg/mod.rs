@@ -1,9 +1,9 @@
+use crate::logger;
 use std::{
     fmt::{Display, Formatter},
     path::Path,
     sync::OnceLock,
 };
-use crate::logger;
 
 pub mod cli_env;
 

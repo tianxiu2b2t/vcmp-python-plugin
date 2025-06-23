@@ -74,10 +74,6 @@ impl Vectorf32 {
         Self { x, y, z }
     }
 
-    pub fn default() -> Self {
-        Self::new(0.0, 0.0, 0.0)
-    }
-
     pub fn distance_from(&self, other: &Self) -> f32 {
         let dx = self.x - other.x;
         let dy = self.y - other.y;
@@ -85,6 +81,18 @@ impl Vectorf32 {
     }
     pub fn length(&self) -> f32 {
         (self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    }
+}
+
+impl From<(f32, f32, f32)> for Vectorf32{
+    fn from(value: (f32, f32, f32)) -> Self {
+        Self { x: value.0, y: value.1, z: value.2 }
+    }
+}
+
+impl Default for Vectorf32 {
+    fn default() -> Self {
+        Self::new(0.0, 0.0, 0.0)
     }
 }
 

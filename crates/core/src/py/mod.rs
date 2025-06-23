@@ -103,7 +103,11 @@ pub fn init_py() {
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
 
-        logger::event!(logger::Level::TRACE, "Status: {}", pyo3::ffi::Py_IsInitialized());
+        logger::event!(
+            logger::Level::TRACE,
+            "Status: {}",
+            pyo3::ffi::Py_IsInitialized()
+        );
     };
 
     logger::event!(logger::Level::TRACE, "Python init");
