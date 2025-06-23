@@ -89,9 +89,9 @@ pub trait PlayerMethods {
     fn get_player_immunity(&self, player: i32) -> u32;
     fn set_player_position(&self, player: i32, position: Vectorf32) -> VcmpResult<()>;
     fn get_player_position(&self, player: i32) -> VcmpResult<Vectorf32>;
-    fn set_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
+    fn set_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()>;
     fn get_player_speed(&self, player: i32) -> VcmpResult<Vectorf32>;
-    fn add_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
+    fn add_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()>;
     fn set_player_angle(&self, player: i32, angle: f32) -> VcmpResult<()>;
     fn get_player_angle(&self, player: i32) -> f32;
     fn set_player_alpha(&self, player: i32, alpha: i32, fade_time: u32) -> VcmpResult<()>;
@@ -528,8 +528,8 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn set_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
-        let code = (self.inner.SetPlayerSpeed)(player, x, y, z);
+    fn set_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()> {
+        let code = (self.inner.SetPlayerSpeed)(player, speed.x, speed.y, speed.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -549,8 +549,8 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn add_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
-        let code = (self.inner.AddPlayerSpeed)(player, x, y, z);
+    fn add_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()> {
+        let code = (self.inner.AddPlayerSpeed)(player, speed.x, speed.y, speed.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {

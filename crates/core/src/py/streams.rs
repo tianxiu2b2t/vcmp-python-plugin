@@ -1,9 +1,8 @@
 use pyo3::{
-    Bound, Py, PyResult, Python, pyclass, pymethods,
-    types::{
+    pyclass, pymethods, types::{
         PyAny, PyAnyMethods, PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods, PyModule,
         PyModuleMethods,
-    },
+    }, Bound, Py, PyResult, Python
 };
 use std::fmt::{Display, Formatter};
 use std::io::{Cursor, Read, Write};
@@ -11,9 +10,19 @@ use vcmp_bindings::encodes::{decode_gbk, encode_to_gbk};
 
 use crate::py::bytes_repr;
 
+use crate::logger;
+
+#[derive(Clone)]
 #[pyclass]
-struct WriteStream {
+#[pyo3(name = "WriteStream")]
+pub struct WriteStream {
     buffer: Vec<u8>,
+}
+
+impl WriteStream {
+    pub fn raw_buffer(&self) -> Vec<u8> {
+        self.buffer.clone()
+    }
 }
 
 #[pymethods]
@@ -24,7 +33,7 @@ impl WriteStream {
     }
 
     fn __repr__(&self) -> String {
-        format!("WriteStream({})", bytes_repr(self.get_raw_buffer()))
+        format!("WriteStream({})", bytes_repr(self.raw_buffer()))
     }
 
     fn write_bytes(&mut self, py: Python<'_>, data: Py<PyAny>) -> PyResult<()> {
@@ -89,7 +98,7 @@ impl WriteStream {
         if data.len() > 4095 {
             self.buffer.write_all(&(4095i16).to_be_bytes()).unwrap();
             self.buffer.write_all(&data[0..4095])?;
-            println!("String is too long, truncated to 4095 bytes");
+            logger::event!(logger::Level::WARN, "String is too long, truncated to 4095 bytes");
             Ok(false)
         } else {
             self.buffer
@@ -131,13 +140,15 @@ impl WriteStream {
         Ok(())
     }
 
-    fn get_raw_buffer(&self) -> Vec<u8> {
-        self.buffer.clone()
+    fn get_raw_buffer<'a>(&mut self, py: Python<'a>) -> Bound<'a, PyBytes> {
+        PyBytes::new(py, &self.raw_buffer())
     }
 }
 
 #[pyclass]
-struct ReadStream {
+#[pyo3(name = "ReadStream")]
+#[derive(Clone)]
+pub struct ReadStream {
     buffer: Cursor<Vec<u8>>,
 }
 
@@ -242,7 +253,7 @@ impl ReadStream {
 
 impl Display for WriteStream {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "WriteStream({})", bytes_repr(self.get_raw_buffer()))
+        write!(f, "WriteStream({})", bytes_repr(self.raw_buffer()))
     }
 }
 

@@ -3,6 +3,7 @@ use std::{
     path::Path,
     sync::OnceLock,
 };
+use crate::logger;
 
 pub mod cli_env;
 
@@ -104,5 +105,5 @@ pub fn init_config() {
         init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or(Config::new()))
     });
 
-    println!("{}", CONFIG.get().unwrap());
+    logger::event!(logger::Level::TRACE, "{}", CONFIG.get().unwrap());
 }

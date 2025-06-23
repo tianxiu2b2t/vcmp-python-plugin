@@ -5,6 +5,7 @@ use crate::{MarkerId, types::WorldId};
 /*
     Color 类
 */
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -61,7 +62,7 @@ impl Display for Color {
 /*
     Vector 类
 */
-
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vectorf32 {
     pub x: f32,
     pub y: f32,
@@ -71,6 +72,10 @@ pub struct Vectorf32 {
 impl Vectorf32 {
     pub fn new(x: f32, y: f32, z: f32) -> Self {
         Self { x, y, z }
+    }
+
+    pub fn default() -> Self {
+        Self::new(0.0, 0.0, 0.0)
     }
 
     pub fn distance_from(&self, other: &Self) -> f32 {

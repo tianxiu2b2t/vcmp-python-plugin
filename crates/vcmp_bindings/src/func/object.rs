@@ -24,22 +24,18 @@ pub trait ObjectMethods {
     fn move_object_to(
         &self,
         object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
+        position: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()>;
 
     fn move_object_by(
         &self,
         object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
+        position: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()>;
 
-    fn set_object_position(&self, object_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
+    fn set_object_position(&self, object_id: i32, position: Vectorf32) -> VcmpResult<()>;
 
     fn get_object_position(&self, object_id: i32) -> VcmpResult<Vectorf32>;
 
@@ -142,12 +138,10 @@ impl ObjectMethods for VcmpFunctions {
     fn move_object_to(
         &self,
         object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
+        position: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()> {
-        let code = (self.inner.MoveObjectTo)(object_id, x, y, z, duration);
+        let code = (self.inner.MoveObjectTo)(object_id, position.x, position.y, position.z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -158,12 +152,10 @@ impl ObjectMethods for VcmpFunctions {
     fn move_object_by(
         &self,
         object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
+        position: Vectorf32,
         duration: u32,
     ) -> VcmpResult<()> {
-        let code = (self.inner.MoveObjectBy)(object_id, x, y, z, duration);
+        let code = (self.inner.MoveObjectBy)(object_id, position.x, position.y, position.z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -171,8 +163,8 @@ impl ObjectMethods for VcmpFunctions {
         }
     }
 
-    fn set_object_position(&self, object_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
-        let code = (self.inner.SetObjectPosition)(object_id, x, y, z);
+    fn set_object_position(&self, object_id: i32, position: Vectorf32) -> VcmpResult<()> {
+        let code = (self.inner.SetObjectPosition)(object_id, position.x, position.y, position.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {

@@ -7,12 +7,13 @@ use vcmp_bindings::{
 };
 
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
+use crate::logger;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
-    println!("[Rust] Server init callback");
+    logger::event!(logger::Level::DEBUG, "[Rust] Server init callback");
 
-    println!("server settings {}", vcmp_func().server_version());
+    logger::event!(logger::Level::DEBUG, "server settings {}", vcmp_func().server_version());
 
     // println!("gamemode: {}", vcmp_func().get_gamemode());
 
@@ -43,7 +44,7 @@ pub unsafe extern "C" fn on_server_performance_report(
     for i in 0..entry_count {
         let description = unsafe { CStr::from_ptr(*descriptions.add(i)) };
         let time = unsafe { *times.add(i) };
-        println!(
+        logger::event!(logger::Level::DEBUG,
             "Performance report: {} - {}",
             description.to_string_lossy(),
             time
@@ -58,10 +59,10 @@ pub unsafe extern "C" fn on_server_performance_report(
 pub unsafe extern "C" fn on_entity_pool_change(c_entity_type: i32, entity_id: i32, is_deleted: u8) {
     let entity_type = VcmpEntityPool::from(c_entity_type);
     let deleted = is_deleted != 0;
-    println!("Entity pool change");
-    println!("entity type: {entity_type:?}");
-    println!("entity id: {entity_id}");
-    println!("deleted: {deleted}");
+    logger::event!(logger::Level::DEBUG, "Entity pool change");
+    logger::event!(logger::Level::DEBUG, "entity type: {entity_type:?}");
+    logger::event!(logger::Level::DEBUG, "entity id: {entity_id}");
+    logger::event!(logger::Level::DEBUG, "deleted: {deleted}");
 
     let mut pool = ENTITY_POOL.lock().expect("pool is poisoned");
 

@@ -7,6 +7,7 @@ use pyo3::types::{PyModule, PyModuleMethods};
 
 use crate::cfg::CONFIG;
 use crate::functions;
+use crate::logger;
 
 pub mod events;
 pub mod streams;
@@ -102,10 +103,10 @@ pub fn init_py() {
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
 
-        println!("Status: {}", pyo3::ffi::Py_IsInitialized());
+        logger::event!(logger::Level::TRACE, "Status: {}", pyo3::ffi::Py_IsInitialized());
     };
 
-    println!("Python init");
+    logger::event!(logger::Level::TRACE, "Python init");
 
     if CONFIG.get().unwrap().preloader {
         load_script_as_module();
@@ -116,9 +117,9 @@ pub fn load_script_as_module() {
     let script_path = CONFIG.get().unwrap().script_path.as_str();
     let res = raw_load_script_as_module(Path::new(script_path));
     if let Err(e) = res {
-        println!("Error: {e}");
+        logger::event!(logger::Level::ERROR, "Error: {e}");
     } else {
-        println!("Script loaded");
+        logger::event!(logger::Level::INFO, "Script loaded");
     }
 }
 
