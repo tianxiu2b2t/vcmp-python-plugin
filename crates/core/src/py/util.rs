@@ -418,7 +418,7 @@ pub fn in_poly(x: f64, y: f64, polies: Vec<(f64, f64)>) -> bool {
 
             // Avoid division by zero for vertical lines
             let k = if dx.abs() < 1e-6 {
-                std::f64::INFINITY
+                f64::INFINITY
             } else {
                 dy / dx
             };

@@ -24,9 +24,9 @@ impl EntityPoolTrait for VehiclePy {
     }
 }
 
-impl Into<VehiclePy> for i32 {
-    fn into(self) -> VehiclePy {
-        VehiclePy::new(self)
+impl From<i32> for VehiclePy {
+    fn from(val: i32) -> Self {
+        VehiclePy::new(val)
     }
 }
 

@@ -84,9 +84,13 @@ impl Vectorf32 {
     }
 }
 
-impl From<(f32, f32, f32)> for Vectorf32{
+impl From<(f32, f32, f32)> for Vectorf32 {
     fn from(value: (f32, f32, f32)) -> Self {
-        Self { x: value.0, y: value.1, z: value.2 }
+        Self {
+            x: value.0,
+            y: value.1,
+            z: value.2,
+        }
     }
 }
 

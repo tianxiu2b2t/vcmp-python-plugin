@@ -75,9 +75,9 @@ impl From<Color> for RGBPy {
     }
 }
 
-impl Into<Color> for RGBPy {
-    fn into(self) -> Color {
-        self.inner
+impl From<RGBPy> for Color {
+    fn from(val: RGBPy) -> Self {
+        val.inner
     }
 }
 
@@ -196,9 +196,9 @@ impl From<(EntityVectorType, EntityId)> for VectorPy {
     }
 }
 
-impl Into<Vectorf32> for VectorPy {
-    fn into(self) -> Vectorf32 {
-        self.get_entity_pos()
+impl From<VectorPy> for Vectorf32 {
+    fn from(val: VectorPy) -> Self {
+        val.get_entity_pos()
     }
 }
 
@@ -255,10 +255,7 @@ impl VectorPy {
                 let info = vcmp_func().get_marker_info(self.entity_id);
                 info.position
             }
-            EntityVectorType::Ignore => {
-                self.inner.clone().unwrap_or_default()
-
-            }
+            EntityVectorType::Ignore => self.inner.unwrap_or_default(),
         }
     }
 

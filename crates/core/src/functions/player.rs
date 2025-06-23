@@ -19,9 +19,9 @@ impl PlayerPy {
     }
 }
 
-impl Into<PlayerPy> for i32 {
-    fn into(self) -> PlayerPy {
-        PlayerPy::new(self)
+impl From<i32> for PlayerPy {
+    fn from(val: i32) -> Self {
+        PlayerPy::new(val)
     }
 }
 
@@ -151,10 +151,10 @@ impl PlayerPy {
         vcmp_func().get_player_key(self.id)
     }
 
-    #[getter]
-    fn get_state(&self) -> VcmpPlayerState {
-        vcmp_func().get_player_state(self.id)
-    }
+    // #[getter]
+    // fn get_state(&self) -> VcmpPlayerState {
+    //     vcmp_func().get_player_state(self.id)
+    // }
 
     /*
 
