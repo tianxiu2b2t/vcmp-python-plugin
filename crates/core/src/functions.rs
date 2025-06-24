@@ -2,7 +2,6 @@ use pyo3::prelude::*;
 use pyo3::types::PyModule;
 use pyo3::{Bound, PyResult, Python};
 
-pub mod callbacks;
 pub mod player;
 pub mod server;
 pub mod vehicle;

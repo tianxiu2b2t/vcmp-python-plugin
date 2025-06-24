@@ -13,6 +13,7 @@ pub mod events;
 pub mod streams;
 pub mod types;
 pub mod util;
+pub mod callbacks;
 
 #[cfg(target_os = "linux")]
 fn get_wchar_t(content: &str) -> Vec<i32> {
