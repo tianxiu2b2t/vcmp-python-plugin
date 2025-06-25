@@ -52,6 +52,10 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     functions::module_define(py, &funcs_module)?;
     m.add_submodule(&funcs_module)?;
 
+    let callbacks_module = PyModule::new(py, "callbacks")?;
+    callbacks::module_define(py, &callbacks_module)?;
+    m.add_submodule(&callbacks_module)?;
+
     Ok(())
 }
 
