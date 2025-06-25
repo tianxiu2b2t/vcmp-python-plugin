@@ -38,33 +38,43 @@ impl CallbackManager {
 
 use std::{convert::Infallible, sync::LazyLock};
 
-use pyo3::{ffi::PyCFunction, prelude::*, types::PyFunction};
+use pyo3::{prelude::*, types::{PyCFunction, PyFunction}};
 use tracing::{event, Level};
+
+#[derive(Debug, Clone)]
+pub struct CallbackFunction<'py> {
+    pub func: Bound<'py, Py<PyAny>>,
+    pub priority: i32,
+}
 
 #[pyclass]
 #[pyo3(name = "CallbackManager")]
-#[derive(Debug, Clone, Copy)]
-pub struct CallbackManager {
-    
+#[derive(Debug, Clone)]
+pub struct CallbackManager<'py> {
+    pub callbacks: Vec<CallbackFunction<'py>>
 }
-
 impl CallbackManager {
     pub fn new() -> Self {
         Self {
-
+            callbacks: Vec::new()
         }
     }
 }
 
 #[pymethods]
 impl CallbackManager {
-    pub fn on(&self, py: Python<'_>, priority: Option<i32>) -> PyResult<()> {
+    pub fn on<'a>(&self, py: Python<'a>, priority: Option<i32>) -> PyResult<pyo3::Bound<'a, pyo3::types::PyCFunction>> {
         let priority = priority.unwrap_or(9999);
         event!(Level::DEBUG, "CallbackManager.on called with priority: {priority}");
         // we need return a function that can be called with the arguments
         // and then call the callback with the arguments
-        Ok(())
+        PyCFunction::new_closure(py, None, None, move |args, _kwargs| -> PyResult<Py<PyAny>> {
+            let func = args.get_item(0).unwrap().extract::<Py<PyAny>>().unwrap();
+            event!(Level::DEBUG, "CallbackManager.on called with function: {func:?}");
+            Ok(func)
+        })
     }
+
 }
 
 pub static CALLBACK: LazyLock<CallbackManager> = LazyLock::new(CallbackManager::new);
