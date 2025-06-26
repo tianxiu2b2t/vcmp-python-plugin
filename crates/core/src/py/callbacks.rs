@@ -42,16 +42,16 @@ use pyo3::{prelude::*, types::{PyCFunction, PyFunction}};
 use tracing::{event, Level};
 
 #[derive(Debug, Clone)]
-pub struct CallbackFunction<'py> {
-    pub func: Bound<'py, Py<PyAny>>,
+pub struct CallbackFunction {
+    pub func: Py<PyFunction>,
     pub priority: i32,
 }
 
 #[pyclass]
 #[pyo3(name = "CallbackManager")]
-#[derive(Debug, Clone)]
-pub struct CallbackManager<'py> {
-    pub callbacks: Vec<CallbackFunction<'py>>
+#[derive(Debug, Clone, Copy)]
+pub struct CallbackManager {
+    pub callbacks: Vec<CallbackFunction>
 }
 impl CallbackManager {
     pub fn new() -> Self {
@@ -59,18 +59,29 @@ impl CallbackManager {
             callbacks: Vec::new()
         }
     }
+
+    fn add_callback(&mut self, callback: CallbackFunction) {
+        self.callbacks.push(callback);
+    }
 }
 
 #[pymethods]
 impl CallbackManager {
-    pub fn on<'a>(&self, py: Python<'a>, priority: Option<i32>) -> PyResult<pyo3::Bound<'a, pyo3::types::PyCFunction>> {
+    pub fn on<'a>(&mut self, py: Python<'a>, priority: Option<i32>) -> PyResult<pyo3::Bound<'a, pyo3::types::PyCFunction>> {
         let priority = priority.unwrap_or(9999);
         event!(Level::DEBUG, "CallbackManager.on called with priority: {priority}");
         // we need return a function that can be called with the arguments
         // and then call the callback with the arguments
-        PyCFunction::new_closure(py, None, None, move |args, _kwargs| -> PyResult<Py<PyAny>> {
-            let func = args.get_item(0).unwrap().extract::<Py<PyAny>>().unwrap();
+        let callbacks = &mut self.callbacks;
+        PyCFunction::new_closure(py, None, None, move |args, _kwargs| -> PyResult<Py<PyFunction>> {
+            let func = args.get_item(0).unwrap().extract::<Py<PyFunction>>().unwrap();
             event!(Level::DEBUG, "CallbackManager.on called with function: {func:?}");
+            let py_clone_func = func.clone();
+            let callback = CallbackFunction {
+                func: py_clone_func,
+                priority,
+            };
+            self.add_callback(callback);
             Ok(func)
         })
     }
