@@ -4,6 +4,7 @@ use std::{
     sync::{LazyLock, Mutex},
 };
 
+use tracing::{event, Level};
 use vcmp_bindings::options::VcmpEntityPool;
 
 use crate::{
@@ -82,6 +83,7 @@ impl EntityPool {
                 self.vehicles.insert_raw_entity(entity_id);
             }
             _ => {
+                event!(Level::TRACE, "Unknown entity type: {entity_type:?}");
                 todo!()
             }
         }
@@ -95,6 +97,7 @@ impl EntityPool {
                 self.vehicles.remove_entity(entity_id);
             }
             _ => {
+                event!(Level::TRACE, "Unknown entity type: {entity_type:?}");
                 todo!()
             }
         }
