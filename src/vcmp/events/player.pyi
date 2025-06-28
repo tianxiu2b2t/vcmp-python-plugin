@@ -1,0 +1,13 @@
+from .abc import Event
+
+class PlayerEvent(Event):
+    ...
+
+class IncomingConnection(PlayerEvent):
+    ...
+
+class PlayerConnectEvent(PlayerEvent):
+    ...
+
+class PlayerDisconnectEvent(PlayerEvent):
+    ...
