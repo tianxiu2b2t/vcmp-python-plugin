@@ -3,11 +3,11 @@ use pyo3::types::PyModule;
 use pyo3::{Bound, PyResult, Python, pyclass, pymethods};
 use vcmp_bindings::events::server;
 
-use crate::py::events::BaseEvent;
+use crate::py::events::{BaseEvent, PyBaseEvent};
 // rewrite this to use pyclass
 
 #[pyclass(extends=BaseEvent, subclass)]
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 #[pyo3(name = "ServerEvent")]
 pub struct ServerEvent;
 
@@ -20,7 +20,7 @@ impl ServerEvent {
 }
 
 #[pyclass(extends=ServerEvent)]
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 #[pyo3(name = "ServerInitialiseEvent")]
 pub struct ServerInitialiseEvent;
 
@@ -33,7 +33,7 @@ impl ServerInitialiseEvent {
 }
 
 #[pyclass(extends=ServerEvent)]
-#[derive(Debug, Default)]
+#[derive(Debug, Clone, Default)]
 #[pyo3(name = "ServerShutdownEvent")]
 pub struct ServerShutdownEvent;
 
@@ -46,7 +46,7 @@ impl ServerShutdownEvent {
 }
 
 #[pyclass(extends=ServerEvent)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[pyo3(name = "ServerFrameEvent")]
 pub struct ServerFrameEvent {
     inner: server::ServerFrameEvent,
@@ -73,7 +73,7 @@ impl ServerFrameEvent {
 }
 
 #[pyclass(extends=ServerEvent)]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 #[pyo3(name = "ServerPerformanceReportEvent")]
 pub struct ServerPerformanceReportEvent {
     inner: server::ServerPerformanceReportEvent,
@@ -122,7 +122,50 @@ impl ServerPerformanceReportEvent {
     }
 }
 
+/*
+    for python
+*/
+
+impl PyBaseEvent for ServerInitialiseEvent {
+    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let value = Py::new(py, ServerInitialiseEvent::new())?;
+        Ok(value.into())
+    }
+}
+impl PyBaseEvent for ServerShutdownEvent {
+    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let value = Py::new(py, ServerShutdownEvent::new())?;
+        Ok(value.into())
+    }
+}
+impl PyBaseEvent for ServerFrameEvent {
+    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let value = Py::new(py, ServerFrameEvent::new(self.frame()))?;
+        Ok(value.into())
+    }
+}
+impl PyBaseEvent for ServerPerformanceReportEvent {
+    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let value = Py::new(
+            py,
+            ServerPerformanceReportEvent::new(
+                self.entry_count(),
+                self.descriptions().clone(),
+                self.times().clone(),
+            ),
+        )?;
+        Ok(value.into())
+    }
+}
+impl PyBaseEvent for ServerEvent {
+    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let value = Py::new(py, ServerEvent::new())?;
+        Ok(value.into())
+    }
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<ServerEvent>()?;
     m.add_class::<ServerInitialiseEvent>()?;
     m.add_class::<ServerFrameEvent>()?;
     m.add_class::<ServerPerformanceReportEvent>()?;

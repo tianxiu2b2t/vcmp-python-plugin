@@ -9,6 +9,8 @@ use vcmp_bindings::{
 use crate::logger;
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
 
+use crate::py::callbacks::CALLBACK;
+
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
     logger::event!(logger::Level::DEBUG, "[Rust] Server init callback");
@@ -24,6 +26,9 @@ pub extern "C" fn on_server_init() -> u8 {
     if !CONFIG.get().unwrap().preloader {
         load_script_as_module();
     }
+
+    CALLBACK.call_func(crate::py::events::server::ServerInitialiseEvent);
+
     1
 }
 

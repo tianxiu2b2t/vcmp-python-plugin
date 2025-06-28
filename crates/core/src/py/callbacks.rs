@@ -1,48 +1,12 @@
-/*use pyo3::types::PyCFunction;
-use pyo3::{pymethods, pyclass, types::PyFunction, Py, PyAny};
-use pyo3::prelude::*;
-
-
-pub struct CallbackParameter {
-    pub name: String,
-    pub annontations: Vec<Py<PyAny>>,
-    pub default: Option<PyAny>,
-    pub required: bool,
-}
-
-pub struct CallbackFunction {
-    pub func: Py<PyFunction>,
-    pub args: Vec<CallbackParameter>,
-    pub poriority: i32,
-}
-
-#[pyclass]
-#[derive(Debug, Clone, Copy)]
-pub struct CallbackManager {
-    callbacks: Vec<CallbackFunction>
-}
-
-impl CallbackManager {
-    pub fn new() -> Self {
-        Self {
-            callbacks: Vec::new()
-        }
-    }
-}
-
-#[pymethods]
-impl CallbackManager {
-
-}*/
-
 use std::{
     default::Default,
     sync::{Arc, LazyLock, Mutex},
 };
 
 use pyo3::{
+    PyClass,
     prelude::*,
-    types::{PyCFunction, PyFunction},
+    types::{PyCFunction, PyDict, PyFunction},
 };
 use tracing::{Level, event};
 
@@ -58,7 +22,26 @@ pub struct CallbackFunction {
 pub struct CallbackManager;
 
 impl CallbackManager {
-    pub fn call() {}
+    pub fn call_func<T>(&self, event: T)
+    where
+        T: PyClass + crate::py::events::PyBaseEvent,
+    {
+        event!(
+            Level::DEBUG,
+            "CallbackManager.call_func called with event: {event:?}"
+        );
+        let callbacks = CALLBACKS_STORE.lock().unwrap();
+        Python::with_gil(|py| {
+            let instance = event.init(py).expect("Failed to initialize event");
+            for callback in callbacks.iter() {
+                let res = callback.func.call1(py, (instance.clone(),)).unwrap();
+                event!(
+                    Level::DEBUG,
+                    "CallbackManager.call_func called with callback: {callback:?}, result: {res:?}"
+                )
+            }
+        });
+    }
 }
 
 #[pymethods]
@@ -90,6 +73,14 @@ impl CallbackManager {
                     "CallbackManager.on called with function: {func:?}"
                 );
                 let py_clone_func = func.clone();
+
+                // print
+                let py_getfullargspec = get_annontations(func.clone());
+                event!(
+                    Level::DEBUG,
+                    "CallbackManager.on called with function args: {py_getfullargspec:?}"
+                );
+
                 let callback = CallbackFunction {
                     func: py_clone_func,
                     priority,
@@ -99,6 +90,24 @@ impl CallbackManager {
             },
         )
     }
+}
+
+fn get_annontations(func: Py<PyFunction>) -> Py<PyDict> {
+    Python::with_gil(|py| {
+        let py_inspect_module =
+            PyModule::import(py, "inspect").expect("Failed to import inspect module");
+        let py_getfullargspec_func = py_inspect_module
+            .getattr("getfullargspec")
+            .expect("Failed to get getfullargspec function");
+        let py_getfullargspec = py_getfullargspec_func
+            .call1((func,))
+            .expect("Failed to call getfullargspec function");
+        event!(
+            Level::DEBUG,
+            "CallbackManager.on called with function args: {py_getfullargspec:?}"
+        );
+        PyDict::new(py).unbind()
+    })
 }
 
 static CALLBACKS_STORE: LazyLock<Arc<Mutex<Vec<CallbackFunction>>>> =
