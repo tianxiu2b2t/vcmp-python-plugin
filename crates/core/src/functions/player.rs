@@ -1,4 +1,4 @@
-use pyo3::{pyclass, pymethods};
+use pyo3::{pyclass, pymethods, types::{PyModule, PyModuleMethods}, Bound, PyResult, Python};
 use vcmp_bindings::{states::VcmpPlayerState, utils::Vectorf32};
 
 use crate::pool::EntityPoolTrait;
@@ -471,4 +471,9 @@ impl PlayerPy {
 
     // fn interpolate_camera_look_at(&self, player: i32, look: Vectorf32, time: u32)
     // -> VcmpResult<()>;
+}
+
+pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<PlayerPy>()?;
+    Ok(())
 }
