@@ -10,7 +10,7 @@ use pyo3::{
 };
 use tracing::{Level, event};
 
-use crate::py::{events::BaseEvent, exceptions::FinishedException};
+use crate::py::{exceptions::FinishedException};
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunctionParameter {
@@ -64,7 +64,7 @@ impl Matcher {
 pub struct CallbackManager;
 
 impl CallbackManager {
-    pub fn call_func<T>(&self, event: T, kwargs: Option<Py<PyDict>>) -> bool
+    pub fn call_func<T>(&self, event: T, _kwargs: Option<Py<PyDict>>) -> bool
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
