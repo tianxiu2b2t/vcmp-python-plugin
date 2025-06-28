@@ -8,7 +8,7 @@ use crate::{PlayerId, VehicleId};
 #[derive(Debug, Clone)]
 pub struct IncomingConnectionEvent {
     player_name: String,
-    pub passowrd: String,
+    pub password: String,
     pub ip: String,
     name_ptr: *mut c_char,
     name_buffer_len: usize,
@@ -45,7 +45,7 @@ impl From<(*mut c_char, usize, *const c_char, *const c_char)> for IncomingConnec
                 player_name: std::ffi::CStr::from_ptr(value.0)
                     .to_string_lossy()
                     .to_string(),
-                passowrd: std::ffi::CStr::from_ptr(value.2)
+                password: std::ffi::CStr::from_ptr(value.2)
                     .to_string_lossy()
                     .to_string(),
                 ip: std::ffi::CStr::from_ptr(value.3)
