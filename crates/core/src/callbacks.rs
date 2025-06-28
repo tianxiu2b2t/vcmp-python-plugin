@@ -27,7 +27,7 @@ pub extern "C" fn on_server_init() -> u8 {
         load_script_as_module();
     }
 
-    CALLBACK.call_func(crate::py::events::server::ServerInitialiseEvent);
+    let _ = CALLBACK.call_func(crate::py::events::server::ServerInitialiseEvent);
 
     1
 }

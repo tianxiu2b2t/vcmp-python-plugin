@@ -11,6 +11,7 @@ use crate::logger;
 
 pub mod callbacks;
 pub mod events;
+pub mod exceptions;
 pub mod streams;
 pub mod types;
 pub mod util;
@@ -59,6 +60,10 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let events_module = PyModule::new(py, "events")?;
     events::module_define(py, &events_module)?;
     m.add_submodule(&events_module)?;
+
+    let exceptions_module = PyModule::new(py, "exceptions")?;
+    exceptions::module_define(py, &exceptions_module)?;
+    m.add_submodule(&exceptions_module)?;
 
     Ok(())
 }

@@ -10,10 +10,38 @@ use pyo3::{
 };
 use tracing::{Level, event};
 
+use crate::py::exceptions::FinishedException;
+
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
     pub func: Py<PyFunction>,
     pub priority: i32,
+}
+
+#[pyclass]
+#[pyo3(name = "Matcher")]
+#[derive(Debug, Clone, Default, Copy)]
+pub struct Matcher {
+    pub is_finished: bool,
+    pub result: bool,
+}
+
+#[pymethods]
+impl Matcher {
+    pub fn finish(&mut self, py: Python<'_>, result: Option<Py<PyAny>>) -> PyResult<()> {
+        // if result is None, then None
+        // if result is not None, then convert to bool
+        let result = result
+            .map(|r| r.extract::<bool>(py).unwrap_or(true))
+            .unwrap_or(true);
+        self.is_finished = true;
+        self.result = result;
+
+        event!(Level::DEBUG, "{self:?}");
+
+        // 然后阻止 python 代码继续运行
+        Err(PyErr::new::<FinishedException, _>("Finished exception"))
+    }
 }
 
 #[pyclass]
@@ -22,7 +50,7 @@ pub struct CallbackFunction {
 pub struct CallbackManager;
 
 impl CallbackManager {
-    pub fn call_func<T>(&self, event: T)
+    pub fn call_func<T>(&self, event: T) -> bool
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
@@ -31,16 +59,44 @@ impl CallbackManager {
             "CallbackManager.call_func called with event: {event:?}"
         );
         let callbacks = CALLBACKS_STORE.lock().unwrap();
+        let mut matcher = Matcher::default();
         Python::with_gil(|py| {
+            let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
-                let res = callback.func.call1(py, (instance.clone(),)).unwrap();
-                event!(
-                    Level::DEBUG,
-                    "CallbackManager.call_func called with callback: {callback:?}, result: {res:?}"
-                )
+                match callback
+                    .func
+                    .call1(py, (instance.clone(), py_matcher.borrow_mut(py)))
+                {
+                    Ok(_) => {
+                        event!(
+                            Level::DEBUG,
+                            "CallbackManager.call_func called with callback: {callback:?}"
+                        )
+                    }
+                    Err(e) => {
+                        event!(Level::ERROR, "CallbackManager.call_func error: {e:?}");
+                        if e.is_instance_of::<FinishedException>(py) {
+                            break;
+                        }
+                    }
+                };
+                if let Ok(matcher_ref) = py_matcher.try_borrow(py)
+                    && matcher_ref.is_finished
+                {
+                    break;
+                }
+            }
+            // 获取最终matcher状态
+            if let Ok(matcher_ref) = py_matcher.try_borrow(py) {
+                matcher = *matcher_ref;
             }
         });
+        event!(
+            Level::DEBUG,
+            "CallbackManager.call_func finished: {matcher:?}"
+        );
+        matcher.result
     }
 }
 
@@ -117,6 +173,7 @@ pub static CALLBACK: LazyLock<CallbackManager> = LazyLock::new(CallbackManager::
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CallbackManager>()?;
+    m.add_class::<Matcher>()?;
     m.add("callbacks", CALLBACK.into_pyobject(py)?)?;
     Ok(())
 }
