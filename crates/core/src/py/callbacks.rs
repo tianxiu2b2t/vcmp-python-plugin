@@ -4,9 +4,7 @@ use std::{
 };
 
 use pyo3::{
-    PyClass,
-    prelude::*,
-    types::{PyCFunction, PyDict, PyFunction},
+    prelude::*, types::{PyBool, PyCFunction, PyDict, PyFunction, PyNone}, PyClass
 };
 use tracing::{Level, event};
 
@@ -68,7 +66,14 @@ impl CallbackManager {
                     .func
                     .call1(py, (instance.clone(), py_matcher.borrow_mut(py)))
                 {
-                    Ok(_) => {
+                    Ok(res) => {
+                        // isinstance bool
+                        let result = res.bind(py);
+                        if let Ok(r) = result.downcast::<PyBool>() {
+                            return r.extract::<bool>().unwrap();
+                        } else if result.is_none() {
+                            return true;
+                        }
                         event!(
                             Level::DEBUG,
                             "CallbackManager.call_func called with callback: {callback:?}"
