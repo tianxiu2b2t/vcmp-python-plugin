@@ -1,9 +1,9 @@
 use std::ffi::CString;
 use std::path::Path;
 
-use pyo3::{Bound, Py, PyResult, Python, pymodule};
+use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
 
-use pyo3::types::{PyModule, PyModuleMethods};
+use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
 
 use crate::cfg::CONFIG;
 use crate::functions;
@@ -185,4 +185,12 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
 
     result.push('\'');
     result
+}
+
+pub fn get_traceback(err: PyErr) -> String {
+    Python::with_gil(|py| {
+        err.traceback(py)
+            .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
+            .unwrap_or(String::from("Unknown traceback"))
+    })
 }

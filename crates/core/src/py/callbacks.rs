@@ -10,7 +10,7 @@ use pyo3::{
 };
 use tracing::{Level, event};
 
-use crate::py::{exceptions::FinishedException};
+use crate::py::{exceptions::FinishedException, get_traceback};
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunctionParameter {
@@ -29,24 +29,29 @@ pub struct CallbackFunction {
 
 #[pyclass]
 #[pyo3(name = "Matcher")]
-#[derive(Debug, Clone, Default, Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Matcher {
     pub is_finished: bool,
     pub result: bool,
 }
 
+impl Default for Matcher {
+    fn default() -> Self {
+        Self {
+            is_finished: false,
+            result: true, // default
+        }
+    }
+}
+
 #[pymethods]
 impl Matcher {
-    pub fn finish(&mut self, py: Python<'_>, result: Option<Py<PyAny>>) -> PyResult<()> {
+    pub fn finish(&mut self, py: Python<'_>, result: Option<Py<PyBool>>) -> PyResult<()> {
         // if result is None, then None
         // if result is not None, then convert to bool
-        let result = result
-            .map(|r| r.extract::<bool>(py).unwrap_or(true))
-            .unwrap_or(true);
+        let result = result.unwrap().extract::<bool>(py).unwrap();
         self.is_finished = true;
         self.result = result;
-
-        event!(Level::DEBUG, "{self:?}");
 
         // 然后阻止 python 代码继续运行
         Err(PyErr::new::<FinishedException, _>("Finished exception"))
@@ -55,6 +60,10 @@ impl Matcher {
     #[getter]
     pub fn is_finished(&self) -> bool {
         self.is_finished
+    }
+
+    pub fn cancel(&mut self, py: Python<'_>) -> PyResult<()> {
+        self.finish(py, Some(PyBool::new(py, false).into()))
     }
 }
 
@@ -68,22 +77,17 @@ impl CallbackManager {
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
-        event!(
-            Level::DEBUG,
-            "CallbackManager.call_func called with event: {event:?}"
-        );
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
         Python::with_gil(|py| {
             let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
-
                 let origin_parameters = callback.params.clone();
                 let py_kwargs = PyDict::new(py);
 
                 let mut matched = true;
-                
+
                 for param in origin_parameters {
                     let name = param.name.clone();
                     for annotation in param.annotations {
@@ -93,32 +97,32 @@ impl CallbackManager {
                             break;
                         }
                         if py_matcher.bind(py).is_instance(annotation).unwrap() {
-                            py_kwargs.set_item(name.clone(), py_matcher.borrow_mut(py)).unwrap();
+                            py_kwargs
+                                .set_item(name.clone(), py_matcher.borrow_mut(py))
+                                .unwrap();
                             break;
                         }
                     }
                     /*
-                    if arg.required and arg.name not in params:
-                    matched = False
-                    break
-                elif arg.name not in params:
-                    params[arg.name] = arg.default */
+                        if arg.required and arg.name not in params:
+                        matched = False
+                        break
+                    elif arg.name not in params:
+                        params[arg.name] = arg.default */
                     if param.required && !py_kwargs.contains(name.clone()).unwrap() {
                         matched = false;
                         break;
                     } else if !py_kwargs.contains(name.clone()).unwrap() {
-                        py_kwargs.set_item(name.clone(), param.default.clone()).unwrap();
+                        py_kwargs
+                            .set_item(name.clone(), param.default.clone())
+                            .unwrap();
                     }
                 }
                 if !matched {
                     continue;
                 }
 
-
-                match callback
-                    .func
-                    .call(py, (), Some(&py_kwargs))
-                {
+                match callback.func.call(py, (), Some(&py_kwargs)) {
                     Ok(res) => {
                         // isinstance bool
                         let result = res.bind(py);
@@ -129,15 +133,16 @@ impl CallbackManager {
                             matcher.is_finished = true;
                             matcher.result = true;
                         }
-                        event!(
-                            Level::DEBUG,
-                            "CallbackManager.call_func called with callback: {callback:?}"
-                        )
                     }
                     Err(e) => {
-                        event!(Level::ERROR, "CallbackManager.call_func error: {e:?}");
                         if e.is_instance_of::<FinishedException>(py) {
                             break;
+                        } else {
+                            event!(
+                                Level::ERROR,
+                                "Callback event: {event:?} error: {}",
+                                get_traceback(e)
+                            );
                         }
                     }
                 };
@@ -154,10 +159,6 @@ impl CallbackManager {
                 matcher = *matcher_ref;
             }
         });
-        event!(
-            Level::DEBUG,
-            "CallbackManager.call_func finished: {matcher:?}"
-        );
         matcher.result
     }
 }
@@ -167,7 +168,7 @@ impl CallbackManager {
     //pub fn trigger(&self, py: Python<'_>, event: Py<BaseEvent>, kwargs: Option<Py<PyDict>>) -> bool {
     //    let event_bind = event.bind(py);
     //    let event_type = event_bind.get_type().;
-    //    
+    //
     //    false
     //}
     pub fn on<'a>(
@@ -176,10 +177,6 @@ impl CallbackManager {
         priority: Option<i32>,
     ) -> PyResult<pyo3::Bound<'a, pyo3::types::PyCFunction>> {
         let priority = priority.unwrap_or(9999);
-        event!(
-            Level::DEBUG,
-            "CallbackManager.on called with priority: {priority}"
-        );
         // we need return a function that can be called with the arguments
         // and then call the callback with the arguments
         PyCFunction::new_closure(
@@ -192,18 +189,9 @@ impl CallbackManager {
                     .unwrap()
                     .extract::<Py<PyFunction>>()
                     .unwrap();
-                event!(
-                    Level::DEBUG,
-                    "CallbackManager.on called with function: {func:?}"
-                );
                 let py_clone_func = func.clone();
 
-                // print
                 let parameters = get_function_parameters(func.clone());
-                event!(
-                    Level::DEBUG,
-                    "CallbackManager.on called with function args: {parameters:?}"
-                );
 
                 let callback = CallbackFunction {
                     func: py_clone_func,
