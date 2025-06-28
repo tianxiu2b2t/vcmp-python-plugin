@@ -1,8 +1,7 @@
 use std::os::raw::c_char;
 
 use vcmp_bindings::{
-    events::player::ClientScriptDataEvent, func::server::ServerMethods, options::VcmpEntityPool,
-    raw::PluginCallbacks, vcmp_func,
+    events::player::ClientScriptDataEvent, options::VcmpEntityPool, raw::PluginCallbacks,
 };
 
 use crate::logger;
@@ -48,7 +47,15 @@ pub unsafe extern "C" fn on_server_performance_report(
     descriptions: *mut *const c_char,
     times: *mut u64,
 ) {
-    let _ = CALLBACK.call_func(crate::py::events::server::ServerPerformanceReportEvent::from((entry_count, descriptions, times)), None);
+    let _ = CALLBACK.call_func(
+        ServerPerformanceReportEvent::from((entry_count, descriptions, times)),
+        None,
+    );
+}
+
+#[unsafe(no_mangle)]
+pub extern "C" fn on_server_shutdown() {
+    let _ = CALLBACK.call_func(ServerShutdownEvent, None);
 }
 
 /// # Safety
