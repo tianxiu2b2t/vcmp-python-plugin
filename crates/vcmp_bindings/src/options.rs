@@ -175,14 +175,14 @@ pub enum VcmpPickupOption {
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum VcmpEntityPool {
-    Vehicle,
-    Object,
-    Pickup,
-    Radio,
-    Player,
-    Reserved1,
-    Blip,
-    CheckPoint,
+    Vehicle = 1,
+    Object = 2,
+    Pickup = 3,
+    Radio = 4,
+    Player = 5,
+    Reserved1 = 6,
+    Blip = 7,
+    CheckPoint = 8,
 }
 
 impl From<i32> for VcmpEntityPool {
