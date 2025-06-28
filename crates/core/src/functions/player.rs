@@ -1,4 +1,7 @@
-use pyo3::{pyclass, pymethods, types::{PyModule, PyModuleMethods}, Bound, PyResult, Python};
+use pyo3::{
+    Bound, PyResult, Python, pyclass, pymethods,
+    types::{PyModule, PyModuleMethods},
+};
 use vcmp_bindings::{states::VcmpPlayerState, utils::Vectorf32};
 
 use crate::pool::EntityPoolTrait;

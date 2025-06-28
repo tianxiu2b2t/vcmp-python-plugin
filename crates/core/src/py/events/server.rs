@@ -52,6 +52,14 @@ pub struct ServerFrameEvent {
     inner: server::ServerFrameEvent,
 }
 
+impl From<f32> for ServerFrameEvent {
+    fn from(value: f32) -> Self {
+        Self {
+            inner: server::ServerFrameEvent::from(value),
+        }
+    }
+}
+
 #[pymethods]
 impl ServerFrameEvent {
     #[new]
@@ -81,7 +89,9 @@ pub struct ServerPerformanceReportEvent {
 
 impl From<(usize, *mut *const ::std::os::raw::c_char, *mut u64)> for ServerPerformanceReportEvent {
     fn from(value: (usize, *mut *const ::std::os::raw::c_char, *mut u64)) -> Self {
-        Self { inner: server::ServerPerformanceReportEvent::from(value) }
+        Self {
+            inner: server::ServerPerformanceReportEvent::from(value),
+        }
     }
 }
 
