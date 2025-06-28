@@ -1,0 +1,13 @@
+from typing import Any, Callable, Optional
+
+
+class CallbackManager:
+    def on(self, priority: Optional[int] = ...) -> Callable: ...
+
+callbacks: CallbackManager = ...
+
+class Matcher:
+    ...
+
+    def finish(self, result: Any):
+        ...
