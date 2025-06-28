@@ -533,7 +533,6 @@ dependencies = [
  "arc-bytes",
  "chrono",
  "pyo3",
- "serde",
  "toml",
  "tracing",
  "tracing-subscriber",

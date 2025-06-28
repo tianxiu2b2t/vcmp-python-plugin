@@ -27,7 +27,7 @@ pub extern "C" fn on_server_init() -> u8 {
         load_script_as_module();
     }
 
-    let _ = CALLBACK.call_func(crate::py::events::server::ServerInitialiseEvent);
+    let _ = CALLBACK.call_func(crate::py::events::server::ServerInitialiseEvent, None);
 
     1
 }
@@ -49,17 +49,7 @@ pub unsafe extern "C" fn on_server_performance_report(
     descriptions: *mut *const c_char,
     times: *mut u64,
 ) {
-    // descriptions is array and times is array
-    for i in 0..entry_count {
-        let description = unsafe { CStr::from_ptr(*descriptions.add(i)) };
-        let time = unsafe { *times.add(i) };
-        logger::event!(
-            logger::Level::DEBUG,
-            "Performance report: {} - {}",
-            description.to_string_lossy(),
-            time
-        );
-    }
+    let _ = CALLBACK.call_func(crate::py::events::server::ServerPerformanceReportEvent::from((entry_count, descriptions, times)), None);
 }
 
 /// # Safety

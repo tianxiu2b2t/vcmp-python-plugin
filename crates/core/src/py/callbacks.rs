@@ -4,16 +4,27 @@ use std::{
 };
 
 use pyo3::{
-    prelude::*, types::{PyBool, PyCFunction, PyDict, PyFunction, PyNone}, PyClass
+    PyClass,
+    prelude::*,
+    types::{PyBool, PyCFunction, PyDict, PyFunction, PyTuple, PyType},
 };
 use tracing::{Level, event};
 
-use crate::py::exceptions::FinishedException;
+use crate::py::{events::BaseEvent, exceptions::FinishedException};
+
+#[derive(Debug, Clone)]
+pub struct CallbackFunctionParameter {
+    pub name: String,
+    pub annotations: Vec<Py<PyType>>,
+    pub required: bool,
+    pub default: Option<Py<PyAny>>,
+}
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
     pub func: Py<PyFunction>,
     pub priority: i32,
+    pub params: Vec<CallbackFunctionParameter>,
 }
 
 #[pyclass]
@@ -40,6 +51,11 @@ impl Matcher {
         // 然后阻止 python 代码继续运行
         Err(PyErr::new::<FinishedException, _>("Finished exception"))
     }
+
+    #[getter]
+    pub fn is_finished(&self) -> bool {
+        self.is_finished
+    }
 }
 
 #[pyclass]
@@ -48,7 +64,7 @@ impl Matcher {
 pub struct CallbackManager;
 
 impl CallbackManager {
-    pub fn call_func<T>(&self, event: T) -> bool
+    pub fn call_func<T>(&self, event: T, kwargs: Option<Py<PyDict>>) -> bool
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
@@ -62,17 +78,56 @@ impl CallbackManager {
             let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
+
+                let origin_parameters = callback.params.clone();
+                let py_kwargs = PyDict::new(py);
+
+                let mut matched = true;
+                
+                for param in origin_parameters {
+                    let name = param.name.clone();
+                    for annotation in param.annotations {
+                        let annotation = annotation.bind(py);
+                        if instance.bind(py).is_instance(annotation).unwrap() {
+                            py_kwargs.set_item(name.clone(), instance.clone()).unwrap();
+                            break;
+                        }
+                        if py_matcher.bind(py).is_instance(annotation).unwrap() {
+                            py_kwargs.set_item(name.clone(), py_matcher.borrow_mut(py)).unwrap();
+                            break;
+                        }
+                    }
+                    /*
+                    if arg.required and arg.name not in params:
+                    matched = False
+                    break
+                elif arg.name not in params:
+                    params[arg.name] = arg.default */
+                    if param.required && !py_kwargs.contains(name.clone()).unwrap() {
+                        matched = false;
+                        break;
+                    } else if !py_kwargs.contains(name.clone()).unwrap() {
+                        py_kwargs.set_item(name.clone(), param.default.clone()).unwrap();
+                    }
+                }
+                if !matched {
+                    continue;
+                }
+
+
                 match callback
                     .func
-                    .call1(py, (instance.clone(), py_matcher.borrow_mut(py)))
+                    .call(py, (), Some(&py_kwargs))
                 {
                     Ok(res) => {
                         // isinstance bool
                         let result = res.bind(py);
                         if let Ok(r) = result.downcast::<PyBool>() {
-                            return r.extract::<bool>().unwrap();
+                            matcher.is_finished = true;
+                            matcher.result = r.extract::<bool>().unwrap();
                         } else if result.is_none() {
-                            return true;
+                            matcher.is_finished = true;
+                            matcher.result = true;
                         }
                         event!(
                             Level::DEBUG,
@@ -92,8 +147,10 @@ impl CallbackManager {
                     break;
                 }
             }
-            // 获取最终matcher状态
-            if let Ok(matcher_ref) = py_matcher.try_borrow(py) {
+
+            if let Ok(matcher_ref) = py_matcher.try_borrow(py)
+                && matcher_ref.is_finished
+            {
                 matcher = *matcher_ref;
             }
         });
@@ -107,6 +164,12 @@ impl CallbackManager {
 
 #[pymethods]
 impl CallbackManager {
+    //pub fn trigger(&self, py: Python<'_>, event: Py<BaseEvent>, kwargs: Option<Py<PyDict>>) -> bool {
+    //    let event_bind = event.bind(py);
+    //    let event_type = event_bind.get_type().;
+    //    
+    //    false
+    //}
     pub fn on<'a>(
         &mut self,
         py: Python<'a>,
@@ -136,15 +199,16 @@ impl CallbackManager {
                 let py_clone_func = func.clone();
 
                 // print
-                let py_getfullargspec = get_annontations(func.clone());
+                let parameters = get_function_parameters(func.clone());
                 event!(
                     Level::DEBUG,
-                    "CallbackManager.on called with function args: {py_getfullargspec:?}"
+                    "CallbackManager.on called with function args: {parameters:?}"
                 );
 
                 let callback = CallbackFunction {
                     func: py_clone_func,
                     priority,
+                    params: parameters,
                 };
                 CALLBACKS_STORE.lock().unwrap().push(callback);
                 Ok(func)
@@ -153,7 +217,8 @@ impl CallbackManager {
     }
 }
 
-fn get_annontations(func: Py<PyFunction>) -> Py<PyDict> {
+fn get_function_parameters(func: Py<PyFunction>) -> Vec<CallbackFunctionParameter> {
+    let mut params = vec![];
     Python::with_gil(|py| {
         let py_inspect_module =
             PyModule::import(py, "inspect").expect("Failed to import inspect module");
@@ -163,11 +228,79 @@ fn get_annontations(func: Py<PyFunction>) -> Py<PyDict> {
         let py_getfullargspec = py_getfullargspec_func
             .call1((func,))
             .expect("Failed to call getfullargspec function");
-        event!(
-            Level::DEBUG,
-            "CallbackManager.on called with function args: {py_getfullargspec:?}"
-        );
-        PyDict::new(py).unbind()
+        let py_args = py_getfullargspec
+            .getattr("args")
+            .unwrap()
+            .extract::<Vec<String>>()
+            .unwrap();
+        let py_defaults: Vec<Bound<'_, PyAny>> = {
+            let binding = py_getfullargspec.getattr("defaults").unwrap();
+            if binding.is_none() {
+                vec![]
+            } else {
+                let mut arr = Vec::new();
+                for ele in binding.downcast::<PyTuple>().unwrap() {
+                    arr.push(ele);
+                }
+                arr
+            }
+        };
+        let py_annontations = {
+            let binding = py_getfullargspec.getattr("annotations").unwrap();
+            let dict = binding.downcast::<PyDict>().unwrap();
+            // 创建新的PyDict
+            let result = PyDict::new(py);
+            // 复制所有项
+            for (k, v) in dict.iter() {
+                result.set_item(k, v).unwrap();
+            }
+            result
+        };
+        let offset = py_args.len() - py_defaults.len();
+        //let mut args = Vec::new();
+        for (i, arg) in py_args.iter().enumerate() {
+            let annotations = {
+                let mut arr = Vec::new();
+                let binding = py_annontations.get_item(arg).unwrap().unwrap();
+                if !binding.is_none() {
+                    if binding.hasattr("__origin__").unwrap()
+                        && binding
+                            .getattr("__origin__")
+                            .unwrap()
+                            .extract::<String>()
+                            .unwrap()
+                            == "Union"
+                    {
+                        let typing_module = PyModule::import(py, "typing").unwrap();
+                        let typing_module_get_args = typing_module.getattr("get_args").unwrap();
+                        let typing_module_get_args =
+                            typing_module_get_args.call1((binding,)).unwrap();
+                        let typing_module_get_args =
+                            typing_module_get_args.downcast::<PyTuple>().unwrap();
+                        for ele in typing_module_get_args {
+                            arr.push(ele.downcast::<PyType>().unwrap().clone().unbind());
+                        }
+                    } else {
+                        arr.push(binding.downcast::<PyType>().unwrap().clone().unbind());
+                    }
+                }
+                arr
+            };
+            let required = i < offset;
+            let default = if (i as i32) - (offset as i32) >= 0 {
+                Some(py_defaults[i - offset].clone().unbind())
+            } else {
+                None
+            };
+            let param = CallbackFunctionParameter {
+                name: arg.clone(),
+                annotations: annotations.clone(),
+                required,
+                default,
+            };
+            params.push(param);
+        }
+        params
     })
 }
 

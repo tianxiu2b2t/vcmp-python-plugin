@@ -76,7 +76,13 @@ impl ServerFrameEvent {
 #[derive(Debug, Clone)]
 #[pyo3(name = "ServerPerformanceReportEvent")]
 pub struct ServerPerformanceReportEvent {
-    inner: server::ServerPerformanceReportEvent,
+    pub inner: server::ServerPerformanceReportEvent,
+}
+
+impl From<(usize, *mut *const ::std::os::raw::c_char, *mut u64)> for ServerPerformanceReportEvent {
+    fn from(value: (usize, *mut *const ::std::os::raw::c_char, *mut u64)) -> Self {
+        Self { inner: server::ServerPerformanceReportEvent::from(value) }
+    }
 }
 
 #[pymethods]
