@@ -1,9 +1,7 @@
 use std::os::raw::c_char;
 
 use crate::py::events::{player::*, server::*};
-use vcmp_bindings::{
-    events::player::ClientScriptDataEvent, options::VcmpEntityPool, raw::PluginCallbacks,
-};
+use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
 use crate::logger;
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
@@ -93,13 +91,13 @@ pub unsafe extern "C" fn on_player_connect(player_id: i32) {
         on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 0);
     }
 
-    let _ = CALLBACK.call_func(PlayerConnectEvent::from(player_id), None);
+    let _ = CALLBACK.call_func(PlayerConnectEvent::from(player::PlayerConnectEvent::from(player_id)), None);
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
 pub unsafe extern "C" fn on_player_disconnect(player_id: i32, reason: i32) {
-    let _ = CALLBACK.call_func(PlayerDisconnectEvent::from((player_id, reason)), None);
+    let _ = CALLBACK.call_func(PlayerDisconnectEvent::from(player::PlayerDisconnectEvent::from((player_id, reason))), None);
 
     unsafe {
         on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 1);
@@ -112,8 +110,11 @@ pub unsafe extern "C" fn on_player_disconnect(player_id: i32, reason: i32) {
 /// This function handles raw pointers from FFI. The caller must ensure:
 /// - `_data` points to a valid buffer of at least `_size` bytes
 /// - The buffer is not modified during the execution of this function
-pub unsafe extern "C" fn on_client_script_data(_client_id: i32, _data: *const u8, _size: usize) {
-    let _ = ClientScriptDataEvent::from((_client_id, _data, _size));
+pub unsafe extern "C" fn on_client_script_data(client_id: i32, data: *const u8, size: usize) {
+    let _ = CALLBACK.call_func(
+        ClientScriptDataEvent::from(player::ClientScriptDataEvent::from((client_id, data, size))),
+        None,
+    );
 }
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {

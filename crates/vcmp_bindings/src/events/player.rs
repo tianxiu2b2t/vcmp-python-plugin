@@ -128,11 +128,11 @@ impl From<i32> for PlayerSpawnEvent {
 }
 
 #[derive(Debug, Clone)]
-pub struct PlayerRequestSpawn {
+pub struct PlayerRequestSpawnEvent {
     pub player_id: PlayerId,
 }
 
-impl From<i32> for PlayerRequestSpawn {
+impl From<i32> for PlayerRequestSpawnEvent {
     fn from(value: i32) -> Self {
         Self { player_id: value }
     }
@@ -410,7 +410,7 @@ impl From<(i32, *const c_char)> for PlayerCommandEvent {
 #[derive(Debug, Clone)]
 pub struct PlayerPrivateMessageEvent {
     pub player_id: PlayerId,
-    pub target_player_id: PlayerId,
+    pub target_id: PlayerId,
     pub message: String,
 }
 
@@ -419,7 +419,7 @@ impl From<(i32, i32, *const c_char)> for PlayerPrivateMessageEvent {
         unsafe {
             Self {
                 player_id: value.0,
-                target_player_id: value.1,
+                target_id: value.1,
                 message: std::ffi::CStr::from_ptr(value.2)
                     .to_string_lossy()
                     .to_string(),
@@ -461,14 +461,14 @@ impl From<(i32, i32)> for PlayerKeyBindUpEvent {
 #[derive(Debug, Clone)]
 pub struct PlayerSpectateEvent {
     pub player_id: PlayerId,
-    pub target_player_id: PlayerId,
+    pub target_id: PlayerId,
 }
 
 impl From<(i32, i32)> for PlayerSpectateEvent {
     fn from(value: (i32, i32)) -> Self {
         Self {
             player_id: value.0,
-            target_player_id: value.1,
+            target_id: value.1,
         }
     }
 }

@@ -4,7 +4,7 @@ use std::{
     sync::{LazyLock, Mutex},
 };
 
-use tracing::{event, Level};
+use tracing::{Level, event};
 use vcmp_bindings::options::VcmpEntityPool;
 
 use crate::{
@@ -44,6 +44,10 @@ impl<E: EntityPoolTrait> AnEntityPool<E> {
 
     pub fn insert_raw_entity(&mut self, entity: impl Into<E>) {
         self.add_entity(entity.into());
+    }
+
+    pub fn get_entity(&self, entity_id: EntityId) -> Option<&E> {
+        self.pool.get(&entity_id)
     }
 
     pub fn new() -> Self {
@@ -101,6 +105,26 @@ impl EntityPool {
                 todo!()
             }
         }
+    }
+
+    pub fn contains(&self, entity_type: VcmpEntityPool, entity_id: EntityId) -> bool {
+        match entity_type {
+            VcmpEntityPool::Player => self.players.have_entity(entity_id),
+            VcmpEntityPool::Vehicle => self.vehicles.have_entity(entity_id),
+            _ => {
+                event!(Level::TRACE, "Unknown entity type: {entity_type:?}");
+                todo!()
+            }
+        }
+    }
+
+    // 更具体的获取方法
+    pub fn get_player(&self, player_id: EntityId) -> Option<&PlayerPy> {
+        self.players.get_entity(player_id)
+    }
+
+    pub fn get_vehicle(&self, vehicle_id: EntityId) -> Option<&VehiclePy> {
+        self.vehicles.get_entity(vehicle_id)
     }
 }
 
