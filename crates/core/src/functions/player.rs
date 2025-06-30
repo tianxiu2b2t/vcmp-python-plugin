@@ -2,9 +2,9 @@ use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
     types::{PyModule, PyModuleMethods},
 };
-use vcmp_bindings::{states::VcmpPlayerState, utils::Vectorf32};
+use vcmp_bindings::{func::QueryVehicle, states::VcmpPlayerState, utils::Vectorf32};
 
-use crate::pool::EntityPoolTrait;
+use crate::{functions::vehicle::VehiclePy, pool::{EntityPoolTrait, ENTITY_POOL}, py::types::{EntityVectorType, VectorPy}};
 use crate::py::streams::WriteStream;
 use crate::py::types::RGBPy;
 use vcmp_bindings::{func::PlayerMethods, options::VcmpPlayerOption, vcmp_func};
@@ -56,7 +56,7 @@ impl PlayerPy {
     }
 
     #[getter]
-    fn get_is_alive(&self) -> bool {
+    fn is_alive(&self) -> bool {
         vcmp_func().is_player_connected(self.id)
     }
 
@@ -361,52 +361,176 @@ impl PlayerPy {
         let _ = vcmp_func().set_player_skin(self.id, skin);
     }
 
-    // #[getter]
-    // fn get_spawned(&self) -> bool {
-    //     vcmp_func().get_player_spaw(self.id)
-    // }
+    #[getter]
+    fn get_spawned(&self) -> bool {
+        vcmp_func().is_player_spawned(self.id)
+    }
 
-    // fn spawn(&self) {
-    //     let _ = vcmp_func().spawn_player(self.id);
-    // }
+    fn spawn(&self) {
+        let _ = vcmp_func().spawn_player(self.id);
+    }
 
-    // fn force_select(&self) {
-    //     vcmp_func().force_player_select(self.id, self.id);
-    // }
+    fn force_select(&self) {
+        vcmp_func().force_player_select(self.id);
+    }
 
-    // fn force_player_select(&self, player: i32) -> VcmpResult<()>;
-    // fn force_all_select(&self);
-    // fn is_player_typing(&self, player: i32) -> bool;
-    // fn give_player_money(&self, player: i32, amount: i32) -> VcmpResult<()>;
-    // fn set_player_money(&self, player: i32, amount: i32) -> VcmpResult<()>;
-    // fn get_player_money(&self, player: i32) -> i32;
-    // fn set_player_score(&self, player: i32, score: i32) -> VcmpResult<()>;
-    // fn get_player_score(&self, player: i32) -> i32;
-    // fn set_player_wanted_level(&self, player: i32, level: i32) -> VcmpResult<()>;
-    // fn get_player_wanted_level(&self, player: i32) -> i32;
-    // fn get_player_ping(&self, player: i32) -> i32;
-    // fn get_player_fps(&self, player: i32) -> f64;
-    // fn set_player_health(&self, player: i32, health: f32) -> VcmpResult<()>;
-    // fn get_player_health(&self, player: i32) -> f32;
-    // fn set_player_armour(&self, player: i32, armour: f32) -> VcmpResult<()>;
-    // fn get_player_armour(&self, player: i32) -> f32;
-    // fn set_player_immunity(&self, player: i32, flags: u32) -> VcmpResult<()>;
-    // fn get_player_immunity(&self, player: i32) -> u32;
-    // fn set_player_position(&self, player: i32, position: Vectorf32) -> VcmpResult<()>;
-    // fn get_player_position(&self, player: i32) -> VcmpResult<Vectorf32>;
-    // fn set_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
-    // fn get_player_speed(&self, player: i32) -> VcmpResult<Vectorf32>;
-    // fn add_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
-    // fn set_player_angle(&self, player: i32, angle: f32) -> VcmpResult<()>;
-    // fn get_player_angle(&self, player: i32) -> f32;
-    // fn set_player_alpha(&self, player: i32, alpha: i32, fade_time: u32) -> VcmpResult<()>;
-    // fn get_player_alpha(&self, player: i32) -> i32;
-    // fn get_player_aim_position(&self, player: i32) -> VcmpResult<Vectorf32>;
-    // fn get_player_aim_direction(&self, player: i32) -> VcmpResult<Vectorf32>;
-    // fn is_player_on_fire(&self, player: i32) -> bool;
-    // fn is_player_crouching(&self, player: i32) -> bool;
-    // fn get_player_action(&self, player: i32) -> i32;
-    // fn get_player_game_keys(&self, player: i32) -> u32;
+    #[getter]
+    fn is_typing(&self) -> bool {
+        vcmp_func().is_player_typing(self.id)
+    }
+
+    #[getter]
+    fn get_cash(&self) -> i32 {
+        vcmp_func().get_player_money(self.id)
+    }
+
+    #[setter]
+    fn set_cash(&self, cash: i32) {
+        let _ = vcmp_func().set_player_money(self.id, cash);
+    }
+
+    fn give_cash(&self, amount: i32) {
+        let _ = vcmp_func().give_player_money(self.id, amount);
+    }
+
+    #[getter]
+    fn get_fps(&self) -> f64 {
+        vcmp_func().get_player_fps(self.id)
+    }
+
+    #[getter]
+    fn get_health(&self) -> f32 {
+        vcmp_func().get_player_health(self.id)
+    }
+
+    #[setter]
+    fn set_health(&self, health: f32) {
+        let _ = vcmp_func().set_player_health(self.id, health);
+    }
+
+    #[getter]
+    fn get_armour(&self) -> f32 {
+        vcmp_func().get_player_armour(self.id)
+    }
+
+    #[setter]
+    fn set_armour(&self, armour: f32) {
+        let _ = vcmp_func().set_player_armour(self.id, armour);
+    }
+
+    #[getter]
+    fn get_immunity(&self) -> u32 {
+        vcmp_func().get_player_immunity(self.id)
+    }
+
+    #[setter]
+    fn set_immunity(&self, flags: u32) {
+        vcmp_func().set_player_immunity(self.id, flags);
+    }
+
+    #[getter]
+    fn get_position(&self) -> VectorPy {
+        VectorPy::from((EntityVectorType::PlayerPosition, self.id))
+    }
+
+    #[setter]
+    fn set_position(&self, position: VectorPy) {
+        let _ = vcmp_func().set_player_position(self.id, position.get_entity_pos());
+    }
+
+    #[getter]
+    fn get_speed(&self) -> VectorPy {
+        VectorPy::from((EntityVectorType::PlayerSpeed, self.id))
+    }
+
+    #[setter]
+    fn set_speed(&self, speed: VectorPy) {
+        let _ = vcmp_func().set_player_speed(self.id, speed.get_entity_pos());
+    }
+
+    #[getter]
+    fn get_angle(&self) -> f32 {
+        vcmp_func().get_player_angle(self.id)
+    }
+
+    #[setter]
+    fn set_angle(&self, angle: f32) {
+        let _ = vcmp_func().set_player_angle(self.id, angle);
+    }
+
+    #[getter]
+    fn get_alpha(&self) -> i32 {
+        vcmp_func().get_player_alpha(self.id)
+    }
+
+    fn set_alpha(&self, alpha: i32, fade_time: u32) {
+        let _ = vcmp_func().set_player_alpha(self.id, alpha, fade_time);
+    }
+
+    #[getter]
+    fn get_player_aim_position(&self) -> VectorPy {
+        let res = vcmp_func().get_player_aim_position(self.id);
+        if let Ok(pos) = res {
+            VectorPy::from(pos)
+        } else {
+            VectorPy::default()
+        }
+    }
+
+    #[getter]
+    fn get_player_aim_direction(&self) -> VectorPy {
+        let res = vcmp_func().get_player_aim_direction(self.id);
+        if let Ok(pos) = res {
+            VectorPy::from(pos)
+        } else {
+            VectorPy::default()
+        }
+    }
+
+    #[getter]
+    fn on_fire(&self) -> bool {
+        vcmp_func().is_player_on_fire(self.id)
+    }
+
+    #[getter]
+    fn crouching(&self) -> bool {
+        vcmp_func().is_player_crouching(self.id)
+    }
+
+    #[getter]
+    fn get_action(&self) -> i32 {
+        vcmp_func().get_player_action(self.id)
+    }
+
+    #[getter]
+    fn get_game_keys(&self) -> u32 {
+        vcmp_func().get_player_game_keys(self.id)
+    }
+
+    #[getter]
+    fn get_vehicle(&self) -> Option<VehiclePy> {
+        let vehicle_id = vcmp_func().get_player_vehicle_id(self.id);
+        let pool = ENTITY_POOL.lock().unwrap();
+        pool.get_vehicle(vehicle_id).map(|veh| *veh)
+    }
+
+    #[setter]
+    fn set_vehicle(&self, vehicle: Option<VehiclePy>) {
+        let mut id = None;
+        if let Some(vehicle) = vehicle {
+            id = Some(vehicle.get_id());
+        }
+        if let Some(id) = id && vcmp_func().is_vehicle_alive(id) {
+            let origin = vcmp_func().get_player_vehicle_id(self.id);
+            if origin != id {
+                let _ = vcmp_func().remove_player_from_vehicle(self.id);
+                let _ = vcmp_func().put_player_in_vehicle(self.id, id, 0, 0, 1);
+            }
+        } else {
+            let _ = vcmp_func().remove_player_from_vehicle(self.id);
+        }
+    }
+
     // fn put_player_in_vehicle(
     //     &self,
     //     player: i32,

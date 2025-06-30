@@ -202,15 +202,25 @@ impl From<VectorPy> for Vectorf32 {
     }
 }
 
+impl From<Vectorf32> for VectorPy {
+    fn from(val: Vectorf32) -> Self {
+        Self {
+            entity_type: EntityVectorType::Ignore,
+            entity_id: 0,
+            inner: Some(val)
+        }
+    }
+}
+
 impl VectorPy {
-    fn get_entity_pos(&self) -> Vectorf32 {
+    pub fn get_entity_pos(&self) -> Vectorf32 {
         match self.entity_type {
             EntityVectorType::PlayerPosition => {
                 let res = vcmp_func().get_player_position(self.entity_id);
                 if let Ok(res) = res {
                     res
                 } else {
-                    Vectorf32::new(0.0, 0.0, 0.0)
+                    Vectorf32::default()
                 }
             }
             EntityVectorType::PlayerSpeed => {
@@ -218,7 +228,7 @@ impl VectorPy {
                 if let Ok(res) = res {
                     res
                 } else {
-                    Vectorf32::new(0.0, 0.0, 0.0)
+                    Vectorf32::default()
                 }
             }
             EntityVectorType::VehiclePosition => vcmp_func().get_vehicle_position(self.entity_id),
@@ -232,7 +242,7 @@ impl VectorPy {
                 if let Ok(res) = res {
                     res
                 } else {
-                    Vectorf32::new(0.0, 0.0, 0.0)
+                    Vectorf32::default()
                 }
             }
             EntityVectorType::PickupPosition => {
@@ -240,7 +250,7 @@ impl VectorPy {
                 if let Ok(res) = res {
                     res
                 } else {
-                    Vectorf32::new(0.0, 0.0, 0.0)
+                    Vectorf32::default()
                 }
             }
             EntityVectorType::CheckPointPosition => {
@@ -248,7 +258,7 @@ impl VectorPy {
                 if let Ok(res) = res {
                     res
                 } else {
-                    Vectorf32::new(0.0, 0.0, 0.0)
+                    Vectorf32::default()
                 }
             }
             EntityVectorType::MarkerPosition => {
@@ -259,7 +269,7 @@ impl VectorPy {
         }
     }
 
-    fn set_entity_pos(&mut self, x: Option<f32>, y: Option<f32>, z: Option<f32>) {
+    pub fn set_entity_pos(&mut self, x: Option<f32>, y: Option<f32>, z: Option<f32>) {
         let mut origin = self.get_entity_pos();
         if let Some(x) = x {
             origin.x = x;
@@ -310,8 +320,27 @@ impl VectorPy {
     }
 }
 
+impl Default for VectorPy {
+    fn default() -> Self {
+        Self {
+            inner: None,
+            entity_type: EntityVectorType::Ignore,
+            entity_id: 0,
+        }
+    }
+}
+
 #[pymethods]
 impl VectorPy {
+    #[new]
+    fn new(x: Option<f32>, y: Option<f32>, z: Option<f32>) -> Self {
+        Self {
+            inner: Some(Vectorf32::new(x.unwrap_or(0.0), y.unwrap_or(0.0), z.unwrap_or(0.0))),
+            entity_type: EntityVectorType::Ignore,
+            entity_id: 0,
+        }
+    }
+
     #[getter]
     pub fn get_x(&self) -> f32 {
         self.get_entity_pos().x
