@@ -91,13 +91,19 @@ pub unsafe extern "C" fn on_player_connect(player_id: i32) {
         on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 0);
     }
 
-    let _ = CALLBACK.call_func(PlayerConnectEvent::from(player::PlayerConnectEvent::from(player_id)), None);
+    let _ = CALLBACK.call_func(
+        PlayerConnectEvent::from(player::PlayerConnectEvent::from(player_id)),
+        None,
+    );
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
 pub unsafe extern "C" fn on_player_disconnect(player_id: i32, reason: i32) {
-    let _ = CALLBACK.call_func(PlayerDisconnectEvent::from(player::PlayerDisconnectEvent::from((player_id, reason))), None);
+    let _ = CALLBACK.call_func(
+        PlayerDisconnectEvent::from(player::PlayerDisconnectEvent::from((player_id, reason))),
+        None,
+    );
 
     unsafe {
         on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 1);
@@ -120,20 +126,28 @@ pub unsafe extern "C" fn on_client_script_data(client_id: i32, data: *const u8, 
 #[unsafe(no_mangle)]
 /// # Safety
 pub unsafe extern "C" fn on_player_request_class(player_id: i32, class_id: i32) -> u8 {
-    CALLBACK.call_func(PlayerRequestClassEvent::from(player::PlayerRequestClassEvent::from((player_id, class_id))), None) as u8
+    CALLBACK.call_func(
+        PlayerRequestClassEvent::from(player::PlayerRequestClassEvent::from((player_id, class_id))),
+        None,
+    ) as u8
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
 pub unsafe extern "C" fn on_player_request_spawn(player_id: i32) -> u8 {
-    CALLBACK.call_func(PlayerRequestSpawnEvent::from(player::PlayerRequestSpawnEvent::from(player_id)), None) as u8
+    CALLBACK.call_func(
+        PlayerRequestSpawnEvent::from(player::PlayerRequestSpawnEvent::from(player_id)),
+        None,
+    ) as u8
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
 pub unsafe extern "C" fn on_player_enter_vehicle(player_id: i32, vehicle_id: i32, seat_id: i32) {
     let _ = CALLBACK.call_func(
-        PlayerEnterVehicleEvent::from(player::PlayerEnterVehicleEvent::from((player_id, vehicle_id, seat_id))),
+        PlayerEnterVehicleEvent::from(player::PlayerEnterVehicleEvent::from((
+            player_id, vehicle_id, seat_id,
+        ))),
         None,
     );
 }
@@ -142,16 +156,24 @@ pub unsafe extern "C" fn on_player_enter_vehicle(player_id: i32, vehicle_id: i32
 /// # Safety
 pub unsafe extern "C" fn on_player_exit_vehicle(player_id: i32, vehicle_id: i32) {
     let _ = CALLBACK.call_func(
-        PlayerExitVehicleEvent::from(player::PlayerExitVehicleEvent::from((player_id, vehicle_id))),
+        PlayerExitVehicleEvent::from(player::PlayerExitVehicleEvent::from((
+            player_id, vehicle_id,
+        ))),
         None,
     );
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
-pub unsafe extern "C" fn on_player_request_enter_vehicle(player_id: i32, vehicle_id: i32, seat_id: i32) -> u8 {
+pub unsafe extern "C" fn on_player_request_enter_vehicle(
+    player_id: i32,
+    vehicle_id: i32,
+    seat_id: i32,
+) -> u8 {
     CALLBACK.call_func(
-        PlayerRequestEnterVehicleEvent::from(player::PlayerRequestEnterVehicleEvent::from((player_id, vehicle_id, seat_id))),
+        PlayerRequestEnterVehicleEvent::from(player::PlayerRequestEnterVehicleEvent::from((
+            player_id, vehicle_id, seat_id,
+        ))),
         None,
     ) as u8
 }
@@ -159,25 +181,39 @@ pub unsafe extern "C" fn on_player_request_enter_vehicle(player_id: i32, vehicle
 #[unsafe(no_mangle)]
 /// # Safety
 pub unsafe extern "C" fn on_player_spawn(player_id: i32) {
-    let _ = CALLBACK.call_func(PlayerSpawnEvent::from(player::PlayerSpawnEvent::from(player_id)), None);
-}
-
-#[unsafe(no_mangle)]
-/// # Safety
-pub unsafe extern "C" fn on_player_death(player_id: i32, killer_id: i32, reason: i32, body_part: i32) {
     let _ = CALLBACK.call_func(
-        PlayerDeathEvent::from(player::PlayerDeathEvent::from((player_id, killer_id, reason, body_part))),
+        PlayerSpawnEvent::from(player::PlayerSpawnEvent::from(player_id)),
         None,
     );
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
-pub unsafe extern "C" fn on_player_name_change(player_id: i32, old_name: *const ::std::os::raw::c_char,
-            new_name: *const ::std::os::raw::c_char) {
-
+pub unsafe extern "C" fn on_player_death(
+    player_id: i32,
+    killer_id: i32,
+    reason: i32,
+    body_part: i32,
+) {
     let _ = CALLBACK.call_func(
-        PlayerNameChangeEvent::from(player::PlayerNameChangeEvent::from((player_id, old_name, new_name))),
+        PlayerDeathEvent::from(player::PlayerDeathEvent::from((
+            player_id, killer_id, reason, body_part,
+        ))),
+        None,
+    );
+}
+
+#[unsafe(no_mangle)]
+/// # Safety
+pub unsafe extern "C" fn on_player_name_change(
+    player_id: i32,
+    old_name: *const ::std::os::raw::c_char,
+    new_name: *const ::std::os::raw::c_char,
+) {
+    let _ = CALLBACK.call_func(
+        PlayerNameChangeEvent::from(player::PlayerNameChangeEvent::from((
+            player_id, old_name, new_name,
+        ))),
         None,
     );
 }
@@ -186,7 +222,9 @@ pub unsafe extern "C" fn on_player_name_change(player_id: i32, old_name: *const 
 /// # Safety
 pub unsafe extern "C" fn on_player_state_change(player_id: i32, old_state: i32, new_state: i32) {
     let _ = CALLBACK.call_func(
-        PlayerStateChangeEvent::from(player::PlayerStateChangeEvent::from((player_id, old_state, new_state))),
+        PlayerStateChangeEvent::from(player::PlayerStateChangeEvent::from((
+            player_id, old_state, new_state,
+        ))),
         None,
     );
 }
@@ -195,7 +233,9 @@ pub unsafe extern "C" fn on_player_state_change(player_id: i32, old_state: i32, 
 /// # Safety
 pub unsafe extern "C" fn on_player_action_change(player_id: i32, old_action: i32, new_action: i32) {
     let _ = CALLBACK.call_func(
-        PlayerActionChangeEvent::from(player::PlayerActionChangeEvent::from((player_id, old_action, new_action))),
+        PlayerActionChangeEvent::from(player::PlayerActionChangeEvent::from((
+            player_id, old_action, new_action,
+        ))),
         None,
     );
 }
@@ -203,12 +243,11 @@ pub unsafe extern "C" fn on_player_action_change(player_id: i32, old_action: i32
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player on fire state change
-pub unsafe extern "C" fn on_player_on_fire_change(
-    player_id: i32,
-    is_on_fire: u8,
-) {
+pub unsafe extern "C" fn on_player_on_fire_change(player_id: i32, is_on_fire: u8) {
     let _ = CALLBACK.call_func(
-        PlayerOnFireChangeEvent::from(player::PlayerOnFireChangeEvent::from((player_id, is_on_fire))),
+        PlayerOnFireChangeEvent::from(player::PlayerOnFireChangeEvent::from((
+            player_id, is_on_fire,
+        ))),
         None,
     );
 }
@@ -216,12 +255,12 @@ pub unsafe extern "C" fn on_player_on_fire_change(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player crouch state change
-pub unsafe extern "C" fn on_player_crouch_change(
-    player_id: i32,
-    is_crouching: u8,
-) {
+pub unsafe extern "C" fn on_player_crouch_change(player_id: i32, is_crouching: u8) {
     let _ = CALLBACK.call_func(
-        PlayerCrouchChangeEvent::from(player::PlayerCrouchChangeEvent::from((player_id, is_crouching))),
+        PlayerCrouchChangeEvent::from(player::PlayerCrouchChangeEvent::from((
+            player_id,
+            is_crouching,
+        ))),
         None,
     );
 }
@@ -229,13 +268,11 @@ pub unsafe extern "C" fn on_player_crouch_change(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player game keys change
-pub unsafe extern "C" fn on_player_game_keys_change(
-    player_id: i32,
-    old_keys: u32,
-    new_keys: u32,
-) {
+pub unsafe extern "C" fn on_player_game_keys_change(player_id: i32, old_keys: u32, new_keys: u32) {
     let _ = CALLBACK.call_func(
-        PlayerGameKeysChangeEvent::from(player::PlayerGameKeysChangeEvent::from((player_id, old_keys, new_keys))),
+        PlayerGameKeysChangeEvent::from(player::PlayerGameKeysChangeEvent::from((
+            player_id, old_keys, new_keys,
+        ))),
         None,
     );
 }
@@ -244,29 +281,20 @@ pub unsafe extern "C" fn on_player_game_keys_change(
 /// # Safety
 /// FFI callback for player begin typing
 pub unsafe extern "C" fn on_player_begin_typing(player_id: i32) {
-    let _ = CALLBACK.call_func(
-        PlayerBeginTypingEvent::from(player_id),
-        None,
-    );
+    let _ = CALLBACK.call_func(PlayerBeginTypingEvent::from(player_id), None);
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player end typing
 pub unsafe extern "C" fn on_player_end_typing(player_id: i32) {
-    let _ = CALLBACK.call_func(
-        PlayerEndTypingEvent::from(player_id),
-        None,
-    );
+    let _ = CALLBACK.call_func(PlayerEndTypingEvent::from(player_id), None);
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player away state change
-pub unsafe extern "C" fn on_player_away_change(
-    player_id: i32,
-    is_away: u8,
-) {
+pub unsafe extern "C" fn on_player_away_change(player_id: i32, is_away: u8) {
     let _ = CALLBACK.call_func(
         PlayerAwayChangeEvent::from(player::PlayerAwayChangeEvent::from((player_id, is_away))),
         None,
@@ -276,10 +304,7 @@ pub unsafe extern "C" fn on_player_away_change(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player message
-pub unsafe extern "C" fn on_player_message(
-    player_id: i32,
-    message: *const c_char,
-) -> u8 {
+pub unsafe extern "C" fn on_player_message(player_id: i32, message: *const c_char) -> u8 {
     CALLBACK.call_func(
         PlayerMessageEvent::from(player::PlayerMessageEvent::from((player_id, message))),
         None,
@@ -289,10 +314,7 @@ pub unsafe extern "C" fn on_player_message(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player command
-pub unsafe extern "C" fn on_player_command(
-    player_id: i32,
-    command: *const c_char,
-) -> u8 {
+pub unsafe extern "C" fn on_player_command(player_id: i32, command: *const c_char) -> u8 {
     CALLBACK.call_func(
         PlayerCommandEvent::from(player::PlayerCommandEvent::from((player_id, command))),
         None,
@@ -308,7 +330,9 @@ pub unsafe extern "C" fn on_player_private_message(
     message: *const c_char,
 ) -> u8 {
     CALLBACK.call_func(
-        PlayerPrivateMessageEvent::from(player::PlayerPrivateMessageEvent::from((player_id, target_id, message))),
+        PlayerPrivateMessageEvent::from(player::PlayerPrivateMessageEvent::from((
+            player_id, target_id, message,
+        ))),
         None,
     ) as u8
 }
@@ -316,10 +340,7 @@ pub unsafe extern "C" fn on_player_private_message(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player key bind down
-pub unsafe extern "C" fn on_player_key_bind_down(
-    player_id: i32,
-    bind_id: i32,
-) {
+pub unsafe extern "C" fn on_player_key_bind_down(player_id: i32, bind_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerKeyBindDownEvent::from(player::PlayerKeyBindDownEvent::from((player_id, bind_id))),
         None,
@@ -329,10 +350,7 @@ pub unsafe extern "C" fn on_player_key_bind_down(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player key bind up
-pub unsafe extern "C" fn on_player_key_bind_up(
-    player_id: i32,
-    bind_id: i32,
-) {
+pub unsafe extern "C" fn on_player_key_bind_up(player_id: i32, bind_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerKeyBindUpEvent::from(player::PlayerKeyBindUpEvent::from((player_id, bind_id))),
         None,
@@ -342,10 +360,7 @@ pub unsafe extern "C" fn on_player_key_bind_up(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player spectate
-pub unsafe extern "C" fn on_player_spectate(
-    player_id: i32,
-    target_id: i32,
-) {
+pub unsafe extern "C" fn on_player_spectate(player_id: i32, target_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerSpectateEvent::from(player::PlayerSpectateEvent::from((player_id, target_id))),
         None,
@@ -355,16 +370,12 @@ pub unsafe extern "C" fn on_player_spectate(
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player crash report
-pub unsafe extern "C" fn on_player_crash_report(
-    player_id: i32,
-    report: *const c_char,
-) {
+pub unsafe extern "C" fn on_player_crash_report(player_id: i32, report: *const c_char) {
     let _ = CALLBACK.call_func(
         PlayerCrashReportEvent::from(player::PlayerCrashReportEvent::from((player_id, report))),
         None,
     );
 }
-
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);
@@ -385,7 +396,6 @@ pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnPlayerSpawn = Some(on_player_spawn);
     callbacks.OnPlayerDeath = Some(on_player_death);
 
-
     callbacks.OnPlayerNameChange = Some(on_player_name_change);
     callbacks.OnPlayerStateChange = Some(on_player_state_change);
     callbacks.OnPlayerActionChange = Some(on_player_action_change);
@@ -402,7 +412,6 @@ pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnPlayerKeyBindUp = Some(on_player_key_bind_up);
     callbacks.OnPlayerSpectate = Some(on_player_spectate);
     callbacks.OnPlayerCrashReport = Some(on_player_crash_report);
-
 
     callbacks.OnEntityPoolChange = Some(on_entity_pool_change);
 }

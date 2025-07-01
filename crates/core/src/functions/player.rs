@@ -4,11 +4,15 @@ use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
     types::{PyModule, PyModuleMethods},
 };
-use vcmp_bindings::{func::QueryVehicle, states::VcmpPlayerState, utils::Vectorf32};
+use vcmp_bindings::{func::QueryVehicle, utils::Vectorf32};
 
-use crate::{functions::{object::ObjectPy, vehicle::VehiclePy}, pool::{EntityPoolTrait, ENTITY_POOL}, py::types::{EntityVectorType, VectorPy}};
 use crate::py::streams::WriteStream;
 use crate::py::types::RGBPy;
+use crate::{
+    functions::{object::ObjectPy, vehicle::VehiclePy},
+    pool::{ENTITY_POOL, EntityPoolTrait},
+    py::types::{EntityVectorType, VectorPy},
+};
 use vcmp_bindings::{func::PlayerMethods, options::VcmpPlayerOption, vcmp_func};
 
 #[pyclass]
@@ -153,7 +157,6 @@ impl PlayerPy {
         vcmp_func().set_player_option(self.id, VcmpPlayerOption::CanAttack, can_attack);
     }
 
-    
     #[getter]
     fn get_cash(&self) -> i32 {
         vcmp_func().get_player_money(self.id)
@@ -173,7 +176,6 @@ impl PlayerPy {
         );
     }
 
-    
     #[getter]
     fn get_class_id(&self) -> i32 {
         vcmp_func().get_player_class(self.id)
@@ -197,7 +199,7 @@ impl PlayerPy {
         let _ = vcmp_func().set_player_color(self.id, value.into());
     }
 
-        #[getter]
+    #[getter]
     fn get_controllable(&self) -> bool {
         vcmp_func().get_player_option(self.id, VcmpPlayerOption::Controllable)
     }
@@ -280,7 +282,7 @@ impl PlayerPy {
     }
 
     fn give_weapon(&self, weapon: i32, ammo: i32) {
-        vcmp_func().give_player_weapon(self.id, weapon, ammo);
+        let _ = vcmp_func().give_player_weapon(self.id, weapon, ammo);
     }
 
     #[getter]
@@ -290,11 +292,7 @@ impl PlayerPy {
 
     #[setter]
     fn set_green_scanlines(&self, green_scanlines: bool) {
-        vcmp_func().set_player_option(
-            self.id,
-            VcmpPlayerOption::GreenScanlines,
-            green_scanlines,
-        );
+        vcmp_func().set_player_option(self.id, VcmpPlayerOption::GreenScanlines, green_scanlines);
     }
 
     #[getter]
@@ -329,7 +327,7 @@ impl PlayerPy {
 
     #[setter]
     fn set_immunity(&self, flags: u32) {
-        vcmp_func().set_player_immunity(self.id, flags);
+        let _ = vcmp_func().set_player_immunity(self.id, flags);
     }
 
     #[getter]
@@ -359,7 +357,7 @@ impl PlayerPy {
     }
 
     fn kill(&self) {
-        vcmp_func().kill_player(self.id);
+        let _ = vcmp_func().kill_player(self.id);
     }
 
     #[getter]
@@ -387,7 +385,9 @@ impl PlayerPy {
     }
 
     fn play_sound(&self, sound: i32, position: Option<VectorPy>) {
-        let pos = position.map(Vectorf32::from).unwrap_or_else(|| Vectorf32::from((f32::NAN, f32::NAN, f32::NAN)));
+        let pos = position
+            .map(Vectorf32::from)
+            .unwrap_or_else(|| Vectorf32::from((f32::NAN, f32::NAN, f32::NAN)));
         vcmp_func().play_sound_for_player(self.id, sound, Some(pos));
     }
 
@@ -402,19 +402,20 @@ impl PlayerPy {
     }
 
     fn redirect(&self, ip: &str, port: u32, nick: &str, password: &str, user_password: &str) {
-        vcmp_func().redirect_player_to_server(self.id, ip, port, nick, password, user_password);
+        let _ =
+            vcmp_func().redirect_player_to_server(self.id, ip, port, nick, password, user_password);
     }
 
     fn remove_weapon(&self, weapon: i32) {
-        vcmp_func().remove_player_weapon(self.id, weapon);
+        let _ = vcmp_func().remove_player_weapon(self.id, weapon);
     }
 
     fn request_module_list(&self) {
-        vcmp_func().get_player_module_list(self.id);
+        let _ = vcmp_func().get_player_module_list(self.id);
     }
 
     fn restore_camera(&self) {
-        vcmp_func().restore_camera(self.id);
+        let _ = vcmp_func().restore_camera(self.id);
     }
 
     #[getter]
@@ -448,7 +449,7 @@ impl PlayerPy {
     }
 
     fn select(&self) {
-        vcmp_func().force_player_select(self.id);
+        let _ = vcmp_func().force_player_select(self.id);
     }
 
     fn send_data(&self, data: WriteStream) {
@@ -471,9 +472,13 @@ impl PlayerPy {
     fn get_unique_world(&self) -> i32 {
         vcmp_func().get_player_unique_world(self.id)
     }
-    
+
     fn set_camera_position(&self, position: VectorPy, look_at: VectorPy) {
-        let _ = vcmp_func().set_camera_position(self.id, position.get_entity_pos(), look_at.get_entity_pos());
+        let _ = vcmp_func().set_camera_position(
+            self.id,
+            position.get_entity_pos(),
+            look_at.get_entity_pos(),
+        );
     }
 
     fn set_camera(&self, position: VectorPy, look_yaw: f32, look_pitch: f32, range: Option<f32>) {
@@ -536,7 +541,6 @@ impl PlayerPy {
         let _ = vcmp_func().spawn_player(self.id);
     }
 
-    
     #[getter]
     fn get_spawned(&self) -> bool {
         vcmp_func().is_player_spawned(self.id)
@@ -588,7 +592,6 @@ impl PlayerPy {
         let _ = vcmp_func().set_player_team(self.id, team);
     }
 
-
     #[getter]
     fn is_typing(&self) -> bool {
         vcmp_func().is_player_typing(self.id)
@@ -617,7 +620,9 @@ impl PlayerPy {
         if let Some(vehicle) = vehicle {
             id = Some(vehicle.get_id());
         }
-        if let Some(id) = id && vcmp_func().is_vehicle_alive(id) {
+        if let Some(id) = id
+            && vcmp_func().is_vehicle_alive(id)
+        {
             let origin = vcmp_func().get_player_vehicle_id(self.id);
             if origin != id {
                 let _ = vcmp_func().remove_player_from_vehicle(self.id);
@@ -643,7 +648,6 @@ impl PlayerPy {
         let _ = vcmp_func().set_player_wanted_level(self.id, wanted_level);
     }
 
-
     #[getter]
     fn get_white_scanlines(&self) -> bool {
         vcmp_func().get_player_option(self.id, VcmpPlayerOption::WhiteScanlines)
@@ -653,7 +657,6 @@ impl PlayerPy {
     fn set_white_scanlines(&self, white_scanlines: bool) {
         vcmp_func().set_player_option(self.id, VcmpPlayerOption::WhiteScanlines, white_scanlines);
     }
-
 
     #[getter]
     fn get_widescreen(&self) -> bool {
@@ -683,7 +686,6 @@ impl PlayerPy {
     fn is_world_compatible(&self, world: i32) -> bool {
         vcmp_func().is_player_world_compatible(self.id, world)
     }
-
 
     // fn get_player_module_list(&self, player: i32) -> VcmpResult<()>;
     // fn kill_player(&self, player: i32) -> VcmpResult<()>;

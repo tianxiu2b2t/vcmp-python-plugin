@@ -1636,10 +1636,7 @@ impl From<player::PlayerSpectateEvent> for PlayerSpectateEvent {
 
 impl PyBaseEvent for PlayerSpectateEvent {
     fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
-            py,
-            PlayerSpectateEvent::new(self.player_id, self.target_id),
-        )?;
+        let value = Py::new(py, PlayerSpectateEvent::new(self.player_id, self.target_id))?;
         Ok(value.into())
     }
 }

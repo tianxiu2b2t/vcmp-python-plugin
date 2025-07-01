@@ -209,7 +209,7 @@ impl From<Vectorf32> for VectorPy {
         Self {
             entity_type: EntityVectorType::Ignore,
             entity_id: 0,
-            inner: Some(val)
+            inner: Some(val),
         }
     }
 }
@@ -334,10 +334,8 @@ impl Add for VectorPy {
             Some(origin.z + other.z),
         );
 
-
         self
     }
-
 }
 
 impl Default for VectorPy {
@@ -355,7 +353,11 @@ impl VectorPy {
     #[new]
     fn new(x: Option<f32>, y: Option<f32>, z: Option<f32>) -> Self {
         Self {
-            inner: Some(Vectorf32::new(x.unwrap_or(0.0), y.unwrap_or(0.0), z.unwrap_or(0.0))),
+            inner: Some(Vectorf32::new(
+                x.unwrap_or(0.0),
+                y.unwrap_or(0.0),
+                z.unwrap_or(0.0),
+            )),
             entity_type: EntityVectorType::Ignore,
             entity_id: 0,
         }
