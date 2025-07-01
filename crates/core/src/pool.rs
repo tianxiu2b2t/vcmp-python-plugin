@@ -9,7 +9,7 @@ use vcmp_bindings::options::VcmpEntityPool;
 
 use crate::{
     consts::EntityId,
-    functions::{player::PlayerPy, vehicle::VehiclePy},
+    functions::{object::ObjectPy, player::PlayerPy, vehicle::VehiclePy},
 };
 
 pub trait EntityPoolTrait: Debug + Clone {
@@ -68,6 +68,7 @@ impl<E: EntityPoolTrait> Default for AnEntityPool<E> {
 pub struct EntityPool {
     players: AnEntityPool<PlayerPy>,
     vehicles: AnEntityPool<VehiclePy>,
+    objects: AnEntityPool<ObjectPy>,
 }
 
 impl EntityPool {
@@ -75,6 +76,7 @@ impl EntityPool {
         Self {
             players: AnEntityPool::new(),
             vehicles: AnEntityPool::new(),
+            objects: AnEntityPool::new(),
         }
     }
 
@@ -125,6 +127,10 @@ impl EntityPool {
 
     pub fn get_vehicle(&self, vehicle_id: EntityId) -> Option<&VehiclePy> {
         self.vehicles.get_entity(vehicle_id)
+    }
+
+    pub fn get_object(&self, object_id: EntityId) -> Option<&ObjectPy> {
+        self.objects.get_entity(object_id)
     }
 }
 

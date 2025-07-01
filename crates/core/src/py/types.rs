@@ -1,3 +1,5 @@
+use std::ops::Add;
+
 use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
     types::{PyModule, PyModuleMethods},
@@ -318,6 +320,24 @@ impl VectorPy {
             }
         };
     }
+}
+
+impl Add for VectorPy {
+    type Output = Self;
+    fn add(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_pos();
+        let other = rhs.get_entity_pos();
+
+        self.set_entity_pos(
+            Some(origin.x + other.x),
+            Some(origin.y + other.y),
+            Some(origin.z + other.z),
+        );
+
+
+        self
+    }
+
 }
 
 impl Default for VectorPy {

@@ -5,6 +5,8 @@ use pyo3::{Bound, PyResult, Python};
 pub mod player;
 pub mod server;
 pub mod vehicle;
+pub mod pickup;
+pub mod object;
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let server_module = PyModule::new(py, "server")?;

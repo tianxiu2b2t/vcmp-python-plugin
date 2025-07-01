@@ -56,8 +56,8 @@ pub trait PlayerMethods {
 
     fn set_player_world(&self, player: i32, world: i32) -> VcmpResult<()>;
     fn get_player_world(&self, player: i32) -> i32;
-    fn set_player_select_world(&self, player: i32, world: i32) -> VcmpResult<()>;
-    fn get_player_select_world(&self, player: i32) -> i32;
+    fn set_player_secondary_world(&self, player: i32, world: i32) -> VcmpResult<()>;
+    fn get_player_secondary_world(&self, player: i32) -> i32;
     fn get_player_unique_world(&self, player: i32) -> i32;
     fn is_player_world_compatible(&self, player: i32, world: i32) -> bool;
     fn get_player_class(&self, player: i32) -> i32;
@@ -102,6 +102,7 @@ pub trait PlayerMethods {
     fn is_player_crouching(&self, player: i32) -> bool;
     fn get_player_action(&self, player: i32) -> i32;
     fn get_player_game_keys(&self, player: i32) -> u32;
+    fn get_player_in_vehicle_status(&self, player: i32) -> i32;
     fn put_player_in_vehicle(
         &self,
         player: i32,
@@ -318,7 +319,7 @@ impl PlayerMethods for VcmpFunctions {
         (self.inner.GetPlayerWorld)(player)
     }
 
-    fn set_player_select_world(&self, player: i32, world: i32) -> VcmpResult<()> {
+    fn set_player_secondary_world(&self, player: i32, world: i32) -> VcmpResult<()> {
         let code = (self.inner.SetPlayerSecondaryWorld)(player, world);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -327,7 +328,7 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn get_player_select_world(&self, player: i32) -> i32 {
+    fn get_player_secondary_world(&self, player: i32) -> i32 {
         (self.inner.GetPlayerSecondaryWorld)(player)
     }
 
@@ -648,10 +649,10 @@ impl PlayerMethods for VcmpFunctions {
             Ok(())
         }
     }
-    // TODO: GetPlayerInVehicleStatus
-    //fn get_player_in_vehicle_status(&self, player: i32) ->  {
-    //    (self.inner.GetPlayerInVehicleStatus)(player)
-    //}
+
+    fn get_player_in_vehicle_status(&self, player: i32) -> i32 {
+        (self.inner.GetPlayerInVehicleStatus)(player)
+    }
 
     fn get_player_in_vehicle_slot(&self, player: i32) -> i32 {
         (self.inner.GetPlayerInVehicleSlot)(player)
