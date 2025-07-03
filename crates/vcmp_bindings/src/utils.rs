@@ -110,6 +110,7 @@ impl Display for Vectorf32 {
     Quaternion 类
 */
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Quaternionf32 {
     pub x: f32,
     pub y: f32,
@@ -130,6 +131,12 @@ impl Display for Quaternionf32 {
             "Quaternion(x={}, y={}, z={}, w={})",
             self.x, self.y, self.z, self.w
         )
+    }
+}
+
+impl Default for Quaternionf32 {
+    fn default() -> Self {
+        Self::new(0.0, 0.0, 0.0, 0.0)
     }
 }
 

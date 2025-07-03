@@ -5,7 +5,7 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use vcmp_bindings::utils::Color;
+use vcmp_bindings::utils::{Color, Quaternionf32};
 use vcmp_bindings::{
     func::{
         CheckPointMethods, MarkerMethods, ObjectMethods, PickupMethods, PlayerMethods,
@@ -166,17 +166,21 @@ impl RGBPy {
 
 #[derive(Clone)]
 pub enum EntityVectorType {
-    PlayerPosition = 0,
-    PlayerSpeed = 1,
-    VehiclePosition = 2,
-    VehicleSpeed = 3,
-    VehicleRelSpeed = 4,
-    VehicleRelTurnSpeed = 5,
-    ObjectPosition = 6,
-    PickupPosition = 7,
-    CheckPointPosition = 8,
-    MarkerPosition = 9,
-    Ignore = -1,
+    PlayerPosition,
+    PlayerSpeed,
+    VehiclePosition,
+    VehicleSpeed,
+    VehicleTurnSpeed,
+    VehicleRelSpeed,
+    VehicleRelTurnSpeed,
+    VehicleRotationEuler,
+    VehicleSpawnRotationEuler,
+    VehicleSpawnPosition,
+    ObjectPosition,
+    PickupPosition,
+    CheckPointPosition,
+    MarkerPosition,
+    Ignore,
 }
 
 #[derive(Clone)]
@@ -267,7 +271,21 @@ impl VectorPy {
                 let info = vcmp_func().get_marker_info(self.entity_id);
                 info.position
             }
+            EntityVectorType::VehicleTurnSpeed => {
+                let res = vcmp_func().get_vehicle_turn_speed(self.entity_id);
+                res
+            }
             EntityVectorType::Ignore => self.inner.unwrap_or_default(),
+            EntityVectorType::VehicleRotationEuler => {
+                vcmp_func().get_vehicle_rotation_euler(self.entity_id)
+            }
+            EntityVectorType::VehicleSpawnRotationEuler => {
+                vcmp_func().get_vehicle_spawn_rotation_euler(self.entity_id)
+            }
+
+            EntityVectorType::VehicleSpawnPosition => {
+                vcmp_func().get_vehicle_spawn_position(self.entity_id)
+            }
         }
     }
 
@@ -311,12 +329,24 @@ impl VectorPy {
             EntityVectorType::CheckPointPosition => {
                 let _ = vcmp_func().set_check_point_position(self.entity_id, origin);
             }
+            EntityVectorType::VehicleTurnSpeed => {
+                let _ = vcmp_func().set_vehicle_turn_speed(self.entity_id, origin);
+            }
             EntityVectorType::MarkerPosition => {
                 // ignore
             }
             EntityVectorType::Ignore => {
                 self.inner = Some(origin);
                 // ignore
+            }
+            EntityVectorType::VehicleRotationEuler => {
+                let _ = vcmp_func().set_vehicle_rotation_euler(self.entity_id, origin);
+            }
+            EntityVectorType::VehicleSpawnRotationEuler => {
+                let _ = vcmp_func().set_vehicle_spawn_rotation_euler(self.entity_id, origin);
+            }
+            EntityVectorType::VehicleSpawnPosition => {
+                let _ = vcmp_func().set_vehicle_spawn_position(self.entity_id, origin);
             }
         };
     }
@@ -343,6 +373,124 @@ impl Default for VectorPy {
         Self {
             inner: None,
             entity_type: EntityVectorType::Ignore,
+            entity_id: 0,
+        }
+    }
+}
+
+#[derive(Clone)]
+pub enum EntityQuaternionType {
+    VehicleRotation,
+    VehicleSpawnRotation,
+    Ignore,
+}
+
+#[derive(Clone)]
+#[pyclass]
+#[pyo3(name = "EntityQuaternion")]
+pub struct QuaternionPy {
+    pub entity_type: EntityQuaternionType,
+    pub entity_id: EntityId,
+    pub inner: Option<Quaternionf32>,
+}
+
+impl From<(EntityQuaternionType, EntityId)> for QuaternionPy {
+    fn from(value: (EntityQuaternionType, EntityId)) -> Self {
+        Self {
+            entity_type: value.0,
+            entity_id: value.1,
+            inner: None,
+        }
+    }
+}
+
+impl From<QuaternionPy> for Quaternionf32 {
+    fn from(val: QuaternionPy) -> Self {
+        val.get_entity_quaternion()
+    }
+}
+
+impl From<Quaternionf32> for QuaternionPy {
+    fn from(val: Quaternionf32) -> Self {
+        Self {
+            entity_type: EntityQuaternionType::Ignore,
+            entity_id: 0,
+            inner: Some(val),
+        }
+    }
+}
+
+impl QuaternionPy {
+    pub fn get_entity_quaternion(&self) -> Quaternionf32 {
+        match self.entity_type {
+            EntityQuaternionType::Ignore => self.inner.unwrap_or_default(),
+            EntityQuaternionType::VehicleRotation => {
+                vcmp_func().get_vehicle_rotation(self.entity_id)
+            }
+            EntityQuaternionType::VehicleSpawnRotation => {
+                vcmp_func().get_vehicle_spawn_rotation(self.entity_id)
+            }
+        }
+    }
+
+    pub fn set_entity_quaternion(
+        &mut self,
+        x: Option<f32>,
+        y: Option<f32>,
+        z: Option<f32>,
+        w: Option<f32>,
+    ) {
+        let mut origin = self.get_entity_quaternion();
+        if let Some(x) = x {
+            origin.x = x;
+        }
+        if let Some(y) = y {
+            origin.y = y;
+        }
+        if let Some(z) = z {
+            origin.z = z;
+        }
+        if let Some(w) = w {
+            origin.w = w;
+        }
+
+        match self.entity_type {
+            EntityQuaternionType::Ignore => {
+                self.inner = Some(origin);
+                // ignore
+            }
+            EntityQuaternionType::VehicleRotation => {
+                let _ = vcmp_func().set_vehicle_rotation(self.entity_id, origin);
+            }
+            EntityQuaternionType::VehicleSpawnRotation => {
+                let _ = vcmp_func().set_vehicle_spawn_rotation(self.entity_id, origin);
+            }
+        };
+    }
+}
+
+impl Add for QuaternionPy {
+    type Output = Self;
+    fn add(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_quaternion();
+        let other = rhs.get_entity_quaternion();
+
+        self.set_entity_quaternion(
+            Some(origin.x + other.x),
+            Some(origin.y + other.y),
+            Some(origin.z + other.z),
+            Some(origin.w + other.w),
+        );
+
+        self
+    }
+}
+
+impl Default for QuaternionPy {
+    fn default() -> Self {
+        Self {
+            inner: None,
+            entity_type: EntityQuaternionType::Ignore,
             entity_id: 0,
         }
     }

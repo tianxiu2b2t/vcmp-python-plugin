@@ -63,12 +63,12 @@ impl PlayerPy {
 
     fn add_position(&mut self, pos: VectorPy) {
         let origin = self._position();
-        origin.add(pos);
+        let _ = origin.add(pos);
     }
 
     fn add_speed(&mut self, speed: VectorPy) {
         let origin = self._speed();
-        origin.add(speed);
+        let _ = origin.add(speed);
     }
 
     #[getter]
@@ -316,7 +316,7 @@ impl PlayerPy {
     }
 
     #[getter]
-    fn get_id(&self) -> i32 {
+    pub fn get_id(&self) -> i32 {
         self.id
     }
 
