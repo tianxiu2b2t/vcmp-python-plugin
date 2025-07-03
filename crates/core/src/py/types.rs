@@ -185,7 +185,7 @@ pub enum EntityVectorType {
 
 #[derive(Clone)]
 #[pyclass]
-#[pyo3(name = "EntityVector")]
+#[pyo3(name = "Vector")]
 pub struct VectorPy {
     pub entity_type: EntityVectorType,
     pub entity_id: EntityId,
@@ -378,6 +378,57 @@ impl Default for VectorPy {
     }
 }
 
+#[pymethods]
+impl VectorPy {
+    #[new]
+    fn new(x: Option<f32>, y: Option<f32>, z: Option<f32>) -> Self {
+        Self {
+            inner: Some(Vectorf32::new(
+                x.unwrap_or(0.0),
+                y.unwrap_or(0.0),
+                z.unwrap_or(0.0),
+            )),
+            entity_type: EntityVectorType::Ignore,
+            entity_id: 0,
+        }
+    }
+
+    #[getter]
+    pub fn get_x(&self) -> f32 {
+        self.get_entity_pos().x
+    }
+
+    #[getter]
+    pub fn get_y(&self) -> f32 {
+        self.get_entity_pos().y
+    }
+
+    #[getter]
+    pub fn get_z(&self) -> f32 {
+        self.get_entity_pos().z
+    }
+
+    #[setter]
+    pub fn set_z(&mut self, value: f32) {
+        self.set_entity_pos(None, None, Some(value));
+    }
+
+    #[setter]
+    pub fn set_y(&mut self, value: f32) {
+        self.set_entity_pos(None, Some(value), None);
+    }
+
+    #[setter]
+    pub fn set_x(&mut self, value: f32) {
+        self.set_entity_pos(Some(value), None, None);
+    }
+
+    fn __repr__(&self) -> String {
+        let pos = self.get_entity_pos();
+        format!("Vector(x={}, y={}, z={})", pos.x, pos.y, pos.z)
+    }
+}
+
 #[derive(Clone)]
 pub enum EntityQuaternionType {
     VehicleRotation,
@@ -387,7 +438,7 @@ pub enum EntityQuaternionType {
 
 #[derive(Clone)]
 #[pyclass]
-#[pyo3(name = "EntityQuaternion")]
+#[pyo3(name = "Quaternion")]
 pub struct QuaternionPy {
     pub entity_type: EntityQuaternionType,
     pub entity_id: EntityId,
@@ -497,53 +548,67 @@ impl Default for QuaternionPy {
 }
 
 #[pymethods]
-impl VectorPy {
+impl QuaternionPy {
     #[new]
-    fn new(x: Option<f32>, y: Option<f32>, z: Option<f32>) -> Self {
+    fn new(x: Option<f32>, y: Option<f32>, z: Option<f32>, w: Option<f32>) -> Self {
         Self {
-            inner: Some(Vectorf32::new(
+            inner: Some(Quaternionf32::new(
                 x.unwrap_or(0.0),
                 y.unwrap_or(0.0),
                 z.unwrap_or(0.0),
+                w.unwrap_or(1.0),
             )),
-            entity_type: EntityVectorType::Ignore,
+            entity_type: EntityQuaternionType::Ignore,
             entity_id: 0,
         }
     }
 
     #[getter]
     pub fn get_x(&self) -> f32 {
-        self.get_entity_pos().x
+        self.get_entity_quaternion().x
     }
 
     #[getter]
     pub fn get_y(&self) -> f32 {
-        self.get_entity_pos().y
+        self.get_entity_quaternion().y
     }
 
     #[getter]
     pub fn get_z(&self) -> f32 {
-        self.get_entity_pos().z
+        self.get_entity_quaternion().z
+    }
+
+    #[getter]
+    pub fn get_w(&self) -> f32 {
+        self.get_entity_quaternion().w
+    }
+
+    #[setter]
+    pub fn set_w(&mut self, value: f32) {
+        self.set_entity_quaternion(None, None, None, Some(value));
     }
 
     #[setter]
     pub fn set_z(&mut self, value: f32) {
-        self.set_entity_pos(None, None, Some(value));
+        self.set_entity_quaternion(None, None, Some(value), None);
     }
 
     #[setter]
     pub fn set_y(&mut self, value: f32) {
-        self.set_entity_pos(None, Some(value), None);
+        self.set_entity_quaternion(None, Some(value), None, None);
     }
 
     #[setter]
     pub fn set_x(&mut self, value: f32) {
-        self.set_entity_pos(Some(value), None, None);
+        self.set_entity_quaternion(Some(value), None, None, None);
     }
 
     fn __repr__(&self) -> String {
-        let pos = self.get_entity_pos();
-        format!("Vector(x={}, y={}, z={})", pos.x, pos.y, pos.z)
+        let pos = self.get_entity_quaternion();
+        format!(
+            "Quaternion(x={}, y={}, z={}, w={})",
+            pos.x, pos.y, pos.z, pos.w
+        )
     }
 }
 
@@ -551,5 +616,6 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ServerSettingsPy>()?;
     m.add_class::<RGBPy>()?;
     m.add_class::<VectorPy>()?;
+    m.add_class::<QuaternionPy>()?;
     Ok(())
 }

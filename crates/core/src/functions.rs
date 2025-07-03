@@ -17,5 +17,9 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     player::module_define(py, &player_module)?;
     m.add_submodule(&player_module)?;
 
+    let vehicle_module = PyModule::new(py, "vehicle")?;
+    vehicle::module_define(py, &vehicle_module)?;
+    m.add_submodule(&vehicle_module)?;
+
     Ok(())
 }

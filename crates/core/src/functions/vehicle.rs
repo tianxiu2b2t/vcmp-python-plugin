@@ -1,6 +1,9 @@
 use std::ops::Add as _;
 
-use pyo3::{pyclass, pymethods};
+use pyo3::{
+    Bound, PyResult, Python, pyclass, pymethods,
+    types::{PyModule, PyModuleMethods},
+};
 use vcmp_bindings::{
     func::{
         QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods,
@@ -513,4 +516,9 @@ impl VehiclePy {
     fn get_wrecked(&self) -> bool {
         vcmp_func().is_vehicle_wrecked(self.id)
     }
+}
+
+pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<VehiclePy>()?;
+    Ok(())
 }
