@@ -1,4 +1,5 @@
 use crate::func::VcmpFunctions;
+use crate::options::VcmpEntityPool;
 use crate::utils::Vectorf32;
 use crate::{PlayerId, VcmpError, VcmpResult};
 
@@ -13,6 +14,8 @@ pub trait PickupMethods {
         is_automatic: bool,
     ) -> i32;
 
+    fn is_pickup_alive(&self, pickup_id: i32) -> bool;
+
     fn delete_pickup(&self, pickup_id: i32) -> VcmpResult<()>;
 
     fn is_pickup_streamed_for_player(&self, pickup_id: i32, player_id: PlayerId) -> bool;
@@ -24,7 +27,7 @@ pub trait PickupMethods {
     fn set_pickup_alpha(&self, pickup_id: i32, alpha: i32) -> VcmpResult<()>;
 
     fn get_pickup_alpha(&self, pickup_id: i32) -> i32;
-    fn set_pickup_is_automatic(&self, pickup_id: i32, toggle: bool) -> VcmpResult<()>;
+    fn set_pickup_automatic(&self, pickup_id: i32, toggle: bool) -> VcmpResult<()>;
 
     fn is_pickup_automatic(&self, pickup_id: i32) -> bool;
 
@@ -48,6 +51,9 @@ pub trait PickupMethods {
 }
 
 impl PickupMethods for VcmpFunctions {
+    fn is_pickup_alive(&self, pickup_id: i32) -> bool {
+        (self.inner.CheckEntityExists)(VcmpEntityPool::Pickup.into(), pickup_id) != 0
+    }
     fn create_pickup(
         &self,
         model_index: i32,
@@ -108,7 +114,7 @@ impl PickupMethods for VcmpFunctions {
         (self.inner.GetPickupAlpha)(pickup_id)
     }
 
-    fn set_pickup_is_automatic(&self, pickup_id: i32, toggle: bool) -> VcmpResult<()> {
+    fn set_pickup_automatic(&self, pickup_id: i32, toggle: bool) -> VcmpResult<()> {
         let code = (self.inner.SetPickupIsAutomatic)(pickup_id, toggle as u8);
         if code != 0 {
             Err(VcmpError::from(code))
