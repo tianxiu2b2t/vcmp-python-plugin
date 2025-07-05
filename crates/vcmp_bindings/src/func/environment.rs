@@ -216,7 +216,7 @@ pub trait EnvironmentMethods {
     fn add_player_class(
         &self,
         team: i32,
-        color: impl Into<u32>,
+        color: Color,
         skin: i32,
         pos: Vectorf32,
         angle: f32,
@@ -287,7 +287,7 @@ impl EnvironmentMethods for VcmpFunctions {
     fn add_player_class(
         &self,
         team: i32,
-        color: impl Into<u32>,
+        color: Color,
         skin: i32,
         pos: Vectorf32,
         angle: f32,
@@ -300,7 +300,7 @@ impl EnvironmentMethods for VcmpFunctions {
         let (wep3, ammo3) = weapon2.unwrap_or((0, 0));
         (self.inner.AddPlayerClass)(
             team,
-            color.into(),
+            color.as_rgba(),
             skin,
             pos.x,
             pos.y,

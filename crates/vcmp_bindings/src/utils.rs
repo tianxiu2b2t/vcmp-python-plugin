@@ -186,7 +186,7 @@ impl Display for WorldBounds {
 /*
     Wasted Settings
 */
-
+#[derive(Clone, Copy, Debug)]
 pub struct WastedSettings {
     pub death_timer: u32,
     pub fade_timer: u32,

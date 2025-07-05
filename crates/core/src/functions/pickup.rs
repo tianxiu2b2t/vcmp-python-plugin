@@ -1,8 +1,9 @@
 use std::ops::Add;
 
 use pyo3::{
-    Bound, PyResult, Python, pyclass, pymethods,
+    Bound, PyResult, Python, pyclass, pyfunction, pymethods,
     types::{PyModule, PyModuleMethods},
+    wrap_pyfunction,
 };
 use vcmp_bindings::{func::PickupMethods, vcmp_func};
 
@@ -146,7 +147,28 @@ impl PickupPy {
     }
 }
 
+#[pyfunction]
+pub fn create_pickup(
+    model_index: i32,
+    world: i32,
+    quantity: i32,
+    position: VectorPy,
+    alpha: i32,
+    is_automatic: bool,
+) {
+    let id = vcmp_func().create_pickup(
+        model_index,
+        world,
+        quantity,
+        position.get_entity_pos(),
+        alpha,
+        is_automatic,
+    );
+    // TODO: Error handling
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PickupPy>()?;
+    m.add_function(wrap_pyfunction!(create_pickup, m)?)?;
     Ok(())
 }

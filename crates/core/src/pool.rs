@@ -88,6 +88,9 @@ impl EntityPool {
             VcmpEntityPool::Vehicle => {
                 self.vehicles.insert_raw_entity(entity_id);
             }
+            VcmpEntityPool::Radio => {
+                // ignore
+            }
             _ => {
                 event!(Level::TRACE, "Unknown entity type: {entity_type:?}");
                 todo!()
@@ -131,6 +134,10 @@ impl EntityPool {
 
     pub fn get_object(&self, object_id: EntityId) -> Option<&ObjectPy> {
         self.objects.get_entity(object_id)
+    }
+
+    pub fn get_players(&self) -> Vec<PlayerPy> {
+        self.players.pool.values().cloned().collect()
     }
 }
 

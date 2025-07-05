@@ -9,6 +9,7 @@ use crate::functions::player::PlayerPy;
 use crate::functions::vehicle::VehiclePy;
 use crate::pool::ENTITY_POOL;
 use crate::py::events::{BaseEvent, PyBaseEvent};
+use crate::py::types::VectorPy;
 // rewrite this to use pyclass
 
 #[pyclass(extends=BaseEvent, subclass)]
@@ -412,18 +413,26 @@ impl PyBaseEvent for PlayerDeathEvent {
 #[pyo3(name = "PlayerHealthEvent")]
 pub struct PlayerHealthEvent {
     player_id: i32,
-    old_health: i32,
-    new_health: i32,
+    old_health: f32,
+    new_health: f32,
+    health: f32,
+}
+
+impl PlayerHealthEvent {
+    pub fn get_health(&self) -> f32 {
+        self.health
+    }
 }
 
 #[pymethods]
 impl PlayerHealthEvent {
     #[new]
-    pub fn new(player_id: i32, old_health: i32, new_health: i32) -> PyClassInitializer<Self> {
+    pub fn new(player_id: i32, old_health: f32, new_health: f32) -> PyClassInitializer<Self> {
         PyClassInitializer::from(PlayerEvent::new("PlayerHealthEvent")).add_subclass(Self {
             player_id,
             old_health,
             new_health,
+            health: old_health,
         })
     }
 
@@ -437,27 +446,28 @@ impl PlayerHealthEvent {
     }
 
     #[getter]
-    pub fn get_old_health(&self) -> i32 {
+    pub fn get_old_health(&self) -> f32 {
         self.old_health
     }
 
     #[getter]
-    pub fn get_new_health(&self) -> i32 {
+    pub fn get_new_health(&self) -> f32 {
         self.new_health
     }
 
     #[setter]
-    pub fn set_new_health(&mut self, new_health: i32) {
-        self.new_health = new_health;
+    pub fn set_new_health(&mut self, new_health: f32) {
+        self.health = new_health;
     }
 }
 
-impl From<(i32, i32, i32)> for PlayerHealthEvent {
-    fn from(value: (i32, i32, i32)) -> Self {
+impl From<(i32, f32, f32)> for PlayerHealthEvent {
+    fn from(value: (i32, f32, f32)) -> Self {
         Self {
             player_id: value.0,
             old_health: value.1,
             new_health: value.2,
+            health: value.1,
         }
     }
 }
@@ -477,18 +487,26 @@ impl PyBaseEvent for PlayerHealthEvent {
 #[pyo3(name = "PlayerArmourEvent")]
 pub struct PlayerArmourEvent {
     player_id: i32,
-    old_armour: i32,
-    new_armour: i32,
+    old_armour: f32,
+    new_armour: f32,
+    armour: f32,
+}
+
+impl PlayerArmourEvent {
+    pub fn get_armour(&self) -> f32 {
+        self.armour
+    }
 }
 
 #[pymethods]
 impl PlayerArmourEvent {
     #[new]
-    pub fn new(player_id: i32, old_armour: i32, new_armour: i32) -> PyClassInitializer<Self> {
+    pub fn new(player_id: i32, old_armour: f32, new_armour: f32) -> PyClassInitializer<Self> {
         PyClassInitializer::from(PlayerEvent::new("PlayerArmourEvent")).add_subclass(Self {
             player_id,
             old_armour,
             new_armour,
+            armour: old_armour,
         })
     }
 
@@ -502,27 +520,28 @@ impl PlayerArmourEvent {
     }
 
     #[getter]
-    pub fn get_old_armour(&self) -> i32 {
+    pub fn get_old_armour(&self) -> f32 {
         self.old_armour
     }
 
     #[getter]
-    pub fn get_new_armour(&self) -> i32 {
+    pub fn get_new_armour(&self) -> f32 {
         self.new_armour
     }
 
     #[setter]
-    pub fn set_new_armour(&mut self, new_armour: i32) {
-        self.new_armour = new_armour;
+    pub fn set_new_armour(&mut self, new_armour: f32) {
+        self.armour = new_armour;
     }
 }
 
-impl From<(i32, i32, i32)> for PlayerArmourEvent {
-    fn from(value: (i32, i32, i32)) -> Self {
+impl From<(i32, f32, f32)> for PlayerArmourEvent {
+    fn from(value: (i32, f32, f32)) -> Self {
         Self {
             player_id: value.0,
             old_armour: value.1,
             new_armour: value.2,
+            armour: value.1,
         }
     }
 }
@@ -545,6 +564,13 @@ pub struct PlayerAmmoEvent {
     player_id: i32,
     old_ammo: i32,
     new_ammo: i32,
+    ammo: i32,
+}
+
+impl PlayerAmmoEvent {
+    pub fn get_ammo(&self) -> i32 {
+        self.ammo
+    }
 }
 
 #[pymethods]
@@ -555,6 +581,7 @@ impl PlayerAmmoEvent {
             player_id,
             old_ammo,
             new_ammo,
+            ammo: old_ammo,
         })
     }
 
@@ -579,7 +606,7 @@ impl PlayerAmmoEvent {
 
     #[setter]
     pub fn set_new_ammo(&mut self, new_ammo: i32) {
-        self.new_ammo = new_ammo;
+        self.ammo = new_ammo;
     }
 }
 
@@ -589,6 +616,7 @@ impl From<(i32, i32, i32)> for PlayerAmmoEvent {
             player_id: value.0,
             old_ammo: value.1,
             new_ammo: value.2,
+            ammo: value.1,
         }
     }
 }
@@ -611,6 +639,13 @@ pub struct PlayerWeaponEvent {
     player_id: i32,
     old_weapon: i32,
     new_weapon: i32,
+    weapon: i32,
+}
+
+impl PlayerWeaponEvent {
+    pub fn get_weapon(&self) -> i32 {
+        self.weapon
+    }
 }
 
 #[pymethods]
@@ -621,6 +656,7 @@ impl PlayerWeaponEvent {
             player_id,
             old_weapon,
             new_weapon,
+            weapon: old_weapon,
         })
     }
 
@@ -645,7 +681,7 @@ impl PlayerWeaponEvent {
 
     #[setter]
     pub fn set_new_weapon(&mut self, new_weapon: i32) {
-        self.new_weapon = new_weapon;
+        self.weapon = new_weapon;
     }
 }
 
@@ -655,6 +691,7 @@ impl From<(i32, i32, i32)> for PlayerWeaponEvent {
             player_id: value.0,
             old_weapon: value.1,
             new_weapon: value.2,
+            weapon: value.1,
         }
     }
 }
@@ -664,6 +701,85 @@ impl PyBaseEvent for PlayerWeaponEvent {
         let value = Py::new(
             py,
             PlayerWeaponEvent::new(self.player_id, self.old_weapon, self.new_weapon),
+        )?;
+        Ok(value.into())
+    }
+}
+
+// Move
+#[pyclass(extends=PlayerEvent)]
+#[derive(Debug, Clone, Copy)]
+#[pyo3(name = "PlayerMoveEvent")]
+pub struct PlayerMoveEvent {
+    player_id: i32,
+    old_position: VectorPy,
+    new_position: VectorPy,
+    position: VectorPy,
+}
+
+impl PlayerMoveEvent {
+    pub fn get_position(&self) -> VectorPy {
+        self.position
+    }
+}
+
+#[pymethods]
+impl PlayerMoveEvent {
+    #[new]
+    pub fn new(
+        player_id: i32,
+        old_position: VectorPy,
+        new_position: VectorPy,
+    ) -> PyClassInitializer<Self> {
+        PyClassInitializer::from(PlayerEvent::new("PlayerMoveEvent")).add_subclass(Self {
+            player_id,
+            old_position,
+            new_position,
+            position: old_position,
+        })
+    }
+
+    #[getter]
+    pub fn get_player(&self) -> PlayerPy {
+        *ENTITY_POOL
+            .lock()
+            .expect("Failed to lock entity pool")
+            .get_player(self.player_id)
+            .unwrap()
+    }
+
+    #[getter]
+    pub fn get_old_position(&self) -> VectorPy {
+        self.old_position
+    }
+
+    #[getter]
+    pub fn get_new_position(&self) -> VectorPy {
+        self.new_position
+    }
+
+    #[setter]
+    pub fn set_new_position(&mut self, new_position: VectorPy) {
+        self.position = new_position;
+    }
+}
+
+impl From<(i32, VectorPy, VectorPy)> for PlayerMoveEvent {
+    fn from(value: (i32, VectorPy, VectorPy)) -> Self {
+        Self {
+            player_id: value.0,
+            old_position: value.1,
+            new_position: value.2,
+            position: value.1,
+        }
+    }
+}
+
+impl PyBaseEvent for PlayerMoveEvent {
+    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
+        let value = Py::new(
+            py,
+            PlayerMoveEvent::new(self.player_id, self.old_position, self.new_position),
         )?;
         Ok(value.into())
     }
@@ -1707,6 +1823,7 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PlayerArmourEvent>()?;
     m.add_class::<PlayerAmmoEvent>()?;
     m.add_class::<PlayerWeaponEvent>()?;
+    m.add_class::<PlayerMoveEvent>()?;
 
     m.add_class::<PlayerEnterVehicleEvent>()?;
     m.add_class::<PlayerExitVehicleEvent>()?;

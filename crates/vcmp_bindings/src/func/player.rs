@@ -250,19 +250,19 @@ impl PlayerMethods for VcmpFunctions {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerIP)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
     fn get_player_uid(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerUID)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
     fn get_player_uid2(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerUID2)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
     fn kick_player(&self, player: i32) {
         (self.inner.KickPlayer)(player);
@@ -286,7 +286,7 @@ impl PlayerMethods for VcmpFunctions {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerName)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
 
     fn set_player_name(&self, player: i32, name: &str) {
@@ -509,7 +509,9 @@ impl PlayerMethods for VcmpFunctions {
     }
 
     fn set_player_position(&self, player: i32, position: Vectorf32) -> VcmpResult<()> {
+        println!("binding: {:?}", position);
         let code = (self.inner.SetPlayerPosition)(player, position.x, position.y, position.z);
+        println!("code: {code:?}");
         if code != 0 {
             Err(VcmpError::from(code))
         } else {

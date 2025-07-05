@@ -6,7 +6,7 @@ pub trait MarkerMethods {
     fn create_marker(
         &self,
         world: i32,
-        pos: (f32, f32, f32),
+        pos: Vectorf32,
         scale: i32,
         color: Color,
         sprite: i32,
@@ -24,7 +24,7 @@ impl MarkerMethods for VcmpFunctions {
     fn create_marker(
         &self,
         world: i32,
-        pos: (f32, f32, f32),
+        pos: Vectorf32,
         scale: i32,
         color: Color,
         sprite: i32,
@@ -34,9 +34,9 @@ impl MarkerMethods for VcmpFunctions {
         (self.inner.CreateCoordBlip)(
             idx,
             world,
-            pos.0,
-            pos.1,
-            pos.2,
+            pos.x,
+            pos.y,
+            pos.z,
             scale,
             color.as_rgba(),
             sprite,

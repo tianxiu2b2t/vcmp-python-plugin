@@ -1,6 +1,7 @@
 use std::os::raw::c_char;
 
 use crate::py::events::{player::*, server::*};
+use crate::py::types::VectorPy;
 use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
 use crate::logger;
@@ -378,8 +379,80 @@ pub unsafe extern "C" fn on_player_crash_report(player_id: i32, report: *const c
 }
 
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
-    
+pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
+    let mut player = *ENTITY_POOL.lock().unwrap().get_player(player_id).unwrap();
+    // first health
+    {
+        let current_health = player.get_health();
+        let last_health = player.last_health;
+        if current_health != last_health {
+            let event = PlayerHealthEvent::from((player_id, last_health, current_health));
+            let health_res = CALLBACK.call_func(event, None);
+            if !health_res {
+                player.set_health(event.get_health());
+            } else {
+                player.last_health = current_health;
+            }
+        }
+    }
+    // then armour
+    {
+        let current_armour = player.get_armour();
+        let last_armour = player.last_armour;
+        if current_armour != last_armour {
+            let event = PlayerArmourEvent::from((player_id, last_armour, current_armour));
+            let armour_res = CALLBACK.call_func(event, None);
+            if !armour_res {
+                player.set_armour(event.get_armour());
+            } else {
+                player.last_armour = current_armour;
+            }
+        }
+    }
+    // then weapon
+    {
+        let current_weapon = player.get_weapon();
+        let last_weapon = player.last_weapon;
+        if current_weapon != last_weapon {
+            let event = PlayerWeaponEvent::from((player_id, last_weapon, current_weapon));
+            let weapon_res = CALLBACK.call_func(event, None);
+            if !weapon_res {
+                player.give_weapon(event.get_weapon(), 0);
+            } else {
+                player.last_weapon = current_weapon;
+            }
+        }
+    }
+    // then ammo, not block it
+    {
+        let current_ammo = player.get_weapon_ammo();
+        let last_ammo = player.last_ammo;
+        if current_ammo != last_ammo {
+            let _ = CALLBACK.call_func(
+                PlayerAmmoEvent::from((player_id, last_ammo, current_ammo)),
+                None,
+            );
+            player.last_ammo = current_ammo;
+        }
+    }
+    // then move
+    {
+        let current_pos = player.get_position().into();
+        let last_pos = player.last_position;
+        if current_pos != last_pos {
+            let event = PlayerMoveEvent::from((
+                player_id,
+                VectorPy::from(last_pos),
+                VectorPy::from(current_pos),
+            ));
+            let move_res = CALLBACK.call_func(event, None);
+            if !move_res {
+                player.set_position(event.get_position().into());
+            } else {
+                player.last_position = current_pos;
+            }
+        }
+    }
 }
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {

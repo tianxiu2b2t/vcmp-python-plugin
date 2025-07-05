@@ -1,8 +1,9 @@
 use std::ops::Add;
 
 use pyo3::{
-    Bound, PyResult, Python, pyclass, pymethods,
+    Bound, PyResult, Python, pyclass, pyfunction, pymethods,
     types::{PyModule, PyModuleMethods},
+    wrap_pyfunction,
 };
 use vcmp_bindings::{func::CheckPointMethods, vcmp_func};
 
@@ -52,18 +53,6 @@ impl CheckPointPy {
     pub fn get_id(&self) -> i32 {
         self.id
     }
-    /*
-        fn add_position
-    fn prop_color
-    fn delete
-    fn prop_id
-    fn prop_is_alive
-    fn is_streamed_for_player
-    fn prop_owner
-    fn prop_position
-    fn prop_radius
-    fn prop_sphere
-    fn prop_world */
 
     fn add_position(&self, pos: VectorPy) {
         let origin = self._position();
@@ -140,7 +129,28 @@ impl CheckPointPy {
     }
 }
 
+#[pyfunction]
+#[pyo3(signature = (world, sphere, pos, color, radius, player = None))]
+pub fn create_checkpoint(
+    world: i32,
+    sphere: bool,
+    pos: VectorPy,
+    color: RGBPy,
+    radius: f32,
+    player: Option<PlayerPy>,
+) {
+    let id = vcmp_func().create_checkpoint(
+        player.map(|p| p.get_id()),
+        world,
+        sphere,
+        pos.into(),
+        color.into(),
+        radius,
+    );
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CheckPointPy>()?;
+    m.add_function(wrap_pyfunction!(create_checkpoint, m)?)?;
     Ok(())
 }

@@ -4,11 +4,10 @@ use std::{
 };
 
 use pyo3::{
-    PyClass,
-    prelude::*,
-    types::{PyBool, PyCFunction, PyDict, PyFunction, PyTuple, PyType},
+    exceptions::PyKeyboardInterrupt, prelude::*, types::{PyBool, PyCFunction, PyDict, PyFunction, PyTuple, PyType}, PyClass
 };
 use tracing::{Level, event};
+use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
 use crate::py::{exceptions::FinishedException, get_traceback};
 
@@ -77,6 +76,8 @@ impl CallbackManager {
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
+        let current_id = EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        event!(Level::TRACE, "Calling callbacks for event: ({current_id}) {:?}", event);
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
         Python::with_gil(|py| {
@@ -135,7 +136,10 @@ impl CallbackManager {
                         }
                     }
                     Err(e) => {
-                        if e.is_instance_of::<FinishedException>(py) {
+                        if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                            vcmp_func().shutdown();
+                            break;
+                        } else if e.is_instance_of::<FinishedException>(py) {
                             break;
                         } else {
                             event!(
@@ -159,6 +163,7 @@ impl CallbackManager {
                 matcher = *matcher_ref;
             }
         });
+        event!(Level::TRACE, "Finished calling callbacks for event: ({current_id}) {:?}", event);
         matcher.result
     }
 }
@@ -171,6 +176,7 @@ impl CallbackManager {
     //
     //    false
     //}
+    #[pyo3(signature = (priority = 9999))]
     pub fn on<'a>(
         &mut self,
         py: Python<'a>,
@@ -296,6 +302,8 @@ static CALLBACKS_STORE: LazyLock<Arc<Mutex<Vec<CallbackFunction>>>> =
     LazyLock::new(|| Arc::new(Mutex::new(Vec::new())));
 
 pub static CALLBACK: LazyLock<CallbackManager> = LazyLock::new(CallbackManager::default);
+
+static EVENT_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CallbackManager>()?;

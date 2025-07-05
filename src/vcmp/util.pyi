@@ -1,3 +1,7 @@
+from vcmp.functions.player import Player
+from vcmp.types import RGB
+
+
 WEAPON_NAMES: dict[int, str] = ...
 WEAPON_MODELS: dict[int, int] = ...
 
@@ -32,4 +36,22 @@ def in_poly(
     *polies: tuple[float, float],
 ) -> bool:
     """Returns True if the given point is inside the polygon."""
+    ...
+
+def get_players() -> list[Player]:
+    ...
+
+def announce_all(
+    announce_type: int,
+    message: str
+):
+    ...
+
+def message_all(message: str):
+    ...
+
+def raw_message_all(
+    color: RGB,
+    message: str
+):
     ...

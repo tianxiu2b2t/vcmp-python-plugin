@@ -7,6 +7,12 @@ use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
 
 use crate::cfg::CONFIG;
 use crate::functions;
+use crate::functions::checkpoint::CheckPointPy;
+use crate::functions::marker::MarkerPy;
+use crate::functions::object::ObjectPy;
+use crate::functions::pickup::PickupPy;
+use crate::functions::player::PlayerPy;
+use crate::functions::vehicle::VehiclePy;
 use crate::logger;
 
 pub mod callbacks;
@@ -39,31 +45,53 @@ fn get_wchar_t(content: &str) -> Vec<u16> {
 fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let util_module = PyModule::new(py, "util")?;
     util::module_define(py, &util_module)?;
+    fix_module_name(py, &util_module, "util");
     m.add_submodule(&util_module)?;
 
     let streams_module = PyModule::new(py, "streams")?;
     streams::module_define(py, &streams_module)?;
+    fix_module_name(py, &streams_module, "streams");
     m.add_submodule(&streams_module)?;
 
     let types_module = PyModule::new(py, "types")?;
     types::module_define(py, &types_module)?;
+    fix_module_name(py, &types_module, "types");
     m.add_submodule(&types_module)?;
 
     let funcs_module = PyModule::new(py, "functions")?;
     functions::module_define(py, &funcs_module)?;
+    fix_module_name(py, &funcs_module, "functions");
     m.add_submodule(&funcs_module)?;
 
     let callbacks_module = PyModule::new(py, "callbacks")?;
     callbacks::module_define(py, &callbacks_module)?;
+    fix_module_name(py, &callbacks_module, "callbacks");
     m.add_submodule(&callbacks_module)?;
 
-    let events_module = PyModule::new(py, "events")?;
-    events::module_define(py, &events_module)?;
-    m.add_submodule(&events_module)?;
+    {
+        let events_module = PyModule::new(py, "events")?;
+        events::module_define(py, &events_module)?;
+        fix_module_name(py, &events_module, "events");
+        m.add_submodule(&events_module)?;
+    }
 
     let exceptions_module = PyModule::new(py, "exceptions")?;
     exceptions::module_define(py, &exceptions_module)?;
+    fix_module_name(py, &exceptions_module, "exceptions");
     m.add_submodule(&exceptions_module)?;
+
+    {
+        // import instance from player, ...
+        let instance_module = PyModule::new(py, "instance")?;
+        instance_module.add_class::<PlayerPy>()?;
+        instance_module.add_class::<VehiclePy>()?;
+        instance_module.add_class::<CheckPointPy>()?;
+        instance_module.add_class::<ObjectPy>()?;
+        instance_module.add_class::<PickupPy>()?;
+        instance_module.add_class::<MarkerPy>()?;
+        fix_module_name(py, &instance_module, "instance");
+        m.add_submodule(&instance_module)?;
+    }
 
     Ok(())
 }
@@ -83,6 +111,14 @@ pub fn init_py_module() {
             Some(register_module::__pyo3_init),
         );
     }
+}
+
+pub fn fix_module_name(py: Python<'_>, module: &Bound<'_, PyModule>, name: &str) {
+    pyo3::py_run!(
+        py,
+        module,
+        format!("import sys; sys.modules['vcmp.{name}'] = module").as_str()
+    );
 }
 
 pub fn init_py() {
@@ -111,6 +147,7 @@ pub fn init_py() {
 
         config.install_signal_handlers = 0; // 必须设置为 false，不然会导致 Server 捕捉不到信号，从而导致进程无法正常退出
 
+        
         pyo3::ffi::Py_InitializeFromConfig(&config as *const _);
 
         pyo3::ffi::PyEval_SaveThread();
@@ -135,7 +172,7 @@ pub fn load_script_as_module() {
     let script_path = CONFIG.get().unwrap().script_path.as_str();
     let res = raw_load_script_as_module(Path::new(script_path));
     if let Err(e) = res {
-        logger::event!(logger::Level::ERROR, "Error: {e}");
+        logger::event!(logger::Level::ERROR, "Error: {}", get_traceback(e));
     } else {
         logger::event!(logger::Level::INFO, "Script loaded");
     }
@@ -175,7 +212,7 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
             b'\\' => result.push_str("\\\\"),
             b'\'' => result.push_str("\\'"),
             b'"' => result.push_str("\\\""),
-            b'\0' => result.push_str("\\0"),
+            b'\0' => result.push_str("\\x00"),
             // 可打印ASCII字符（32-126）
             32..=126 => result.push(byte as char),
             // 其他字节用十六进制表示
@@ -188,9 +225,10 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
 }
 
 pub fn get_traceback(err: PyErr) -> String {
-    Python::with_gil(|py| {
+    let res = Python::with_gil(|py| {
         err.traceback(py)
             .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
             .unwrap_or(String::from("Unknown traceback"))
-    })
+    });
+    format!("{}{}", res, err.to_string())
 }
