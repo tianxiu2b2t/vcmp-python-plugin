@@ -1,10 +1,13 @@
 use crate::{
     PlayerId, VcmpError, VcmpResult,
     func::VcmpFunctions,
+    options::VcmpEntityPool,
     utils::{Quaternionf32, Vectorf32},
 };
 
 pub trait ObjectMethods {
+    fn is_object_alive(&self, object_id: i32) -> bool;
+
     fn create_object(&self, model_index: i32, world: i32, position: Vectorf32, alpha: i32) -> i32;
 
     fn delete_object(&self, object_id: i32) -> VcmpResult<()>;
@@ -71,6 +74,10 @@ pub trait ObjectMethods {
 }
 
 impl ObjectMethods for VcmpFunctions {
+    fn is_object_alive(&self, object_id: i32) -> bool {
+        (self.inner.CheckEntityExists)(VcmpEntityPool::Object.into(), object_id) != 0
+    }
+
     fn create_object(&self, model_index: i32, world: i32, position: Vectorf32, alpha: i32) -> i32 {
         (self.inner.CreateObject)(
             model_index,

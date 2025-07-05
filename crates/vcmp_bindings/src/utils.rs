@@ -59,6 +59,17 @@ impl Display for Color {
     }
 }
 
+impl Default for Color {
+    fn default() -> Self {
+        Self {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 255,
+        }
+    }
+}
+
 /*
     Vector 类
 */

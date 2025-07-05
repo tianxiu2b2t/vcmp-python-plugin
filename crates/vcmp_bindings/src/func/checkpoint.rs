@@ -1,11 +1,12 @@
 use crate::{
     PlayerId, VcmpError, VcmpResult,
     func::VcmpFunctions,
+    options::VcmpEntityPool,
     utils::{Color, Vectorf32},
 };
 
 pub trait CheckPointMethods {
-    fn create_check_point(
+    fn create_checkpoint(
         &self,
         player_id: Option<i32>,
         world: i32,
@@ -15,33 +16,38 @@ pub trait CheckPointMethods {
         radius: f32,
     ) -> i32;
 
-    fn delete_check_point(&self, check_point_id: i32) -> VcmpResult<()>;
+    fn is_checkpoint_alive(&self, checkpoint_id: i32) -> bool;
 
-    fn is_check_point_streamed_for_player(&self, check_point_id: i32, player_id: PlayerId) -> bool;
+    fn delete_checkpoint(&self, checkpoint_id: i32) -> VcmpResult<()>;
 
-    fn is_check_point_sphere(&self, check_point_id: i32) -> bool;
+    fn is_checkpoint_streamed_for_player(&self, checkpoint_id: i32, player_id: PlayerId) -> bool;
 
-    fn set_check_point_world(&self, check_point_id: i32, world: i32) -> VcmpResult<()>;
+    fn is_checkpoint_sphere(&self, checkpoint_id: i32) -> bool;
 
-    fn get_check_point_world(&self, check_point_id: i32) -> i32;
+    fn set_checkpoint_world(&self, checkpoint_id: i32, world: i32) -> VcmpResult<()>;
 
-    fn set_check_point_colour(&self, check_point_id: i32, color: Color) -> VcmpResult<()>;
+    fn get_checkpoint_world(&self, checkpoint_id: i32) -> i32;
 
-    fn get_check_point_colour(&self, check_point_id: i32) -> VcmpResult<Color>;
+    fn set_checkpoint_colour(&self, checkpoint_id: i32, color: Color) -> VcmpResult<()>;
 
-    fn set_check_point_position(&self, check_point_id: i32, position: Vectorf32) -> VcmpResult<()>;
+    fn get_checkpoint_colour(&self, checkpoint_id: i32) -> VcmpResult<Color>;
 
-    fn get_check_point_position(&self, check_point_id: i32) -> VcmpResult<Vectorf32>;
+    fn set_checkpoint_position(&self, checkpoint_id: i32, position: Vectorf32) -> VcmpResult<()>;
 
-    fn set_check_point_radius(&self, check_point_id: i32, radius: f32) -> VcmpResult<()>;
+    fn get_checkpoint_position(&self, checkpoint_id: i32) -> VcmpResult<Vectorf32>;
 
-    fn get_check_point_radius(&self, check_point_id: i32) -> f32;
+    fn set_checkpoint_radius(&self, checkpoint_id: i32, radius: f32) -> VcmpResult<()>;
 
-    fn get_check_point_owner(&self, check_point_id: i32) -> i32;
+    fn get_checkpoint_radius(&self, checkpoint_id: i32) -> f32;
+
+    fn get_checkpoint_owner(&self, checkpoint_id: i32) -> i32;
 }
 
 impl CheckPointMethods for VcmpFunctions {
-    fn create_check_point(
+    fn is_checkpoint_alive(&self, checkpoint_id: i32) -> bool {
+        (self.inner.CheckEntityExists)(VcmpEntityPool::CheckPoint.into(), checkpoint_id) != 0
+    }
+    fn create_checkpoint(
         &self,
         player_id: Option<i32>,
         world: i32,
@@ -65,8 +71,8 @@ impl CheckPointMethods for VcmpFunctions {
         )
     }
 
-    fn delete_check_point(&self, check_point_id: i32) -> VcmpResult<()> {
-        let code = (self.inner.DeleteCheckPoint)(check_point_id);
+    fn delete_checkpoint(&self, checkpoint_id: i32) -> VcmpResult<()> {
+        let code = (self.inner.DeleteCheckPoint)(checkpoint_id);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -74,16 +80,16 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn is_check_point_streamed_for_player(&self, check_point_id: i32, player_id: PlayerId) -> bool {
-        (self.inner.IsCheckPointStreamedForPlayer)(check_point_id, player_id) != 0
+    fn is_checkpoint_streamed_for_player(&self, checkpoint_id: i32, player_id: PlayerId) -> bool {
+        (self.inner.IsCheckPointStreamedForPlayer)(checkpoint_id, player_id) != 0
     }
 
-    fn is_check_point_sphere(&self, check_point_id: i32) -> bool {
-        (self.inner.IsCheckPointSphere)(check_point_id) != 0
+    fn is_checkpoint_sphere(&self, checkpoint_id: i32) -> bool {
+        (self.inner.IsCheckPointSphere)(checkpoint_id) != 0
     }
 
-    fn set_check_point_world(&self, check_point_id: i32, world: i32) -> VcmpResult<()> {
-        let code = (self.inner.SetCheckPointWorld)(check_point_id, world);
+    fn set_checkpoint_world(&self, checkpoint_id: i32, world: i32) -> VcmpResult<()> {
+        let code = (self.inner.SetCheckPointWorld)(checkpoint_id, world);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -91,13 +97,13 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn get_check_point_world(&self, check_point_id: i32) -> i32 {
-        (self.inner.GetCheckPointWorld)(check_point_id)
+    fn get_checkpoint_world(&self, checkpoint_id: i32) -> i32 {
+        (self.inner.GetCheckPointWorld)(checkpoint_id)
     }
 
-    fn set_check_point_colour(&self, check_point_id: i32, color: Color) -> VcmpResult<()> {
+    fn set_checkpoint_colour(&self, checkpoint_id: i32, color: Color) -> VcmpResult<()> {
         let code = (self.inner.SetCheckPointColour)(
-            check_point_id,
+            checkpoint_id,
             color.r as i32,
             color.g as i32,
             color.b as i32,
@@ -110,13 +116,13 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn get_check_point_colour(&self, check_point_id: i32) -> VcmpResult<Color> {
+    fn get_checkpoint_colour(&self, checkpoint_id: i32) -> VcmpResult<Color> {
         let mut red = 0;
         let mut green = 0;
         let mut blue = 0;
         let mut alpha = 0;
         let code = (self.inner.GetCheckPointColour)(
-            check_point_id,
+            checkpoint_id,
             &mut red,
             &mut green,
             &mut blue,
@@ -134,9 +140,9 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn set_check_point_position(&self, check_point_id: i32, position: Vectorf32) -> VcmpResult<()> {
+    fn set_checkpoint_position(&self, checkpoint_id: i32, position: Vectorf32) -> VcmpResult<()> {
         let code =
-            (self.inner.SetCheckPointPosition)(check_point_id, position.x, position.y, position.z);
+            (self.inner.SetCheckPointPosition)(checkpoint_id, position.x, position.y, position.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -144,11 +150,11 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn get_check_point_position(&self, check_point_id: i32) -> VcmpResult<Vectorf32> {
+    fn get_checkpoint_position(&self, checkpoint_id: i32) -> VcmpResult<Vectorf32> {
         let mut x = 0.0;
         let mut y = 0.0;
         let mut z = 0.0;
-        let code = (self.inner.GetCheckPointPosition)(check_point_id, &mut x, &mut y, &mut z);
+        let code = (self.inner.GetCheckPointPosition)(checkpoint_id, &mut x, &mut y, &mut z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -156,8 +162,8 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn set_check_point_radius(&self, check_point_id: i32, radius: f32) -> VcmpResult<()> {
-        let code = (self.inner.SetCheckPointRadius)(check_point_id, radius);
+    fn set_checkpoint_radius(&self, checkpoint_id: i32, radius: f32) -> VcmpResult<()> {
+        let code = (self.inner.SetCheckPointRadius)(checkpoint_id, radius);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -165,11 +171,11 @@ impl CheckPointMethods for VcmpFunctions {
         }
     }
 
-    fn get_check_point_radius(&self, check_point_id: i32) -> f32 {
-        (self.inner.GetCheckPointRadius)(check_point_id)
+    fn get_checkpoint_radius(&self, checkpoint_id: i32) -> f32 {
+        (self.inner.GetCheckPointRadius)(checkpoint_id)
     }
 
-    fn get_check_point_owner(&self, check_point_id: i32) -> i32 {
-        (self.inner.GetCheckPointOwner)(check_point_id)
+    fn get_checkpoint_owner(&self, checkpoint_id: i32) -> i32 {
+        (self.inner.GetCheckPointOwner)(checkpoint_id)
     }
 }

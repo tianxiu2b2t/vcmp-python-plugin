@@ -181,7 +181,7 @@ pub enum VcmpEntityPool {
     Radio = 4,
     Player = 5,
     Reserved1 = 6,
-    Blip = 7,
+    Marker = 7,
     CheckPoint = 8,
 }
 
@@ -194,7 +194,7 @@ impl From<i32> for VcmpEntityPool {
             4 => Self::Radio,
             5 => Self::Player,
             6 => Self::Reserved1,
-            7 => Self::Blip,
+            7 => Self::Marker,
             8 => Self::CheckPoint,
             _ => Self::Reserved1, // 未知值转为第一个变体
         }

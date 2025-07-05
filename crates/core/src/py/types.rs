@@ -177,6 +177,7 @@ pub enum EntityVectorType {
     VehicleSpawnRotationEuler,
     VehicleSpawnPosition,
     ObjectPosition,
+    ObjectRotationEuler,
     PickupPosition,
     CheckPointPosition,
     MarkerPosition,
@@ -260,7 +261,7 @@ impl VectorPy {
                 }
             }
             EntityVectorType::CheckPointPosition => {
-                let res = vcmp_func().get_check_point_position(self.entity_id);
+                let res = vcmp_func().get_checkpoint_position(self.entity_id);
                 if let Ok(res) = res {
                     res
                 } else {
@@ -282,10 +283,12 @@ impl VectorPy {
             EntityVectorType::VehicleSpawnRotationEuler => {
                 vcmp_func().get_vehicle_spawn_rotation_euler(self.entity_id)
             }
-
             EntityVectorType::VehicleSpawnPosition => {
                 vcmp_func().get_vehicle_spawn_position(self.entity_id)
             }
+            EntityVectorType::ObjectRotationEuler => vcmp_func()
+                .get_object_rotation_euler(self.entity_id)
+                .unwrap_or_default(),
         }
     }
 
@@ -327,7 +330,7 @@ impl VectorPy {
                 let _ = vcmp_func().set_pickup_position(self.entity_id, origin);
             }
             EntityVectorType::CheckPointPosition => {
-                let _ = vcmp_func().set_check_point_position(self.entity_id, origin);
+                let _ = vcmp_func().set_checkpoint_position(self.entity_id, origin);
             }
             EntityVectorType::VehicleTurnSpeed => {
                 let _ = vcmp_func().set_vehicle_turn_speed(self.entity_id, origin);
@@ -347,6 +350,9 @@ impl VectorPy {
             }
             EntityVectorType::VehicleSpawnPosition => {
                 let _ = vcmp_func().set_vehicle_spawn_position(self.entity_id, origin);
+            }
+            EntityVectorType::ObjectRotationEuler => {
+                let _ = vcmp_func().rotate_object_to_euler(self.entity_id, origin, 0);
             }
         };
     }
@@ -433,6 +439,7 @@ impl VectorPy {
 pub enum EntityQuaternionType {
     VehicleRotation,
     VehicleSpawnRotation,
+    ObjectRotation,
     Ignore,
 }
 
@@ -481,6 +488,9 @@ impl QuaternionPy {
             EntityQuaternionType::VehicleSpawnRotation => {
                 vcmp_func().get_vehicle_spawn_rotation(self.entity_id)
             }
+            EntityQuaternionType::ObjectRotation => vcmp_func()
+                .get_object_rotation(self.entity_id)
+                .unwrap_or_default(),
         }
     }
 
@@ -515,6 +525,9 @@ impl QuaternionPy {
             }
             EntityQuaternionType::VehicleSpawnRotation => {
                 let _ = vcmp_func().set_vehicle_spawn_rotation(self.entity_id, origin);
+            }
+            EntityQuaternionType::ObjectRotation => {
+                let _ = vcmp_func().rotate_object_to(self.entity_id, origin, 0);
             }
         };
     }

@@ -1,0 +1,146 @@
+use std::ops::Add;
+
+use pyo3::{
+    Bound, PyResult, Python, pyclass, pymethods,
+    types::{PyModule, PyModuleMethods},
+};
+use vcmp_bindings::{func::CheckPointMethods, vcmp_func};
+
+use crate::{
+    functions::player::PlayerPy,
+    pool::{ENTITY_POOL, EntityPoolTrait},
+    py::types::{EntityVectorType, RGBPy, VectorPy},
+};
+
+#[pyclass]
+#[derive(Debug, Clone, Copy)]
+#[pyo3(name = "CheckPoint")]
+pub struct CheckPointPy {
+    id: i32,
+}
+
+impl CheckPointPy {
+    pub fn new(id: i32) -> Self {
+        Self { id }
+    }
+}
+
+impl EntityPoolTrait for CheckPointPy {
+    fn entity_id(&self) -> crate::consts::EntityId {
+        self.id
+    }
+    fn entity_pool_type() -> vcmp_bindings::options::VcmpEntityPool {
+        vcmp_bindings::options::VcmpEntityPool::CheckPoint
+    }
+}
+
+impl From<i32> for CheckPointPy {
+    fn from(val: i32) -> Self {
+        CheckPointPy::new(val)
+    }
+}
+
+impl CheckPointPy {
+    pub fn _position(&self) -> VectorPy {
+        VectorPy::from((EntityVectorType::CheckPointPosition, self.id))
+    }
+}
+
+#[pymethods]
+impl CheckPointPy {
+    #[getter]
+    pub fn get_id(&self) -> i32 {
+        self.id
+    }
+    /*
+        fn add_position
+    fn prop_color
+    fn delete
+    fn prop_id
+    fn prop_is_alive
+    fn is_streamed_for_player
+    fn prop_owner
+    fn prop_position
+    fn prop_radius
+    fn prop_sphere
+    fn prop_world */
+
+    fn add_position(&self, pos: VectorPy) {
+        let origin = self._position();
+        let _ = origin.add(pos);
+    }
+
+    #[getter]
+    fn get_color(&self) -> RGBPy {
+        RGBPy::from(
+            vcmp_func()
+                .get_checkpoint_colour(self.id)
+                .unwrap_or_default(),
+        )
+    }
+
+    #[setter]
+    fn set_color(&self, color: RGBPy) {
+        let _ = vcmp_func().set_checkpoint_colour(self.id, color.into());
+    }
+
+    fn delete(&self) {
+        let _ = vcmp_func().delete_checkpoint(self.id);
+    }
+
+    #[getter]
+    fn is_alive(&self) -> bool {
+        vcmp_func().is_checkpoint_alive(self.id)
+    }
+
+    fn is_streamed_for_player(&self, player: PlayerPy) -> bool {
+        vcmp_func().is_checkpoint_streamed_for_player(self.id, player.get_id())
+    }
+
+    #[getter]
+    fn get_owner(&self) -> Option<PlayerPy> {
+        let id = vcmp_func().get_checkpoint_owner(self.id);
+        let pool = ENTITY_POOL.lock().unwrap();
+        pool.get_player(id).map(|p| *p)
+    }
+
+    #[getter]
+    fn get_position(&self) -> VectorPy {
+        self._position()
+    }
+
+    #[setter]
+    fn set_position(&self, pos: VectorPy) {
+        let _ = vcmp_func().set_checkpoint_position(self.id, pos.into());
+    }
+
+    #[getter]
+    fn get_radius(&self) -> f32 {
+        vcmp_func().get_checkpoint_radius(self.id)
+    }
+
+    #[setter]
+    fn set_radius(&self, radius: f32) {
+        let _ = vcmp_func().set_checkpoint_radius(self.id, radius);
+    }
+
+    #[getter]
+    fn get_sphere(&self) -> bool {
+        vcmp_func().is_checkpoint_sphere(self.id)
+    }
+
+    #[getter]
+    fn get_world(&self) -> i32 {
+        vcmp_func().get_checkpoint_world(self.id)
+    }
+
+    #[setter]
+    fn set_world(&self, world: i32) {
+        let _ = vcmp_func().set_checkpoint_world(self.id, world);
+    }
+}
+
+pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<CheckPointPy>()?;
+    Ok(())
+}
