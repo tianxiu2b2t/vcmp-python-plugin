@@ -377,6 +377,11 @@ pub unsafe extern "C" fn on_player_crash_report(player_id: i32, report: *const c
     );
 }
 
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
+    
+}
+
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);
     callbacks.OnServerFrame = Some(on_server_frame);
@@ -412,6 +417,7 @@ pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnPlayerKeyBindUp = Some(on_player_key_bind_up);
     callbacks.OnPlayerSpectate = Some(on_player_spectate);
     callbacks.OnPlayerCrashReport = Some(on_player_crash_report);
+    callbacks.OnPlayerUpdate = Some(on_player_update);
 
     callbacks.OnEntityPoolChange = Some(on_entity_pool_change);
 }
