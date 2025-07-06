@@ -6,15 +6,14 @@ use crate::py::fix_module_name;
 
 pub mod checkpoint;
 pub mod environment;
+pub mod keybind;
 pub mod marker;
+pub mod misc;
 pub mod object;
 pub mod pickup;
 pub mod player;
 pub mod server;
 pub mod vehicle;
-pub mod keybind;
-pub mod misc;
-
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let server_module = PyModule::new(py, "server")?;

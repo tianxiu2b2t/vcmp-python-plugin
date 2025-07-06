@@ -4,7 +4,7 @@ use std::{
     sync::OnceLock,
 };
 
-use tracing::{event, Level};
+use tracing::{Level, event};
 
 pub mod cli_env;
 

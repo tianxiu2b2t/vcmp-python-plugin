@@ -1,9 +1,9 @@
 use std::ffi::CString;
 use std::path::Path;
 
-use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
 use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
-use tracing::{event, Level};
+use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
+use tracing::{Level, event};
 
 use crate::cfg::CONFIG;
 use crate::functions;
@@ -147,21 +147,16 @@ pub fn init_py() {
 
         config.install_signal_handlers = 0; // 必须设置为 false，不然会导致 Server 捕捉不到信号，从而导致进程无法正常退出
 
-
         pyo3::ffi::Py_InitializeFromConfig(&config as *const _);
 
         pyo3::ffi::PyEval_SaveThread();
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
 
-        event!(
-            Level::INFO,
-            "Status: {}",
-            pyo3::ffi::Py_IsInitialized()
-        );
+        event!(Level::INFO, "Status: {}", pyo3::ffi::Py_IsInitialized());
     }
 
-        event!(Level::INFO, "Python init done");
+    event!(Level::INFO, "Python init done");
 
     if CONFIG.get().unwrap().preloader {
         load_script_as_module();

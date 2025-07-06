@@ -390,7 +390,6 @@ impl VectorPy {
                 info.position
             }
             EntityVectorType::VehicleTurnSpeed => {
-                
                 vcmp_func().get_vehicle_turn_speed(self.entity_id)
             }
             EntityVectorType::Ignore => self.inner.unwrap_or_default(),

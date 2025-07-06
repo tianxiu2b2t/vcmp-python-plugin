@@ -10,7 +10,6 @@ pub mod vehicle;
 
 pub enum VcmpEvent {
     PluginCommand(PluginCommandEvent),
-
 }
 
 pub struct PluginCommandEvent {

@@ -4,7 +4,10 @@ use std::{
 };
 
 use pyo3::{
-    exceptions::PyKeyboardInterrupt, prelude::*, types::{PyBool, PyCFunction, PyDict, PyFunction, PyTuple, PyType}, PyClass
+    PyClass,
+    exceptions::PyKeyboardInterrupt,
+    prelude::*,
+    types::{PyBool, PyCFunction, PyDict, PyFunction, PyTuple, PyType},
 };
 use tracing::{Level, event};
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
@@ -81,7 +84,11 @@ impl CallbackManager {
         T: PyClass + crate::py::events::PyBaseEvent,
     {
         let current_id = increase_event_counter();
-        event!(Level::TRACE, "Calling callbacks for event: ({current_id}) {:?}", event);
+        event!(
+            Level::TRACE,
+            "Calling callbacks for event: ({current_id}) {:?}",
+            event
+        );
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
         // Rust -> python -> rust -> c -> callback to rust -> this
@@ -216,18 +223,20 @@ impl CallbackManager {
                         }
                     }
                 };
-                if matcher.is_finished
-                {
+                if matcher.is_finished {
                     break;
                 }
             }
 
-            if matcher.is_finished
-            {
+            if matcher.is_finished {
                 // matcher = *matcher_ref;
             }
         });
-        event!(Level::TRACE, "Finished calling callbacks for event: ({current_id}) {:?}", event);
+        event!(
+            Level::TRACE,
+            "Finished calling callbacks for event: ({current_id}) {:?}",
+            event
+        );
         matcher.result
     }
 }

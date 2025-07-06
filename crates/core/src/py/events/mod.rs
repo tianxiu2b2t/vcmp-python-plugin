@@ -12,7 +12,7 @@ pub mod server;
 
 #[pyclass(name = "VcmpEvent")]
 pub struct PyVcmpEvnet {
-    pub event_enum: VcmpEvent
+    pub event_enum: VcmpEvent,
 }
 
 #[pymethods]

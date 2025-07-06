@@ -5,7 +5,7 @@ use crate::py::types::VectorPy;
 use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
-use tracing::{event, Level};
+use tracing::{Level, event};
 
 use crate::py::callbacks::CALLBACK;
 

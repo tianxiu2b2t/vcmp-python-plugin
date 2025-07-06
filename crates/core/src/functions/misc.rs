@@ -3,10 +3,7 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
     wrap_pyfunction,
 };
-use vcmp_bindings::{
-    func::MiscMethods,
-    vcmp_func,
-};
+use vcmp_bindings::{func::MiscMethods, vcmp_func};
 
 use crate::{functions::player::PlayerPy, py::types::VectorPy};
 
@@ -17,34 +14,30 @@ pub fn create_explosion(
     explosion_type: i32,
     pos: VectorPy,
     target: Option<PlayerPy>,
-    ground: bool
+    ground: bool,
 ) {
-    vcmp_func().create_explosion(world_id, explosion_type, pos.into(), target.map(|p| p.get_id()).unwrap_or(-1), ground);
+    vcmp_func().create_explosion(
+        world_id,
+        explosion_type,
+        pos.into(),
+        target.map(|p| p.get_id()).unwrap_or(-1),
+        ground,
+    );
 }
 
 #[pyfunction]
-pub fn play_sound(
-    world_id: i32,
-    sound_id: i32,
-    pos: VectorPy,
-) {
+pub fn play_sound(world_id: i32, sound_id: i32, pos: VectorPy) {
     let position = pos.get_entity_pos();
     vcmp_func().play_sound(world_id, sound_id, position.x, position.y, position.z);
 }
 
 #[pyfunction]
-pub fn hide_map_object(
-    object_id: i32,
-    pos: VectorPy,
-) {
+pub fn hide_map_object(object_id: i32, pos: VectorPy) {
     vcmp_func().hide_map_object(object_id, pos.into());
 }
 
 #[pyfunction]
-pub fn show_map_object(
-    object_id: i32,
-    pos: VectorPy,
-) {
+pub fn show_map_object(object_id: i32, pos: VectorPy) {
     vcmp_func().hide_map_object(object_id, pos.into());
 }
 
@@ -54,19 +47,12 @@ pub fn show_all_map_objects() {
 }
 
 #[pyfunction]
-pub fn add_radio_stream(
-    id: i32,
-    name: &str,
-    url: &str,
-    can_select: bool
-) {
+pub fn add_radio_stream(id: i32, name: &str, url: &str, can_select: bool) {
     vcmp_func().add_radio_stream(id, name, url, can_select);
 }
 
 #[pyfunction]
-pub fn remove_radio_stream(
-    id: i32,
-) {
+pub fn remove_radio_stream(id: i32) {
     vcmp_func().remove_radio_stream(id);
 }
 
