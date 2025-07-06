@@ -108,7 +108,7 @@ fn init_config_from_toml() -> Option<Config> {
 
 pub fn init_config() {
     CONFIG.get_or_init(|| {
-        init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or(Config::new()))
+        init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or_default())
     });
 
     logger::event!(logger::Level::TRACE, "{}", CONFIG.get().unwrap());

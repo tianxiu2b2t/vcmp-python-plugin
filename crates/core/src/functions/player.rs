@@ -514,9 +514,9 @@ impl PlayerPy {
 
         let mut look = Vectorf32::default();
         let range = range.unwrap_or(0.5);
-        look.x = (look_yaw.cos() * range);
-        look.y = (look_yaw.sin() * range);
-        look.z = (look_pitch.sin() * range);
+        look.x = look_yaw.cos() * range;
+        look.y = look_yaw.sin() * range;
+        look.z = look_pitch.sin() * range;
         let py_look = VectorPy::from(look);
         let origin = position;
         let camera_position = position;
