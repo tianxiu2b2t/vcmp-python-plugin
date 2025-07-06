@@ -66,6 +66,10 @@ impl Matcher {
     }
 }
 
+pub fn increase_event_counter() -> u32 {
+    EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+}
+
 #[pyclass]
 #[pyo3(name = "CallbackManager")]
 #[derive(Debug, Clone, Copy, Default)]
@@ -76,12 +80,73 @@ impl CallbackManager {
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
-        let current_id = EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+        let current_id = increase_event_counter();
         event!(Level::TRACE, "Calling callbacks for event: ({current_id}) {:?}", event);
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
+        // Rust -> python -> rust -> c -> callback to rust -> this
+        /*
+
+
+
+        @callbacks.on()
+        def _(event: ServerInitialiseEvent):
+            ...
+
+        @callbacks.on_player_join()
+        def _(event: PlayerJoinEvent):
+            ...
+
+        @callbacks.on()
+        def _(matcher: Matcher, event: PlayerKeyBindDownEvent, pressed: bool = False):
+            player = event.player
+            if not variables[player.id].loaded or not variables[player.id].account.loggin:
+                matcher.finish()
+
+            key = event.key
+            if not pressed and key in (
+                keybind.w, keybind.s, keybind.a, keybind.d,
+                keybind.up_arrow, keybind.down_arrow, keybind.left_arrow, keybind.right_arrow
+            ) and key not in variables[player.id].keys.presses:
+                variables[player.id].keys.presses.append(key)
+                variables[player.id].keys.next_press_tick = time.perf_counter() + 0.250
+
+        def _handle(
+                self,
+                event: Event
+            ):
+                # 开一个 Matcher 为了一些事件可以直接matcher.finish()
+                matcher = Matcher(event)
+                result = None
+                for callback in self.callbacks:
+                    params = {}
+                    matched = True
+                    for arg in callback.args:
+                        if isinstance(event, arg.annotations):
+                            params[arg.name] = event
+                        elif isinstance(matcher, arg.annotations):
+                            params[arg.name] = matcher
+
+                        if arg.required and arg.name not in params:
+                            matched = False
+                            break
+                        elif arg.name not in params:
+                            params[arg.name] = arg.default
+
+                    if not matched:
+                        continue
+                    try:
+                        result = callback.callback(**params)
+                    except FinishedException:
+                        result = result or matcher._result
+                        break
+                    except:
+                        logger.error(f"Error in callback {callback.callback.__name__}")
+                        logger.exception(traceback.format_exc())
+                return result
+         */
         Python::with_gil(|py| {
-            let py_matcher = Py::new(py, matcher).unwrap();
+            // let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
                 let origin_parameters = callback.params.clone();
@@ -97,12 +162,13 @@ impl CallbackManager {
                             py_kwargs.set_item(name.clone(), instance.clone()).unwrap();
                             break;
                         }
-                        if py_matcher.bind(py).is_instance(annotation).unwrap() {
-                            py_kwargs
-                                .set_item(name.clone(), py_matcher.borrow_mut(py))
-                                .unwrap();
-                            break;
-                        }
+                        // if py_matcher.bind(py).is_instance(annotation).unwrap() {
+                        //     py_kwargs
+                        //         .set_item(name.clone(), py_matcher.borrow_mut(py))
+                        //         .unwrap();
+                        //     break;
+                        // }
+                        // if
                     }
                     /*
                         if arg.required and arg.name not in params:
@@ -150,17 +216,15 @@ impl CallbackManager {
                         }
                     }
                 };
-                if let Ok(matcher_ref) = py_matcher.try_borrow(py)
-                    && matcher_ref.is_finished
+                if matcher.is_finished
                 {
                     break;
                 }
             }
 
-            if let Ok(matcher_ref) = py_matcher.try_borrow(py)
-                && matcher_ref.is_finished
+            if matcher.is_finished
             {
-                matcher = *matcher_ref;
+                // matcher = *matcher_ref;
             }
         });
         event!(Level::TRACE, "Finished calling callbacks for event: ({current_id}) {:?}", event);

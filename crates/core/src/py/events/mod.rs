@@ -3,11 +3,25 @@
 use pyo3::prelude::*;
 use pyo3::types::PyModule;
 use pyo3::{Bound, PyResult, Python};
+use vcmp_bindings::events::VcmpEvent;
 
 use crate::py::fix_module_name;
 
 pub mod player;
 pub mod server;
+
+#[pyclass(name = "VcmpEvent")]
+pub struct PyVcmpEvnet {
+    pub event_enum: VcmpEvent
+}
+
+#[pymethods]
+impl PyVcmpEvnet {
+    #[staticmethod]
+    pub fn plugin_command() -> Self {
+        todo!()
+    }
+}
 
 #[pyclass(subclass)]
 #[pyo3(name = "Event")]

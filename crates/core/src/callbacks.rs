@@ -4,14 +4,14 @@ use crate::py::events::{player::*, server::*};
 use crate::py::types::VectorPy;
 use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
-use crate::logger;
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
+use tracing::{event, Level};
 
 use crate::py::callbacks::CALLBACK;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
-    logger::event!(logger::Level::TRACE, "[Rust] Server init callback");
+    event!(Level::TRACE, "[Rust] Server init callback");
 
     if !CONFIG.get().unwrap().preloader {
         load_script_as_module();
@@ -56,10 +56,10 @@ pub extern "C" fn on_server_shutdown() {
 pub unsafe extern "C" fn on_entity_pool_change(c_entity_type: i32, entity_id: i32, is_deleted: u8) {
     let entity_type = VcmpEntityPool::from(c_entity_type);
     let deleted = is_deleted != 0;
-    logger::event!(logger::Level::TRACE, "Entity pool change");
-    logger::event!(logger::Level::TRACE, "entity type: {entity_type:?}");
-    logger::event!(logger::Level::TRACE, "entity id: {entity_id}");
-    logger::event!(logger::Level::TRACE, "deleted: {deleted}");
+    event!(Level::TRACE, "Entity pool change");
+    event!(Level::TRACE, "entity type: {entity_type:?}");
+    event!(Level::TRACE, "entity id: {entity_id}");
+    event!(Level::TRACE, "deleted: {deleted}");
 
     let mut pool = ENTITY_POOL.lock().expect("pool is poisoned");
 

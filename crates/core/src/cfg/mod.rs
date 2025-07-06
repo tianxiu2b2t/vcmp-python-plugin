@@ -1,9 +1,10 @@
-use crate::logger;
 use std::{
     fmt::{Display, Formatter},
     path::Path,
     sync::OnceLock,
 };
+
+use tracing::{event, Level};
 
 pub mod cli_env;
 
@@ -13,6 +14,7 @@ pub struct Config {
     pub script_path: String, // 脚本路径
     pub virtual_env: String, // 虚拟环境路径 (建议是包)
     pub debug: bool,         // 是否调试
+    pub trace: bool,
 }
 
 impl Default for Config {
@@ -28,6 +30,7 @@ impl Config {
             script_path: "".to_string(),
             virtual_env: "".to_string(),
             debug: false,
+            trace: false,
         }
     }
 
@@ -111,5 +114,5 @@ pub fn init_config() {
         init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or_default())
     });
 
-    logger::event!(logger::Level::TRACE, "{}", CONFIG.get().unwrap());
+    event!(Level::TRACE, "{}", CONFIG.get().unwrap());
 }
