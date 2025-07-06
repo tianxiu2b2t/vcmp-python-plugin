@@ -90,7 +90,7 @@ impl CheckPointPy {
     fn get_owner(&self) -> Option<PlayerPy> {
         let id = vcmp_func().get_checkpoint_owner(self.id);
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_player(id).map(|p| *p)
+        pool.get_player(id).copied()
     }
 
     #[getter]

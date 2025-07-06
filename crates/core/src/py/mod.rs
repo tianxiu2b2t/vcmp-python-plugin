@@ -230,5 +230,5 @@ pub fn get_traceback(err: PyErr) -> String {
             .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
             .unwrap_or(String::from("Unknown traceback"))
     });
-    format!("{}{}", res, err.to_string())
+    format!("{}{}", res, err)
 }

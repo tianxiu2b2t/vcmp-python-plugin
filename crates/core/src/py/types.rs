@@ -1,4 +1,4 @@
-use std::{fmt::format, ops::Add};
+use std::ops::Add;
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
@@ -77,9 +77,9 @@ impl From<WastedSettings> for WastedSettingsPy {
     }
 }
 
-impl Into<WastedSettings> for WastedSettingsPy {
-    fn into(self) -> WastedSettings {
-        self.inner
+impl From<WastedSettingsPy> for WastedSettings {
+    fn from(val: WastedSettingsPy) -> Self {
+        val.inner
     }
 }
 
@@ -165,7 +165,7 @@ impl WastedSettingsPy {
 
     #[setter]
     pub fn set_color(&mut self, value: RGBPy) {
-        self.inner.color = value.inner.into();
+        self.inner.color = value.inner;
     }
 
     #[setter]
@@ -361,19 +361,11 @@ impl VectorPy {
         match self.entity_type {
             EntityVectorType::PlayerPosition => {
                 let res = vcmp_func().get_player_position(self.entity_id);
-                if let Ok(res) = res {
-                    res
-                } else {
-                    Vectorf32::default()
-                }
+                res.unwrap_or_default()
             }
             EntityVectorType::PlayerSpeed => {
                 let res = vcmp_func().get_player_speed(self.entity_id);
-                if let Ok(res) = res {
-                    res
-                } else {
-                    Vectorf32::default()
-                }
+                res.unwrap_or_default()
             }
             EntityVectorType::VehiclePosition => vcmp_func().get_vehicle_position(self.entity_id),
             EntityVectorType::VehicleSpeed => vcmp_func().get_vehicle_speed(self.entity_id),
@@ -383,35 +375,23 @@ impl VectorPy {
             }
             EntityVectorType::ObjectPosition => {
                 let res = vcmp_func().get_object_position(self.entity_id);
-                if let Ok(res) = res {
-                    res
-                } else {
-                    Vectorf32::default()
-                }
+                res.unwrap_or_default()
             }
             EntityVectorType::PickupPosition => {
                 let res = vcmp_func().get_pickup_position(self.entity_id);
-                if let Ok(res) = res {
-                    res
-                } else {
-                    Vectorf32::default()
-                }
+                res.unwrap_or_default()
             }
             EntityVectorType::CheckPointPosition => {
                 let res = vcmp_func().get_checkpoint_position(self.entity_id);
-                if let Ok(res) = res {
-                    res
-                } else {
-                    Vectorf32::default()
-                }
+                res.unwrap_or_default()
             }
             EntityVectorType::MarkerPosition => {
                 let info = vcmp_func().get_marker_info(self.entity_id);
                 info.position
             }
             EntityVectorType::VehicleTurnSpeed => {
-                let res = vcmp_func().get_vehicle_turn_speed(self.entity_id);
-                res
+                
+                vcmp_func().get_vehicle_turn_speed(self.entity_id)
             }
             EntityVectorType::Ignore => self.inner.unwrap_or_default(),
             EntityVectorType::VehicleRotationEuler => {
@@ -1159,9 +1139,9 @@ impl From<i32> for KeyCode {
     }
 }
 
-impl Into<i32> for KeyCode {
-    fn into(self) -> i32 {
-        self as i32
+impl From<KeyCode> for i32 {
+    fn from(val: KeyCode) -> Self {
+        val as i32
     }
 }
 

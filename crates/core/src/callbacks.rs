@@ -447,7 +447,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
             ));
             let move_res = CALLBACK.call_func(event, None);
             if !move_res {
-                player.set_position(event.get_position().into());
+                player.set_position(event.get_position());
             } else {
                 player.last_position = current_pos;
             }

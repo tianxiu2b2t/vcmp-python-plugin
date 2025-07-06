@@ -4,14 +4,11 @@ use pyo3::{
     wrap_pyfunction,
 };
 use vcmp_bindings::{
-    func::{
-        environment::{QueryEnvironmentWorld, SetEnvironmentWorld}, EnvironmentMethods, MiscMethods, QueryEnvironmentOption, SetEnvironmentOption
-    },
-    utils::Vectorf32,
+    func::MiscMethods,
     vcmp_func,
 };
 
-use crate::{functions::player::PlayerPy, py::types::{RGBPy, VectorPy, WastedSettingsPy}};
+use crate::{functions::player::PlayerPy, py::types::VectorPy};
 
 #[pyfunction]
 #[pyo3(signature = (world_id, explosion_type, pos, target = None, ground = false))]
@@ -22,7 +19,7 @@ pub fn create_explosion(
     target: Option<PlayerPy>,
     ground: bool
 ) {
-    let _ = vcmp_func().create_explosion(world_id, explosion_type, pos.into(), target.map(|p| p.get_id()).unwrap_or(-1), ground);
+    vcmp_func().create_explosion(world_id, explosion_type, pos.into(), target.map(|p| p.get_id()).unwrap_or(-1), ground);
 }
 
 #[pyfunction]
@@ -32,7 +29,7 @@ pub fn play_sound(
     pos: VectorPy,
 ) {
     let position = pos.get_entity_pos();
-    let _ = vcmp_func().play_sound(world_id, sound_id, position.x, position.y, position.z);
+    vcmp_func().play_sound(world_id, sound_id, position.x, position.y, position.z);
 }
 
 #[pyfunction]
@@ -40,7 +37,7 @@ pub fn hide_map_object(
     object_id: i32,
     pos: VectorPy,
 ) {
-    let _ = vcmp_func().hide_map_object(object_id, pos.into());
+    vcmp_func().hide_map_object(object_id, pos.into());
 }
 
 #[pyfunction]
@@ -48,12 +45,12 @@ pub fn show_map_object(
     object_id: i32,
     pos: VectorPy,
 ) {
-    let _ = vcmp_func().hide_map_object(object_id, pos.into());
+    vcmp_func().hide_map_object(object_id, pos.into());
 }
 
 #[pyfunction]
 pub fn show_all_map_objects() {
-    let _ = vcmp_func().show_all_map_objects();
+    vcmp_func().show_all_map_objects();
 }
 
 #[pyfunction]
@@ -63,14 +60,14 @@ pub fn add_radio_stream(
     url: &str,
     can_select: bool
 ) {
-    let _ = vcmp_func().add_radio_stream(id, name, url, can_select);
+    vcmp_func().add_radio_stream(id, name, url, can_select);
 }
 
 #[pyfunction]
 pub fn remove_radio_stream(
     id: i32,
 ) {
-    let _ = vcmp_func().remove_radio_stream(id);
+    vcmp_func().remove_radio_stream(id);
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

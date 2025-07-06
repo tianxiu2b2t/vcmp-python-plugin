@@ -15,6 +15,12 @@ pub struct Config {
     pub debug: bool,         // 是否调试
 }
 
+impl Default for Config {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Config {
     pub fn new() -> Self {
         Self {
@@ -97,7 +103,7 @@ fn init_config_from_cfg() -> Option<Config> {
 }
 
 fn init_config_from_toml() -> Option<Config> {
-    return None;
+    None
 }
 
 pub fn init_config() {
