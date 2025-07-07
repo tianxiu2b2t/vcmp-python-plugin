@@ -60,12 +60,16 @@ impl EntityPoolTrait for PlayerPy {
 }
 
 impl PlayerPy {
-    pub fn _position(&self) -> VectorPy {
+    fn position(&self) -> VectorPy {
         VectorPy::from((EntityVectorType::PlayerPosition, self.id))
     }
 
     pub fn _speed(&self) -> VectorPy {
         VectorPy::from((EntityVectorType::PlayerSpeed, self.id))
+    }
+
+    pub fn set_position(&self, position: Vectorf32) {
+        let _ = vcmp_func().set_player_position(self.id, position);
     }
 }
 
@@ -77,7 +81,7 @@ impl PlayerPy {
     }
 
     pub fn add_position(&mut self, pos: VectorPy) {
-        let origin = self._position();
+        let origin = self.position();
         let _ = origin.add(pos);
     }
 
@@ -408,11 +412,12 @@ impl PlayerPy {
 
     #[getter]
     pub fn get_position(&self) -> VectorPy {
-        self._position()
+        self.position()
     }
 
     #[setter]
-    pub fn set_position(&self, py: Python<'_>, position: VectorPy) {
+    #[pyo3(name="position")]
+    pub fn py_set_position(&self, py: Python<'_>, position: VectorPy) {
         py.allow_threads(|| {
             let _ = vcmp_func().set_player_position(self.id, position.get_entity_pos());
         });
