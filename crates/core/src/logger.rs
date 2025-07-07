@@ -4,7 +4,7 @@ use tracing_appender::rolling::{RollingFileAppender, Rotation};
 use tracing_subscriber::{fmt, prelude::*};
 
 pub fn init() {
-    let max_level = Level::TRACE; // 硬编码最大日志级别
+    let max_level = Level::INFO; // 硬编码最大日志级别
     
     // 创建按天轮换的文件 appender
     let file_appender = RollingFileAppender::new(

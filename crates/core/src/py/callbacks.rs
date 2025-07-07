@@ -86,7 +86,7 @@ impl CallbackManager {
         let current_id = increase_event_id();
         let thread_id = thread::current().id();
         event!(
-            Level::TRACE,
+            Level::INFO,
             "Calling callbacks for event: (Thread({thread_id:?}) {current_id}) {:?}",
             event
         );
@@ -97,7 +97,7 @@ impl CallbackManager {
             let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
-                event!(Level::TRACE, "Matching callback: {:?}", callback);
+                event!(Level::INFO, "Matching callback: {:?}", callback);
                 let origin_parameters = callback.params.clone();
                 let py_kwargs = PyDict::new(py);
 
@@ -137,7 +137,7 @@ impl CallbackManager {
                     continue;
                 }
 
-                event!(Level::TRACE, "Matched callback: {:?}", callback);
+                event!(Level::INFO, "Matched callback: {:?}", callback);
 
                 match callback.func.call(py, (), Some(&py_kwargs)) {
                     Ok(res) => {
@@ -176,7 +176,7 @@ impl CallbackManager {
             }
         });
         event!(
-            Level::TRACE,
+            Level::INFO,
             "Finished calling callbacks for event: (Thread({thread_id:?}) {current_id}) {:?}",
             event
         );

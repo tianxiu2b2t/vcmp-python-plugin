@@ -92,7 +92,7 @@ impl EntityPool {
                 // ignore
             }
             _ => {
-                event!(Level::TRACE, "Unknown entity type: {entity_type:?}");
+                event!(Level::INFO, "Unknown entity type: {entity_type:?}");
                 todo!()
             }
         }
@@ -106,7 +106,7 @@ impl EntityPool {
                 self.vehicles.remove_entity(entity_id);
             }
             _ => {
-                event!(Level::TRACE, "Unknown entity type: {entity_type:?}");
+                event!(Level::INFO, "Unknown entity type: {entity_type:?}");
                 todo!()
             }
         }
@@ -117,7 +117,7 @@ impl EntityPool {
             VcmpEntityPool::Player => self.players.have_entity(entity_id),
             VcmpEntityPool::Vehicle => self.vehicles.have_entity(entity_id),
             _ => {
-                event!(Level::TRACE, "Unknown entity type: {entity_type:?}");
+                event!(Level::INFO, "Unknown entity type: {entity_type:?}");
                 todo!()
             }
         }

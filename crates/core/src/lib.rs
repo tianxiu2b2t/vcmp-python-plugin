@@ -70,7 +70,7 @@ extern "C" fn VcmpPluginInit(
     info.apiMinorVersion = 0; // 就先 .0了
     info.pluginVersion = PLUGIN_VERSION;
 
-    event!(Level::TRACE, "vcmp-plugin-rs info: {info:?}");
+    event!(Level::INFO, "vcmp-plugin-rs info: {info:?}");
 
     init_config();
     init_py();

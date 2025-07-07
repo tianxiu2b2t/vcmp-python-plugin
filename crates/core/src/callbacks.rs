@@ -11,7 +11,7 @@ use crate::py::callbacks::CALLBACK;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
-    event!(Level::TRACE, "[Rust] Server init callback");
+    event!(Level::INFO, "[Rust] Server init callback");
 
     if !CONFIG.get().unwrap().preloader {
         load_script_as_module();
@@ -56,10 +56,10 @@ pub extern "C" fn on_server_shutdown() {
 pub unsafe extern "C" fn on_entity_pool_change(c_entity_type: i32, entity_id: i32, is_deleted: u8) {
     let entity_type = VcmpEntityPool::from(c_entity_type);
     let deleted = is_deleted != 0;
-    event!(Level::TRACE, "Entity pool change");
-    event!(Level::TRACE, "entity type: {entity_type:?}");
-    event!(Level::TRACE, "entity id: {entity_id}");
-    event!(Level::TRACE, "deleted: {deleted}");
+    event!(Level::INFO, "Entity pool change");
+    event!(Level::INFO, "entity type: {entity_type:?}");
+    event!(Level::INFO, "entity id: {entity_id}");
+    event!(Level::INFO, "deleted: {deleted}");
 
     let mut pool = ENTITY_POOL.lock().expect("pool is poisoned");
 

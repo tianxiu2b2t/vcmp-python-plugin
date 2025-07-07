@@ -114,5 +114,5 @@ pub fn init_config() {
         init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or_default())
     });
 
-    event!(Level::TRACE, "{}", CONFIG.get().unwrap());
+    event!(Level::INFO, "{}", CONFIG.get().unwrap());
 }
