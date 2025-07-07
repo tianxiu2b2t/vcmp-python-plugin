@@ -97,7 +97,7 @@ impl CallbackManager {
             let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
-                event!(Level::INFO, "Matching callback: {:?}", callback);
+                //event!(Level::INFO, "Matching callback: {:?}", callback);
                 let origin_parameters = callback.params.clone();
                 let py_kwargs = PyDict::new(py);
 
@@ -153,17 +153,27 @@ impl CallbackManager {
                     }
                     Err(e) => {
                         if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                            event!(Level::DEBUG, "KeyboardInterrupt");
                             vcmp_func().shutdown();
                             break;
-                        } else if e.is_instance_of::<FinishedException>(py) {
-                            break;
-                        } else {
-                            event!(
-                                Level::ERROR,
-                                "Callback event: {event:?} error: {}",
-                                get_traceback(e)
-                            );
                         }
+                        event!(
+                            Level::ERROR,
+                            "Callback event: {event:?} error: {}",
+                            get_traceback(e, Some(py))
+                        );
+                        //if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                        //    vcmp_func().shutdown();
+                        //    break;
+                        //} else if e.is_instance_of::<FinishedException>(py) {
+                        //    break;
+                        //} else {
+                        //    //event!(
+                        //    //    Level::ERROR,
+                        //    //    "Callback event: {event:?} error: {}",
+                        //    //    get_traceback(e, Some(py))
+                        //    //);
+                        //}
                     }
                 };
                 if matcher.is_finished {

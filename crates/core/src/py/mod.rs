@@ -169,7 +169,7 @@ pub fn load_script_as_module() {
     let script_path = CONFIG.get().unwrap().script_path.as_str();
     let res = raw_load_script_as_module(Path::new(script_path));
     if let Err(e) = res {
-        event!(Level::ERROR, "Error: {}", get_traceback(e));
+        event!(Level::ERROR, "Error: {}", get_traceback(e, None));
     } else {
         event!(Level::INFO, "Script loaded");
     }
@@ -221,11 +221,17 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
     result
 }
 
-pub fn get_traceback(err: PyErr) -> String {
-    let res = Python::with_gil(|py| {
-        err.traceback(py)
+pub fn get_traceback(err: PyErr, py: Option<Python<'_>>) -> String {
+    let res = if py.is_none() {
+        Python::with_gil(|py| {
+            err.traceback(py)
+                .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
+                .unwrap_or(String::from("Unknown traceback"))
+        })
+    } else {
+        err.traceback(py.unwrap())
             .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
             .unwrap_or(String::from("Unknown traceback"))
-    });
+    };
     format!("{res}{err}")
 }
