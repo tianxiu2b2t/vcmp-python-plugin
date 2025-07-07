@@ -20,19 +20,22 @@ use crate::{
 #[pyfunction]
 #[pyo3(signature = (world_id, explosion_type, pos, target = None, ground = false))]
 pub fn create_explosion(
+    py: Python<'_>,
     world_id: i32,
     explosion_type: i32,
     pos: VectorPy,
     target: Option<PlayerPy>,
     ground: bool,
 ) {
-    let _ = vcmp_func().create_explosion(
-        world_id,
-        explosion_type,
-        pos.into(),
-        target.map(|p| p.get_id()).unwrap_or(-1),
-        ground,
-    );
+    py.allow_threads(|| {
+        vcmp_func().create_explosion(
+            world_id,
+            explosion_type,
+            pos.into(),
+            target.map(|p| p.get_id()).unwrap_or(-1),
+            ground,
+        );
+    })
 }
 
 #[pyfunction]
@@ -42,8 +45,8 @@ pub fn play_sound(world_id: i32, sound_id: i32, pos: VectorPy) {
 }
 
 #[pyfunction]
-pub fn hide_map_object(object_id: i32, pos: VectorPy) {
-    let _ = vcmp_func().hide_map_object(object_id, pos.into());
+pub fn hide_map_object(py: Python<'_>, object_id: i32, pos: VectorPy) {
+    py.allow_threads(|| vcmp_func().hide_map_object(object_id, pos.into()))
 }
 
 #[pyfunction]

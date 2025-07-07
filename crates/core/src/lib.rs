@@ -18,7 +18,7 @@ pub mod py;
 /// semver:
 /// xx yy zz
 #[allow(clippy::zero_prefixed_literal)]
-pub const PLUGIN_VERSION: u32 = 00_01_00;
+pub const PLUGIN_VERSION: u32 = 00_01_01;
 
 use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
 
@@ -66,11 +66,10 @@ extern "C" fn VcmpPluginInit(
 
     // 参考 cpp.ing
     info.apiMajorVersion = 2;
-    // info.apiMinorVersion = bindings::API_MINOR as u16 - 1; // 难蚌 compat
     info.apiMinorVersion = 0; // 就先 .0了
     info.pluginVersion = PLUGIN_VERSION;
 
-    event!(Level::INFO, "vcmp-plugin-rs info: {info:?}");
+    event!(Level::DEBUG, "vcmp-plugin-rs info: {info:?}");
 
     init_config();
     init_py();
@@ -98,25 +97,8 @@ extern "C" fn VcmpPluginInit(
         }
     }
 
-    // println!(
-    //     "sizeof callback: {}",
-    //     std::mem::size_of::<PluginCallbacks>()
-    // );
-    // println!("sizeof functions: {}", std::mem::size_of::<PluginFuncs>());
-
-    // println!("give sizeof callback: {}", callbacks.structSize);
-    // println!("give sizeof functions: {}", functions.inner_struct_size());
-
-    // get version
     let version: u32 = functions.server_version();
-    event!(Level::DEBUG, "server version: {version}");
-
-    //println!("ready to getsetting");
-    //let server_settings = functions.get_server_settings();
-    //println!("server settings: {}", server_settings);
-    //functions.set_server_name("测试服务器");
-    //let server_settings = functions.get_server_settings();
-    //println!("server settings: {}", server_settings);
+    event!(Level::INFO, "server version: {version}");
 
     init_callbacks(callbacks);
 
