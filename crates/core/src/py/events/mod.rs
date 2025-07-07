@@ -18,10 +18,6 @@ pub struct BaseEvent {
 
 pub trait PyBaseEvent: std::fmt::Debug + Clone {
     fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>>;
-    //pub fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-    //    let typeobj = py.get_type::<Self>();
-    //    let sub_sub_class = typeobj.call((), None).unwrap();
-    //}
 }
 impl PyBaseEvent for BaseEvent {
     fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {

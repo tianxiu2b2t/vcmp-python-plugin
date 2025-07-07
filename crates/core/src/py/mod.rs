@@ -1,5 +1,7 @@
+use std::cell::OnceCell;
 use std::ffi::CString;
 use std::path::Path;
+use std::sync::OnceLock;
 
 use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
 
@@ -147,7 +149,6 @@ pub fn init_py() {
 
         config.install_signal_handlers = 0; // 必须设置为 false，不然会导致 Server 捕捉不到信号，从而导致进程无法正常退出
 
-        
         pyo3::ffi::Py_InitializeFromConfig(&config as *const _);
 
         pyo3::ffi::PyEval_SaveThread();

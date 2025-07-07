@@ -1,4 +1,4 @@
-use crate::{func::VcmpFunctions, utils::Keybind, VcmpError, VcmpResult};
+use crate::{VcmpError, VcmpResult, func::VcmpFunctions, utils::Keybind};
 
 pub trait KeybindMethods {
     fn register_key_bind(
@@ -57,12 +57,12 @@ impl KeybindMethods for VcmpFunctions {
             Err(VcmpError::from(code))
         } else {
             Ok(Keybind {
-            slot,
-            can_release: release != 0,
-            key,
-            key2,
-            key3,
-        })
+                slot,
+                can_release: release != 0,
+                key,
+                key2,
+                key3,
+            })
         }
     }
 }

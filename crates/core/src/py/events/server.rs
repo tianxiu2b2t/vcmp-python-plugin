@@ -14,8 +14,9 @@ pub struct ServerEvent;
 #[pymethods]
 impl ServerEvent {
     #[new]
-    pub fn new() -> (Self, BaseEvent) {
-        (Self, BaseEvent::new("ServerEvent"))
+    #[pyo3(signature = (name = "ServerEvent"))]
+    pub fn new(name: &str) -> (Self, BaseEvent) {
+        (Self, BaseEvent::new(name))
     }
 }
 
@@ -28,7 +29,7 @@ pub struct ServerInitialiseEvent;
 impl ServerInitialiseEvent {
     #[new]
     pub fn new() -> PyClassInitializer<Self> {
-        PyClassInitializer::from(ServerEvent::new()).add_subclass(Self)
+        PyClassInitializer::from(ServerEvent::new("ServerInitialiseEvent")).add_subclass(Self)
     }
 }
 
@@ -41,7 +42,7 @@ pub struct ServerShutdownEvent;
 impl ServerShutdownEvent {
     #[new]
     pub fn new() -> PyClassInitializer<Self> {
-        PyClassInitializer::from(ServerEvent::new()).add_subclass(Self)
+        PyClassInitializer::from(ServerEvent::new("ServerShutdownEvent")).add_subclass(Self)
     }
 }
 
@@ -65,7 +66,7 @@ impl ServerFrameEvent {
     #[new]
     #[pyo3(signature = (elapsed_time))]
     pub fn new(elapsed_time: f32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(ServerEvent::new()).add_subclass(Self {
+        PyClassInitializer::from(ServerEvent::new("ServerFrameEvent")).add_subclass(Self {
             inner: server::ServerFrameEvent::from(elapsed_time),
         })
     }
@@ -104,13 +105,15 @@ impl ServerPerformanceReportEvent {
         descriptions: Vec<String>,
         times: Vec<u64>,
     ) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(ServerEvent::new()).add_subclass(Self {
-            inner: server::ServerPerformanceReportEvent {
-                entry_count,
-                descriptions,
-                times,
+        PyClassInitializer::from(ServerEvent::new("ServerPerformanceReportEvent")).add_subclass(
+            Self {
+                inner: server::ServerPerformanceReportEvent {
+                    entry_count,
+                    descriptions,
+                    times,
+                },
             },
-        })
+        )
     }
 
     #[getter]
@@ -175,7 +178,7 @@ impl PyBaseEvent for ServerPerformanceReportEvent {
 }
 impl PyBaseEvent for ServerEvent {
     fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, ServerEvent::new())?;
+        let value = Py::new(py, ServerEvent::new("ServerEvent"))?;
         Ok(value.into())
     }
 }

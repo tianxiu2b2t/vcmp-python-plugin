@@ -1,10 +1,14 @@
 use std::{
     default::Default,
     sync::{Arc, LazyLock, Mutex},
+    thread::{self, Thread},
 };
 
 use pyo3::{
-    exceptions::PyKeyboardInterrupt, prelude::*, types::{PyBool, PyCFunction, PyDict, PyFunction, PyTuple, PyType}, PyClass
+    PyClass,
+    exceptions::PyKeyboardInterrupt,
+    prelude::*,
+    types::{PyBool, PyCFunction, PyDict, PyFunction, PyTuple, PyType},
 };
 use tracing::{Level, event};
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
@@ -66,6 +70,12 @@ impl Matcher {
     }
 }
 
+pub static CALLBACK_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
+
+fn increase_event_id() -> u32 {
+    EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+}
+
 #[pyclass]
 #[pyo3(name = "CallbackManager")]
 #[derive(Debug, Clone, Copy, Default)]
@@ -76,11 +86,22 @@ impl CallbackManager {
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
-        let current_id = EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
-        event!(Level::TRACE, "Calling callbacks for event: ({current_id}) {:?}", event);
+        let current_id = increase_event_id();
+        let thread_id = thread::current().id();
+        event!(
+            Level::TRACE,
+            "Calling callbacks for event: (Thread({thread_id:?}) {current_id}) {:?}",
+            event
+        );
+
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
+        let _lock = CALLBACK_LOCK.lock().unwrap();
         Python::with_gil(|py| {
+            let cpython_thread = unsafe { pyo3::ffi::PyEval_SaveThread() };
+            unsafe {
+                pyo3::ffi::PyEval_RestoreThread(cpython_thread);
+            }
             let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
@@ -163,7 +184,11 @@ impl CallbackManager {
                 matcher = *matcher_ref;
             }
         });
-        event!(Level::TRACE, "Finished calling callbacks for event: ({current_id}) {:?}", event);
+        event!(
+            Level::TRACE,
+            "Finished calling callbacks for event: (Thread({thread_id:?}) {current_id}) {:?}",
+            event
+        );
         matcher.result
     }
 }

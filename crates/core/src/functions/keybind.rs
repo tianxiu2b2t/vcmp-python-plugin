@@ -1,14 +1,16 @@
 use pyo3::{
-    pyclass, pyfunction, pymethods, types::{PyModule, PyModuleMethods}, wrap_pyfunction, Bound, PyResult, Python
+    Bound, PyResult, Python, pyclass, pyfunction, pymethods,
+    types::{PyModule, PyModuleMethods},
+    wrap_pyfunction,
 };
 use vcmp_bindings::{func::KeybindMethods, vcmp_func};
 
 use crate::py::types::KeyCode;
 
 #[pyclass]
-#[pyo3(name="KeyBind")]
+#[pyo3(name = "KeyBind")]
 pub struct KeyBindPy {
-    slot: i32
+    slot: i32,
 }
 
 impl KeyBindPy {
@@ -49,15 +51,9 @@ impl KeyBindPy {
     }
 }
 
-
 #[pyfunction]
 #[pyo3(name = "bindkey", signature = (can_release, key, key2=None, key3=None))]
-pub fn bindkey(
-    can_release: bool,
-    key: i32,
-    key2: Option<i32>,
-    key3: Option<i32>,
-) -> KeyBindPy {
+pub fn bindkey(can_release: bool, key: i32, key2: Option<i32>, key3: Option<i32>) -> KeyBindPy {
     let keybind = vcmp_func().register_key_bind(can_release, key, key2, key3);
     KeyBindPy::new(keybind.slot)
 }
@@ -70,14 +66,17 @@ pub fn bindkey1(
     key2: Option<KeyCode>,
     key3: Option<KeyCode>,
 ) -> KeyBindPy {
-    let keybind = vcmp_func().register_key_bind(can_release, key.into(), key2.map(|k| k.into()), key3.map(|k| k.into()));
+    let keybind = vcmp_func().register_key_bind(
+        can_release,
+        key.into(),
+        key2.map(|k| k.into()),
+        key3.map(|k| k.into()),
+    );
     KeyBindPy::new(keybind.slot)
 }
 
 #[pyfunction]
-pub fn get_bindkey(
-    slot: i32
-) -> Option<KeyBindPy> {
+pub fn get_bindkey(slot: i32) -> Option<KeyBindPy> {
     if let Ok(keybind) = vcmp_func().get_key_bind_data(slot) {
         Some(KeyBindPy::new(keybind.slot))
     } else {
@@ -86,9 +85,7 @@ pub fn get_bindkey(
 }
 
 #[pyfunction]
-pub fn remove_bind_key(
-    slot: i32
-) {
+pub fn remove_bind_key(slot: i32) {
     vcmp_func().remove_key_bind(slot);
 }
 
@@ -96,7 +93,6 @@ pub fn remove_bind_key(
 pub fn remove_all_key_binds() {
     vcmp_func().remove_all_key_binds();
 }
-
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<KeyBindPy>()?;
@@ -106,4 +102,3 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(remove_all_key_binds, m)?)?;
     Ok(())
 }
-
