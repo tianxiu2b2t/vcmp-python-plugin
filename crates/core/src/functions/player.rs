@@ -498,6 +498,7 @@ impl PlayerPy {
         );
     }
 
+    #[pyo3(signature = (position, look_yaw, look_pitch, range = 0.5))]
     pub fn set_camera(
         &self,
         position: VectorPy,
@@ -574,6 +575,11 @@ impl PlayerPy {
         let pool = ENTITY_POOL.lock().unwrap();
         let id = vcmp_func().get_player_spectate_target(self.id);
         pool.get_player(id).copied()
+    }
+
+    #[setter]
+    pub fn set_spectate_target(&self, player: Option<PlayerPy>) {
+        let _ = vcmp_func().set_player_spectate_target(self.id, player.map(|p| p.get_id()).unwrap_or(-1));
     }
 
     #[getter]

@@ -1,7 +1,6 @@
 use std::{
     default::Default,
     sync::{Arc, LazyLock, Mutex},
-    thread,
 };
 
 use pyo3::{
@@ -49,6 +48,7 @@ impl Default for Matcher {
 
 #[pymethods]
 impl Matcher {
+    #[pyo3(signature = (result = true))]
     pub fn finish(&mut self, py: Python<'_>, result: Option<Py<PyBool>>) -> PyResult<()> {
         // if result is None, then None
         // if result is not None, then convert to bool
@@ -74,6 +74,39 @@ pub fn increase_event_id() -> u32 {
     EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
 }
 
+pub struct EventCallRefCounter {
+    pub counter: Arc<Mutex<i32>>,
+}
+
+impl EventCallRefCounter {
+    pub fn new() -> Self {
+        Self {
+            counter: Arc::new(Mutex::new(0)),
+        }
+    }
+
+    pub fn increase(&self) -> i32 {
+        let mut counter = self.counter.lock().unwrap();
+        *counter += 1;
+
+        *counter
+    }
+
+    pub fn decrease(&self) -> i32{
+        let mut counter = self.counter.lock().unwrap();
+        *counter -= 1;
+
+        *counter
+    }
+
+    pub fn current(&self) -> i32 {
+        let counter = self.counter.lock().unwrap();
+        *counter
+    }
+}
+
+pub static IS_CALLING: LazyLock<EventCallRefCounter> = LazyLock::new(EventCallRefCounter::new);
+
 #[pyclass]
 #[pyo3(name = "CallbackManager")]
 #[derive(Debug, Clone, Copy, Default)]
@@ -84,12 +117,18 @@ impl CallbackManager {
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
-        //let current_id = increase_event_id();
-        //event!(
-        //    Level::INFO,
-        //    "Calling callbacks for event: {current_id}) {:?}",
-        //    event
-        //);
+        let current_id = increase_event_id();
+        let current_ref = IS_CALLING.increase();
+        if current_ref >= 2 {
+            event!(Level::ERROR, "Too many callbacks are calling, current_ref: {current_ref}, {event:?}");
+            IS_CALLING.decrease();
+            return false;
+        }
+        event!(
+            Level::DEBUG,
+            "Calling callbacks for event: ({current_id}, current_ref: {current_ref}) {:?}",
+            event
+        );
 
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
@@ -97,7 +136,7 @@ impl CallbackManager {
             let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
-                //event!(Level::INFO, "Matching callback: {:?}", callback);
+                //event!(Level::DEBUG, "Matching callback: {:?}", callback);
                 let origin_parameters = callback.params.clone();
                 let py_kwargs = PyDict::new(py);
 
@@ -119,11 +158,6 @@ impl CallbackManager {
                         }
                     }
 
-                    //    if arg.required and arg.name not in params:
-                    //    matched = False
-                    //    break
-                    //elif arg.name not in params:
-                    //    params[arg.name] = arg.default
                     if param.required && !py_kwargs.contains(name.clone()).unwrap() {
                         matched = false;
                         break;
@@ -141,18 +175,18 @@ impl CallbackManager {
 
                 match callback.func.call(py, (), Some(&py_kwargs)) {
                     Ok(res) => {
+                        event!(Level::DEBUG, "Callback result: {:?}", &res);
                         // isinstance bool
                         let result = res.bind(py);
                         if let Ok(r) = result.downcast::<PyBool>() {
                             matcher.is_finished = true;
                             matcher.result = r.extract::<bool>().unwrap();
-                        } else if result.is_none() {
-                            matcher.is_finished = true;
-                            matcher.result = true;
                         }
                     }
                     Err(e) => {
+                        let traceback = get_traceback(&e, Some(py));
                         if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                            event!(Level::DEBUG, traceback);
                             event!(Level::DEBUG, "KeyboardInterrupt");
                             vcmp_func().shutdown();
                             break;
@@ -160,7 +194,7 @@ impl CallbackManager {
                         event!(
                             Level::ERROR,
                             "Callback event: {event:?} error: {}",
-                            get_traceback(&e, Some(py))
+                            traceback
                         );
                         //if e.is_instance_of::<PyKeyboardInterrupt>(py) {
                         //    vcmp_func().shutdown();
@@ -181,15 +215,19 @@ impl CallbackManager {
                 }
             }
 
-            if matcher.is_finished {
-                // matcher = *matcher_ref;
+            if let Err(e) = py.check_signals() {
+                let traceback = get_traceback(&e, Some(py));
+                event!(Level::DEBUG, traceback);
+                vcmp_func().shutdown();
             }
         });
-        //event!(
-        //    Level::INFO,
-        //    "Finished calling callbacks for event: {current_id}) {:?}",
-        //    event
-        //);
+        event!(
+            Level::DEBUG,
+            "Finished calling callbacks for event: ({current_id}, current_ref: {current_ref}, global_ref: {}) {:?}",
+            IS_CALLING.current(),
+            event
+        );
+        IS_CALLING.decrease();
         matcher.result
     }
 }

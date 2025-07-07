@@ -15,8 +15,9 @@ use tracing_subscriber::{
 /// 非常好 生命周期, 使我烦死
 static LOG_FILE_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
 
+const MAX_LEVEL: Level = Level::INFO; // 硬编码最大日志级别
+
 pub fn init() {
-    let max_level = Level::DEBUG; // 硬编码最大日志级别
 
     // 创建按天轮换的文件 appender
     let file_appender = {
@@ -30,8 +31,8 @@ pub fn init() {
 
     let _ = LOG_FILE_GUARD.set(guard);
 
-    let file = non_blocking_file.with_max_level(max_level);
-    let stdio = std::io::stdout.with_max_level(max_level);
+    let file = non_blocking_file.with_max_level(MAX_LEVEL);
+    let stdio = std::io::stdout.with_max_level(MAX_LEVEL);
 
     let stdout_layer = fmt::layer()
         .with_writer(stdio)

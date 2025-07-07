@@ -5,6 +5,7 @@ use pyo3::types::PyModule;
 use pyo3::{Bound, PyResult, Python, pyclass, pymethods};
 use vcmp_bindings::events::player;
 
+use crate::functions::keybind::KeyBindPy;
 use crate::functions::player::PlayerPy;
 use crate::functions::vehicle::VehiclePy;
 use crate::pool::ENTITY_POOL;
@@ -138,6 +139,11 @@ impl PlayerDisconnectEvent {
             .expect("Failed to lock entity pool")
             .get_player(self.player_id)
             .unwrap()
+    }
+
+    #[getter]
+    pub fn get_reason(&self) -> i32 {
+        self.reason
     }
 }
 
@@ -1634,8 +1640,8 @@ impl PlayerKeyBindDownEvent {
     }
 
     #[getter]
-    pub fn get_bind_id(&self) -> i32 {
-        self.bind_id
+    pub fn get_key(&self) -> KeyBindPy {
+        KeyBindPy::new(self.bind_id)
     }
 }
 
@@ -1685,8 +1691,8 @@ impl PlayerKeyBindUpEvent {
     }
 
     #[getter]
-    pub fn get_bind_id(&self) -> i32 {
-        self.bind_id
+    pub fn get_key(&self) -> KeyBindPy {
+        KeyBindPy::new(self.bind_id)
     }
 }
 
