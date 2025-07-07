@@ -4,17 +4,13 @@ use pyo3::{
     wrap_pyfunction,
 };
 use vcmp_bindings::{
-    func::{
-        EnvironmentMethods, MiscMethods, QueryEnvironmentOption, SetEnvironmentOption,
-        environment::{QueryEnvironmentWorld, SetEnvironmentWorld},
-    },
-    utils::Vectorf32,
+    func::MiscMethods,
     vcmp_func,
 };
 
 use crate::{
     functions::player::PlayerPy,
-    py::types::{RGBPy, VectorPy, WastedSettingsPy},
+    py::types::VectorPy,
 };
 
 #[pyfunction]
@@ -51,7 +47,7 @@ pub fn hide_map_object(py: Python<'_>, object_id: i32, pos: VectorPy) {
 
 #[pyfunction]
 pub fn show_map_object(object_id: i32, pos: VectorPy) {
-    let _ = vcmp_func().hide_map_object(object_id, pos.into());
+    vcmp_func().hide_map_object(object_id, pos.into());
 }
 
 #[pyfunction]
@@ -61,12 +57,12 @@ pub fn show_all_map_objects() {
 
 #[pyfunction]
 pub fn add_radio_stream(id: i32, name: &str, url: &str, can_select: bool) {
-    let _ = vcmp_func().add_radio_stream(id, name, url, can_select);
+    vcmp_func().add_radio_stream(id, name, url, can_select);
 }
 
 #[pyfunction]
 pub fn remove_radio_stream(id: i32) {
-    let _ = vcmp_func().remove_radio_stream(id);
+    vcmp_func().remove_radio_stream(id);
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

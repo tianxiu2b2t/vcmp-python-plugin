@@ -5,6 +5,7 @@ use vcmp_bindings::{
 
 use tracing::{Level, event};
 
+#[allow(clippy::missing_safety_doc)]
 pub mod callbacks;
 pub mod consts;
 pub mod functions;
