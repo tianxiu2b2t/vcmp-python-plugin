@@ -714,14 +714,9 @@ pub struct PlayerMoveEvent {
     player_id: i32,
     old_position: VectorPy,
     new_position: VectorPy,
-    position: VectorPy,
+    pub position: VectorPy,
 }
 
-impl PlayerMoveEvent {
-    pub fn get_position(&self) -> VectorPy {
-        self.position
-    }
-}
 
 #[pymethods]
 impl PlayerMoveEvent {
