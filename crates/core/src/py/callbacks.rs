@@ -84,13 +84,12 @@ impl CallbackManager {
     where
         T: PyClass + crate::py::events::PyBaseEvent,
     {
-        let current_id = increase_event_id();
-        let thread_id = thread::current().id();
-        event!(
-            Level::INFO,
-            "Calling callbacks for event: (Thread({thread_id:?}) {current_id}) {:?}",
-            event
-        );
+        //let current_id = increase_event_id();
+        //event!(
+        //    Level::INFO,
+        //    "Calling callbacks for event: {current_id}) {:?}",
+        //    event
+        //);
 
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
@@ -138,7 +137,7 @@ impl CallbackManager {
                     continue;
                 }
 
-                event!(Level::INFO, "Matched callback: {:?}", callback);
+                event!(Level::DEBUG, "Matched callback: {:?} {:?}", callback, event);
 
                 match callback.func.call(py, (), Some(&py_kwargs)) {
                     Ok(res) => {
@@ -186,11 +185,11 @@ impl CallbackManager {
                 // matcher = *matcher_ref;
             }
         });
-        event!(
-            Level::INFO,
-            "Finished calling callbacks for event: (Thread({thread_id:?}) {current_id}) {:?}",
-            event
-        );
+        //event!(
+        //    Level::INFO,
+        //    "Finished calling callbacks for event: {current_id}) {:?}",
+        //    event
+        //);
         matcher.result
     }
 }

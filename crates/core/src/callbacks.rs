@@ -2,6 +2,7 @@ use std::os::raw::c_char;
 
 use crate::py::events::{player::*, server::*};
 use crate::py::types::VectorPy;
+use pyo3::Python;
 use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
@@ -447,7 +448,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
             ));
             let move_res = CALLBACK.call_func(event, None);
             if !move_res {
-                player.set_position(event.get_position());
+                Python::with_gil(|py| player.set_position(py, event.get_position()));
             } else {
                 player.last_position = current_pos;
             }
@@ -490,7 +491,7 @@ pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnPlayerKeyBindUp = Some(on_player_key_bind_up);
     callbacks.OnPlayerSpectate = Some(on_player_spectate);
     callbacks.OnPlayerCrashReport = Some(on_player_crash_report);
-    callbacks.OnPlayerUpdate = Some(on_player_update);
+    //callbacks.OnPlayerUpdate = Some(on_player_update);
 
     callbacks.OnEntityPoolChange = Some(on_entity_pool_change);
 }

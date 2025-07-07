@@ -412,10 +412,10 @@ impl PlayerPy {
     }
 
     #[setter]
-    pub fn set_position(&self, position: VectorPy) {
-        println!("test {position:?}");
-        let res = vcmp_func().set_player_position(self.id, position.get_entity_pos());
-        println!("test res: {res:?}");
+    pub fn set_position(&self, py: Python<'_>, position: VectorPy) {
+        py.allow_threads(|| {
+            let _ = vcmp_func().set_player_position(self.id, position.get_entity_pos());
+        });
     }
 
     pub fn redirect(&self, ip: &str, port: u32, nick: &str, password: &str, user_password: &str) {
