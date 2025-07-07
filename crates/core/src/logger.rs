@@ -1,4 +1,4 @@
-use std::{io, sync::OnceLock};
+use std::sync::OnceLock;
 use tracing::{Level, event};
 use tracing_appender::{
     non_blocking::WorkerGuard,
@@ -6,31 +6,38 @@ use tracing_appender::{
 };
 use tracing_subscriber::{
     fmt::{self, writer::MakeWriterExt},
-    prelude::*,
+    layer::SubscriberExt,
+    util::SubscriberInitExt,
 };
 
-static LOG_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
+/// 用于持有 WorkerGuard, 让它别 Drop 了
+///
+/// 非常好 生命周期, 使我烦死
+static LOG_FILE_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
 
 pub fn init() {
     let max_level = Level::DEBUG; // 硬编码最大日志级别
 
     // 创建按天轮换的文件 appender
-    let file_appender = RollingFileAppender::new(Rotation::DAILY, "logs", "app.log");
+    let file_appender = {
+        RollingFileAppender::builder()
+            .filename_suffix("vcmp-rs.log") // 要后缀!
+            .rotation(Rotation::DAILY)
+            .build("logs")
+            .expect("Failed to build log file writer.")
+    };
     let (non_blocking_file, guard) = tracing_appender::non_blocking(file_appender);
 
-    let _ = LOG_GUARD.set(guard);
+    let _ = LOG_FILE_GUARD.set(guard);
 
     let file = non_blocking_file.with_max_level(max_level);
-
     let stdio = std::io::stdout.with_max_level(max_level);
 
-    // 控制台输出层 - 使用硬编码的最大级别
     let stdout_layer = fmt::layer()
         .with_writer(stdio)
         .with_line_number(true)
         .with_thread_ids(true);
 
-    // // 文件输出层 - 使用硬编码的最大级别
     let file_layer = fmt::layer().with_writer(file).with_ansi(false);
 
     // 初始化订阅者
@@ -39,5 +46,5 @@ pub fn init() {
         .with(file_layer)
         .init();
 
-    event!(Level::INFO, "tracing 设置完成");
+    event!(Level::INFO, "tracing 日志设置完成");
 }
