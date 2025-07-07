@@ -160,7 +160,7 @@ impl CallbackManager {
                         event!(
                             Level::ERROR,
                             "Callback event: {event:?} error: {}",
-                            get_traceback(e, Some(py))
+                            get_traceback(&e, Some(py))
                         );
                         //if e.is_instance_of::<PyKeyboardInterrupt>(py) {
                         //    vcmp_func().shutdown();

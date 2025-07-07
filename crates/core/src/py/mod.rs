@@ -1,7 +1,5 @@
-use std::cell::OnceCell;
 use std::ffi::CString;
 use std::path::Path;
-use std::sync::OnceLock;
 
 use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
 use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
@@ -15,7 +13,6 @@ use crate::functions::object::ObjectPy;
 use crate::functions::pickup::PickupPy;
 use crate::functions::player::PlayerPy;
 use crate::functions::vehicle::VehiclePy;
-use crate::logger;
 
 pub mod callbacks;
 pub mod events;
@@ -169,7 +166,7 @@ pub fn load_script_as_module() {
     let script_path = CONFIG.get().unwrap().script_path.as_str();
     let res = raw_load_script_as_module(Path::new(script_path));
     if let Err(e) = res {
-        event!(Level::ERROR, "Error: {}", get_traceback(e, None));
+        event!(Level::ERROR, "Error: {}", get_traceback(&e, None));
     } else {
         event!(Level::INFO, "Script loaded");
     }
@@ -221,17 +218,20 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
     result
 }
 
-pub fn get_traceback(err: PyErr, py: Option<Python<'_>>) -> String {
-    let res = if py.is_none() {
-        Python::with_gil(|py| {
-            err.traceback(py)
-                .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
-                .unwrap_or(String::from("Unknown traceback"))
-        })
-    } else {
-        err.traceback(py.unwrap())
-            .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
-            .unwrap_or(String::from("Unknown traceback"))
+/// 获取 python 错误信息
+///
+/// 可以提供一个 gil 来减少 gil 获取次数
+pub fn get_traceback(py_err: &PyErr, py: Option<Python<'_>>) -> String {
+    let traceback = match py {
+        Some(py) => match py_err.traceback(py) {
+            Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
+            None => "none traceback".to_string(),
+        },
+        None => Python::with_gil(|py| match py_err.traceback(py) {
+            Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
+            None => "none traceback".to_string(),
+        }),
     };
-    format!("{res}{err}")
+
+    format!("{traceback}{py_err}")
 }

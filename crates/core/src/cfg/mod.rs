@@ -61,10 +61,7 @@ impl Display for Config {
             debug: {}
         }}
         "#,
-            self.preloader,
-            self.script_path,
-            self.virtual_env.clone(),
-            self.debug
+            self.preloader, self.script_path, self.virtual_env, self.debug
         )
     }
 }
@@ -114,5 +111,5 @@ pub fn init_config() {
         init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or_default())
     });
 
-    event!(Level::INFO, "{}", CONFIG.get().unwrap());
+    event!(Level::DEBUG, "{}", CONFIG.get().unwrap());
 }
