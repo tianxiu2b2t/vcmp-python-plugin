@@ -10,6 +10,65 @@ pub mod vehicle;
 
 pub enum VcmpEvent {
     PluginCommand(PluginCommandEvent),
+    EntityStreaming(EntityStreamingChangeEvent),
+    EntityPool(EntityPoolChangeEvent),
+    
+    // checkpoint
+    CheckpointEntered(checkpoint::CheckpointEnteredEvent),
+    CheckpointExited(checkpoint::CheckpointExitedEvent),
+
+    // object
+    ObjectShot(object::ObjectShotEvent),
+    ObjectTouched(object::ObjectTouchedEvent),
+
+    // pickup
+    PickupPicked(pickup::PickupPickedEvent),
+    PickupPickAttempt(pickup::PickupPickAttemptEvent),
+    PickupRespawn(pickup::PickupRespawnEvent),
+
+    // player
+    IncomingConnection(player::IncomingConnectionEvent),
+    ClientScriptData(player::ClientScriptDataEvent),
+    PlayerConnect(player::PlayerConnectEvent),
+    PlayerDisconnect(player::PlayerDisconnectEvent),
+    PlayerRequestClass(player::PlayerRequestClassEvent),
+    PlayerSpawn(player::PlayerSpawnEvent),
+    PlayerRequestSpawn(player::PlayerRequestSpawnEvent),
+    PlayerDeath(player::PlayerDeathEvent),
+    PlayerUpdate(player::PlayerUpdateEvent),
+    PlayerRequestEnterVehicle(player::PlayerRequestEnterVehicleEvent),
+    PlayerEnterVehicle(player::PlayerEnterVehicleEvent),
+    PlayerExitVehicle(player::PlayerExitVehicleEvent),
+    PlayerNameChange(player::PlayerNameChangeEvent),
+    PlayerStateChange(player::PlayerStateChangeEvent),
+    PlayerActionChange(player::PlayerActionChangeEvent),
+    PlayerOnFireChange(player::PlayerOnFireChangeEvent),
+    PlayerCrouchChange(player::PlayerCrouchChangeEvent),
+    PlayerGameKeysChange(player::PlayerGameKeysChangeEvent),
+    PlayerBeginTyping(player::PlayerBeginTypingEvent),
+    PlayerEndTyping(player::PlayerEndTypingEvent),
+    PlayerAwayChange(player::PlayerAwayChangeEvent),
+    PlayerMessage(player::PlayerMessageEvent),
+    PlayerCommand(player::PlayerCommandEvent),
+    PlayerPrivateMessage(player::PlayerPrivateMessageEvent),
+    PlayerKeyBindDown(player::PlayerKeyBindDownEvent),
+    PlayerKeyBindUp(player::PlayerKeyBindUpEvent),
+    PlayerSpectate(player::PlayerSpectateEvent),
+    PlayerCrashReport(player::PlayerCrashReportEvent),
+    PlayerModuleList(player::PlayerModuleListEvent),
+
+    // server
+
+    ServerInitialise(server::ServerInitialiseEvent),
+    ServerShutdown(server::ServerShutdownEvent),
+    ServerFrame(server::ServerFrameEvent),
+    ServerPerformanceReport(server::ServerPerformanceReportEvent),
+
+    // vehicle
+    VehicleUpdate(vehicle::VehicleUpdateEvent),
+    VehicleExplode(vehicle::VehicleExplodeEvent),
+    VehicleRespawn(vehicle::VehicleRespawnEvent),
+
 }
 
 pub struct PluginCommandEvent {

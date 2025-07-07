@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::{ops::Add, fmt::Debug};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
@@ -301,7 +301,7 @@ impl RGBPy {
     }
 }
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Debug, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum EntityVectorType {
     PlayerPosition,
     PlayerSpeed,
@@ -321,7 +321,7 @@ pub enum EntityVectorType {
     Ignore,
 }
 
-#[derive(Clone, Debug, Copy)]
+#[derive(Clone, Copy)]
 #[pyclass]
 #[pyo3(name = "Vector")]
 pub struct VectorPy {
@@ -496,6 +496,27 @@ impl Default for VectorPy {
             inner: None,
             entity_type: EntityVectorType::Ignore,
             entity_id: 0,
+        }
+    }
+}
+
+impl Debug for VectorPy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let pos = self.get_entity_pos();
+        if self.entity_type == EntityVectorType::Ignore {
+            f.debug_struct("VectorPy")
+                .field("x", &pos.x)
+                .field("y", &pos.y)
+                .field("z", &pos.z)
+                .finish()
+        } else {
+            f.debug_struct("VectorPy")
+                .field("entity_type", &self.entity_type)
+                .field("entity_id", &self.entity_id)
+                .field("x", &pos.x)
+                .field("y", &pos.y)
+                .field("z", &pos.z)
+                .finish()
         }
     }
 }

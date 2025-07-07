@@ -154,6 +154,7 @@ impl PlayerPy {
         vcmp_func().is_player_away(self.id)
     }
 
+    #[pyo3(signature = (message = None))]
     pub fn ban(&self, message: Option<&str>) {
         if let Some(message) = message {
             self.send_message(message);
@@ -368,6 +369,7 @@ impl PlayerPy {
         vcmp_func().get_player_key(self.id)
     }
 
+    #[pyo3(signature = (message = None))]
     pub fn kick(&self, message: Option<&str>) {
         if let Some(message) = message {
             self.send_message(message);
@@ -403,6 +405,7 @@ impl PlayerPy {
         let _ = vcmp_func().set_player_animation(self.id, group_id, animation_id);
     }
 
+    #[pyo3(signature = (sound, position = None))]
     pub fn play_sound(&self, sound: i32, position: Option<VectorPy>) {
         let pos = position
             .map(Vectorf32::from)

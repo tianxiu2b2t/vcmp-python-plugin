@@ -18,7 +18,7 @@ pub extern "C" fn on_server_init() -> u8 {
         load_script_as_module();
     }
 
-    let _ = CALLBACK.call_func(ServerInitialiseEvent, None);
+    let _ = CALLBACK.call_func(ServerInitialiseEvent, None, false);
 
     1
 }
@@ -27,7 +27,7 @@ pub extern "C" fn on_server_init() -> u8 {
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn on_server_frame(elapsed_time: f32) {
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
-    let _ = CALLBACK.call_func(ServerFrameEvent::from(elapsed_time), None);
+    let _ = CALLBACK.call_func(ServerFrameEvent::from(elapsed_time), None, false);
 }
 
 ///
@@ -42,12 +42,13 @@ pub unsafe extern "C" fn on_server_performance_report(
     let _ = CALLBACK.call_func(
         ServerPerformanceReportEvent::from((entry_count, descriptions, times)),
         None,
+        false,
     );
 }
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_shutdown() {
-    let _ = CALLBACK.call_func(ServerShutdownEvent, None);
+    let _ = CALLBACK.call_func(ServerShutdownEvent, None, false);
 }
 
 /// # Safety
@@ -82,6 +83,7 @@ pub unsafe extern "C" fn on_incoming_connection(
     CALLBACK.call_func(
         IncomingConnectionEvent::from((player_name, name_buffer_size, user_password, ip_address)),
         None,
+        false,
     ) as u8
 }
 
@@ -96,6 +98,7 @@ pub unsafe extern "C" fn on_player_connect(player_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerConnectEvent::from(player::PlayerConnectEvent::from(player_id)),
         None,
+        false,
     );
 }
 
@@ -105,6 +108,7 @@ pub unsafe extern "C" fn on_player_disconnect(player_id: i32, reason: i32) {
     let _ = CALLBACK.call_func(
         PlayerDisconnectEvent::from(player::PlayerDisconnectEvent::from((player_id, reason))),
         None,
+        false,
     );
 
     unsafe {
@@ -122,6 +126,7 @@ pub unsafe extern "C" fn on_client_script_data(client_id: i32, data: *const u8, 
     let _ = CALLBACK.call_func(
         ClientScriptDataEvent::from(player::ClientScriptDataEvent::from((client_id, data, size))),
         None,
+        false,
     );
 }
 
@@ -131,6 +136,7 @@ pub unsafe extern "C" fn on_player_request_class(player_id: i32, class_id: i32) 
     CALLBACK.call_func(
         PlayerRequestClassEvent::from(player::PlayerRequestClassEvent::from((player_id, class_id))),
         None,
+        false
     ) as u8
 }
 
@@ -140,6 +146,7 @@ pub unsafe extern "C" fn on_player_request_spawn(player_id: i32) -> u8 {
     CALLBACK.call_func(
         PlayerRequestSpawnEvent::from(player::PlayerRequestSpawnEvent::from(player_id)),
         None,
+        false
     ) as u8
 }
 
@@ -151,6 +158,7 @@ pub unsafe extern "C" fn on_player_enter_vehicle(player_id: i32, vehicle_id: i32
             player_id, vehicle_id, seat_id,
         ))),
         None,
+        false
     );
 }
 
@@ -162,6 +170,7 @@ pub unsafe extern "C" fn on_player_exit_vehicle(player_id: i32, vehicle_id: i32)
             player_id, vehicle_id,
         ))),
         None,
+        false
     );
 }
 
@@ -177,6 +186,7 @@ pub unsafe extern "C" fn on_player_request_enter_vehicle(
             player_id, vehicle_id, seat_id,
         ))),
         None,
+        false
     ) as u8
 }
 
@@ -186,6 +196,7 @@ pub unsafe extern "C" fn on_player_spawn(player_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerSpawnEvent::from(player::PlayerSpawnEvent::from(player_id)),
         None,
+        false
     );
 }
 
@@ -202,6 +213,7 @@ pub unsafe extern "C" fn on_player_death(
             player_id, killer_id, reason, body_part,
         ))),
         None,
+        false
     );
 }
 
@@ -217,6 +229,7 @@ pub unsafe extern "C" fn on_player_name_change(
             player_id, old_name, new_name,
         ))),
         None,
+        false
     );
 }
 
@@ -228,6 +241,7 @@ pub unsafe extern "C" fn on_player_state_change(player_id: i32, old_state: i32, 
             player_id, old_state, new_state,
         ))),
         None,
+        false
     );
 }
 
@@ -239,6 +253,7 @@ pub unsafe extern "C" fn on_player_action_change(player_id: i32, old_action: i32
             player_id, old_action, new_action,
         ))),
         None,
+        false
     );
 }
 
@@ -251,6 +266,7 @@ pub unsafe extern "C" fn on_player_on_fire_change(player_id: i32, is_on_fire: u8
             player_id, is_on_fire,
         ))),
         None,
+        false
     );
 }
 
@@ -264,6 +280,7 @@ pub unsafe extern "C" fn on_player_crouch_change(player_id: i32, is_crouching: u
             is_crouching,
         ))),
         None,
+        false
     );
 }
 
@@ -276,6 +293,7 @@ pub unsafe extern "C" fn on_player_game_keys_change(player_id: i32, old_keys: u3
             player_id, old_keys, new_keys,
         ))),
         None,
+        false
     );
 }
 
@@ -283,14 +301,14 @@ pub unsafe extern "C" fn on_player_game_keys_change(player_id: i32, old_keys: u3
 /// # Safety
 /// FFI callback for player begin typing
 pub unsafe extern "C" fn on_player_begin_typing(player_id: i32) {
-    let _ = CALLBACK.call_func(PlayerBeginTypingEvent::from(player_id), None);
+    let _ = CALLBACK.call_func(PlayerBeginTypingEvent::from(player_id), None, false);
 }
 
 #[unsafe(no_mangle)]
 /// # Safety
 /// FFI callback for player end typing
 pub unsafe extern "C" fn on_player_end_typing(player_id: i32) {
-    let _ = CALLBACK.call_func(PlayerEndTypingEvent::from(player_id), None);
+    let _ = CALLBACK.call_func(PlayerEndTypingEvent::from(player_id), None, false);
 }
 
 #[unsafe(no_mangle)]
@@ -300,6 +318,7 @@ pub unsafe extern "C" fn on_player_away_change(player_id: i32, is_away: u8) {
     let _ = CALLBACK.call_func(
         PlayerAwayChangeEvent::from(player::PlayerAwayChangeEvent::from((player_id, is_away))),
         None,
+        false
     );
 }
 
@@ -310,6 +329,7 @@ pub unsafe extern "C" fn on_player_message(player_id: i32, message: *const c_cha
     CALLBACK.call_func(
         PlayerMessageEvent::from(player::PlayerMessageEvent::from((player_id, message))),
         None,
+        false
     ) as u8
 }
 
@@ -320,6 +340,7 @@ pub unsafe extern "C" fn on_player_command(player_id: i32, command: *const c_cha
     CALLBACK.call_func(
         PlayerCommandEvent::from(player::PlayerCommandEvent::from((player_id, command))),
         None,
+        false
     ) as u8
 }
 
@@ -336,6 +357,7 @@ pub unsafe extern "C" fn on_player_private_message(
             player_id, target_id, message,
         ))),
         None,
+        false
     ) as u8
 }
 
@@ -346,6 +368,7 @@ pub unsafe extern "C" fn on_player_key_bind_down(player_id: i32, bind_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerKeyBindDownEvent::from(player::PlayerKeyBindDownEvent::from((player_id, bind_id))),
         None,
+        false
     );
 }
 
@@ -356,6 +379,7 @@ pub unsafe extern "C" fn on_player_key_bind_up(player_id: i32, bind_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerKeyBindUpEvent::from(player::PlayerKeyBindUpEvent::from((player_id, bind_id))),
         None,
+        false
     );
 }
 
@@ -366,6 +390,7 @@ pub unsafe extern "C" fn on_player_spectate(player_id: i32, target_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerSpectateEvent::from(player::PlayerSpectateEvent::from((player_id, target_id))),
         None,
+        false
     );
 }
 
@@ -376,6 +401,7 @@ pub unsafe extern "C" fn on_player_crash_report(player_id: i32, report: *const c
     let _ = CALLBACK.call_func(
         PlayerCrashReportEvent::from(player::PlayerCrashReportEvent::from((player_id, report))),
         None,
+        false
     );
 }
 
@@ -388,7 +414,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
         let last_health = player.last_health;
         if current_health != last_health {
             let event = PlayerHealthEvent::from((player_id, last_health, current_health));
-            let health_res = CALLBACK.call_func(event, None);
+            let health_res = CALLBACK.call_func(event, None, true);
             if !health_res {
                 player.set_health(event.get_health());
             } else {
@@ -402,7 +428,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
         let last_armour = player.last_armour;
         if current_armour != last_armour {
             let event = PlayerArmourEvent::from((player_id, last_armour, current_armour));
-            let armour_res = CALLBACK.call_func(event, None);
+            let armour_res = CALLBACK.call_func(event, None, true);
             if !armour_res {
                 player.set_armour(event.get_armour());
             } else {
@@ -416,7 +442,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
         let last_weapon = player.last_weapon;
         if current_weapon != last_weapon {
             let event = PlayerWeaponEvent::from((player_id, last_weapon, current_weapon));
-            let weapon_res = CALLBACK.call_func(event, None);
+            let weapon_res = CALLBACK.call_func(event, None, true);
             if !weapon_res {
                 player.give_weapon(event.get_weapon(), 0);
             } else {
@@ -432,6 +458,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
             let _ = CALLBACK.call_func(
                 PlayerAmmoEvent::from((player_id, last_ammo, current_ammo)),
                 None,
+                true,
             );
             player.last_ammo = current_ammo;
         }
@@ -446,7 +473,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
                 VectorPy::from(last_pos),
                 VectorPy::from(current_pos),
             ));
-            let move_res = CALLBACK.call_func(event, None);
+            let move_res = CALLBACK.call_func(event, None, true);
             if !move_res {
                 player.set_position(event.position.get_entity_pos());
             } else {

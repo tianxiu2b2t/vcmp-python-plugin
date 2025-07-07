@@ -1,6 +1,5 @@
 use std::{
-    default::Default,
-    sync::{Arc, LazyLock, Mutex},
+    any::Any, collections::HashMap, default::Default, sync::{Arc, LazyLock, Mutex}
 };
 
 use pyo3::{
@@ -48,13 +47,18 @@ impl Default for Matcher {
 
 #[pymethods]
 impl Matcher {
-    #[pyo3(signature = (result = true))]
+    #[pyo3(signature = (result = None))]
     pub fn finish(&mut self, py: Python<'_>, result: Option<Py<PyBool>>) -> PyResult<()> {
         // if result is None, then None
         // if result is not None, then convert to bool
-        let result = result.unwrap().extract::<bool>(py).unwrap();
+        let res = {
+            match result {
+                Some(result) => result.extract::<bool>(py).unwrap(),
+                None => true,
+            }
+        };
         self.is_finished = true;
-        self.result = result;
+        self.result = res;
 
         // 然后阻止 python 代码继续运行
         Err(PyErr::new::<FinishedException, _>("Finished exception"))
@@ -107,22 +111,52 @@ impl EventCallRefCounter {
 
 pub static IS_CALLING: LazyLock<EventCallRefCounter> = LazyLock::new(EventCallRefCounter::new);
 
+#[derive(Debug, Clone, Copy)]
+pub struct CallbackBuilder<T>
+where
+    T: PyClass + crate::py::events::PyBaseEvent + Clone + Copy,
+{
+    event: T,
+    kwargs: HashMap<String, Box<dyn Any + Send + Sync>>,
+impl<T> CallbackBuilder<T>
+where
+    T: PyClass + crate::py::events::PyBaseEvent + Clone + Copy,
+{
+    pub fn new(event: T) -> Self {
+        Self {
+            event,
+            kwargs: HashMap::new(),
+            failed_result: false,
+        }
+    }
+    pub fn kwargs(mut self, kwargs: HashMap<String, Box<dyn Any + Send + Sync>>) -> Self {
+        self.kwargs = kwargs;
+        self
+    }
+    pub fn failed_result(mut self, failed_result: bool) -> Self {
+        self.failed_result = failed_result;
+        self
+    }
+}
+        self
+    }
+}
+
 #[pyclass]
 #[pyo3(name = "CallbackManager")]
 #[derive(Debug, Clone, Copy, Default)]
 pub struct CallbackManager;
 
 impl CallbackManager {
-    pub fn call_func<T>(&self, event: T, _kwargs: Option<Py<PyDict>>) -> bool
-    where
-        T: PyClass + crate::py::events::PyBaseEvent,
-    {
+    pub fn handle_event(&self, builder: CallbackBuilder, py: Python<'_>) -> bool {
+    }
+    pub fn call_func(&self, builder: CallbackBuilder) -> bool {
         let current_id = increase_event_id();
         let current_ref = IS_CALLING.increase();
         if current_ref >= 2 {
             event!(Level::ERROR, "Too many callbacks are calling, current_ref: {current_ref}, {event:?}");
             IS_CALLING.decrease();
-            return false;
+            return failed_result;
         }
         event!(
             Level::DEBUG,
