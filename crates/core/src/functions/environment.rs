@@ -379,12 +379,12 @@ pub fn set_spawn_camera_look_at(position: VectorPy) {
 pub fn set_spawn_camera(position: VectorPy, look_yaw: f32, look_pitch: f32, range: Option<f32>) {
     let mut look = Vectorf32::default();
     let range = range.unwrap_or(0.5);
-    look.x = (look_yaw.cos() * range) as f32;
-    look.y = (look_yaw.sin() * range) as f32;
-    look.z = (look_pitch.sin() * range) as f32;
+    look.x = look_yaw.cos() * range;
+    look.y = look_yaw.sin() * range;
+    look.z = look_pitch.sin() * range;
     let py_look = VectorPy::from(look);
-    let origin = position.clone();
-    let camera_position = position.clone();
+    let origin = position;
+    let camera_position = position;
     set_spawn_camera_position(origin);
     set_spawn_camera_look_at(py_look + camera_position);
 }

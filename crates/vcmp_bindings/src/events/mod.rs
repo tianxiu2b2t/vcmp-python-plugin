@@ -1,17 +1,21 @@
 use crate::{PlayerId, options::VcmpEntityPool};
 use std::ffi::c_char;
 
-pub struct PluginCommandEvent {
-    pub identifer: u32,
-    pub message: String,
-}
-
 pub mod checkpoint;
 pub mod object;
 pub mod pickup;
 pub mod player;
 pub mod server;
 pub mod vehicle;
+
+pub enum VcmpEvent {
+    PluginCommand(PluginCommandEvent),
+}
+
+pub struct PluginCommandEvent {
+    pub identifer: u32,
+    pub message: String,
+}
 
 impl From<(u32, *const c_char)> for PluginCommandEvent {
     fn from(value: (u32, *const c_char)) -> Self {

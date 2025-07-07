@@ -3,9 +3,9 @@ use std::ffi::CString;
 use std::path::Path;
 use std::sync::OnceLock;
 
-use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
-
 use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
+use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
+use tracing::{Level, event};
 
 use crate::cfg::CONFIG;
 use crate::functions;
@@ -65,9 +65,9 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     fix_module_name(py, &funcs_module, "functions");
     m.add_submodule(&funcs_module)?;
 
-    let callbacks_module = PyModule::new(py, "callbacks")?;
+    let callbacks_module = PyModule::new(py, "callback")?;
     callbacks::module_define(py, &callbacks_module)?;
-    fix_module_name(py, &callbacks_module, "callbacks");
+    fix_module_name(py, &callbacks_module, "callback");
     m.add_submodule(&callbacks_module)?;
 
     {
@@ -155,14 +155,10 @@ pub fn init_py() {
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
 
-        logger::event!(
-            logger::Level::TRACE,
-            "Status: {}",
-            pyo3::ffi::Py_IsInitialized()
-        );
-    };
+        event!(Level::INFO, "Status: {}", pyo3::ffi::Py_IsInitialized());
+    }
 
-    logger::event!(logger::Level::TRACE, "Python init");
+    event!(Level::INFO, "Python init done");
 
     if CONFIG.get().unwrap().preloader {
         load_script_as_module();
@@ -173,9 +169,9 @@ pub fn load_script_as_module() {
     let script_path = CONFIG.get().unwrap().script_path.as_str();
     let res = raw_load_script_as_module(Path::new(script_path));
     if let Err(e) = res {
-        logger::event!(logger::Level::ERROR, "Error: {}", get_traceback(e));
+        event!(Level::ERROR, "Error: {}", get_traceback(e));
     } else {
-        logger::event!(logger::Level::INFO, "Script loaded");
+        event!(Level::INFO, "Script loaded");
     }
 }
 
@@ -231,5 +227,5 @@ pub fn get_traceback(err: PyErr) -> String {
             .map(|f| f.format().unwrap_or(String::from("Unknown traceback")))
             .unwrap_or(String::from("Unknown traceback"))
     });
-    format!("{}{}", res, err.to_string())
+    format!("{res}{err}")
 }

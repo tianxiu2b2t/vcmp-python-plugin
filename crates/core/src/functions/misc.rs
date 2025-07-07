@@ -38,7 +38,7 @@ pub fn create_explosion(
 #[pyfunction]
 pub fn play_sound(world_id: i32, sound_id: i32, pos: VectorPy) {
     let position = pos.get_entity_pos();
-    let _ = vcmp_func().play_sound(world_id, sound_id, position.x, position.y, position.z);
+    vcmp_func().play_sound(world_id, sound_id, position.x, position.y, position.z);
 }
 
 #[pyfunction]
@@ -53,7 +53,7 @@ pub fn show_map_object(object_id: i32, pos: VectorPy) {
 
 #[pyfunction]
 pub fn show_all_map_objects() {
-    let _ = vcmp_func().show_all_map_objects();
+    vcmp_func().show_all_map_objects();
 }
 
 #[pyfunction]

@@ -3,6 +3,8 @@ use vcmp_bindings::{
     raw::{PluginCallbacks, PluginFuncs, PluginInfo},
 };
 
+use tracing::{Level, event};
+
 pub mod callbacks;
 pub mod consts;
 pub mod functions;
@@ -39,19 +41,19 @@ extern "C" fn VcmpPluginInit(
     // first logger init
     logger::init();
 
-    logger::event!(logger::Level::INFO, "loading vcmp-plugin-rs");
+    event!(Level::INFO, "loading vcmp-plugin-rs");
     {
         // check null
         if plugin_functions.is_null() {
-            logger::event!(logger::Level::ERROR, "!!! plugin_functions is null !!!");
+            event!(Level::ERROR, "!!! plugin_functions is null !!!");
             return 0;
         }
         if plugin_callbacks.is_null() {
-            logger::event!(logger::Level::ERROR, "!!! plugin_callbacks is null !!!");
+            event!(Level::ERROR, "!!! plugin_callbacks is null !!!");
             return 0;
         }
         if plugin_info.is_null() {
-            logger::event!(logger::Level::ERROR, "!!! plugin_info is null !!!");
+            event!(Level::ERROR, "!!! plugin_info is null !!!");
             return 0;
         }
     }
@@ -68,7 +70,7 @@ extern "C" fn VcmpPluginInit(
     info.apiMinorVersion = 0; // 就先 .0了
     info.pluginVersion = PLUGIN_VERSION;
 
-    logger::event!(logger::Level::TRACE, "vcmp-plugin-rs info: {info:?}");
+    event!(Level::TRACE, "vcmp-plugin-rs info: {info:?}");
 
     init_config();
     init_py();
@@ -77,18 +79,18 @@ extern "C" fn VcmpPluginInit(
     if !(functions.inner_ffi_size() == functions.inner_struct_size()
         && std::mem::size_of::<PluginCallbacks>() == callbacks.structSize as usize)
     {
-        logger::event!(logger::Level::WARN, "WARNING!! struct size not matching");
+        event!(Level::WARN, "WARNING!! struct size not matching");
         if functions.inner_ffi_size() != functions.inner_struct_size() {
-            logger::event!(
-                logger::Level::WARN,
+            event!(
+                Level::WARN,
                 "func expect size: {}, actuall ffi size: {}",
                 functions.inner_ffi_size(),
                 functions.inner_struct_size()
             );
         }
         if std::mem::size_of::<PluginCallbacks>() != callbacks.structSize as usize {
-            logger::event!(
-                logger::Level::WARN,
+            event!(
+                Level::WARN,
                 "callback expect size: {}, actuall ffi size {}",
                 std::mem::size_of::<PluginCallbacks>(),
                 callbacks.structSize
@@ -107,7 +109,7 @@ extern "C" fn VcmpPluginInit(
 
     // get version
     let version: u32 = functions.server_version();
-    logger::event!(logger::Level::DEBUG, "server version: {version}");
+    event!(Level::DEBUG, "server version: {version}");
 
     //println!("ready to getsetting");
     //let server_settings = functions.get_server_settings();
@@ -118,7 +120,7 @@ extern "C" fn VcmpPluginInit(
 
     init_callbacks(callbacks);
 
-    logger::event!(logger::Level::INFO, "vcmp-plugin-rs loaded");
+    event!(Level::INFO, "vcmp-plugin-rs loaded");
 
     1
 }

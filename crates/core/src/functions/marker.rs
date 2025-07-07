@@ -82,7 +82,7 @@ impl MarkerPy {
     }
 
     pub fn delete(&self) {
-        let _ = vcmp_func().destory_marker(self.id);
+        vcmp_func().destory_marker(self.id);
     }
 }
 

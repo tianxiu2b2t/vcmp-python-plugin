@@ -413,9 +413,9 @@ impl PlayerPy {
 
     #[setter]
     pub fn set_position(&self, position: VectorPy) {
-        println!("test {:?}", position);
+        println!("test {position:?}");
         let res = vcmp_func().set_player_position(self.id, position.get_entity_pos());
-        println!("test res: {:?}", res);
+        println!("test res: {res:?}");
     }
 
     pub fn redirect(&self, ip: &str, port: u32, nick: &str, password: &str, user_password: &str) {
@@ -514,12 +514,12 @@ impl PlayerPy {
 
         let mut look = Vectorf32::default();
         let range = range.unwrap_or(0.5);
-        look.x = (look_yaw.cos() * range) as f32;
-        look.y = (look_yaw.sin() * range) as f32;
-        look.z = (look_pitch.sin() * range) as f32;
+        look.x = look_yaw.cos() * range;
+        look.y = look_yaw.sin() * range;
+        look.z = look_pitch.sin() * range;
         let py_look = VectorPy::from(look);
-        let origin = position.clone();
-        let camera_position = position.clone();
+        let origin = position;
+        let camera_position = position;
         self.set_camera_position(origin, py_look + camera_position);
     }
 
@@ -573,7 +573,7 @@ impl PlayerPy {
     pub fn get_spectate_target(&self) -> Option<PlayerPy> {
         let pool = ENTITY_POOL.lock().unwrap();
         let id = vcmp_func().get_player_spectate_target(self.id);
-        pool.get_player(id).map(|p| *p)
+        pool.get_player(id).copied()
     }
 
     #[getter]
@@ -590,14 +590,14 @@ impl PlayerPy {
     pub fn get_standing_on_object(&self) -> Option<ObjectPy> {
         let id = vcmp_func().get_player_standing_on_object(self.id);
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_object(id).map(|o| *o)
+        pool.get_object(id).copied()
     }
 
     #[getter]
     pub fn get_standing_vehicle(&self) -> Option<VehiclePy> {
         let id = vcmp_func().get_player_standing_on_vehicle(self.id);
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_vehicle(id).map(|o| *o)
+        pool.get_vehicle(id).copied()
     }
 
     #[getter]
@@ -634,7 +634,7 @@ impl PlayerPy {
     pub fn get_vehicle(&self) -> Option<VehiclePy> {
         let vehicle_id = vcmp_func().get_player_vehicle_id(self.id);
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_vehicle(vehicle_id).map(|veh| *veh)
+        pool.get_vehicle(vehicle_id).copied()
     }
 
     #[setter]

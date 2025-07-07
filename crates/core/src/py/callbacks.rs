@@ -70,9 +70,8 @@ impl Matcher {
     }
 }
 
-pub static CALLBACK_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
-fn increase_event_id() -> u32 {
+pub fn increase_event_id() -> u32 {
     EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
 }
 
@@ -96,7 +95,6 @@ impl CallbackManager {
 
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
-        let _lock = CALLBACK_LOCK.lock().unwrap();
         Python::with_gil(|py| {
             let cpython_thread = unsafe { pyo3::ffi::PyEval_SaveThread() };
             unsafe {
@@ -118,12 +116,13 @@ impl CallbackManager {
                             py_kwargs.set_item(name.clone(), instance.clone()).unwrap();
                             break;
                         }
-                        if py_matcher.bind(py).is_instance(annotation).unwrap() {
-                            py_kwargs
-                                .set_item(name.clone(), py_matcher.borrow_mut(py))
-                                .unwrap();
-                            break;
-                        }
+                        // if py_matcher.bind(py).is_instance(annotation).unwrap() {
+                        //     py_kwargs
+                        //         .set_item(name.clone(), py_matcher.borrow_mut(py))
+                        //         .unwrap();
+                        //     break;
+                        // }
+                        // if
                     }
                     /*
                         if arg.required and arg.name not in params:
@@ -171,17 +170,13 @@ impl CallbackManager {
                         }
                     }
                 };
-                if let Ok(matcher_ref) = py_matcher.try_borrow(py)
-                    && matcher_ref.is_finished
-                {
+                if matcher.is_finished {
                     break;
                 }
             }
 
-            if let Ok(matcher_ref) = py_matcher.try_borrow(py)
-                && matcher_ref.is_finished
-            {
-                matcher = *matcher_ref;
+            if matcher.is_finished {
+                // matcher = *matcher_ref;
             }
         });
         event!(
