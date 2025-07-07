@@ -1,7 +1,5 @@
 use std::{
-    default::Default,
-    sync::{Arc, LazyLock, Mutex},
-    thread::{self, Thread},
+    default::Default, sync::{Arc, LazyLock, Mutex}, thread
 };
 
 use pyo3::{
@@ -96,13 +94,10 @@ impl CallbackManager {
         let callbacks = CALLBACKS_STORE.lock().unwrap();
         let mut matcher = Matcher::default();
         Python::with_gil(|py| {
-            let cpython_thread = unsafe { pyo3::ffi::PyEval_SaveThread() };
-            unsafe {
-                pyo3::ffi::PyEval_RestoreThread(cpython_thread);
-            }
             let py_matcher = Py::new(py, matcher).unwrap();
             let instance = event.init(py).expect("Failed to initialize event");
             for callback in callbacks.iter() {
+                event!(Level::TRACE, "Matching callback: {:?}", callback);
                 let origin_parameters = callback.params.clone();
                 let py_kwargs = PyDict::new(py);
 
@@ -116,20 +111,19 @@ impl CallbackManager {
                             py_kwargs.set_item(name.clone(), instance.clone()).unwrap();
                             break;
                         }
-                        // if py_matcher.bind(py).is_instance(annotation).unwrap() {
-                        //     py_kwargs
-                        //         .set_item(name.clone(), py_matcher.borrow_mut(py))
-                        //         .unwrap();
-                        //     break;
-                        // }
-                        // if
+                        if py_matcher.bind(py).is_instance(annotation).unwrap() {
+                            py_kwargs
+                                .set_item(name.clone(), py_matcher.borrow_mut(py))
+                                .unwrap();
+                            break;
+                        }
                     }
-                    /*
-                        if arg.required and arg.name not in params:
-                        matched = False
-                        break
-                    elif arg.name not in params:
-                        params[arg.name] = arg.default */
+                    
+                    //    if arg.required and arg.name not in params:
+                    //    matched = False
+                    //    break
+                    //elif arg.name not in params:
+                    //    params[arg.name] = arg.default 
                     if param.required && !py_kwargs.contains(name.clone()).unwrap() {
                         matched = false;
                         break;
@@ -142,6 +136,8 @@ impl CallbackManager {
                 if !matched {
                     continue;
                 }
+
+                event!(Level::TRACE, "Matched callback: {:?}", callback);
 
                 match callback.func.call(py, (), Some(&py_kwargs)) {
                     Ok(res) => {
