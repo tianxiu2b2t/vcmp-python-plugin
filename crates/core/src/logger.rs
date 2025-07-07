@@ -15,7 +15,7 @@ pub fn init() {
     let max_level = Level::DEBUG; // 硬编码最大日志级别
 
     // 创建按天轮换的文件 appender
-    let file_appender = RollingFileAppender::new(Rotation::HOURLY, "logs", "app.log");
+    let file_appender = RollingFileAppender::new(Rotation::DAILY, "logs", "app.log");
     let (non_blocking_file, guard) = tracing_appender::non_blocking(file_appender);
 
     let _ = LOG_GUARD.set(guard);
@@ -39,5 +39,5 @@ pub fn init() {
         .with(file_layer)
         .init();
 
-    event!(Level::WARN, "tracing 设置完成");
+    event!(Level::INFO, "tracing 设置完成");
 }
