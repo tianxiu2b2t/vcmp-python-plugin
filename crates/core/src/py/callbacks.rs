@@ -1,5 +1,7 @@
 use std::{
-    default::Default, sync::{Arc, LazyLock, Mutex}, thread
+    default::Default,
+    sync::{Arc, LazyLock, Mutex},
+    thread,
 };
 
 use pyo3::{
@@ -68,7 +70,6 @@ impl Matcher {
     }
 }
 
-
 pub fn increase_event_id() -> u32 {
     EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
 }
@@ -118,12 +119,12 @@ impl CallbackManager {
                             break;
                         }
                     }
-                    
+
                     //    if arg.required and arg.name not in params:
                     //    matched = False
                     //    break
                     //elif arg.name not in params:
-                    //    params[arg.name] = arg.default 
+                    //    params[arg.name] = arg.default
                     if param.required && !py_kwargs.contains(name.clone()).unwrap() {
                         matched = false;
                         break;
