@@ -3,15 +3,9 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
     wrap_pyfunction,
 };
-use vcmp_bindings::{
-    func::MiscMethods,
-    vcmp_func,
-};
+use vcmp_bindings::{func::MiscMethods, vcmp_func};
 
-use crate::{
-    functions::player::PlayerPy,
-    py::types::VectorPy,
-};
+use crate::{functions::player::PlayerPy, py::types::VectorPy};
 
 #[pyfunction]
 #[pyo3(signature = (world_id, explosion_type, pos, target = None, ground = false))]

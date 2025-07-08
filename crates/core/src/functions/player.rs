@@ -419,7 +419,7 @@ impl PlayerPy {
     }
 
     #[setter]
-    #[pyo3(name="position")]
+    #[pyo3(name = "position")]
     pub fn py_set_position(&self, py: Python<'_>, position: VectorPy) {
         py.allow_threads(|| {
             let _ = vcmp_func().set_player_position(self.id, position.get_entity_pos());
@@ -587,7 +587,8 @@ impl PlayerPy {
 
     #[setter]
     pub fn set_spectate_target(&self, player: Option<PlayerPy>) {
-        let _ = vcmp_func().set_player_spectate_target(self.id, player.map(|p| p.get_id()).unwrap_or(-1));
+        let _ = vcmp_func()
+            .set_player_spectate_target(self.id, player.map(|p| p.get_id()).unwrap_or(-1));
     }
 
     #[getter]

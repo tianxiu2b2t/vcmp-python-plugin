@@ -59,7 +59,6 @@ pub enum VcmpEvent {
     PlayerModuleList(player::PlayerModuleListEvent),
 
     // server
-
     ServerInitialise(server::ServerInitialiseEvent),
     ServerShutdown(server::ServerShutdownEvent),
     ServerFrame(server::ServerFrameEvent),
@@ -69,7 +68,6 @@ pub enum VcmpEvent {
     VehicleUpdate(vehicle::VehicleUpdateEvent),
     VehicleExplode(vehicle::VehicleExplodeEvent),
     VehicleRespawn(vehicle::VehicleRespawnEvent),
-
 }
 #[derive(Clone, Debug)]
 pub struct PluginCommandEvent {

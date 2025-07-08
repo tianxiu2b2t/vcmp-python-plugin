@@ -18,7 +18,6 @@ static LOG_FILE_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
 const MAX_LEVEL: Level = Level::INFO; // 硬编码最大日志级别
 
 pub fn init() {
-
     // 创建按天轮换的文件 appender
     let file_appender = {
         RollingFileAppender::builder()

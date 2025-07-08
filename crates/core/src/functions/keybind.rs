@@ -34,7 +34,6 @@ impl KeyBindPy {
         self.slot as i32
     }
 
-
     #[getter]
     pub fn can_release(&self) -> bool {
         let res = vcmp_func().get_key_bind_data(self.slot);

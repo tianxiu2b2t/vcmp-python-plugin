@@ -723,7 +723,6 @@ pub struct PlayerMoveEvent {
     pub position: VectorPy,
 }
 
-
 #[pymethods]
 impl PlayerMoveEvent {
     #[new]

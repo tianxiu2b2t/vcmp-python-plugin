@@ -2,7 +2,6 @@ use std::os::raw::c_char;
 
 use crate::py::events::{player::*, server::*};
 use crate::py::types::VectorPy;
-use pyo3::Python;
 use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
@@ -136,7 +135,7 @@ pub unsafe extern "C" fn on_player_request_class(player_id: i32, class_id: i32) 
     CALLBACK.call_func(
         PlayerRequestClassEvent::from(player::PlayerRequestClassEvent::from((player_id, class_id))),
         None,
-        false
+        false,
     ) as u8
 }
 
@@ -146,7 +145,7 @@ pub unsafe extern "C" fn on_player_request_spawn(player_id: i32) -> u8 {
     CALLBACK.call_func(
         PlayerRequestSpawnEvent::from(player::PlayerRequestSpawnEvent::from(player_id)),
         None,
-        false
+        false,
     ) as u8
 }
 
@@ -158,7 +157,7 @@ pub unsafe extern "C" fn on_player_enter_vehicle(player_id: i32, vehicle_id: i32
             player_id, vehicle_id, seat_id,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -170,7 +169,7 @@ pub unsafe extern "C" fn on_player_exit_vehicle(player_id: i32, vehicle_id: i32)
             player_id, vehicle_id,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -186,7 +185,7 @@ pub unsafe extern "C" fn on_player_request_enter_vehicle(
             player_id, vehicle_id, seat_id,
         ))),
         None,
-        false
+        false,
     ) as u8
 }
 
@@ -196,7 +195,7 @@ pub unsafe extern "C" fn on_player_spawn(player_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerSpawnEvent::from(player::PlayerSpawnEvent::from(player_id)),
         None,
-        false
+        false,
     );
 }
 
@@ -213,7 +212,7 @@ pub unsafe extern "C" fn on_player_death(
             player_id, killer_id, reason, body_part,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -229,7 +228,7 @@ pub unsafe extern "C" fn on_player_name_change(
             player_id, old_name, new_name,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -241,7 +240,7 @@ pub unsafe extern "C" fn on_player_state_change(player_id: i32, old_state: i32, 
             player_id, old_state, new_state,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -253,7 +252,7 @@ pub unsafe extern "C" fn on_player_action_change(player_id: i32, old_action: i32
             player_id, old_action, new_action,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -266,7 +265,7 @@ pub unsafe extern "C" fn on_player_on_fire_change(player_id: i32, is_on_fire: u8
             player_id, is_on_fire,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -280,7 +279,7 @@ pub unsafe extern "C" fn on_player_crouch_change(player_id: i32, is_crouching: u
             is_crouching,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -293,7 +292,7 @@ pub unsafe extern "C" fn on_player_game_keys_change(player_id: i32, old_keys: u3
             player_id, old_keys, new_keys,
         ))),
         None,
-        false
+        false,
     );
 }
 
@@ -318,7 +317,7 @@ pub unsafe extern "C" fn on_player_away_change(player_id: i32, is_away: u8) {
     let _ = CALLBACK.call_func(
         PlayerAwayChangeEvent::from(player::PlayerAwayChangeEvent::from((player_id, is_away))),
         None,
-        false
+        false,
     );
 }
 
@@ -329,7 +328,7 @@ pub unsafe extern "C" fn on_player_message(player_id: i32, message: *const c_cha
     CALLBACK.call_func(
         PlayerMessageEvent::from(player::PlayerMessageEvent::from((player_id, message))),
         None,
-        false
+        false,
     ) as u8
 }
 
@@ -340,7 +339,7 @@ pub unsafe extern "C" fn on_player_command(player_id: i32, command: *const c_cha
     CALLBACK.call_func(
         PlayerCommandEvent::from(player::PlayerCommandEvent::from((player_id, command))),
         None,
-        false
+        false,
     ) as u8
 }
 
@@ -357,7 +356,7 @@ pub unsafe extern "C" fn on_player_private_message(
             player_id, target_id, message,
         ))),
         None,
-        false
+        false,
     ) as u8
 }
 
@@ -368,7 +367,7 @@ pub unsafe extern "C" fn on_player_key_bind_down(player_id: i32, bind_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerKeyBindDownEvent::from(player::PlayerKeyBindDownEvent::from((player_id, bind_id))),
         None,
-        false
+        false,
     );
 }
 
@@ -379,7 +378,7 @@ pub unsafe extern "C" fn on_player_key_bind_up(player_id: i32, bind_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerKeyBindUpEvent::from(player::PlayerKeyBindUpEvent::from((player_id, bind_id))),
         None,
-        false
+        false,
     );
 }
 
@@ -390,7 +389,7 @@ pub unsafe extern "C" fn on_player_spectate(player_id: i32, target_id: i32) {
     let _ = CALLBACK.call_func(
         PlayerSpectateEvent::from(player::PlayerSpectateEvent::from((player_id, target_id))),
         None,
-        false
+        false,
     );
 }
 
@@ -401,7 +400,7 @@ pub unsafe extern "C" fn on_player_crash_report(player_id: i32, report: *const c
     let _ = CALLBACK.call_func(
         PlayerCrashReportEvent::from(player::PlayerCrashReportEvent::from((player_id, report))),
         None,
-        false
+        false,
     );
 }
 

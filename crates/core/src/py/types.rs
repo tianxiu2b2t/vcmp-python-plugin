@@ -1,11 +1,11 @@
-use std::{ops::Add, fmt::Debug};
+use std::{fmt::Debug, ops::Add};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
     types::{PyModule, PyModuleMethods},
 };
 
-use vcmp_bindings::utils::{Color, Quaternionf32, WastedSettings};
+use vcmp_bindings::{options::VcmpEntityPool, utils::{Color, Quaternionf32, WastedSettings}};
 use vcmp_bindings::{
     func::{
         CheckPointMethods, MarkerMethods, ObjectMethods, PickupMethods, PlayerMethods,
@@ -762,17 +762,32 @@ impl QuaternionPy {
     }
 }
 
-#[pyclass(eq, eq_int)]
+#[pyclass]
 #[derive(PartialEq, Clone, Copy, Debug)]
 #[allow(non_camel_case_types)]
 pub enum Version {
-    Unknown = -1,
-    v04rel002 = 66215,
-    v04rel003 = 66230,
-    v04rel004 = 67000,
-    v04rel006 = 67400,
-    v0_4_7_0 = 67700,
-    v0_4_7_1 = 67710,
+    /// 66215
+    v04rel002(),
+    v04rel003(),
+    v04rel004(),
+    v04rel006(),
+    v0_4_7_0(),
+    v0_4_7_1(),
+    Unknown(i32),
+}
+
+impl From<Version> for i32 {
+    fn from(value: Version) -> Self {
+        match value {
+            Version::v04rel002() => 66215,
+            Version::v04rel003() => 66230,
+            Version::v04rel004() => 67000,
+            Version::v04rel006() => 67400,
+            Version::v0_4_7_0() => 67700,
+            Version::v0_4_7_1() => 67710,
+            Version::Unknown(x) => x,
+        }
+    }
 }
 
 #[pymethods]
@@ -784,20 +799,20 @@ impl Version {
 
     #[getter]
     fn value(&self) -> i32 {
-        *self as i32
+        (*self).into()
     }
 }
 
 impl From<i32> for Version {
     fn from(value: i32) -> Self {
         match value {
-            66215 => Version::v04rel002,
-            66230 => Version::v04rel003,
-            67000 => Version::v04rel004,
-            67400 => Version::v04rel006,
-            67700 => Version::v0_4_7_0,
-            67710 => Version::v0_4_7_1,
-            _ => Version::Unknown,
+            66215 => Version::v04rel002(),
+            66230 => Version::v04rel003(),
+            67000 => Version::v04rel004(),
+            67400 => Version::v04rel006(),
+            67700 => Version::v0_4_7_0(),
+            67710 => Version::v0_4_7_1(),
+            x => Version::Unknown(x),
         }
     }
 }
@@ -1172,6 +1187,79 @@ impl KeyCode {
         (*self).into()
     }
 }
+
+#[pyclass]
+#[derive(Clone, Debug)]
+#[pyo3(name = "EntityPool")]
+pub struct VcmpEntityPoolPy {
+    pub inner: VcmpEntityPool
+}
+
+impl From<VcmpEntityPoolPy> for VcmpEntityPool {
+    fn from(value: VcmpEntityPoolPy) -> Self {
+        value.inner
+    }
+}
+
+#[pymethods]
+impl VcmpEntityPoolPy {
+    #[staticmethod]
+    pub fn vehicle() -> Self {
+        Self {
+            inner: VcmpEntityPool::Vehicle
+        }
+    }
+
+    #[staticmethod]
+    pub fn object() -> Self {
+        Self {
+            inner: VcmpEntityPool::Object
+        }
+    }
+
+    #[staticmethod]
+    pub fn pickup() -> Self {
+        Self {
+            inner: VcmpEntityPool::Pickup
+        }
+    }
+
+    #[staticmethod]
+    pub fn radio() -> Self {
+        Self {
+            inner: VcmpEntityPool::Radio
+        }
+    }
+
+    #[staticmethod]
+    pub fn player() -> Self {
+        Self {
+            inner: VcmpEntityPool::Player
+        }
+    }
+
+    #[staticmethod]
+    pub fn reserved1() -> Self {
+        Self {
+            inner: VcmpEntityPool::Reserved1
+        }
+    }
+
+    #[staticmethod]
+    pub fn marker() -> Self {
+        Self {
+            inner: VcmpEntityPool::Marker
+        }
+    }
+
+    #[staticmethod]
+    pub fn check_point() -> Self {
+        Self {
+            inner: VcmpEntityPool::CheckPoint
+        }
+    }
+}
+
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ServerSettingsPy>()?;

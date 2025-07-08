@@ -1,5 +1,8 @@
 use std::{
-    any::Any, collections::HashMap, default::Default, sync::{Arc, LazyLock, Mutex}
+    any::Any,
+    collections::HashMap,
+    default::Default,
+    sync::{Arc, LazyLock, Mutex},
 };
 
 use pyo3::{
@@ -96,7 +99,7 @@ impl EventCallRefCounter {
         *counter
     }
 
-    pub fn decrease(&self) -> i32{
+    pub fn decrease(&self) -> i32 {
         let mut counter = self.counter.lock().unwrap();
         *counter -= 1;
 
@@ -124,7 +127,10 @@ impl CallbackManager {
         let current_id = increase_event_id();
         let current_ref = IS_CALLING.increase();
         if current_ref >= 2 {
-            event!(Level::ERROR, "Too many callbacks are calling, current_ref: {current_ref}, {event:?}");
+            event!(
+                Level::ERROR,
+                "Too many callbacks are calling, current_ref: {current_ref}, {event:?}"
+            );
             IS_CALLING.decrease();
             return failed_result;
         }
