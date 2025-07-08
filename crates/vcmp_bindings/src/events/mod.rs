@@ -8,6 +8,7 @@ pub mod player;
 pub mod server;
 pub mod vehicle;
 
+#[derive(Clone, Debug)]
 pub enum VcmpEvent {
     PluginCommand(PluginCommandEvent),
     EntityStreaming(EntityStreamingChangeEvent),
@@ -71,6 +72,7 @@ pub enum VcmpEvent {
 
 }
 
+#[derive(Clone, Debug)]
 pub struct PluginCommandEvent {
     pub identifer: u32,
     pub message: String,

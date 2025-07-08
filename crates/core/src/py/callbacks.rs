@@ -111,46 +111,16 @@ impl EventCallRefCounter {
 
 pub static IS_CALLING: LazyLock<EventCallRefCounter> = LazyLock::new(EventCallRefCounter::new);
 
-#[derive(Debug, Clone, Copy)]
-pub struct CallbackBuilder<T>
-where
-    T: PyClass + crate::py::events::PyBaseEvent + Clone + Copy,
-{
-    event: T,
-    kwargs: HashMap<String, Box<dyn Any + Send + Sync>>,
-impl<T> CallbackBuilder<T>
-where
-    T: PyClass + crate::py::events::PyBaseEvent + Clone + Copy,
-{
-    pub fn new(event: T) -> Self {
-        Self {
-            event,
-            kwargs: HashMap::new(),
-            failed_result: false,
-        }
-    }
-    pub fn kwargs(mut self, kwargs: HashMap<String, Box<dyn Any + Send + Sync>>) -> Self {
-        self.kwargs = kwargs;
-        self
-    }
-    pub fn failed_result(mut self, failed_result: bool) -> Self {
-        self.failed_result = failed_result;
-        self
-    }
-}
-        self
-    }
-}
-
 #[pyclass]
 #[pyo3(name = "CallbackManager")]
 #[derive(Debug, Clone, Copy, Default)]
 pub struct CallbackManager;
 
 impl CallbackManager {
-    pub fn handle_event(&self, builder: CallbackBuilder, py: Python<'_>) -> bool {
-    }
-    pub fn call_func(&self, builder: CallbackBuilder) -> bool {
+    pub fn call_func<T>(&self, event: T, kwargs: Option<Py<PyDict>>, failed_result: bool) -> bool
+    where
+        T: PyClass + crate::py::events::PyBaseEvent + Clone + Copy,
+    {
         let current_id = increase_event_id();
         let current_ref = IS_CALLING.increase();
         if current_ref >= 2 {
