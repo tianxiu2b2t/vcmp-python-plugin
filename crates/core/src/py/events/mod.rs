@@ -3,7 +3,9 @@
 use pyo3::prelude::*;
 use pyo3::types::PyModule;
 use pyo3::{Bound, PyResult, Python};
-use vcmp_bindings::events::{EntityPoolChangeEvent, EntityStreamingChangeEvent, PluginCommandEvent, VcmpEvent};
+use vcmp_bindings::events::{
+    EntityPoolChangeEvent, EntityStreamingChangeEvent, PluginCommandEvent, VcmpEvent,
+};
 
 use crate::py::fix_module_name;
 
@@ -48,18 +50,12 @@ impl PyVcmpEvent {
     }
 
     #[staticmethod]
-    pub fn entity_pool(
-        entity_type: VcmpEntityPoolPy,
-        entity_id: i32,
-        deleted: bool,
-    ) -> Self {
-        Self::new(
-            VcmpEvent::EntityPool(EntityPoolChangeEvent::new(
-                entity_type.into(),
-                entity_id,
-                deleted
-            ))
-        )
+    pub fn entity_pool(entity_type: VcmpEntityPoolPy, entity_id: i32, deleted: bool) -> Self {
+        Self::new(VcmpEvent::EntityPool(EntityPoolChangeEvent::new(
+            entity_type.into(),
+            entity_id,
+            deleted,
+        )))
     }
 }
 

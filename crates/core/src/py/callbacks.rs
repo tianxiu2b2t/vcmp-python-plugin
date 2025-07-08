@@ -26,8 +26,8 @@ pub struct PyCallbackStorage {
 }
 
 /// 全局 callback 存储
-pub static PY_CALLBACK_STORAGE: LazyLock<Mutex<PyCallbackStorage>> = LazyLock::new(|| Mutex::new(PyCallbackStorage::default()));
-
+pub static PY_CALLBACK_STORAGE: LazyLock<Mutex<PyCallbackStorage>> =
+    LazyLock::new(|| Mutex::new(PyCallbackStorage::default()));
 
 // #[derive(Debug, Clone)]
 // pub struct CallbackFunctionParameter {
