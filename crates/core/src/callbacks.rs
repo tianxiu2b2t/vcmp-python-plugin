@@ -7,7 +7,7 @@ use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallback
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
 use tracing::{Level, event};
 
-use crate::py::callbacks::CALLBACK;
+// use crate::py::callbacks::CALLBACK;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
