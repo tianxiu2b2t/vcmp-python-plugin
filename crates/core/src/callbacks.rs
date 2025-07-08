@@ -364,6 +364,15 @@ pub unsafe extern "C" fn on_player_private_message(
 /// # Safety
 /// FFI callback for player key bind down
 pub unsafe extern "C" fn on_player_key_bind_down(player_id: i32, bind_id: i32) {
+    /* 
+        def on_player_chat(message: str) -> bool | None:
+            if "stop" in message:
+                return False
+            
+
+
+        res = x()
+     */
     let _ = CALLBACK.call_func(
         PlayerKeyBindDownEvent::from(player::PlayerKeyBindDownEvent::from((player_id, bind_id))),
         None,

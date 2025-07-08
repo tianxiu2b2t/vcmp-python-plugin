@@ -5,7 +5,7 @@ use std::{
 };
 
 use pyo3::prelude::*;
-use vcmp_bindings::events::VcmpEventType;
+use vcmp_bindings::events::{VcmpEvent, VcmpEventType};
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
@@ -28,6 +28,25 @@ pub struct PyCallbackStorage {
 /// 全局 callback 存储
 pub static PY_CALLBACK_STORAGE: LazyLock<Mutex<PyCallbackStorage>> =
     LazyLock::new(|| Mutex::new(PyCallbackStorage::default()));
+
+
+
+
+#[derive(Clone, Default, Debug)]
+pub struct PyCallbackManager;
+
+impl PyCallbackManager {
+    pub fn handle(&self, event: VcmpEvent, default_bool: bool) -> bool {
+        let res = Python::with_gil(|py| {
+            self.py_handle(py, event)
+        });
+
+        default_bool
+    }
+    fn py_handle(&self, py: Python<'_>, event: VcmpEvent) -> PyResult<PyAny> {
+        Ok(())
+    }
+}
 
 // #[derive(Debug, Clone)]
 // pub struct CallbackFunctionParameter {
