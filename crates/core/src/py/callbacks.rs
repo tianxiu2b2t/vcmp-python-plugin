@@ -117,9 +117,9 @@ pub static IS_CALLING: LazyLock<EventCallRefCounter> = LazyLock::new(EventCallRe
 pub struct CallbackManager;
 
 impl CallbackManager {
-    pub fn call_func<T>(&self, event: T, kwargs: Option<Py<PyDict>>, failed_result: bool) -> bool
+    pub fn call_func<T>(&self, event: T, _kwargs: Option<Py<PyDict>>, failed_result: bool) -> bool
     where
-        T: PyClass + crate::py::events::PyBaseEvent + Clone + Copy,
+        T: PyClass + crate::py::events::PyBaseEvent + Clone + std::fmt::Debug,
     {
         let current_id = increase_event_id();
         let current_ref = IS_CALLING.increase();
