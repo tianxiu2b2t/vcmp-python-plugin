@@ -5,7 +5,6 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use vcmp_bindings::{options::VcmpEntityPool, utils::{Color, Quaternionf32, WastedSettings}};
 use vcmp_bindings::{
     func::{
         CheckPointMethods, MarkerMethods, ObjectMethods, PickupMethods, PlayerMethods,
@@ -14,6 +13,10 @@ use vcmp_bindings::{
     setting::VcmpServerSettings,
     utils::Vectorf32,
     vcmp_func,
+};
+use vcmp_bindings::{
+    options::VcmpEntityPool,
+    utils::{Color, Quaternionf32, WastedSettings},
 };
 
 use crate::consts::EntityId;
@@ -1192,7 +1195,7 @@ impl KeyCode {
 #[derive(Clone, Debug)]
 #[pyo3(name = "EntityPool")]
 pub struct VcmpEntityPoolPy {
-    pub inner: VcmpEntityPool
+    pub inner: VcmpEntityPool,
 }
 
 impl From<VcmpEntityPoolPy> for VcmpEntityPool {
@@ -1206,60 +1209,59 @@ impl VcmpEntityPoolPy {
     #[staticmethod]
     pub fn vehicle() -> Self {
         Self {
-            inner: VcmpEntityPool::Vehicle
+            inner: VcmpEntityPool::Vehicle,
         }
     }
 
     #[staticmethod]
     pub fn object() -> Self {
         Self {
-            inner: VcmpEntityPool::Object
+            inner: VcmpEntityPool::Object,
         }
     }
 
     #[staticmethod]
     pub fn pickup() -> Self {
         Self {
-            inner: VcmpEntityPool::Pickup
+            inner: VcmpEntityPool::Pickup,
         }
     }
 
     #[staticmethod]
     pub fn radio() -> Self {
         Self {
-            inner: VcmpEntityPool::Radio
+            inner: VcmpEntityPool::Radio,
         }
     }
 
     #[staticmethod]
     pub fn player() -> Self {
         Self {
-            inner: VcmpEntityPool::Player
+            inner: VcmpEntityPool::Player,
         }
     }
 
     #[staticmethod]
     pub fn reserved1() -> Self {
         Self {
-            inner: VcmpEntityPool::Reserved1
+            inner: VcmpEntityPool::Reserved1,
         }
     }
 
     #[staticmethod]
     pub fn marker() -> Self {
         Self {
-            inner: VcmpEntityPool::Marker
+            inner: VcmpEntityPool::Marker,
         }
     }
 
     #[staticmethod]
     pub fn check_point() -> Self {
         Self {
-            inner: VcmpEntityPool::CheckPoint
+            inner: VcmpEntityPool::CheckPoint,
         }
     }
 }
-
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ServerSettingsPy>()?;

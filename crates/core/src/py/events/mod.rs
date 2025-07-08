@@ -12,7 +12,6 @@ use super::types::VcmpEntityPoolPy;
 pub mod player;
 pub mod server;
 
-
 #[pyclass(name = "VcmpEvent")]
 pub struct PyVcmpEvnet {
     pub event_enum: VcmpEvent,

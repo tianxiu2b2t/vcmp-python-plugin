@@ -9,6 +9,68 @@ pub mod server;
 pub mod vehicle;
 
 #[derive(Clone, Debug)]
+pub enum VcmpEventType {
+    PluginCommand,
+    EntityStreaming,
+    EntityPool,
+
+    // checkpoint
+    CheckpointEntered,
+    CheckpointExited,
+
+    // object
+    ObjectShot,
+    ObjectTouched,
+
+    // pickup
+    PickupPicked,
+    PickupPickAttempt,
+    PickupRespawn,
+
+    // player
+    IncomingConnection,
+    ClientScriptData,
+    PlayerConnect,
+    PlayerDisconnect,
+    PlayerRequestClass,
+    PlayerSpawn,
+    PlayerRequestSpawn,
+    PlayerDeath,
+    PlayerUpdate,
+    PlayerRequestEnterVehicle,
+    PlayerEnterVehicle,
+    PlayerExitVehicle,
+    PlayerNameChange,
+    PlayerStateChange,
+    PlayerActionChange,
+    PlayerOnFireChange,
+    PlayerCrouchChange,
+    PlayerGameKeysChange,
+    PlayerBeginTyping,
+    PlayerEndTyping,
+    PlayerAwayChange,
+    PlayerMessage,
+    PlayerCommand,
+    PlayerPrivateMessage,
+    PlayerKeyBindDown,
+    PlayerKeyBindUp,
+    PlayerSpectate,
+    PlayerCrashReport,
+    PlayerModuleList,
+
+    // server
+    ServerInitialise,
+    ServerShutdown,
+    ServerFrame,
+    ServerPerformanceReport,
+
+    // vehicle
+    VehicleUpdate,
+    VehicleExplode,
+    VehicleRespawn,
+}
+
+#[derive(Clone, Debug)]
 pub enum VcmpEvent {
     PluginCommand(PluginCommandEvent),
     EntityStreaming(EntityStreamingChangeEvent),
@@ -69,6 +131,60 @@ pub enum VcmpEvent {
     VehicleExplode(vehicle::VehicleExplodeEvent),
     VehicleRespawn(vehicle::VehicleRespawnEvent),
 }
+
+impl From<VcmpEvent> for VcmpEventType {
+    fn from(val: VcmpEvent) -> Self {
+        match val {
+            VcmpEvent::PluginCommand(_) => VcmpEventType::PluginCommand,
+            VcmpEvent::EntityStreaming(_) => VcmpEventType::EntityStreaming,
+            VcmpEvent::EntityPool(_) => VcmpEventType::EntityPool,
+            VcmpEvent::CheckpointEntered(_) => VcmpEventType::CheckpointEntered,
+            VcmpEvent::CheckpointExited(_) => VcmpEventType::CheckpointExited,
+            VcmpEvent::ObjectShot(_) => VcmpEventType::ObjectShot,
+            VcmpEvent::ObjectTouched(_) => VcmpEventType::ObjectTouched,
+            VcmpEvent::PickupPicked(_) => VcmpEventType::PickupPicked,
+            VcmpEvent::PickupPickAttempt(_) => VcmpEventType::PickupPickAttempt,
+            VcmpEvent::PickupRespawn(_) => VcmpEventType::PickupRespawn,
+            VcmpEvent::IncomingConnection(_) => VcmpEventType::IncomingConnection,
+            VcmpEvent::ClientScriptData(_) => VcmpEventType::ClientScriptData,
+            VcmpEvent::PlayerConnect(_) => VcmpEventType::PlayerConnect,
+            VcmpEvent::PlayerDisconnect(_) => VcmpEventType::PlayerDisconnect,
+            VcmpEvent::PlayerRequestClass(_) => VcmpEventType::PlayerRequestClass,
+            VcmpEvent::PlayerSpawn(_) => VcmpEventType::PlayerSpawn,
+            VcmpEvent::PlayerRequestSpawn(_) => VcmpEventType::PlayerRequestSpawn,
+            VcmpEvent::PlayerDeath(_) => VcmpEventType::PlayerDeath,
+            VcmpEvent::PlayerUpdate(_) => VcmpEventType::PlayerUpdate,
+            VcmpEvent::PlayerRequestEnterVehicle(_) => VcmpEventType::PlayerRequestEnterVehicle,
+            VcmpEvent::PlayerEnterVehicle(_) => VcmpEventType::PlayerEnterVehicle,
+            VcmpEvent::PlayerExitVehicle(_) => VcmpEventType::PlayerExitVehicle,
+            VcmpEvent::PlayerNameChange(_) => VcmpEventType::PlayerNameChange,
+            VcmpEvent::PlayerStateChange(_) => VcmpEventType::PlayerStateChange,
+            VcmpEvent::PlayerActionChange(_) => VcmpEventType::PlayerActionChange,
+            VcmpEvent::PlayerOnFireChange(_) => VcmpEventType::PlayerOnFireChange,
+            VcmpEvent::PlayerCrouchChange(_) => VcmpEventType::PlayerCrouchChange,
+            VcmpEvent::PlayerGameKeysChange(_) => VcmpEventType::PlayerGameKeysChange,
+            VcmpEvent::PlayerBeginTyping(_) => VcmpEventType::PlayerBeginTyping,
+            VcmpEvent::PlayerEndTyping(_) => VcmpEventType::PlayerEndTyping,
+            VcmpEvent::PlayerAwayChange(_) => VcmpEventType::PlayerAwayChange,
+            VcmpEvent::PlayerMessage(_) => VcmpEventType::PlayerMessage,
+            VcmpEvent::PlayerCommand(_) => VcmpEventType::PlayerCommand,
+            VcmpEvent::PlayerPrivateMessage(_) => VcmpEventType::PlayerPrivateMessage,
+            VcmpEvent::PlayerKeyBindDown(_) => VcmpEventType::PlayerKeyBindDown,
+            VcmpEvent::PlayerKeyBindUp(_) => VcmpEventType::PlayerKeyBindUp,
+            VcmpEvent::PlayerSpectate(_) => VcmpEventType::PlayerSpectate,
+            VcmpEvent::PlayerCrashReport(_) => VcmpEventType::PlayerCrashReport,
+            VcmpEvent::PlayerModuleList(_) => VcmpEventType::PlayerModuleList,
+            VcmpEvent::ServerInitialise(_) => VcmpEventType::ServerInitialise,
+            VcmpEvent::ServerShutdown(_) => VcmpEventType::ServerShutdown,
+            VcmpEvent::ServerFrame(_) => VcmpEventType::ServerFrame,
+            VcmpEvent::ServerPerformanceReport(_) => VcmpEventType::ServerPerformanceReport,
+            VcmpEvent::VehicleUpdate(_) => VcmpEventType::VehicleUpdate,
+            VcmpEvent::VehicleExplode(_) => VcmpEventType::VehicleExplode,
+            VcmpEvent::VehicleRespawn(_) => VcmpEventType::VehicleRespawn,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct PluginCommandEvent {
     pub identifer: u32,

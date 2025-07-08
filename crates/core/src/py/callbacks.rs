@@ -2,7 +2,7 @@ use std::{
     any::Any,
     collections::HashMap,
     default::Default,
-    sync::{Arc, LazyLock, Mutex},
+    sync::{Arc, LazyLock, Mutex, OnceLock},
 };
 
 use pyo3::{
@@ -81,17 +81,12 @@ pub fn increase_event_id() -> u32 {
     EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
 }
 
+#[derive(Default)]
 pub struct EventCallRefCounter {
     pub counter: Arc<Mutex<i32>>,
 }
 
 impl EventCallRefCounter {
-    pub fn new() -> Self {
-        Self {
-            counter: Arc::new(Mutex::new(0)),
-        }
-    }
-
     pub fn increase(&self) -> i32 {
         let mut counter = self.counter.lock().unwrap();
         *counter += 1;
@@ -385,3 +380,9 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("callbacks", CALLBACK.into_pyobject(py)?)?;
     Ok(())
 }
+
+pub struct PyCallbackStorage {
+    pub callbacks: HashMap,
+}
+
+pub static PY_CALLBACK_STORAGE: OnceLock<Mutex<PyCallbackStorage>> = OnceLock::new();
