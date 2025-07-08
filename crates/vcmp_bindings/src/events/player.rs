@@ -7,14 +7,21 @@ use crate::{PlayerId, VehicleId};
 
 #[derive(Debug, Clone)]
 pub struct IncomingConnectionEvent {
-    player_name: String,
+    pub player_name: String,
     pub password: String,
     pub ip: String,
     //name_ptr: *mut c_char,
-    name_buffer_len: usize,
+    //name_buffer_len: usize,
 }
 
 impl IncomingConnectionEvent {
+    pub fn new(player_name: String, password: String, ip: String) -> Self {
+        Self {
+            player_name,
+            password,
+            ip,
+        }
+    }
     pub fn player_name(&self) -> &str {
         &self.player_name
     }
@@ -52,7 +59,7 @@ impl From<(*mut c_char, usize, *const c_char, *const c_char)> for IncomingConnec
                     .to_string_lossy()
                     .to_string(),
                 //name_ptr: value.0,
-                name_buffer_len: value.1,
+                //name_buffer_len: value.1,
             }
         }
     }
