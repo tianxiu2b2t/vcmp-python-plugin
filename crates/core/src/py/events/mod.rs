@@ -3,7 +3,7 @@
 use pyo3::prelude::*;
 use pyo3::types::PyModule;
 use pyo3::{Bound, PyResult, Python};
-use vcmp_bindings::events::{PluginCommandEvent, VcmpEvent};
+use vcmp_bindings::events::{EntityStreamingChangeEvent, PluginCommandEvent, VcmpEvent};
 
 use crate::py::fix_module_name;
 
@@ -15,23 +15,29 @@ pub struct PyVcmpEvnet {
     pub event_enum: VcmpEvent,
 }
 
+impl PyVcmpEvnet {
+    pub fn new(event: VcmpEvent) -> Self {
+        Self { event_enum: event }
+    }
+}
+
 #[pymethods]
 impl PyVcmpEvnet {
     #[staticmethod]
     pub fn plugin_command(identifer: u32, message: String) -> Self {
-        PluginCommandEvent::from((identifer, message.as_ptr() as *const i8)).into()
+        Self { event_enum: VcmpEvent::PluginCommand(PluginCommandEvent::new(identifer, message)) }
     }
 
     #[staticmethod]
     pub fn entity_streaming(player_id: i32, entity_id: i32, entity_type: i32, deleted: bool) -> Self {
-        VcmpEvent::EntityStreaming((player_id, entity_id, entity_type, deleted as u8)).into()
+        Self { event_enum: VcmpEvent::EntityStreaming(EntityStreamingChangeEvent::new(player_id, entity_id, entity_type.into(), deleted))}
     }
     /*
 pub enum VcmpEvent {
     PluginCommand(PluginCommandEvent),
     EntityStreaming(EntityStreamingChangeEvent),
     EntityPool(EntityPoolChangeEvent),
-    
+
 
 #[derive(Debug, Clone)]
 pub struct EntityStreamingChangeEvent {

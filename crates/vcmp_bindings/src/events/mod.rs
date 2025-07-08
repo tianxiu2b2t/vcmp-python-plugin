@@ -13,7 +13,7 @@ pub enum VcmpEvent {
     PluginCommand(PluginCommandEvent),
     EntityStreaming(EntityStreamingChangeEvent),
     EntityPool(EntityPoolChangeEvent),
-    
+
     // checkpoint
     CheckpointEntered(checkpoint::CheckpointEnteredEvent),
     CheckpointExited(checkpoint::CheckpointExitedEvent),
@@ -71,11 +71,16 @@ pub enum VcmpEvent {
     VehicleRespawn(vehicle::VehicleRespawnEvent),
 
 }
-
 #[derive(Clone, Debug)]
 pub struct PluginCommandEvent {
     pub identifer: u32,
     pub message: String,
+}
+
+impl PluginCommandEvent {
+    pub fn new(identifer: u32, message: String) -> Self {
+        Self { identifer, message }
+    }
 }
 
 impl From<(u32, *const c_char)> for PluginCommandEvent {
@@ -99,6 +104,22 @@ pub struct EntityStreamingChangeEvent {
     pub deleted: bool,
 }
 
+impl EntityStreamingChangeEvent {
+    pub fn new(
+        player_id: PlayerId,
+        entity_id: i32,
+        entity_type: VcmpEntityPool,
+        deleted: bool,
+    ) -> Self {
+        Self {
+            player_id,
+            entity_id,
+            entity_type,
+            deleted,
+        }
+    }
+}
+
 impl From<(i32, i32, i32, u8)> for EntityStreamingChangeEvent {
     fn from(value: (i32, i32, i32, u8)) -> Self {
         Self {
@@ -115,6 +136,16 @@ pub struct EntityPoolChangeEvent {
     pub entity_type: VcmpEntityPool,
     pub entity_id: i32,
     pub deleted: bool,
+}
+
+impl EntityPoolChangeEvent {
+    pub fn new(entity_type: VcmpEntityPool, entity_id: i32, deleted: bool) -> Self {
+        Self {
+            entity_type,
+            entity_id,
+            deleted,
+        }
+    }
 }
 
 impl From<(i32, i32, u8)> for EntityPoolChangeEvent {
