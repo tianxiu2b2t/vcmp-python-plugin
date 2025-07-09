@@ -138,7 +138,7 @@ pub fn create_checkpoint(
     color: RGBPy,
     radius: f32,
     player: Option<PlayerPy>,
-) {
+) -> CheckPointPy {
     let id = vcmp_func().create_checkpoint(
         player.map(|p| p.get_id()),
         world,
@@ -147,6 +147,10 @@ pub fn create_checkpoint(
         color.into(),
         radius,
     );
+    
+    let pool = ENTITY_POOL.lock().unwrap();
+    
+    pool.get_checkpoint(id).map(|c| *c).unwrap_or(CheckPointPy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

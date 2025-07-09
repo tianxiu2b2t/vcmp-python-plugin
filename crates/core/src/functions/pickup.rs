@@ -9,7 +9,7 @@ use vcmp_bindings::{func::PickupMethods, vcmp_func};
 
 use crate::{
     functions::player::PlayerPy,
-    pool::EntityPoolTrait,
+    pool::{EntityPoolTrait, ENTITY_POOL},
     py::types::{EntityVectorType, VectorPy},
 };
 
@@ -157,7 +157,7 @@ pub fn create_pickup(
     position: VectorPy,
     alpha: i32,
     is_automatic: bool,
-) {
+) -> PickupPy {
     let id = vcmp_func().create_pickup(
         model_index,
         world,
@@ -166,7 +166,10 @@ pub fn create_pickup(
         alpha,
         is_automatic,
     );
-    // TODO: Error handling
+    
+    let pool = ENTITY_POOL.lock().unwrap();
+
+    pool.get_pickup(id).map(|p| *p).unwrap_or(PickupPy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -725,27 +725,37 @@ impl PlayerPy {
         vcmp_func().is_player_world_compatible(self.id, world)
     }
 
-    // pub fn get_player_module_list(&self, player: i32) -> VcmpResult<()>;
-    // pub fn kill_player(&self, player: i32) -> VcmpResult<()>;
-    // fn set_player_drunk_handling(&self, player: i32, drunk_level: u32) -> VcmpResult<()>;
+    #[getter]
+    pub fn drunk_handling(&self) -> u32 {
+        vcmp_func().get_player_drunk_handling(self.id)
+    }
 
-    // fn get_player_drunk_handling(&self, player: i32) -> u32;
+    #[setter]
+    pub fn set_drunk_handling(&self, drunk_level: u32) {
+        let _ = vcmp_func().set_player_drunk_handling(self.id, drunk_level);
+    }
 
-    // fn set_player_drunk_visuals(&self, player: i32, drunk: bool) -> VcmpResult<()>;
+    #[getter]
+    pub fn drunk_visuals(&self) -> bool {
+        vcmp_func().get_player_drunk_visuals(self.id)
+    }
 
-    // fn get_player_drunk_visuals(&self, player: i32) -> bool;
+    #[setter]
+    pub fn set_drunk_visuals(&self, drunk: bool) {
+        let _ = vcmp_func().set_player_drunk_visuals(self.id, drunk);
+    }
 
-    // fn set_player_3d_arrow_for_target(
-    //     &self,
-    //     player: i32,
-    //     target: i32,
-    //     show: bool,
-    // ) -> VcmpResult<()>;
+    pub fn set_3d_arrow_for_target(&self, target: PlayerPy, show: bool) {
+        let _ = vcmp_func().set_player_3d_arrow_for_target(self.id, target, show);
+    }
 
-    // fn is_player_3d_arrow_for_target(&self, player: i32, target: i32) -> bool;
+    pub fn is_3d_arrow_show_for_target(&self, target: PlayerPy) -> bool {
+        vcmp_func().is_player_3d_arrow_for_target(self.id, target)
+    }
 
-    // fn interpolate_camera_look_at(&self, player: i32, look: Vectorf32, time: u32)
-    // -> VcmpResult<()>;
+    pub fn interpolate_camera_look_at(&self, look: Vectorf32, time: u32) -> VcmpResult<()> {
+        let _ = vcmp_func().interpolate_camera_look_at(self.id, look, time);
+    }
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -320,3 +320,13 @@ class Vehicle:
     
     def set_speed(self, speed: Vector) -> None:
         ...
+
+def create_vehicle(
+    model: int,
+    world: int,
+    pos: Vector,
+    angle: float = 0,
+    primary_color: int = -1,
+    secondary_color: int = -1,
+) -> Vehicle:
+    ...

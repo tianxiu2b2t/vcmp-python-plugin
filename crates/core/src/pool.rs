@@ -9,7 +9,9 @@ use vcmp_bindings::options::VcmpEntityPool;
 
 use crate::{
     consts::EntityId,
-    functions::{object::ObjectPy, player::PlayerPy, vehicle::VehiclePy},
+    functions::{
+        checkpoint::CheckPointPy, marker::MarkerPy, object::ObjectPy, pickup::PickupPy, player::PlayerPy, vehicle::VehiclePy
+    },
 };
 
 pub trait EntityPoolTrait: Debug + Clone {
@@ -50,6 +52,10 @@ impl<E: EntityPoolTrait> AnEntityPool<E> {
         self.pool.get(&entity_id)
     }
 
+    pub fn entities(&self) -> impl Iterator<Item = &E> {
+        self.pool.values()
+    }
+
     pub fn new() -> Self {
         Self {
             pool: HashMap::new(),
@@ -63,23 +69,18 @@ impl<E: EntityPoolTrait> Default for AnEntityPool<E> {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 /// 实体池
 pub struct EntityPool {
     players: AnEntityPool<PlayerPy>,
     vehicles: AnEntityPool<VehiclePy>,
     objects: AnEntityPool<ObjectPy>,
+    pickups: AnEntityPool<PickupPy>,
+    markers: AnEntityPool<MarkerPy>,
+    checkpoints: AnEntityPool<CheckPointPy>
 }
 
 impl EntityPool {
-    fn new() -> Self {
-        Self {
-            players: AnEntityPool::new(),
-            vehicles: AnEntityPool::new(),
-            objects: AnEntityPool::new(),
-        }
-    }
-
     pub fn insert(&mut self, entity_type: VcmpEntityPool, entity_id: EntityId) {
         match entity_type {
             VcmpEntityPool::Player => {
@@ -136,8 +137,20 @@ impl EntityPool {
         self.objects.get_entity(object_id)
     }
 
+    pub fn get_pickup(&self, pickup_id: EntityId) -> Option<&PickupPy> {
+        self.pickups.get_entity(pickup_id)
+    }
+
+    pub fn get_marker(&self, marker_id: EntityId) -> Option<&MarkerPy> {
+        self.markers.get_entity(marker_id)
+    }
+
+    pub fn get_checkpoint(&self, checkpoint_id: EntityId) -> Option<&CheckPointPy> {
+        self.checkpoints.get_entity(checkpoint_id)
+    }
+
     pub fn get_players(&self) -> Vec<PlayerPy> {
-        self.players.pool.values().cloned().collect()
+        self.players.entities().cloned().collect()
     }
 }
 
@@ -145,4 +158,4 @@ impl EntityPool {
 ///
 /// Thread safe
 pub static ENTITY_POOL: LazyLock<Mutex<EntityPool>> =
-    LazyLock::new(|| Mutex::new(EntityPool::new()));
+    LazyLock::new(|| Mutex::new(EntityPool::default()));

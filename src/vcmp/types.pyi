@@ -1,18 +1,23 @@
-from enum import IntEnum
+from enum import IntEnum, auto
 
 
 class ServerSettings:
-    server_name: str
-    port: int
-    max_players: int
-    flags: int
+    @property
+    def server_name(self) -> str: ...
+    @property
+    def port(self) -> int: ...
+    @property
+    def max_players(self) -> int: ...
+    @property
+    def flags(self) -> int: ...
+
 
 class WastedSettings:
     death_timer: int
     fade_timer: int
     fade_in_speed: float
     fade_out_speed: float
-    fade_colour: 'RGB'
+    color: 'RGB'
     corpse_fade_start: int
     corpse_fade_time: int
 
@@ -239,3 +244,20 @@ class KeyCode(IntEnum):
     VK_PA1 = 0xFD
     VK_OEM_CLEAR = 0xFE
     VK_UNKNOWN = 0xFF
+
+
+class EntityPool(IntEnum):
+    @staticmethod
+    def vehicle() -> 'EntityPool': ...
+    @staticmethod
+    def object() -> 'EntityPool': ...
+    @staticmethod
+    def pickup() -> 'EntityPool': ...
+    @staticmethod
+    def radio() -> 'EntityPool': ...
+    @staticmethod
+    def player() -> 'EntityPool': ...
+    @staticmethod
+    def marker() -> 'EntityPool': ...
+    @staticmethod
+    def checkpoint() -> 'EntityPool': ...

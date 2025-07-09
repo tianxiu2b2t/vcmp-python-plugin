@@ -1256,7 +1256,7 @@ impl VcmpEntityPoolPy {
     }
 
     #[staticmethod]
-    pub fn check_point() -> Self {
+    pub fn checkpoint() -> Self {
         Self {
             inner: VcmpEntityPool::CheckPoint,
         }

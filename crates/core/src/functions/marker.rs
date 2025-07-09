@@ -6,7 +6,7 @@ use pyo3::{
 use vcmp_bindings::{func::MarkerMethods, vcmp_func};
 
 use crate::{
-    pool::EntityPoolTrait,
+    pool::{EntityPoolTrait, ENTITY_POOL},
     py::types::{EntityVectorType, RGBPy, VectorPy},
 };
 
@@ -88,9 +88,12 @@ impl MarkerPy {
 
 #[pyfunction]
 pub fn create_marker(model: i32, world: i32, position: VectorPy, scale: i32, color: RGBPy) {
-    let _marker =
+    let id =
         vcmp_func().create_marker(world, position.into(), scale, color.into(), model, None);
-    // TODO: error handling
+    
+    let pool = ENTITY_POOL.lock().unwrap();
+
+    pool.get_marker(id).map(|m| *m).unwrap_or(MarkerPy::new(id));
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

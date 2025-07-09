@@ -1,20 +1,19 @@
 use std::ops::Add as _;
 
 use pyo3::{
-    Bound, PyResult, Python, pyclass, pymethods,
+    Bound, PyResult, Python, pyclass, pymethods, pyfunction, wrap_pyfunction,
     types::{PyModule, PyModuleMethods},
 };
 use vcmp_bindings::{
     func::{
         QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods,
         VehicleMethods,
-    },
-    vcmp_func,
+    }, vcmp_func
 };
 
 use crate::{
     functions::player::PlayerPy,
-    pool::EntityPoolTrait,
+    pool::{EntityPoolTrait, ENTITY_POOL},
     py::types::{EntityQuaternionType, EntityVectorType, QuaternionPy, VectorPy},
 };
 
@@ -518,7 +517,34 @@ impl VehiclePy {
     }
 }
 
+#[pyfunction]
+#[pyo3(signature = (model, world, pos, angle = 0.0, primary_color = -1, secondary_color = -1))]
+pub fn create_vehicle(
+    model: i32,
+    world: i32,
+    pos: VectorPy,
+    angle: f32,
+    primary_color: i32,
+    secondary_color: i32,
+) -> VehiclePy {
+    let primary_colour = if primary_color < 0 {
+        rand::random_range(0..95)
+    } else {
+        primary_color
+    };
+    let secondary_colour = if secondary_color < 0 {
+        rand::random_range(0..95)
+    } else {
+        secondary_color
+    };
+    let id = vcmp_func().create_vehicle(model, world, pos.into(), angle, primary_colour, secondary_colour);
+
+    let pool = ENTITY_POOL.lock().unwrap();
+    pool.get_vehicle(id).map(|v| *v).unwrap_or(VehiclePy::new(id))
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<VehiclePy>()?;
+    m.add_function(wrap_pyfunction!(create_vehicle, m)?)?;
     Ok(())
 }

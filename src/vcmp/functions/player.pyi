@@ -444,3 +444,28 @@ class Player:
     
     def is_world_compatible(self, world: int) -> bool:
         ...
+
+    @property
+    def drunk_handling(self) -> int:
+        ...
+
+    @drunk_handling.setter
+    def drunk_handling(self, drunk_handling: int) -> None:
+        ...
+
+    @property
+    def drunk_visuals(self) -> bool:
+        ...
+
+    @drunk_visuals.setter
+    def drunk_visuals(self, drunk: bool) -> None:
+        ...
+
+    def set_3d_arrow_for_target(self, target: Player, show: bool):
+        ...
+
+    def is_3d_arrow_show_for_target(self, target: Player) -> bool:
+        ...
+
+    def interpolate_camera_look_at(self, look_at: Vector, time: int) -> None:
+        ...

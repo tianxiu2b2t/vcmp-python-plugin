@@ -161,10 +161,20 @@ impl ReadStream {
     }
 }
 
+impl From<Vec<u8>> for ReadStream {
+    fn from(data: Vec<u8>) -> Self {
+        ReadStream {
+            buffer: Cursor::new(data),
+        }
+    }
+}
+
 #[pymethods]
 impl ReadStream {
     #[new]
-    fn new(data: Vec<u8>) -> Self {
+    #[pyo3(signature = (data = None))]
+    fn new(py: Python<'_>, data: Option<Py<PyBytes>>) -> Self {
+        let data = data.map(|d| d.as_bytes(py).to_vec()).unwrap_or_default();
         ReadStream {
             buffer: Cursor::new(data),
         }
