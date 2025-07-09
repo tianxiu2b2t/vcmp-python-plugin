@@ -4,7 +4,7 @@ use std::{
     sync::{LazyLock, Mutex},
 };
 
-use pyo3::prelude::*;
+use pyo3::{prelude::*, types::PyNone};
 use vcmp_bindings::events::{VcmpEvent, VcmpEventType};
 
 #[derive(Debug, Clone)]
@@ -37,14 +37,24 @@ pub struct PyCallbackManager;
 
 impl PyCallbackManager {
     pub fn handle(&self, event: VcmpEvent, default_bool: bool) -> bool {
-        let res = Python::with_gil(|py| {
-            self.py_handle(py, event)
-        });
-
-        default_bool
+        Python::with_gil(|py| {
+            match self.py_handle(py, event) {
+                Ok(res) => {
+                    if res.is_none(py) {
+                        default_bool
+                    } else {
+                        match res.extract::<bool>(py) {
+                            Ok(res) => res,
+                            Err(_) => default_bool
+                        }
+                    }
+                }
+                Err(_) => default_bool
+            }
+        })
     }
-    fn py_handle(&self, py: Python<'_>, event: VcmpEvent) -> PyResult<PyAny> {
-        Ok(())
+    fn py_handle(&self, py: Python<'_>, event: VcmpEvent) -> PyResult<Py<PyAny>> {
+        Ok(PyNone::get(py).downcast::<PyAny>().unwrap().clone().unbind())
     }
 }
 
