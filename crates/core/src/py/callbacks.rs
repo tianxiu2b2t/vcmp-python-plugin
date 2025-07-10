@@ -121,15 +121,15 @@ impl PyCallbackManager {
         event_type: VcmpEventType,
         func: Option<Py<PyAny>>,
         priority: u16,
-    ) -> PyResult<Py<PyAny>> {
+    ) -> Py<PyAny> {
         if let Some(func) = func {
             PY_CALLBACK_STORAGE
                 .lock()
                 .unwrap()
                 .register_func(event_type, func.clone(), priority);
-            Ok(func)
+            func
         } else {
-            let res = PyCFunction::new_closure(
+            PyCFunction::new_closure(
                 py,
                 None,
                 None,
@@ -146,8 +146,7 @@ impl PyCallbackManager {
             .unwrap()
             .unbind()
             .extract::<Py<PyAny>>(py)
-            .unwrap();
-            Ok(res)
+            .unwrap()
         }
     }
 }
@@ -160,7 +159,7 @@ impl PyCallbackManager {
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
-    ) -> PyResult<Py<PyAny>> {
+    ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerInitialise, func, priority)
     }
 
@@ -170,7 +169,7 @@ impl PyCallbackManager {
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
-    ) -> PyResult<Py<PyAny>> {
+    ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerShutdown, func, priority)
     }
 
@@ -180,7 +179,7 @@ impl PyCallbackManager {
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
-    ) -> PyResult<Py<PyAny>> {
+    ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerPerformanceReport, func, priority)
     }
     
@@ -190,7 +189,7 @@ impl PyCallbackManager {
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
-    ) -> PyResult<Py<PyAny>> {
+    ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerFrame, func, priority)
     }
 
