@@ -9,7 +9,7 @@ use vcmp_bindings::{func::ObjectMethods, vcmp_func};
 
 use crate::{
     functions::player::PlayerPy,
-    pool::{EntityPoolTrait, ENTITY_POOL},
+    pool::{ENTITY_POOL, EntityPoolTrait},
     py::types::{EntityQuaternionType, EntityVectorType, QuaternionPy, VectorPy},
 };
 
@@ -206,7 +206,7 @@ impl ObjectPy {
 #[pyfunction]
 pub fn create_object(model: i32, world: i32, pos: VectorPy, alpha: i32) -> ObjectPy {
     let id = vcmp_func().create_object(model, world, pos.into(), alpha);
-    
+
     let pool = ENTITY_POOL.lock().unwrap();
 
     pool.get_object(id).map(|o| *o).unwrap_or(ObjectPy::new(id))

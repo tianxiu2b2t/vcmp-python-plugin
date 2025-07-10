@@ -4,8 +4,14 @@ use std::{
     sync::{LazyLock, Mutex},
 };
 
-use pyo3::{prelude::*, types::PyNone};
+use pyo3::{
+    prelude::*,
+    types::{PyCFunction, PyNone},
+};
+use tracing::event;
 use vcmp_bindings::events::{VcmpEvent, VcmpEventType};
+
+use crate::py::events::PyVcmpEvent;
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
@@ -25,37 +31,180 @@ pub struct PyCallbackStorage {
     pub callbacks: HashMap<VcmpEventType, Vec<CallbackFunction>>,
 }
 
+impl PyCallbackStorage {
+    pub fn register_func(&mut self, event_type: VcmpEventType, func: Py<PyAny>, priority: u16) {
+        if !self.callbacks.contains_key(&event_type) {
+            self.callbacks.insert(event_type.clone(), Vec::default());
+        }
+        self.callbacks
+            .get_mut(&event_type)
+            .unwrap()
+            .push(CallbackFunction { func, priority });
+    }
+
+    pub fn get_handlers(&self, event_type: &VcmpEventType) -> Option<&Vec<CallbackFunction>> {
+        self.callbacks.get(event_type)
+    }
+}
+
 /// 全局 callback 存储
 pub static PY_CALLBACK_STORAGE: LazyLock<Mutex<PyCallbackStorage>> =
     LazyLock::new(|| Mutex::new(PyCallbackStorage::default()));
 
-
-
-
-#[derive(Clone, Default, Debug)]
-pub struct PyCallbackManager;
+#[derive(Clone, Default, Debug, Copy)]
+#[pyclass]
+pub struct PyCallbackManager {}
 
 impl PyCallbackManager {
-    pub fn handle(&self, event: VcmpEvent, default_bool: bool) -> bool {
-        Python::with_gil(|py| {
-            match self.py_handle(py, event) {
-                Ok(res) => {
-                    if res.is_none(py) {
-                        default_bool
-                    } else {
-                        match res.extract::<bool>(py) {
-                            Ok(res) => res,
-                            Err(_) => default_bool
-                        }
+    pub fn handle(&self, event: PyVcmpEvent, abortable: bool) -> bool {
+        Python::with_gil(|py| match self.py_handle(py, event) {
+            Ok(res) => {
+                if res.is_none(py) {
+                    abortable
+                } else {
+                    match res.extract::<bool>(py) {
+                        Ok(res) => res,
+                        Err(_) => abortable,
                     }
                 }
-                Err(_) => default_bool
             }
+            Err(_) => abortable,
         })
     }
-    fn py_handle(&self, py: Python<'_>, event: VcmpEvent) -> PyResult<Py<PyAny>> {
-        Ok(PyNone::get(py).downcast::<PyAny>().unwrap().clone().unbind())
+    fn py_handle(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
+        let event_type = VcmpEventType::from(event.event_enum);
+        let storage = PY_CALLBACK_STORAGE.lock().unwrap();
+        let handlers = storage.get_handlers(&event_type);
+        if handlers.is_none() {
+            return Ok(PyNone::get(py)
+                .downcast::<PyAny>()
+                .unwrap()
+                .clone()
+                .unbind());
+        }
+        let handlers = handlers.unwrap();
+        //let mut res = None;
+        let need_arg = {
+            match event_type {
+                VcmpEventType::ServerInitialise => false,
+                VcmpEventType::ServerShutdown => false,
+                _ => true,
+            }
+        };
+        let args = if need_arg {
+            PyTuple::new(py, &[event.clone().into_py(py)])
+        } else {
+            PyTuple::new(py, &[])
+        };
+        for handler in handlers {
+            let func = handler.func.clone();
+            match func.call1(py, args) {
+                Ok(res) => {
+                    //event.abort = res.extract::<bool>(py).unwrap_or(false);
+                }
+                Err(e) => {
+                    //event.abort = true;
+                    //event.error = Some(e.to_string());
+                }
+            }
+        }
+        Ok(PyNone::get(py)
+            .downcast::<PyAny>()
+            .unwrap()
+            .clone()
+            .unbind())
     }
+
+    pub fn register_func(
+        &self,
+        py: Python<'_>,
+        event_type: VcmpEventType,
+        func: Option<Py<PyAny>>,
+        priority: u16,
+    ) -> PyResult<Py<PyAny>> {
+        if let Some(func) = func {
+            PY_CALLBACK_STORAGE
+                .lock()
+                .unwrap()
+                .register_func(event_type, func.clone(), priority);
+            Ok(func)
+        } else {
+            let res = PyCFunction::new_closure(
+                py,
+                None,
+                None,
+                move |args, _kwargs| -> PyResult<Py<PyAny>> {
+                    let func = args.get_item(0).unwrap().extract::<Py<PyAny>>().unwrap();
+                    PY_CALLBACK_STORAGE.lock().unwrap().register_func(
+                        event_type,
+                        func.clone(),
+                        priority,
+                    );
+                    Ok(func)
+                },
+            )
+            .unwrap()
+            .unbind()
+            .extract::<Py<PyAny>>(py)
+            .unwrap();
+            Ok(res)
+        }
+    }
+}
+
+#[pymethods]
+impl PyCallbackManager {
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_server_initialise(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> PyResult<Py<PyAny>> {
+        self.register_func(py, VcmpEventType::ServerInitialise, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_server_shutdown(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> PyResult<Py<PyAny>> {
+        self.register_func(py, VcmpEventType::ServerShutdown, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_server_performance_report(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> PyResult<Py<PyAny>> {
+        self.register_func(py, VcmpEventType::ServerPerformanceReport, func, priority)
+    }
+    
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_server_frame(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> PyResult<Py<PyAny>> {
+        self.register_func(py, VcmpEventType::ServerFrame, func, priority)
+    }
+
+}
+
+/// 全局的 callback 管理器
+
+pub static PY_CALLBACK_MANAGER: LazyLock<PyCallbackManager> =
+    LazyLock::new(|| PyCallbackManager::default());
+
+pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<PyCallbackManager>()?;
+    m.add("callbacks", PY_CALLBACK_MANAGER.into_pyobject(py)?)?;
+    Ok(())
 }
 
 // #[derive(Debug, Clone)]

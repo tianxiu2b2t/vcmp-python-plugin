@@ -484,7 +484,7 @@ pub fn get_players() -> Vec<PlayerPy> {
 pub fn announce_all(announce_type: i32, message: String) {
     let pool = ENTITY_POOL.lock().unwrap();
     for player in pool.get_players() {
-        player.send_announce(announce_type, &message.clone());
+        player.announce(announce_type, &message.clone());
     }
 }
 
@@ -492,7 +492,7 @@ pub fn announce_all(announce_type: i32, message: String) {
 pub fn message_all(message: String) {
     let pool = ENTITY_POOL.lock().unwrap();
     for player in pool.get_players() {
-        player.send_message(&message.clone());
+        player.message(&message.clone());
     }
 }
 
@@ -500,7 +500,7 @@ pub fn message_all(message: String) {
 pub fn raw_message_all(color: RGBPy, message: String) {
     let pool = ENTITY_POOL.lock().unwrap();
     for player in pool.get_players() {
-        player.send_raw_message(color, &message.clone());
+        player.raw_message(color, &message.clone());
     }
 }
 

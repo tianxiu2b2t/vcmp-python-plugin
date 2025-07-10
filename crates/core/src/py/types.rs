@@ -555,18 +555,24 @@ impl VectorPy {
     }
 
     #[setter]
-    pub fn set_z(&mut self, value: f32) {
-        self.set_entity_pos(None, None, Some(value));
+    pub fn set_z(&mut self, py: Python<'_>, value: f32) {
+        py.allow_threads(|| {
+            self.set_entity_pos(None, None, Some(value));
+        });
     }
 
     #[setter]
-    pub fn set_y(&mut self, value: f32) {
-        self.set_entity_pos(None, Some(value), None);
+    pub fn set_y(&mut self, py: Python<'_>, value: f32) {
+        py.allow_threads(|| {
+            self.set_entity_pos(None, Some(value), None);
+        });
     }
 
     #[setter]
-    pub fn set_x(&mut self, value: f32) {
-        self.set_entity_pos(Some(value), None, None);
+    pub fn set_x(&mut self, py: Python<'_>, value: f32) {
+        py.allow_threads(|| {
+            self.set_entity_pos(Some(value), None, None);
+        });
     }
 
     fn __repr__(&self) -> String {
@@ -737,23 +743,31 @@ impl QuaternionPy {
     }
 
     #[setter]
-    pub fn set_w(&mut self, value: f32) {
-        self.set_entity_quaternion(None, None, None, Some(value));
+    pub fn set_w(&mut self, py: Python<'_>, value: f32) {
+        py.allow_threads(|| {
+            self.set_entity_quaternion(None, None, None, Some(value));
+        });
     }
 
     #[setter]
-    pub fn set_z(&mut self, value: f32) {
-        self.set_entity_quaternion(None, None, Some(value), None);
+    pub fn set_z(&mut self, py: Python<'_>, value: f32) {
+        py.allow_threads(|| {
+            self.set_entity_quaternion(None, None, Some(value), None);
+        });
     }
 
     #[setter]
-    pub fn set_y(&mut self, value: f32) {
-        self.set_entity_quaternion(None, Some(value), None, None);
+    pub fn set_y(&mut self, py: Python<'_>, value: f32) {
+        py.allow_threads(|| {
+            self.set_entity_quaternion(None, Some(value), None, None);
+        });
     }
 
     #[setter]
-    pub fn set_x(&mut self, value: f32) {
-        self.set_entity_quaternion(Some(value), None, None, None);
+    pub fn set_x(&mut self, py: Python<'_>, value: f32) {
+        py.allow_threads(|| {
+            self.set_entity_quaternion(None, Some(value), None, None);
+        });
     }
 
     fn __repr__(&self) -> String {

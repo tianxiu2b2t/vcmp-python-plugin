@@ -1,19 +1,21 @@
 use std::ops::Add as _;
 
 use pyo3::{
-    Bound, PyResult, Python, pyclass, pymethods, pyfunction, wrap_pyfunction,
+    Bound, PyResult, Python, pyclass, pyfunction, pymethods,
     types::{PyModule, PyModuleMethods},
+    wrap_pyfunction,
 };
 use vcmp_bindings::{
     func::{
         QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods,
         VehicleMethods,
-    }, vcmp_func
+    },
+    vcmp_func,
 };
 
 use crate::{
     functions::player::PlayerPy,
-    pool::{EntityPoolTrait, ENTITY_POOL},
+    pool::{ENTITY_POOL, EntityPoolTrait},
     py::types::{EntityQuaternionType, EntityVectorType, QuaternionPy, VectorPy},
 };
 
@@ -537,10 +539,19 @@ pub fn create_vehicle(
     } else {
         secondary_color
     };
-    let id = vcmp_func().create_vehicle(model, world, pos.into(), angle, primary_colour, secondary_colour);
+    let id = vcmp_func().create_vehicle(
+        model,
+        world,
+        pos.into(),
+        angle,
+        primary_colour,
+        secondary_colour,
+    );
 
     let pool = ENTITY_POOL.lock().unwrap();
-    pool.get_vehicle(id).map(|v| *v).unwrap_or(VehiclePy::new(id))
+    pool.get_vehicle(id)
+        .map(|v| *v)
+        .unwrap_or(VehiclePy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

@@ -10,7 +10,8 @@ use vcmp_bindings::options::VcmpEntityPool;
 use crate::{
     consts::EntityId,
     functions::{
-        checkpoint::CheckPointPy, marker::MarkerPy, object::ObjectPy, pickup::PickupPy, player::PlayerPy, vehicle::VehiclePy
+        checkpoint::CheckPointPy, marker::MarkerPy, object::ObjectPy, pickup::PickupPy,
+        player::PlayerPy, vehicle::VehiclePy,
     },
 };
 
@@ -77,7 +78,7 @@ pub struct EntityPool {
     objects: AnEntityPool<ObjectPy>,
     pickups: AnEntityPool<PickupPy>,
     markers: AnEntityPool<MarkerPy>,
-    checkpoints: AnEntityPool<CheckPointPy>
+    checkpoints: AnEntityPool<CheckPointPy>,
 }
 
 impl EntityPool {

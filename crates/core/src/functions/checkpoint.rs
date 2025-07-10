@@ -147,10 +147,12 @@ pub fn create_checkpoint(
         color.into(),
         radius,
     );
-    
+
     let pool = ENTITY_POOL.lock().unwrap();
-    
-    pool.get_checkpoint(id).map(|c| *c).unwrap_or(CheckPointPy::new(id))
+
+    pool.get_checkpoint(id)
+        .map(|c| *c)
+        .unwrap_or(CheckPointPy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

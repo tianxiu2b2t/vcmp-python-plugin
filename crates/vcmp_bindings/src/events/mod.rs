@@ -8,7 +8,7 @@ pub mod player;
 pub mod server;
 pub mod vehicle;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, Copy)]
 pub enum VcmpEventType {
     PluginCommand,
     EntityStreaming,
