@@ -18,6 +18,7 @@ pub mod player;
 pub mod server;
 
 #[pyclass(name = "VcmpEvent")]
+#[derive(Clone, Debug)]
 pub struct PyVcmpEvent {
     pub event_enum: VcmpEvent,
 }

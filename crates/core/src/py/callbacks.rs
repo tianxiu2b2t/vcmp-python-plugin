@@ -8,10 +8,10 @@ use pyo3::{
     prelude::*,
     types::{PyCFunction, PyNone},
 };
-use tracing::event;
-use vcmp_bindings::events::{VcmpEvent, VcmpEventType};
+use tracing::{Level, event};
+use vcmp_bindings::events::{VcmpEvent, VcmpEventType, server as server_events};
 
-use crate::py::events::PyVcmpEvent;
+use crate::py::events::{server::{ServerFrameEvent, ServerInitialiseEvent, ServerShutdownEvent}, PyBaseEvent, PyVcmpEvent};
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
@@ -53,6 +53,7 @@ pub static PY_CALLBACK_STORAGE: LazyLock<Mutex<PyCallbackStorage>> =
 
 #[derive(Clone, Default, Debug, Copy)]
 #[pyclass]
+#[pyo3(name = "CallbackManager")]
 pub struct PyCallbackManager {}
 
 impl PyCallbackManager {
@@ -91,18 +92,23 @@ impl PyCallbackManager {
                 _ => true,
             }
         };
-        let args = if need_arg {
-            PyTuple::new(py, &[event.clone().into_py(py)])
-        } else {
-            PyTuple::new(py, &[])
-        };
+        let py_event = match event_type {
+            VcmpEventType::ServerInitialise => {
+                ServerInitialiseEvent
+            },
+            _ => {
+                ServerShutdownEvent
+            }
+        }.init(py).unwrap();
         for handler in handlers {
             let func = handler.func.clone();
-            match func.call1(py, args) {
+            match func.call1(py, (py_event,)) {
                 Ok(res) => {
+                    event!(Level::INFO, "Callback called: {}", res)
                     //event.abort = res.extract::<bool>(py).unwrap_or(false);
                 }
                 Err(e) => {
+                    event!(Level::ERROR, "Failed to call callback: {}", e)
                     //event.abort = true;
                     //event.error = Some(e.to_string());
                 }
@@ -182,7 +188,7 @@ impl PyCallbackManager {
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerPerformanceReport, func, priority)
     }
-    
+
     #[pyo3(signature = (priority = 9999, func = None))]
     pub fn on_server_frame(
         &self,
@@ -192,7 +198,432 @@ impl PyCallbackManager {
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerFrame, func, priority)
     }
+    // 续接现有代码...
 
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_plugin_command(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PluginCommand, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_entity_streaming(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::EntityStreaming, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_entity_pool(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::EntityPool, func, priority)
+    }
+
+    // 检查点事件
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_checkpoint_entered(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::CheckpointEntered, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_checkpoint_exited(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::CheckpointExited, func, priority)
+    }
+
+    // 对象事件
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_object_shot(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::ObjectShot, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_object_touched(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::ObjectTouched, func, priority)
+    }
+
+    // 拾取物事件
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_pickup_picked(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PickupPicked, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_pickup_pick_attempt(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PickupPickAttempt, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_pickup_respawn(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PickupRespawn, func, priority)
+    }
+
+    // 玩家事件
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_incoming_connection(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::IncomingConnection, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_client_script_data(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::ClientScriptData, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_connect(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerConnect, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_disconnect(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerDisconnect, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_request_class(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerRequestClass, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_spawn(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerSpawn, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_request_spawn(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerRequestSpawn, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_death(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerDeath, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_update(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerUpdate, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_request_enter_vehicle(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerRequestEnterVehicle, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_enter_vehicle(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerEnterVehicle, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_exit_vehicle(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerExitVehicle, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_name_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerNameChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_state_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerStateChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_action_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerActionChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_on_fire_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerOnFireChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_crouch_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerCrouchChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_game_keys_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerGameKeysChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_begin_typing(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerBeginTyping, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_end_typing(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerEndTyping, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_away_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerAwayChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_message(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerMessage, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_command(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerCommand, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_private_message(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerPrivateMessage, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_key_bind_down(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerKeyBindDown, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_key_bind_up(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerKeyBindUp, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_spectate(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerSpectate, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_crash_report(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerCrashReport, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_module_list(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerModuleList, func, priority)
+    }
+
+    // 载具事件
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_update(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleUpdate, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_explode(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleExplode, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_respawn(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleRespawn, func, priority)
+    }
 }
 
 /// 全局的 callback 管理器

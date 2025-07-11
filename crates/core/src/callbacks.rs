@@ -3,7 +3,7 @@ use std::os::raw::c_char;
 use crate::py::callbacks::PY_CALLBACK_MANAGER;
 use crate::py::events::{PyVcmpEvent, player::*, server::*};
 use crate::py::types::VectorPy;
-use vcmp_bindings::events::{server, VcmpEvent};
+use vcmp_bindings::events::{VcmpEvent, server};
 use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
@@ -42,16 +42,16 @@ pub unsafe extern "C" fn on_server_performance_report(
     descriptions: *mut *const c_char,
     times: *mut u64,
 ) {
-    let bindings_evnt = server::ServerPerformanceReportEvent::from((
-        entry_count,
-        descriptions,
-        times,
-    ));
-    let _ = PY_CALLBACK_MANAGER.handle(PyVcmpEvent::server_performance_report(
-        bindings_evnt.entry_count,
-        bindings_evnt.descriptions,
-        bindings_evnt.times,
-    ), false);
+    let bindings_evnt =
+        server::ServerPerformanceReportEvent::from((entry_count, descriptions, times));
+    let _ = PY_CALLBACK_MANAGER.handle(
+        PyVcmpEvent::server_performance_report(
+            bindings_evnt.entry_count,
+            bindings_evnt.descriptions,
+            bindings_evnt.times,
+        ),
+        false,
+    );
 }
 
 #[unsafe(no_mangle)]
@@ -94,11 +94,14 @@ pub unsafe extern "C" fn on_incoming_connection(
         user_password,
         ip_address,
     ));
-    PY_CALLBACK_MANAGER.handle(PyVcmpEvent::incoming_connection(
-        binding_event.player_name,
-        binding_event.password,
-        binding_event.ip,
-    ), false) as u8
+    PY_CALLBACK_MANAGER.handle(
+        PyVcmpEvent::incoming_connection(
+            binding_event.player_name,
+            binding_event.password,
+            binding_event.ip,
+        ),
+        false,
+    ) as u8
 }
 
 // #[unsafe(no_mangle)]
