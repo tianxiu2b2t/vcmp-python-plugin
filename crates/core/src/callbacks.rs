@@ -3,6 +3,7 @@ use std::os::raw::c_char;
 use crate::py::callbacks::PY_CALLBACK_MANAGER;
 use crate::py::events::{PyVcmpEvent, player::*, server::*};
 use crate::py::types::VectorPy;
+use crate::py::GLOBAL_VAR;
 use vcmp_bindings::events::{VcmpEvent, server};
 use vcmp_bindings::{events::player, options::VcmpEntityPool, raw::PluginCallbacks};
 
@@ -28,6 +29,14 @@ pub extern "C" fn on_server_init() -> u8 {
 #[unsafe(no_mangle)]
 #[allow(clippy::not_unsafe_ptr_arg_deref)]
 pub extern "C" fn on_server_frame(elapsed_time: f32) {
+    // first check need reload
+
+    let mut var = GLOBAL_VAR.lock().unwrap();
+    if var.need_reload {
+        var.need_reload = false;
+        load_script_as_module();
+    }
+
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
     //let _ = CALLBACK.call_func(ServerFrameEvent::from(elapsed_time), None, false);
     let _ = PY_CALLBACK_MANAGER.handle(PyVcmpEvent::server_frame(elapsed_time), false);

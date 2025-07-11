@@ -9,9 +9,9 @@ use pyo3::{
     types::{PyCFunction, PyNone},
 };
 use tracing::{Level, event};
-use vcmp_bindings::events::{VcmpEvent, VcmpEventType, server as server_events};
+use vcmp_bindings::events::{VcmpEvent, VcmpEventType};
 
-use crate::py::events::{server::{ServerFrameEvent, ServerInitialiseEvent, ServerShutdownEvent}, PyBaseEvent, PyVcmpEvent};
+use crate::py::events::{server::{ServerFrameEvent, ServerInitialiseEvent, ServerPerformanceReportEvent, ServerShutdownEvent}, PyBaseEvent, PyVcmpEvent};
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
@@ -73,7 +73,7 @@ impl PyCallbackManager {
         })
     }
     fn py_handle(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
-        let event_type = VcmpEventType::from(event.event_enum);
+        let event_type = VcmpEventType::from(event.event_enum.clone());
         let storage = PY_CALLBACK_STORAGE.lock().unwrap();
         let handlers = storage.get_handlers(&event_type);
         if handlers.is_none() {
@@ -92,17 +92,18 @@ impl PyCallbackManager {
                 _ => true,
             }
         };
-        let py_event = match event_type {
-            VcmpEventType::ServerInitialise => {
-                ServerInitialiseEvent
-            },
-            _ => {
-                ServerShutdownEvent
-            }
-        }.init(py).unwrap();
+        let py_event: Option<Py<PyAny>> = match event.event_enum {
+            VcmpEvent::PluginCommand(_) => None,
+            VcmpEvent::ServerInitialise(_) => Some((ServerInitialiseEvent {}).init(py)),
+            VcmpEvent::ServerFrame(e) => Some((ServerFrameEvent { inner: e }).init(py)),
+            VcmpEvent::ServerShutdown(_) => Some((ServerShutdownEvent {}).init(py)),
+            VcmpEvent::ServerPerformanceReport(e) => Some((ServerPerformanceReportEvent { inner: e}).init(py)),
+            _ => None
+        };
+        //let py_event = py_event.init(py).unwrap();
         for handler in handlers {
             let func = handler.func.clone();
-            match func.call1(py, (py_event,)) {
+            match func.call1(py, (py_event.clone(),)) {
                 Ok(res) => {
                     event!(Level::INFO, "Callback called: {}", res)
                     //event.abort = res.extract::<bool>(py).unwrap_or(false);

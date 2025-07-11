@@ -1,8 +1,9 @@
 use std::ffi::CString;
 use std::path::Path;
+use std::sync::{LazyLock, Mutex};
 
 use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
-use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule};
+use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule, pyfunction, wrap_pyfunction};
 use tracing::{Level, event};
 
 use crate::cfg::CONFIG;
@@ -20,6 +21,14 @@ pub mod exceptions;
 pub mod streams;
 pub mod types;
 pub mod util;
+
+#[derive(Clone, Debug, Default)]
+pub struct GlobalVar {
+    pub need_reload: bool,
+}
+
+pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> = LazyLock::new(|| Mutex::new(GlobalVar::default()));
+
 
 #[cfg(target_os = "linux")]
 fn get_wchar_t(content: &str) -> Vec<i32> {
@@ -91,6 +100,8 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
         fix_module_name(py, &instance_module, "instance");
         m.add_submodule(&instance_module)?;
     }
+
+    m.add_function(wrap_pyfunction!(reload, m)?)?;
 
     Ok(())
 }
@@ -217,6 +228,16 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
     result.push('\'');
     result
 }
+
+/// 重新加载？
+/// 
+#[pyfunction]
+pub fn reload() -> PyResult<()> {
+    let mut var = GLOBAL_VAR.lock().unwrap();
+    var.need_reload = true;
+    Ok(())
+}
+
 
 /// 获取 python 错误信息
 ///

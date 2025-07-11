@@ -50,7 +50,7 @@ impl ServerShutdownEvent {
 #[derive(Debug, Clone)]
 #[pyo3(name = "ServerFrameEvent")]
 pub struct ServerFrameEvent {
-    inner: server::ServerFrameEvent,
+    pub inner: server::ServerFrameEvent,
 }
 
 impl From<f32> for ServerFrameEvent {
@@ -146,40 +146,35 @@ impl ServerPerformanceReportEvent {
 */
 
 impl PyBaseEvent for ServerInitialiseEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, ServerInitialiseEvent::new())?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, ServerInitialiseEvent::new()).expect("Failed to create ServerInitialiseEvent").into()
     }
 }
 impl PyBaseEvent for ServerShutdownEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, ServerShutdownEvent::new())?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, ServerShutdownEvent::new()).expect("Failed to create ServerShutdownEvent").into()
     }
 }
 impl PyBaseEvent for ServerFrameEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, ServerFrameEvent::new(self.frame()))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, ServerFrameEvent::new(self.frame())).expect("Failed to create ServerFrameEvent").into()
     }
 }
 impl PyBaseEvent for ServerPerformanceReportEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             ServerPerformanceReportEvent::new(
                 self.entry_count(),
                 self.descriptions().clone(),
                 self.times().clone(),
             ),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create ServerPerformanceReportEvent").into()
     }
 }
 impl PyBaseEvent for ServerEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, ServerEvent::new("ServerEvent"))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, ServerEvent::new("ServerEvent")).expect("Failed to create ServerEvent").into()
     }
 }
 

@@ -27,9 +27,8 @@ impl PlayerEvent {
 }
 
 impl PyBaseEvent for PlayerEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerEvent::new("PlayerEvent"))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerEvent::new("PlayerEvent")).expect("Failed to create PlayerEvent").into()
     }
 }
 
@@ -70,9 +69,8 @@ impl IncomingConnectionEvent {
 }
 
 impl PyBaseEvent for IncomingConnectionEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, IncomingConnectionEvent::new(self.inner.clone()))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, IncomingConnectionEvent::new(self.inner.clone())).expect("Failed to create IncomingConnectionEvent").into()
     }
 }
 
@@ -110,9 +108,8 @@ impl From<player::PlayerConnectEvent> for PlayerConnectEvent {
 }
 
 impl PyBaseEvent for PlayerConnectEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerConnectEvent::new(self.player_id))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerConnectEvent::new(self.player_id)).expect("Failed to create PlayerConnectEvent").into()
     }
 }
 
@@ -157,9 +154,8 @@ impl From<player::PlayerDisconnectEvent> for PlayerDisconnectEvent {
 }
 
 impl PyBaseEvent for PlayerDisconnectEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerDisconnectEvent::new(self.player_id, self.reason))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerDisconnectEvent::new(self.player_id, self.reason)).expect("Failed to create PlayerDisconnectEvent").into()
     }
 }
 
@@ -199,12 +195,11 @@ impl From<player::ClientScriptDataEvent> for ClientScriptDataEvent {
 }
 
 impl PyBaseEvent for ClientScriptDataEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             ClientScriptDataEvent::new(self.player_id, self.data.clone()),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create ClientScriptDataEvent").into()
     }
 }
 
@@ -246,12 +241,11 @@ impl From<player::PlayerRequestClassEvent> for PlayerRequestClassEvent {
 }
 
 impl PyBaseEvent for PlayerRequestClassEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerRequestClassEvent::new(self.player_id, self.class_id),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerRequestClassEvent").into()
     }
 }
 
@@ -289,9 +283,8 @@ impl From<player::PlayerRequestSpawnEvent> for PlayerRequestSpawnEvent {
 }
 
 impl PyBaseEvent for PlayerRequestSpawnEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerRequestSpawnEvent::new(self.player_id))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerRequestSpawnEvent::new(self.player_id)).expect("Failed to create PlayerRequestSpawnEvent").into()
     }
 }
 
@@ -329,9 +322,8 @@ impl From<player::PlayerSpawnEvent> for PlayerSpawnEvent {
 }
 
 impl PyBaseEvent for PlayerSpawnEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerSpawnEvent::new(self.player_id))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerSpawnEvent::new(self.player_id)).expect("Failed to create PlayerSpawnEvent").into()
     }
 }
 
@@ -400,12 +392,11 @@ impl From<player::PlayerDeathEvent> for PlayerDeathEvent {
 }
 
 impl PyBaseEvent for PlayerDeathEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerDeathEvent::new(self.player_id, self.killer_id, self.reason, self.body_part),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerDeathEvent").into()
     }
 }
 
@@ -479,12 +470,11 @@ impl From<(i32, f32, f32)> for PlayerHealthEvent {
 }
 
 impl PyBaseEvent for PlayerHealthEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerHealthEvent::new(self.player_id, self.old_health, self.new_health),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerHealthEvent").into()
     }
 }
 // Player Armour
@@ -553,12 +543,11 @@ impl From<(i32, f32, f32)> for PlayerArmourEvent {
 }
 
 impl PyBaseEvent for PlayerArmourEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerArmourEvent::new(self.player_id, self.old_armour, self.new_armour),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerArmourEvent").into()
     }
 }
 
@@ -628,12 +617,11 @@ impl From<(i32, i32, i32)> for PlayerAmmoEvent {
 }
 
 impl PyBaseEvent for PlayerAmmoEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerAmmoEvent::new(self.player_id, self.old_ammo, self.new_ammo),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerAmmoEvent").into()
     }
 }
 
@@ -703,12 +691,11 @@ impl From<(i32, i32, i32)> for PlayerWeaponEvent {
 }
 
 impl PyBaseEvent for PlayerWeaponEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerWeaponEvent::new(self.player_id, self.old_weapon, self.new_weapon),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerWeaponEvent").into()
     }
 }
 
@@ -776,12 +763,11 @@ impl From<(i32, VectorPy, VectorPy)> for PlayerMoveEvent {
 }
 
 impl PyBaseEvent for PlayerMoveEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerMoveEvent::new(self.player_id, self.old_position, self.new_position),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerMoveEvent").into()
     }
 }
 
@@ -834,12 +820,11 @@ impl From<player::PlayerRequestEnterVehicleEvent> for PlayerRequestEnterVehicleE
 }
 
 impl PyBaseEvent for PlayerRequestEnterVehicleEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerRequestEnterVehicleEvent::new(self.player_id, self.vehicle_id),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerRequestEnterVehicleEvent").into()
     }
 }
 
@@ -890,12 +875,11 @@ impl From<player::PlayerEnterVehicleEvent> for PlayerEnterVehicleEvent {
 }
 
 impl PyBaseEvent for PlayerEnterVehicleEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerEnterVehicleEvent::new(self.player_id, self.vehicle_id),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerEnterVehicleEvent").into()
     }
 }
 
@@ -946,12 +930,11 @@ impl From<player::PlayerExitVehicleEvent> for PlayerExitVehicleEvent {
 }
 
 impl PyBaseEvent for PlayerExitVehicleEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerExitVehicleEvent::new(self.player_id, self.vehicle_id),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerExitVehicleEvent").into()
     }
 }
 
@@ -1007,16 +990,15 @@ impl From<player::PlayerNameChangeEvent> for PlayerNameChangeEvent {
 }
 
 impl PyBaseEvent for PlayerNameChangeEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerNameChangeEvent::new(
                 self.player_id,
                 self.old_name.clone(),
                 self.new_name.clone(),
             ),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerNameChangeEvent").into()
     }
 }
 
@@ -1072,12 +1054,11 @@ impl From<player::PlayerStateChangeEvent> for PlayerStateChangeEvent {
 }
 
 impl PyBaseEvent for PlayerStateChangeEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerStateChangeEvent::new(self.player_id, self.old_state, self.new_state),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerStateChangeEvent").into()
     }
 }
 
@@ -1133,12 +1114,11 @@ impl From<player::PlayerActionChangeEvent> for PlayerActionChangeEvent {
 }
 
 impl PyBaseEvent for PlayerActionChangeEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerActionChangeEvent::new(self.player_id, self.old_action, self.new_action),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerActionChangeEvent").into()
     }
 }
 
@@ -1186,12 +1166,11 @@ impl From<player::PlayerOnFireChangeEvent> for PlayerOnFireChangeEvent {
 }
 
 impl PyBaseEvent for PlayerOnFireChangeEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerOnFireChangeEvent::new(self.player_id, self.is_on_fire),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerOnFireChangeEvent").into()
     }
 }
 
@@ -1239,12 +1218,11 @@ impl From<player::PlayerCrouchChangeEvent> for PlayerCrouchChangeEvent {
 }
 
 impl PyBaseEvent for PlayerCrouchChangeEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerCrouchChangeEvent::new(self.player_id, self.is_crouching),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerCrouchChangeEvent").into()
     }
 }
 
@@ -1300,12 +1278,11 @@ impl From<player::PlayerGameKeysChangeEvent> for PlayerGameKeysChangeEvent {
 }
 
 impl PyBaseEvent for PlayerGameKeysChangeEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerGameKeysChangeEvent::new(self.player_id, self.old_keys, self.new_keys),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerGameKeysChangeEvent").into()
     }
 }
 
@@ -1342,9 +1319,8 @@ impl From<i32> for PlayerBeginTypingEvent {
 }
 
 impl PyBaseEvent for PlayerBeginTypingEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerBeginTypingEvent::new(self.player_id))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerBeginTypingEvent::new(self.player_id)).expect("Failed to create PlayerBeginTypingEvent").into()
     }
 }
 
@@ -1381,9 +1357,8 @@ impl From<i32> for PlayerEndTypingEvent {
 }
 
 impl PyBaseEvent for PlayerEndTypingEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerEndTypingEvent::new(self.player_id))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerEndTypingEvent::new(self.player_id)).expect("Failed to create PlayerEndTypingEvent").into()
     }
 }
 
@@ -1429,9 +1404,8 @@ impl From<player::PlayerAwayChangeEvent> for PlayerAwayChangeEvent {
 }
 
 impl PyBaseEvent for PlayerAwayChangeEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerAwayChangeEvent::new(self.player_id, self.is_away))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerAwayChangeEvent::new(self.player_id, self.is_away)).expect("Failed to create PlayerAwayChangeEvent").into()
     }
 }
 
@@ -1477,12 +1451,11 @@ impl From<player::PlayerMessageEvent> for PlayerMessageEvent {
 }
 
 impl PyBaseEvent for PlayerMessageEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerMessageEvent::new(self.player_id, self.message.clone()),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerMessageEvent").into()
     }
 }
 
@@ -1533,12 +1506,11 @@ impl From<player::PlayerCommandEvent> for PlayerCommandEvent {
 }
 
 impl PyBaseEvent for PlayerCommandEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerCommandEvent::new(self.player_id, self.command.clone(), self.text.clone()),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerCommandEvent").into()
     }
 }
 
@@ -1598,12 +1570,11 @@ impl From<player::PlayerPrivateMessageEvent> for PlayerPrivateMessageEvent {
 }
 
 impl PyBaseEvent for PlayerPrivateMessageEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerPrivateMessageEvent::new(self.player_id, self.target_id, self.message.clone()),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerPrivateMessageEvent").into()
     }
 }
 
@@ -1649,12 +1620,11 @@ impl From<player::PlayerKeyBindDownEvent> for PlayerKeyBindDownEvent {
 }
 
 impl PyBaseEvent for PlayerKeyBindDownEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerKeyBindDownEvent::new(self.player_id, self.bind_id),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerKeyBindDownEvent").into()
     }
 }
 
@@ -1700,9 +1670,8 @@ impl From<player::PlayerKeyBindUpEvent> for PlayerKeyBindUpEvent {
 }
 
 impl PyBaseEvent for PlayerKeyBindUpEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerKeyBindUpEvent::new(self.player_id, self.bind_id))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerKeyBindUpEvent::new(self.player_id, self.bind_id)).expect("Failed to create PlayerKeyBindUpEvent").into()
     }
 }
 
@@ -1751,9 +1720,8 @@ impl From<player::PlayerSpectateEvent> for PlayerSpectateEvent {
 }
 
 impl PyBaseEvent for PlayerSpectateEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(py, PlayerSpectateEvent::new(self.player_id, self.target_id))?;
-        Ok(value.into())
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(py, PlayerSpectateEvent::new(self.player_id, self.target_id)).expect("Failed to create PlayerSpectateEvent").into()
     }
 }
 
@@ -1799,12 +1767,11 @@ impl From<player::PlayerCrashReportEvent> for PlayerCrashReportEvent {
 }
 
 impl PyBaseEvent for PlayerCrashReportEvent {
-    fn init(&self, py: Python<'_>) -> PyResult<Py<PyAny>> {
-        let value = Py::new(
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
             py,
             PlayerCrashReportEvent::new(self.player_id, self.report.clone()),
-        )?;
-        Ok(value.into())
+        ).expect("Failed to create PlayerCrashReportEvent").into()
     }
 }
 
