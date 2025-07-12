@@ -3,7 +3,11 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use crate::py::events::abc::{BaseEvent, PyEvent};
+use crate::{
+    functions::{pickup::PickupPy, player::PlayerPy},
+    pool::ENTITY_POOL,
+    py::events::abc::{BaseEvent, PyEvent},
+};
 
 use vcmp_bindings::events::pickup;
 
@@ -41,31 +45,22 @@ pub struct PickupPickAttemptEvent {
 #[pymethods]
 impl PickupPickAttemptEvent {
     #[getter]
-    fn pickup_id(&self) -> i32 {
-        self.inner.pickup_id
+    fn pickup(&self) -> PickupPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_pickup(self.inner.pickup_id).unwrap()
     }
 
     #[getter]
-    fn player_id(&self) -> i32 {
-        self.inner.player_id.into()
-    }
-
-    #[getter]
-    fn is_allowed(&self) -> bool {
-        self.inner.is_allowed
-    }
-
-    #[setter]
-    fn set_is_allowed(&mut self, value: bool) {
-        self.inner.is_allowed = value;
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
 
     fn __repr__(&self) -> String {
         format!(
-            "PickupPickAttemptEvent(pickup_id={}, player_id={}, is_allowed={})",
-            self.pickup_id(),
-            self.player_id(),
-            self.is_allowed()
+            "PickupPickAttemptEvent(pickup={:?}, player={:?})",
+            self.pickup(),
+            self.player(),
         )
     }
 }
@@ -100,20 +95,22 @@ pub struct PickupPickedEvent {
 #[pymethods]
 impl PickupPickedEvent {
     #[getter]
-    fn pickup_id(&self) -> i32 {
-        self.inner.pickup_id
+    fn pickup(&self) -> PickupPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_pickup(self.inner.pickup_id).unwrap()
     }
 
     #[getter]
-    fn player_id(&self) -> i32 {
-        self.inner.player_id.into()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
 
     fn __repr__(&self) -> String {
         format!(
-            "PickupPickedEvent(pickup_id={}, player_id={})",
-            self.pickup_id(),
-            self.player_id()
+            "PickupPickedEvent(pickup={:?}, player={:?})",
+            self.pickup(),
+            self.player()
         )
     }
 }
@@ -148,12 +145,13 @@ pub struct PickupRespawnEvent {
 #[pymethods]
 impl PickupRespawnEvent {
     #[getter]
-    fn pickup_id(&self) -> i32 {
-        self.inner.pickup_id
+    fn pickup(&self) -> PickupPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_pickup(self.inner.pickup_id).unwrap()
     }
 
     fn __repr__(&self) -> String {
-        format!("PickupRespawnEvent(pickup_id={})", self.pickup_id())
+        format!("PickupRespawnEvent(pickup={:?})", self.pickup())
     }
 }
 

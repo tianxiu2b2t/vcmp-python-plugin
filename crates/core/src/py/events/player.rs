@@ -14,6 +14,7 @@ use crate::{
     py::{
         events::abc::{BaseEvent, PyEvent},
         streams::ReadStream,
+        types::VectorPy,
     },
 };
 
@@ -1373,7 +1374,358 @@ impl PyEvent for PlayerModuleListEvent {
     }
 }
 
-// 更新模块定义函数以包含所有新事件
+// Extra
+
+#[derive(Debug, Clone, Copy)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerHealthChangeEvent {
+    pub player_id: i32,
+    pub old_health: f32,
+    pub new_health: f32,
+    pub current_health: f32,
+}
+#[pymethods]
+impl PlayerHealthChangeEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.player_id).unwrap()
+    }
+
+    #[getter]
+    fn get_old_health(&self) -> f32 {
+        self.old_health
+    }
+
+    #[getter]
+    fn get_new_health(&self) -> f32 {
+        self.new_health
+    }
+
+    #[getter]
+    fn get_current_health(&self) -> f32 {
+        self.current_health
+    }
+
+    #[setter]
+    fn set_current_health(&mut self, health: f32) {
+        self.current_health = health
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerHealthChangeEvent(player={:?}, old_health={}, new_health={})",
+            self.player(),
+            self.get_old_health(),
+            self.get_new_health()
+        )
+    }
+}
+impl From<(i32, f32, f32)> for PlayerHealthChangeEvent {
+    fn from(value: (i32, f32, f32)) -> Self {
+        Self {
+            player_id: value.0,
+            old_health: value.1,
+            new_health: value.2,
+            current_health: value.2,
+        }
+    }
+}
+impl PyEvent for PlayerHealthChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerHealthChangeEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerArmourChangeEvent {
+    pub player_id: i32,
+    pub old_armour: f32,
+    pub new_armour: f32,
+    pub current_armour: f32,
+}
+#[pymethods]
+impl PlayerArmourChangeEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.player_id).unwrap()
+    }
+
+    #[getter]
+    fn get_old_armour(&self) -> f32 {
+        self.old_armour
+    }
+
+    #[getter]
+    fn get_new_armour(&self) -> f32 {
+        self.new_armour
+    }
+
+    #[getter]
+    fn get_current_armour(&self) -> f32 {
+        self.current_armour
+    }
+
+    #[setter]
+    fn set_current_armour(&mut self, armour: f32) {
+        self.current_armour = armour
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerArmourChangeEvent(player={:?}, old_armour={}, new_armour={})",
+            self.player(),
+            self.get_old_armour(),
+            self.get_new_armour()
+        )
+    }
+}
+impl From<(i32, f32, f32)> for PlayerArmourChangeEvent {
+    fn from(value: (i32, f32, f32)) -> Self {
+        Self {
+            player_id: value.0,
+            old_armour: value.1,
+            new_armour: value.2,
+            current_armour: value.2,
+        }
+    }
+}
+impl PyEvent for PlayerArmourChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerArmourChangeEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerWeaponChangeEvent {
+    pub player_id: i32,
+    pub old_weapon: i32,
+    pub new_weapon: i32,
+    pub current_weapon: i32,
+}
+#[pymethods]
+impl PlayerWeaponChangeEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.player_id).unwrap()
+    }
+
+    #[getter]
+    fn get_old_weapon(&self) -> i32 {
+        self.old_weapon
+    }
+
+    #[getter]
+    fn get_new_weapon(&self) -> i32 {
+        self.new_weapon
+    }
+
+    #[getter]
+    fn get_current_weapon(&self) -> i32 {
+        self.current_weapon
+    }
+
+    #[setter]
+    fn set_current_weapon(&mut self, weapon: i32) {
+        self.current_weapon = weapon
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerWeaponChangeEvent(player={:?}, old_weapon={}, new_weapon={})",
+            self.player(),
+            self.get_old_weapon(),
+            self.get_new_weapon()
+        )
+    }
+}
+impl From<(i32, i32, i32)> for PlayerWeaponChangeEvent {
+    fn from(value: (i32, i32, i32)) -> Self {
+        Self {
+            player_id: value.0,
+            old_weapon: value.1,
+            new_weapon: value.2,
+            current_weapon: value.2,
+        }
+    }
+}
+impl PyEvent for PlayerWeaponChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerWeaponChangeEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerAmmoChangeEvent {
+    pub player_id: i32,
+    pub old_ammo: i32,
+    pub new_ammo: i32,
+    pub current_ammo: i32,
+}
+#[pymethods]
+impl PlayerAmmoChangeEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.player_id).unwrap()
+    }
+
+    #[getter]
+    fn get_old_ammo(&self) -> i32 {
+        self.old_ammo
+    }
+
+    #[getter]
+    fn get_new_ammo(&self) -> i32 {
+        self.new_ammo
+    }
+
+    #[getter]
+    fn get_current_ammo(&self) -> i32 {
+        self.current_ammo
+    }
+
+    #[setter]
+    fn set_current_ammo(&mut self, ammo: i32) {
+        self.current_ammo = ammo
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerWeaponChangeEvent(player={:?}, old_ammo={}, new_ammo={})",
+            self.player(),
+            self.get_old_ammo(),
+            self.get_new_ammo()
+        )
+    }
+}
+impl From<(i32, i32, i32)> for PlayerAmmoChangeEvent {
+    fn from(value: (i32, i32, i32)) -> Self {
+        Self {
+            player_id: value.0,
+            old_ammo: value.1,
+            new_ammo: value.2,
+            current_ammo: value.2,
+        }
+    }
+}
+impl PyEvent for PlayerAmmoChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerAmmoChangeEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone, Copy)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerMoveEvent {
+    pub player_id: i32,
+    pub old_position: VectorPy,
+    pub new_position: VectorPy,
+    pub current_position: VectorPy,
+}
+#[pymethods]
+impl PlayerMoveEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.player_id).unwrap()
+    }
+
+    #[getter]
+    fn get_old_position(&self) -> VectorPy {
+        self.old_position
+    }
+
+    #[getter]
+    fn get_new_position(&self) -> VectorPy {
+        self.new_position
+    }
+
+    #[getter]
+    fn get_current_position(&self) -> VectorPy {
+        self.current_position
+    }
+
+    #[setter]
+    fn set_current_position(&mut self, position: VectorPy) {
+        self.current_position = position
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerMoveEvent(player={:?}, old_position={:?}, new_position={:?})",
+            self.player(),
+            self.get_old_position(),
+            self.get_new_position()
+        )
+    }
+}
+impl From<(i32, VectorPy, VectorPy)> for PlayerMoveEvent {
+    fn from(value: (i32, VectorPy, VectorPy)) -> Self {
+        Self {
+            player_id: value.0,
+            old_position: value.1,
+            new_position: value.2,
+            current_position: value.2,
+        }
+    }
+}
+impl PyEvent for PlayerMoveEvent {
+    fn event_name(&self) -> String {
+        "PlayerMoveEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PlayerEvent>()?;
     m.add_class::<IncomingConnectionEvent>()?;
@@ -1405,6 +1757,13 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PlayerSpectateEvent>()?;
     m.add_class::<PlayerCrashReportEvent>()?;
     m.add_class::<PlayerModuleListEvent>()?;
+
+    // Extra
+    m.add_class::<PlayerAmmoChangeEvent>()?;
+    m.add_class::<PlayerMoveEvent>()?;
+    m.add_class::<PlayerHealthChangeEvent>()?;
+    m.add_class::<PlayerArmourChangeEvent>()?;
+    m.add_class::<PlayerWeaponChangeEvent>()?;
 
     Ok(())
 }

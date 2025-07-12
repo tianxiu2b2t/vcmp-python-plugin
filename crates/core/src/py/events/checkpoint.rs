@@ -3,7 +3,11 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use crate::py::events::abc::{BaseEvent, PyEvent};
+use crate::{
+    functions::{checkpoint::CheckPointPy, player::PlayerPy},
+    pool::ENTITY_POOL,
+    py::events::abc::{BaseEvent, PyEvent},
+};
 
 use vcmp_bindings::events::checkpoint;
 
@@ -41,20 +45,22 @@ pub struct CheckpointEnteredEvent {
 #[pymethods]
 impl CheckpointEnteredEvent {
     #[getter]
-    fn checkpoint_id(&self) -> i32 {
-        self.inner.checkpoint_id
+    fn checkpoint(&self) -> CheckPointPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_checkpoint(self.inner.checkpoint_id).unwrap()
     }
 
     #[getter]
-    fn player_id(&self) -> i32 {
-        self.inner.player_id.into()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
 
     fn __repr__(&self) -> String {
         format!(
-            "CheckpointEnteredEvent(checkpoint_id={}, player_id={})",
-            self.checkpoint_id(),
-            self.player_id()
+            "CheckpointEnteredEvent(checkpoint={:?}, player={:?})",
+            self.checkpoint(),
+            self.player()
         )
     }
 }
@@ -89,20 +95,22 @@ pub struct CheckpointExitedEvent {
 #[pymethods]
 impl CheckpointExitedEvent {
     #[getter]
-    fn checkpoint_id(&self) -> i32 {
-        self.inner.checkpoint_id
+    fn checkpoint(&self) -> CheckPointPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_checkpoint(self.inner.checkpoint_id).unwrap()
     }
 
     #[getter]
-    fn player_id(&self) -> i32 {
-        self.inner.player_id.into()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
 
     fn __repr__(&self) -> String {
         format!(
-            "CheckpointExitedEvent(checkpoint_id={}, player_id={})",
-            self.checkpoint_id(),
-            self.player_id()
+            "CheckpointExitedEvent(checkpoint={:?}, player={:?})",
+            self.checkpoint(),
+            self.player()
         )
     }
 }

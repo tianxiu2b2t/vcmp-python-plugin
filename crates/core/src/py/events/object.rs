@@ -3,7 +3,11 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use crate::py::events::abc::{BaseEvent, PyEvent};
+use crate::{
+    functions::{object::ObjectPy, player::PlayerPy},
+    pool::ENTITY_POOL,
+    py::events::abc::{BaseEvent, PyEvent},
+};
 
 use vcmp_bindings::events::object;
 
@@ -41,13 +45,15 @@ pub struct ObjectShotEvent {
 #[pymethods]
 impl ObjectShotEvent {
     #[getter]
-    fn object_id(&self) -> i32 {
-        self.inner.object_id
+    fn object(&self) -> ObjectPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_object(self.inner.object_id).unwrap()
     }
 
     #[getter]
-    fn player_id(&self) -> i32 {
-        self.inner.player_id.into()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
 
     #[getter]
@@ -57,9 +63,9 @@ impl ObjectShotEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "ObjectShotEvent(object_id={}, player_id={}, weapon_id={})",
-            self.object_id(),
-            self.player_id(),
+            "ObjectShotEvent(object={:?}, player={:?}, weapon_id={})",
+            self.object(),
+            self.player(),
             self.weapon_id()
         )
     }
@@ -95,20 +101,22 @@ pub struct ObjectTouchedEvent {
 #[pymethods]
 impl ObjectTouchedEvent {
     #[getter]
-    fn object_id(&self) -> i32 {
-        self.inner.object_id
+    fn object(&self) -> ObjectPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_object(self.inner.object_id).unwrap()
     }
 
     #[getter]
-    fn player_id(&self) -> i32 {
-        self.inner.player_id.into()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
 
     fn __repr__(&self) -> String {
         format!(
-            "ObjectTouchedEvent(object_id={}, player_id={})",
-            self.object_id(),
-            self.player_id()
+            "ObjectTouchedEvent(object={:?}, player={:?})",
+            self.object(),
+            self.player()
         )
     }
 }

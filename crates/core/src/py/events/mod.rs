@@ -17,11 +17,13 @@ pub mod vehicle;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum VcmpEventType {
+    // Server
     ServerInitialise,
     ServerShutdown,
     ServerFrame,
     ServerPerformanceReport,
 
+    // Player
     IncomingConnection,
     ClientScriptData,
     PlayerConnect,
@@ -51,6 +53,35 @@ pub enum VcmpEventType {
     PlayerSpectate,
     PlayerCrashReport,
     PlayerModuleList,
+
+    // Player Extra
+    PlayerHealthChange,
+    PlayerArmourChange,
+    PlayerWeaponChange,
+    PlayerAmmoChange,
+    PlayerMove,
+
+    // Pickup
+    PickupPickAttempt,
+    PickupPicked,
+    PickupRespawn,
+
+    // Checkpoint
+    CheckpointEntered,
+    CheckpointExited,
+
+    // Object
+    ObjectShot,
+    ObjectTouched,
+
+    // Vehicle
+    VehicleExplode,
+    VehicleRespawn,
+    VehicleUpdate,
+
+    // Vehicle Extra
+    VehicleMove,
+    VehicleHealthChange
 }
 
 #[derive(Debug, Clone)]
@@ -89,16 +120,47 @@ pub enum VcmpEvent {
     PlayerSpectate(player::PlayerSpectateEvent),
     PlayerCrashReport(player::PlayerCrashReportEvent),
     PlayerModuleList(player::PlayerModuleListEvent),
+
+    // Player Extra
+    PlayerHealthChange(player::PlayerHealthChangeEvent),
+    PlayerArmourChange(player::PlayerArmourChangeEvent),
+    PlayerWeaponChange(player::PlayerWeaponChangeEvent),
+    PlayerAmmoChange(player::PlayerAmmoChangeEvent),
+    PlayerMove(player::PlayerMoveEvent),
+
+    // pickup
+    PickupPickAttempt(pickup::PickupPickAttemptEvent),
+    PickupPicked(pickup::PickupPickedEvent),
+    PickupRespawn(pickup::PickupRespawnEvent),
+
+    // checkpoint
+    CheckpointEntered(checkpoint::CheckpointEnteredEvent),
+    CheckpointExited(checkpoint::CheckpointExitedEvent),
+
+    // object
+    ObjectShot(object::ObjectShotEvent),
+    ObjectTouched(object::ObjectTouchedEvent),
+
+    // vehicle
+    VehicleExplode(vehicle::VehicleExplodeEvent),
+    VehicleRespawn(vehicle::VehicleRespawnEvent),
+    VehicleUpdate(vehicle::VehicleUpdateEvent),
+
+    // Vehicle Extra
+    VehicleMove(vehicle::VehicleMoveEvent),
+    VehicleHealthChange(vehicle::VehicleHealthChangeEvent),
 }
 
 impl From<VcmpEvent> for VcmpEventType {
     fn from(event_type: VcmpEvent) -> Self {
         match event_type {
+            // Server
             VcmpEvent::ServerInitialise(_) => Self::ServerInitialise,
             VcmpEvent::ServerShutdown(_) => Self::ServerShutdown,
             VcmpEvent::ServerFrame(_) => Self::ServerFrame,
             VcmpEvent::ServerPerformanceReport(_) => Self::ServerPerformanceReport,
 
+            // Player
             VcmpEvent::IncomingConnection(_) => Self::IncomingConnection,
             VcmpEvent::ClientScriptData(_) => Self::ClientScriptData,
             VcmpEvent::PlayerConnect(_) => Self::PlayerConnect,
@@ -128,6 +190,35 @@ impl From<VcmpEvent> for VcmpEventType {
             VcmpEvent::PlayerSpectate(_) => Self::PlayerSpectate,
             VcmpEvent::PlayerCrashReport(_) => Self::PlayerCrashReport,
             VcmpEvent::PlayerModuleList(_) => Self::PlayerModuleList,
+
+            // Player extra
+            VcmpEvent::PlayerHealthChange(_) => Self::PlayerHealthChange,
+            VcmpEvent::PlayerArmourChange(_) => Self::PlayerArmourChange,
+            VcmpEvent::PlayerWeaponChange(_) => Self::PlayerWeaponChange,
+            VcmpEvent::PlayerAmmoChange(_) => Self::PlayerAmmoChange,
+            VcmpEvent::PlayerMove(_) => Self::PlayerMove,
+
+            // Pickup
+            VcmpEvent::PickupPickAttempt(_) => Self::PickupPickAttempt,
+            VcmpEvent::PickupPicked(_) => Self::PickupPicked,
+            VcmpEvent::PickupRespawn(_) => Self::PickupRespawn,
+
+            // Checkpoint
+            VcmpEvent::CheckpointEntered(_) => Self::CheckpointEntered,
+            VcmpEvent::CheckpointExited(_) => Self::CheckpointExited,
+
+            // Object
+            VcmpEvent::ObjectShot(_) => Self::ObjectShot,
+            VcmpEvent::ObjectTouched(_) => Self::ObjectTouched,
+
+            // Vehicle
+            VcmpEvent::VehicleExplode(_) => Self::VehicleExplode,
+            VcmpEvent::VehicleRespawn(_) => Self::VehicleRespawn,
+            VcmpEvent::VehicleUpdate(_) => Self::VehicleUpdate,
+
+            // Vehicle Extra
+            VcmpEvent::VehicleMove(_) => Self::VehicleMove,
+            VcmpEvent::VehicleHealthChange(_) => Self::VehicleHealthChange,
         }
     }
 }
@@ -175,6 +266,8 @@ impl PyVcmpEvent {
             server::ServerShutdownEvent::default(),
         ))
     }
+
+    // TODO: this func
 }
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

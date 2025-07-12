@@ -2,12 +2,13 @@ use std::os::raw::c_char;
 
 use crate::py::GLOBAL_VAR;
 use crate::py::callbacks::PY_CALLBACK_MANAGER;
-use crate::py::events::VcmpEvent;
-use crate::py::events::player::*;
-use crate::py::events::server::{
-    ServerFrameEvent, ServerInitialiseEvent, ServerPerformanceReportEvent, ServerShutdownEvent,
+use crate::py::events::{
+    VcmpEvent, checkpoint::*, object::*, pickup::*, player::*, server::*, vehicle::*,
 };
-use vcmp_bindings::events::{player, server};
+use crate::py::types::VectorPy;
+use vcmp_bindings::events::{checkpoint, object, pickup, player, server, vehicle};
+use vcmp_bindings::func::PlayerMethods;
+use vcmp_bindings::vcmp_func;
 use vcmp_bindings::{options::VcmpEntityPool, raw::PluginCallbacks};
 
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
@@ -439,83 +440,204 @@ pub unsafe extern "C" fn on_player_module_list(player_id: i32, modules: *const c
     );
 }
 
-// #[unsafe(no_mangle)]
-// pub unsafe extern "C" fn on_player_update(player_id: i32, _state: i32) {
-//     let mut player = *ENTITY_POOL.lock().unwrap().get_player(player_id).unwrap();
-//     // first health
-//     {
-//         let current_health = player.get_health();
-//         let last_health = player.last_health;
-//         if current_health != last_health {
-//             let event = PlayerHealthEvent::from((player_id, last_health, current_health));
-//             let health_res = CALLBACK.call_func(event, None, true);
-//             if !health_res {
-//                 player.set_health(event.get_health());
-//             } else {
-//                 player.last_health = current_health;
-//             }
-//         }
-//     }
-//     // then armour
-//     {
-//         let current_armour = player.get_armour();
-//         let last_armour = player.last_armour;
-//         if current_armour != last_armour {
-//             let event = PlayerArmourEvent::from((player_id, last_armour, current_armour));
-//             let armour_res = CALLBACK.call_func(event, None, true);
-//             if !armour_res {
-//                 player.set_armour(event.get_armour());
-//             } else {
-//                 player.last_armour = current_armour;
-//             }
-//         }
-//     }
-//     // then weapon
-//     {
-//         let current_weapon = player.get_weapon();
-//         let last_weapon = player.last_weapon;
-//         if current_weapon != last_weapon {
-//             let event = PlayerWeaponEvent::from((player_id, last_weapon, current_weapon));
-//             let weapon_res = CALLBACK.call_func(event, None, true);
-//             if !weapon_res {
-//                 player.give_weapon(event.get_weapon(), 0);
-//             } else {
-//                 player.last_weapon = current_weapon;
-//             }
-//         }
-//     }
-//     // then ammo, not block it
-//     {
-//         let current_ammo = player.get_weapon_ammo();
-//         let last_ammo = player.last_ammo;
-//         if current_ammo != last_ammo {
-//             let _ = CALLBACK.call_func(
-//                 PlayerAmmoEvent::from((player_id, last_ammo, current_ammo)),
-//                 None,
-//                 true,
-//             );
-//             player.last_ammo = current_ammo;
-//         }
-//     }
-//     // then move
-//     {
-//         let current_pos = player.get_position().into();
-//         let last_pos = player.last_position;
-//         if current_pos != last_pos {
-//             let event = PlayerMoveEvent::from((
-//                 player_id,
-//                 VectorPy::from(last_pos),
-//                 VectorPy::from(current_pos),
-//             ));
-//             let move_res = CALLBACK.call_func(event, None, true);
-//             if !move_res {
-//                 player.set_position(event.position.get_entity_pos());
-//             } else {
-//                 player.last_position = current_pos;
-//             }
-//         }
-//     }
-// }
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
+    {
+        let mut player = *ENTITY_POOL.lock().unwrap().get_player(player_id).unwrap();
+        // first health
+        {
+            // use raw vcmp_bindings
+            let current_health = vcmp_func().get_player_health(player_id);
+            let last_health = player.last_health;
+            if current_health != last_health {
+                let event = PlayerHealthChangeEvent::from((player_id, last_health, current_health));
+                let health_res =
+                    PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerHealthChange(event), true);
+                if !health_res {
+                    let _ = vcmp_func().set_player_health(player_id, event.current_health);
+                }
+                player.last_health = event.current_health;
+            }
+        }
+        // then armour
+        {
+            let current_armour = vcmp_func().get_player_armour(player_id);
+            let last_armour = player.last_armour;
+            if current_armour != last_armour {
+                let event = PlayerArmourChangeEvent::from((player_id, last_armour, current_armour));
+                let armour_res =
+                    PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerArmourChange(event), true);
+                if !armour_res {
+                    let _ = vcmp_func().set_player_armour(player_id, event.current_armour);
+                }
+                player.last_armour = event.current_armour;
+            }
+        }
+        // then weapon
+        {
+            let current_weapon = vcmp_func().get_player_weapon(player_id);
+            let last_weapon = player.last_weapon;
+            if current_weapon != last_weapon {
+                let event = PlayerWeaponChangeEvent::from((player_id, last_weapon, current_weapon));
+                let weapon_res =
+                    PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerWeaponChange(event), true);
+                if !weapon_res {
+                    let _ = vcmp_func().give_player_weapon(player_id, event.current_weapon, 0);
+                }
+                player.last_weapon = event.current_weapon;
+            }
+        }
+        // then ammo, not block it
+        {
+            let current_ammo = vcmp_func().get_player_weapon_ammo(player_id);
+            let current_wep = vcmp_func().get_player_weapon(player_id);
+            let last_ammo = player.last_ammo;
+            if current_ammo != last_ammo {
+                let event = PlayerAmmoChangeEvent::from((player_id, last_ammo, current_ammo));
+                let res = PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerAmmoChange(event), true);
+                if !res {
+                    let real_ammo = vcmp_func().get_player_weapon_ammo(player_id);
+                    let restore_ammo = event.current_ammo - real_ammo;
+                    let _ = vcmp_func().give_player_weapon(player_id, current_wep, restore_ammo);
+                }
+                player.last_ammo = event.current_ammo;
+            }
+        }
+        // then move
+        {
+            let current_pos = player.get_position().get_entity_pos();
+            let last_pos = player.last_position;
+            if current_pos != last_pos {
+                let event = PlayerMoveEvent::from((
+                    player_id,
+                    VectorPy::from(last_pos),
+                    VectorPy::from(current_pos),
+                ));
+                let move_res = PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerMove(event), true);
+                if !move_res {
+                    player.set_position(event.current_position.get_entity_pos());
+                }
+                player.last_position = event.current_position.get_entity_pos();
+            }
+        }
+    }
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::PlayerUpdate(PlayerUpdateEvent::from(player::PlayerUpdateEvent::from((
+            player_id, state,
+        )))),
+        true,
+    );
+}
+
+/// # Safety
+/// FFI callback for vehicle update
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
+    let binding_event = vehicle::VehicleUpdateEvent::from((vehicle_id, update_type));
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::VehicleUpdate(VehicleUpdateEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for vehicle explode
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_vehicle_explode(vehicle_id: i32) {
+    let binding_event = vehicle::VehicleExplodeEvent::from(vehicle_id);
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::VehicleExplode(VehicleExplodeEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for vehicle respawn
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_vehicle_respawn(vehicle_id: i32) {
+    let binding_event = vehicle::VehicleRespawnEvent::from(vehicle_id);
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::VehicleRespawn(VehicleRespawnEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for object shot
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_object_shot(object_id: i32, player_id: i32, weapon_id: i32) {
+    let binding_event = object::ObjectShotEvent::from((object_id, player_id, weapon_id));
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::ObjectShot(ObjectShotEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for object touched
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_object_touched(object_id: i32, player_id: i32) {
+    let binding_event = object::ObjectTouchedEvent::from((object_id, player_id));
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::ObjectTouched(ObjectTouchedEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for pickup pick attempt
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_pickup_pick_attempt(pickup_id: i32, player_id: i32) -> u8 {
+    let binding_event = pickup::PickupPickAttemptEvent::from((pickup_id, player_id));
+    PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::PickupPickAttempt(PickupPickAttemptEvent::from(binding_event)),
+        true,
+    ) as u8
+}
+
+/// # Safety
+/// FFI callback for pickup picked
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_pickup_picked(pickup_id: i32, player_id: i32) {
+    let binding_event = pickup::PickupPickedEvent::from((pickup_id, player_id));
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::PickupPicked(PickupPickedEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for pickup respawn
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_pickup_respawn(pickup_id: i32) {
+    let binding_event = pickup::PickupRespawnEvent::from(pickup_id);
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::PickupRespawn(PickupRespawnEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for checkpoint entered
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_checkpoint_entered(checkpoint_id: i32, player_id: i32) {
+    let binding_event = checkpoint::CheckpointEnteredEvent::from((checkpoint_id, player_id));
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::CheckpointEntered(CheckpointEnteredEvent::from(binding_event)),
+        false,
+    );
+}
+
+/// # Safety
+/// FFI callback for checkpoint exited
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn on_checkpoint_exited(checkpoint_id: i32, player_id: i32) {
+    let binding_event = checkpoint::CheckpointExitedEvent::from((checkpoint_id, player_id));
+    let _ = PY_CALLBACK_MANAGER.handle(
+        VcmpEvent::CheckpointExited(CheckpointExitedEvent::from(binding_event)),
+        false,
+    );
+}
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);
@@ -552,7 +674,25 @@ pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnPlayerKeyBindUp = Some(on_player_key_bind_up);
     callbacks.OnPlayerSpectate = Some(on_player_spectate);
     callbacks.OnPlayerCrashReport = Some(on_player_crash_report);
-    //callbacks.OnPlayerUpdate = Some(on_player_update);
+    callbacks.OnPlayerUpdate = Some(on_player_update);
+
+    // 车辆相关回调设置
+    callbacks.OnVehicleUpdate = Some(on_vehicle_update);
+    callbacks.OnVehicleExplode = Some(on_vehicle_explode);
+    callbacks.OnVehicleRespawn = Some(on_vehicle_respawn);
+
+    // 对象相关回调设置
+    callbacks.OnObjectShot = Some(on_object_shot);
+    callbacks.OnObjectTouched = Some(on_object_touched);
+
+    // 拾取物相关回调设置
+    callbacks.OnPickupPickAttempt = Some(on_pickup_pick_attempt);
+    callbacks.OnPickupPicked = Some(on_pickup_picked);
+    callbacks.OnPickupRespawn = Some(on_pickup_respawn);
+
+    // 检查点相关回调设置
+    callbacks.OnCheckpointEntered = Some(on_checkpoint_entered);
+    callbacks.OnCheckpointExited = Some(on_checkpoint_exited);
 
     callbacks.OnEntityPoolChange = Some(on_entity_pool_change);
 }

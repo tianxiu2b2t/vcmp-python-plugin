@@ -264,6 +264,23 @@ impl PyCallbackManager {
             VcmpEvent::PlayerSpectate(event) => event.init(py),
             VcmpEvent::PlayerCrashReport(event) => event.init(py),
             VcmpEvent::PlayerModuleList(event) => event.init(py),
+            VcmpEvent::PlayerHealthChange(event) => event.init(py),
+            VcmpEvent::PlayerArmourChange(event) => event.init(py),
+            VcmpEvent::PlayerWeaponChange(event) => event.init(py),
+            VcmpEvent::PlayerAmmoChange(event) => event.init(py),
+            VcmpEvent::PlayerMove(event) => event.init(py),
+            VcmpEvent::PickupPickAttempt(event) => event.init(py),
+            VcmpEvent::PickupPicked(event) => event.init(py),
+            VcmpEvent::PickupRespawn(event) => event.init(py),
+            VcmpEvent::CheckpointEntered(event) => event.init(py),
+            VcmpEvent::CheckpointExited(event) => event.init(py),
+            VcmpEvent::ObjectShot(event) => event.init(py),
+            VcmpEvent::ObjectTouched(event) => event.init(py),
+            VcmpEvent::VehicleExplode(event) => event.init(py),
+            VcmpEvent::VehicleRespawn(event) => event.init(py),
+            VcmpEvent::VehicleUpdate(event) => event.init(py),
+            VcmpEvent::VehicleMove(event) => event.init(py),
+            VcmpEvent::VehicleHealthChange(event) => event.init(py),
         }
     }
 }
@@ -602,6 +619,176 @@ impl PyCallbackManager {
         func: Option<Py<PyAny>>,
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::PlayerModuleList, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_health_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerHealthChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_armour_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerArmourChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_weapon_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerWeaponChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_ammo_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerAmmoChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_player_move(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PlayerMove, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_pickup_pick_attempt(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PickupPickAttempt, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_pickup_picked(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PickupPicked, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_pickup_respawn(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::PickupRespawn, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_checkpoint_entered(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::CheckpointEntered, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_checkpoint_exited(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::CheckpointExited, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_object_shot(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::ObjectShot, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_object_touched(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::ObjectTouched, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_explode(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleExplode, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_respawn(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleRespawn, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_update(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleUpdate, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_move(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleMove, func, priority)
+    }
+    
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_vehicle_health_change(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::VehicleHealthChange, func, priority)
     }
 }
 

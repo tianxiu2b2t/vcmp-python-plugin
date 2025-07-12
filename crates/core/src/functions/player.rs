@@ -494,8 +494,8 @@ impl PlayerPy {
     }
 
     #[getter]
-    pub fn get_position(&self, py: Python<'_>) -> VectorPy {
-        py.allow_threads(|| self.position())
+    pub fn get_position(&self) -> VectorPy {
+        self.position()
     }
 
     #[setter]

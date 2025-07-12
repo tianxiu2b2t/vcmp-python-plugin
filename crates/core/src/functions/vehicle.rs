@@ -10,6 +10,7 @@ use vcmp_bindings::{
         QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods,
         VehicleMethods,
     },
+    utils::Vectorf32,
     vcmp_func,
 };
 
@@ -24,11 +25,17 @@ use crate::{
 #[pyo3(name = "Vehicle")]
 pub struct VehiclePy {
     id: i32,
+
+    // storage var
+    pub last_pos: Vectorf32,
 }
 
 impl VehiclePy {
     pub fn new(id: i32) -> Self {
-        Self { id }
+        Self {
+            id,
+            last_pos: Vectorf32::default(),
+        }
     }
 
     pub fn _position(&self) -> VectorPy {

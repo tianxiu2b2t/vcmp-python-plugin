@@ -4,15 +4,13 @@ use crate::PlayerId;
 pub struct PickupPickAttemptEvent {
     pub pickup_id: i32,
     pub player_id: PlayerId,
-    pub is_allowed: bool,
 }
 
-impl From<(i32, i32, u8)> for PickupPickAttemptEvent {
-    fn from(value: (i32, i32, u8)) -> Self {
+impl From<(i32, i32)> for PickupPickAttemptEvent {
+    fn from(value: (i32, i32)) -> Self {
         Self {
             pickup_id: value.0,
             player_id: value.1,
-            is_allowed: value.2 != 0,
         }
     }
 }
