@@ -51,10 +51,6 @@ impl MarkerPy {
         self.id
     }
 
-    /*
-        Eq
-    */
-
     fn __hash__(&self) -> i32 {
         self.id
     }
