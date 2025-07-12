@@ -494,7 +494,7 @@ impl PlayerPy {
     #[pyo3(name = "position")]
     pub fn py_set_position(&self, py: Python<'_>, position: VectorPy) {
         py.allow_threads(|| {
-            let _ = vcmp_func().set_player_position(self.id, position.get_entity_pos());
+            self.set_position(position.into());
         })
     }
 
