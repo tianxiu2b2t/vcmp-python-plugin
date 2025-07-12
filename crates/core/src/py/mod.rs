@@ -3,7 +3,7 @@ use std::path::Path;
 use std::sync::{LazyLock, Mutex};
 
 use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
-use pyo3::{Bound, Py, PyErr, PyResult, Python, pymodule, pyfunction, wrap_pyfunction};
+use pyo3::{Bound, Py, PyErr, PyResult, Python, pyfunction, pymodule, wrap_pyfunction};
 use tracing::{Level, event};
 
 use crate::cfg::CONFIG;
@@ -27,8 +27,8 @@ pub struct GlobalVar {
     pub need_reload: bool,
 }
 
-pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> = LazyLock::new(|| Mutex::new(GlobalVar::default()));
-
+pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> =
+    LazyLock::new(|| Mutex::new(GlobalVar::default()));
 
 #[cfg(target_os = "linux")]
 fn get_wchar_t(content: &str) -> Vec<i32> {
@@ -230,14 +230,13 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
 }
 
 /// 重新加载？
-/// 
+///
 #[pyfunction]
 pub fn reload() -> PyResult<()> {
     let mut var = GLOBAL_VAR.lock().unwrap();
     var.need_reload = true;
     Ok(())
 }
-
 
 /// 获取 python 错误信息
 ///
@@ -246,11 +245,11 @@ pub fn get_traceback(py_err: &PyErr, py: Option<Python<'_>>) -> String {
     let traceback = match py {
         Some(py) => match py_err.traceback(py) {
             Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
-            None => "none traceback".to_string(),
+            None => "Traceback (most recent call last):\n  (Rust) Code".to_string(),
         },
         None => Python::with_gil(|py| match py_err.traceback(py) {
             Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
-            None => "none traceback".to_string(),
+            None => "Traceback (most recent call last):\n  (Rust) Code".to_string(),
         }),
     };
 
