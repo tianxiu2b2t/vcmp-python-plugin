@@ -7,6 +7,7 @@ use vcmp_bindings::{func::KeybindMethods, vcmp_func};
 
 use crate::py::types::KeyCode;
 
+#[derive(Clone, Debug)]
 #[pyclass]
 #[pyo3(name = "KeyBind")]
 pub struct KeyBindPy {
