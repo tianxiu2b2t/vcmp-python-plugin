@@ -3,7 +3,7 @@ name: Build and Upload DLL
 on:
   push:
     branches:
-      - rwir
+      - master
   workflow_dispatch:
 
 jobs:
