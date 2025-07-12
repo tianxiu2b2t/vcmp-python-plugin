@@ -17,8 +17,5 @@ tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["chrono", "fmt", "ansi"] }
 vcmp_bindings = { path = "../vcmp_bindings" }
 
-[build-dependencies]
-pyo3-build-config = { version = "0.25.1", features = ["resolve-config"] }
-
 [lib]
 crate-type = ["cdylib"]
