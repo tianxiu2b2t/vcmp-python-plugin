@@ -5,7 +5,6 @@ use std::{
 };
 
 use pyo3::{
-    IntoPyObjectExt,
     exceptions::PyKeyboardInterrupt,
     prelude::*,
     types::{PyCFunction, PyNone},
@@ -14,10 +13,7 @@ use tracing::{Level, event};
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
 use crate::py::{
-    events::{
-        PyVcmpEvent, VcmpEvent, VcmpEventType,
-        abc::{BaseEvent, PyEvent},
-    },
+    events::{PyVcmpEvent, VcmpEvent, VcmpEventType, abc::PyEvent},
     get_traceback,
 };
 

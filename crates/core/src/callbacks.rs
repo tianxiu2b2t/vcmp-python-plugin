@@ -252,7 +252,6 @@ pub unsafe extern "C" fn on_player_name_change(
     old_name: *const c_char,
     new_name: *const c_char,
 ) {
-
     let binding_event = player::PlayerNameChangeEvent::from((player_id, old_name, new_name));
     let _ = PY_CALLBACK_MANAGER.handle(
         VcmpEvent::PlayerNameChange(PlayerNameChangeEvent::from(binding_event)),
