@@ -3,6 +3,9 @@ from vcmp.types import Quaternion, Vector
 
 
 class Vehicle:
+    def __hash__(self) -> int: ...
+    def __eq__(self, other: 'Vehicle') -> bool: ...
+
     @property
     def id(self) -> int:
         ...

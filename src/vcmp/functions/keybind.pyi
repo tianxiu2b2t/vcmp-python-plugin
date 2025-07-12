@@ -1,10 +1,6 @@
 from typing import Optional
 
-from vcmp.types import KeyCode
-
 class KeyBind:
-    def __init__(self, slot: int) -> None: ...
-
     @property
     def slot(self) -> int: ...
 

@@ -6,6 +6,9 @@ from vcmp.streams import WriteStream
 from vcmp.types import RGB, Vector
 
 class Player:
+    def __hash__(self) -> int: ...
+    def __eq__(self, other: object) -> bool: ...
+
     @property
     def id(self) -> int:
         ...
