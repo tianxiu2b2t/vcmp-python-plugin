@@ -1,11 +1,12 @@
 [project]
 name = "vcmp-python-plugin"
-version = "1.2.10.6"
+version = "2.0.0.0"
 description = "Python for VC:MP Server Plugin"
 authors = [
+    {name = "shenjack", email = "3695888@qq.com"},
     {name = "tianxiu2b2t", email = "atianxiua@163.com"},
 ]
-dependencies = ["requests>=2.32.3", "tianxiu2b2t-utils>=0.1.33", "apscheduler>=3.11.0"]
+dependencies = []
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
