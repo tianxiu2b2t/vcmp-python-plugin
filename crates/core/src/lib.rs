@@ -39,7 +39,10 @@ extern "C" fn VcmpPluginInit(
     plugin_callbacks: *mut PluginCallbacks,
     plugin_info: *mut PluginInfo,
 ) -> u32 {
+    println!("loading config for vcmp-plugin-rs");
     init_config();
+
+    println!("loading logger for vcmp-plugin-rs");
 
     logger::init();
 
