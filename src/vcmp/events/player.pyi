@@ -1,5 +1,6 @@
 from typing import Optional
 
+from vcmp.streams import ReadStream
 from vcmp.types import Vector
 from vcmp.functions.player import Player
 from vcmp.functions.vehicle import Vehicle
@@ -33,6 +34,9 @@ class ClientScriptDataEvent(PlayerEvent):
 
     @property
     def player(self) -> Player: ...
+
+    @property
+    def stream(self) -> ReadStream: ...
 
 class PlayerRequestClassEvent(PlayerEvent):
     def __init__(self, player_id: int, class_id: int) -> None: ...
@@ -273,6 +277,12 @@ class PlayerCommandEvent(PlayerEvent):
 
     @property
     def command(self) -> str: ...
+
+    @property
+    def text(self) -> str: ...
+
+    @property
+    def args(self) -> list[str]: ...
 
 class PlayerPrivateMessageEvent(PlayerEvent):
     def __init__(self, player_id: int, target_id: int, message: str) -> None: ...
