@@ -54,6 +54,14 @@ impl PickupPy {
         self.id
     }
 
+    fn __hash__(&self) -> i32 {
+        self.id
+    }
+
+    fn __eq__(&self, other: &PickupPy) -> bool {
+        self.id == other.id
+    }
+
     fn add_position(&self, position: VectorPy) {
         let origin = self._position();
         let _ = origin.add(position);

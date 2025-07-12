@@ -89,6 +89,14 @@ impl PlayerPy {
 
 #[pymethods]
 impl PlayerPy {
+    fn __hash__(&self) -> i32 {
+        self.id
+    }
+
+    fn __eq__(&self, other: &PlayerPy) -> bool {
+        self.id == other.id
+    }
+
     #[getter]
     pub fn get_action(&self, py: Python<'_>) -> i32 {
         py.allow_threads(|| vcmp_func().get_player_action(self.id))

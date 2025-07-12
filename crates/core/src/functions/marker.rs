@@ -51,6 +51,18 @@ impl MarkerPy {
         self.id
     }
 
+    /*
+        Eq
+    */
+
+    fn __hash__(&self) -> i32 {
+        self.id
+    }
+
+    fn __eq__(&self, other: &MarkerPy) -> bool {
+        self.id == other.id
+    }
+
     #[getter]
     pub fn get_color(&self) -> RGBPy {
         RGBPy::from(vcmp_func().get_marker_info(self.id).color)

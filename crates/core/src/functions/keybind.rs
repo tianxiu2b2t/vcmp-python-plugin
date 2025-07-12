@@ -32,7 +32,7 @@ impl KeyBindPy {
     }
 
     pub fn __hash__(&self) -> i32 {
-        self.slot as i32
+        self.slot
     }
 
     #[getter]

@@ -89,6 +89,14 @@ impl From<i32> for VehiclePy {
 
 #[pymethods]
 impl VehiclePy {
+    fn __hash__(&self) -> i32 {
+        self.id
+    }
+
+    fn __eq__(&self, other: &VehiclePy) -> bool {
+        self.id == other.id
+    }
+
     #[getter]
     pub fn get_id(&self) -> i32 {
         self.id
