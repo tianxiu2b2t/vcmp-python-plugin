@@ -93,9 +93,20 @@ impl EntityPool {
             VcmpEntityPool::Radio => {
                 // ignore
             }
+            VcmpEntityPool::Object => {
+                self.objects.insert_raw_entity(entity_id);
+            }
+            VcmpEntityPool::Pickup => {
+                self.pickups.insert_raw_entity(entity_id);
+            }
+            VcmpEntityPool::Marker => {
+                self.markers.insert_raw_entity(entity_id);
+            }
+            VcmpEntityPool::CheckPoint => {
+                self.checkpoints.insert_raw_entity(entity_id);
+            }
             _ => {
-                event!(Level::INFO, "Unknown entity type: {entity_type:?}");
-                todo!()
+                event!(Level::ERROR, "Unknown entity type: {:?}", entity_type);
             }
         }
     }
@@ -107,9 +118,23 @@ impl EntityPool {
             VcmpEntityPool::Vehicle => {
                 self.vehicles.remove_entity(entity_id);
             }
+            VcmpEntityPool::Radio => {
+                // ignore
+            }
+            VcmpEntityPool::Object => {
+                self.objects.remove_entity(entity_id);
+            }
+            VcmpEntityPool::Pickup => {
+                self.pickups.remove_entity(entity_id);
+            }
+            VcmpEntityPool::Marker => {
+                self.markers.remove_entity(entity_id);
+            }
+            VcmpEntityPool::CheckPoint => {
+                self.checkpoints.remove_entity(entity_id);
+            }
             _ => {
-                event!(Level::INFO, "Unknown entity type: {entity_type:?}");
-                todo!()
+                event!(Level::ERROR, "Unknown entity type: {:?}", entity_type);
             }
         }
     }
@@ -118,10 +143,12 @@ impl EntityPool {
         match entity_type {
             VcmpEntityPool::Player => self.players.have_entity(entity_id),
             VcmpEntityPool::Vehicle => self.vehicles.have_entity(entity_id),
-            _ => {
-                event!(Level::INFO, "Unknown entity type: {entity_type:?}");
-                todo!()
-            }
+            VcmpEntityPool::Radio => false,
+            VcmpEntityPool::Object => self.objects.have_entity(entity_id),
+            VcmpEntityPool::Pickup => self.pickups.have_entity(entity_id),
+            VcmpEntityPool::Marker => self.markers.have_entity(entity_id),
+            VcmpEntityPool::CheckPoint => self.checkpoints.have_entity(entity_id),
+            _ => false,
         }
     }
 
