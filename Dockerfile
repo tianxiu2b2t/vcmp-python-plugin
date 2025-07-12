@@ -5,7 +5,7 @@ WORKDIR /app
 RUN mkdir -p /app/plugins
 # RUN cp /libraries/vcmp-python-plugin-cpy313-rel64.so /app/plugin/vcmp-python-plugin-cpy313-rel64.so
 ADD pyproject.toml /app/pyproject.toml
-ADD /libraries/vcmp-python-plugin-cpy313-rel64.so /app/plugins/vcmp-python-plugin-cpy313-rel64.so
+ADD /libraries/libvcmp_plugin_rs.so /app/plugins/vcmp-python-plugin-04rel64-rspyo3-py.so
 
 #RUN apt-get update && apt-get install -y libc6 build-essential
 # verify
