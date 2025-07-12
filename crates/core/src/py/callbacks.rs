@@ -780,7 +780,7 @@ impl PyCallbackManager {
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::VehicleMove, func, priority)
     }
-    
+
     #[pyo3(signature = (priority = 9999, func = None))]
     pub fn on_vehicle_health_change(
         &self,

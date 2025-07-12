@@ -81,7 +81,7 @@ pub enum VcmpEventType {
 
     // Vehicle Extra
     VehicleMove,
-    VehicleHealthChange
+    VehicleHealthChange,
 }
 
 #[derive(Debug, Clone)]
