@@ -18,16 +18,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "arc-bytes"
-version = "0.3.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3de7bfea323262a3d319ed4ed16a960f07395bd903ac650f5e345b32401567d5"
-dependencies = [
- "serde",
- "thiserror",
-]
-
-[[package]]
 name = "autocfg"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -68,9 +58,7 @@ checksum = "c469d952047f47f91b68d1cba3f10d63c11d73e4636f24f08daf0278abf01c4d"
 dependencies = [
  "android-tzdata",
  "iana-time-zone",
- "js-sys",
  "num-traits",
- "wasm-bindgen",
  "windows-link",
 ]
 
@@ -677,9 +665,8 @@ checksum = "ba73ea9cf16a25df0c8caa16c51acb937d5712a8429db78a3ee29d5dcacd3a65"
 name = "vcmp-plugin-rs"
 version = "0.1.0"
 dependencies = [
- "arc-bytes",
- "chrono",
  "pyo3",
+ "pyo3-build-config",
  "rand",
  "toml",
  "tracing",

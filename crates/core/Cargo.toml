@@ -9,8 +9,6 @@ authors = [
 repository = "https://github.com/tianxiu2b2t/vcmp-python-plugin"
 
 [dependencies]
-arc-bytes = "0.3.5"
-chrono = "0.4.41"
 pyo3 = { version = "0.25.1", features = ["py-clone"]}
 rand = "0.9.1"
 toml = "0.8.23"
@@ -18,6 +16,9 @@ tracing = "0.1.41"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["chrono", "fmt", "ansi"] }
 vcmp_bindings = { path = "../vcmp_bindings" }
+
+[build-dependencies]
+pyo3-build-config = { version = "0.25.1", features = ["resolve-config"] }
 
 [lib]
 crate-type = ["cdylib"]
