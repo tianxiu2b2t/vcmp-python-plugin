@@ -1,1801 +1,1393 @@
-use std::ffi::c_char;
-
-use pyo3::prelude::*;
-use pyo3::types::PyModule;
-use pyo3::{Bound, PyResult, Python, pyclass, pymethods};
+use pyo3::{
+    Bound, Py, PyAny, PyClassInitializer, PyResult, Python, pyclass, pymethods,
+    types::{PyModule, PyModuleMethods},
+};
 use vcmp_bindings::events::player;
 
-use crate::functions::keybind::KeyBindPy;
-use crate::functions::player::PlayerPy;
-use crate::functions::vehicle::VehiclePy;
-use crate::pool::ENTITY_POOL;
-use crate::py::events::{BaseEvent, PyBaseEvent};
-use crate::py::types::VectorPy;
-// rewrite this to use pyclass
+use crate::{
+    functions::{
+        keybind::{KeyBindPy, get_bindkey},
+        player::PlayerPy,
+        vehicle::VehiclePy,
+    },
+    pool::ENTITY_POOL,
+    py::{
+        events::abc::{BaseEvent, PyEvent},
+        streams::ReadStream,
+    },
+};
 
+#[derive(Debug, Clone)]
 #[pyclass(extends=BaseEvent, subclass)]
-#[derive(Debug, Clone, Default)]
-#[pyo3(name = "PlayerEvent")]
-pub struct PlayerEvent;
-
-#[pymethods]
+pub struct PlayerEvent {}
 impl PlayerEvent {
-    #[new]
-    pub fn new(name: &str) -> (Self, BaseEvent) {
-        (Self, BaseEvent::new(name))
+    pub fn new() -> (Self, BaseEvent) {
+        (Self {}, BaseEvent::default())
     }
 }
+impl PyEvent for PlayerEvent {
+    fn event_name(&self) -> String {
+        "PlayerEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerEvent::new("PlayerEvent")).expect("Failed to create PlayerEvent").into()
+        Py::new(
+            py,
+            PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-#[pyclass(extends=PlayerEvent, unsendable)]
 #[derive(Debug, Clone)]
-#[pyo3(name = "IncomingConnectionEvent")]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct IncomingConnectionEvent {
-    inner: player::IncomingConnectionEvent,
+    pub inner: player::IncomingConnectionEvent,
 }
-
-impl From<(*mut c_char, usize, *const c_char, *const c_char)> for IncomingConnectionEvent {
-    fn from(value: (*mut c_char, usize, *const c_char, *const c_char)) -> Self {
-        Self {
-            inner: player::IncomingConnectionEvent::from(value),
-        }
-    }
-}
-
-impl IncomingConnectionEvent {
-    pub fn new(inner: player::IncomingConnectionEvent) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("IncomingConnectionEvent"))
-            .add_subclass(Self { inner })
-    }
-}
-
 #[pymethods]
 impl IncomingConnectionEvent {
-    #[new]
-    pub fn py_new(player_name: String, password: String, ip: String) -> PyClassInitializer<Self> {
-        // (*mut c_char, usize, *const c_char, *const c_char)
-        Self::new(player::IncomingConnectionEvent::from((
-            player_name.as_str().as_ptr() as *mut c_char,
-            player_name.len(),
-            password.as_str().as_ptr() as *const c_char,
-            ip.as_str().as_ptr() as *const c_char,
-        )))
-    }
-}
-
-impl PyBaseEvent for IncomingConnectionEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, IncomingConnectionEvent::new(self.inner.clone())).expect("Failed to create IncomingConnectionEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent, unsendable)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "PlayerConnectEvent")]
-pub struct PlayerConnectEvent {
-    player_id: i32,
-}
-
-#[pymethods]
-impl PlayerConnectEvent {
-    #[new]
-    pub fn new(player_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerConnectEvent"))
-            .add_subclass(Self { player_id })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn ip(&self) -> String {
+        self.inner.ip.clone()
     }
-}
-
-impl From<player::PlayerConnectEvent> for PlayerConnectEvent {
-    fn from(value: player::PlayerConnectEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerConnectEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerConnectEvent::new(self.player_id)).expect("Failed to create PlayerConnectEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent, unsendable)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "PlayerDisconnectEvent")]
-pub struct PlayerDisconnectEvent {
-    player_id: i32,
-    reason: i32,
-}
-
-#[pymethods]
-impl PlayerDisconnectEvent {
-    #[new]
-    pub fn new(player_id: i32, reason: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerDisconnectEvent"))
-            .add_subclass(Self { player_id, reason })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player_name(&self) -> String {
+        self.inner.player_name.clone()
     }
-
     #[getter]
-    pub fn get_reason(&self) -> i32 {
-        self.reason
-    }
-}
-
-impl From<player::PlayerDisconnectEvent> for PlayerDisconnectEvent {
-    fn from(value: player::PlayerDisconnectEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            reason: value.reason,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerDisconnectEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerDisconnectEvent::new(self.player_id, self.reason)).expect("Failed to create PlayerDisconnectEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "ClientScriptDataEvent")]
-pub struct ClientScriptDataEvent {
-    player_id: i32,
-    data: Vec<u8>,
-}
-
-#[pymethods]
-impl ClientScriptDataEvent {
-    #[new]
-    pub fn new(player_id: i32, data: Vec<u8>) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("ClientScriptDataEvent"))
-            .add_subclass(Self { player_id, data })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-}
-
-impl From<player::ClientScriptDataEvent> for ClientScriptDataEvent {
-    fn from(value: player::ClientScriptDataEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            data: value.data,
-        }
-    }
-}
-
-impl PyBaseEvent for ClientScriptDataEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            ClientScriptDataEvent::new(self.player_id, self.data.clone()),
-        ).expect("Failed to create ClientScriptDataEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "PlayerRequestClassEvent")]
-pub struct PlayerRequestClassEvent {
-    player_id: i32,
-    class_id: i32,
-}
-
-#[pymethods]
-impl PlayerRequestClassEvent {
-    #[new]
-    pub fn new(player_id: i32, class_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerRequestClassEvent")).add_subclass(Self {
-            player_id,
-            class_id,
-        })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-}
-
-impl From<player::PlayerRequestClassEvent> for PlayerRequestClassEvent {
-    fn from(value: player::PlayerRequestClassEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            class_id: value.class_id,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerRequestClassEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            PlayerRequestClassEvent::new(self.player_id, self.class_id),
-        ).expect("Failed to create PlayerRequestClassEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "PlayerRequestSpawnEvent")]
-pub struct PlayerRequestSpawnEvent {
-    player_id: i32,
-}
-
-#[pymethods]
-impl PlayerRequestSpawnEvent {
-    #[new]
-    pub fn new(player_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerRequestSpawnEvent"))
-            .add_subclass(Self { player_id })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-}
-
-impl From<player::PlayerRequestSpawnEvent> for PlayerRequestSpawnEvent {
-    fn from(value: player::PlayerRequestSpawnEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerRequestSpawnEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerRequestSpawnEvent::new(self.player_id)).expect("Failed to create PlayerRequestSpawnEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "PlayerSpawnEvent")]
-pub struct PlayerSpawnEvent {
-    player_id: i32,
-}
-
-#[pymethods]
-impl PlayerSpawnEvent {
-    #[new]
-    pub fn new(player_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerSpawnEvent"))
-            .add_subclass(Self { player_id })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-}
-
-impl From<player::PlayerSpawnEvent> for PlayerSpawnEvent {
-    fn from(value: player::PlayerSpawnEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerSpawnEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerSpawnEvent::new(self.player_id)).expect("Failed to create PlayerSpawnEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "PlayerDeathEvent")]
-pub struct PlayerDeathEvent {
-    player_id: i32,
-    killer_id: i32,
-    reason: i32,
-    body_part: i32,
-}
-
-#[pymethods]
-impl PlayerDeathEvent {
-    #[new]
-    pub fn new(
-        player_id: i32,
-        killer_id: i32,
-        reason: i32,
-        body_part: i32,
-    ) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerRequestSpawnEvent")).add_subclass(Self {
-            player_id,
-            killer_id,
-            reason,
-            body_part,
-        })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_killer(&self) -> Option<PlayerPy> {
-        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        pool.get_player(self.killer_id).copied()
-    }
-
-    #[getter]
-    pub fn get_reason(&self) -> i32 {
-        self.reason
-    }
-
-    #[getter]
-    pub fn get_body_part(&self) -> i32 {
-        self.body_part
-    }
-}
-
-impl From<player::PlayerDeathEvent> for PlayerDeathEvent {
-    fn from(value: player::PlayerDeathEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            killer_id: value.killer_id,
-            reason: value.reason,
-            body_part: value.body,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerDeathEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            PlayerDeathEvent::new(self.player_id, self.killer_id, self.reason, self.body_part),
-        ).expect("Failed to create PlayerDeathEvent").into()
-    }
-}
-
-/*
-    Extra Player Update Event,
-    Health, Armour, Ammo, Weapon, etc.
-*/
-// Player Health
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerHealthEvent")]
-pub struct PlayerHealthEvent {
-    player_id: i32,
-    old_health: f32,
-    new_health: f32,
-    health: f32,
-}
-
-impl PlayerHealthEvent {
-    pub fn get_health(&self) -> f32 {
-        self.health
-    }
-}
-
-#[pymethods]
-impl PlayerHealthEvent {
-    #[new]
-    pub fn new(player_id: i32, old_health: f32, new_health: f32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerHealthEvent")).add_subclass(Self {
-            player_id,
-            old_health,
-            new_health,
-            health: old_health,
-        })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_old_health(&self) -> f32 {
-        self.old_health
-    }
-
-    #[getter]
-    pub fn get_new_health(&self) -> f32 {
-        self.new_health
-    }
-
-    #[setter]
-    pub fn set_new_health(&mut self, new_health: f32) {
-        self.health = new_health;
-    }
-}
-
-impl From<(i32, f32, f32)> for PlayerHealthEvent {
-    fn from(value: (i32, f32, f32)) -> Self {
-        Self {
-            player_id: value.0,
-            old_health: value.1,
-            new_health: value.2,
-            health: value.1,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerHealthEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            PlayerHealthEvent::new(self.player_id, self.old_health, self.new_health),
-        ).expect("Failed to create PlayerHealthEvent").into()
-    }
-}
-// Player Armour
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerArmourEvent")]
-pub struct PlayerArmourEvent {
-    player_id: i32,
-    old_armour: f32,
-    new_armour: f32,
-    armour: f32,
-}
-
-impl PlayerArmourEvent {
-    pub fn get_armour(&self) -> f32 {
-        self.armour
-    }
-}
-
-#[pymethods]
-impl PlayerArmourEvent {
-    #[new]
-    pub fn new(player_id: i32, old_armour: f32, new_armour: f32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerArmourEvent")).add_subclass(Self {
-            player_id,
-            old_armour,
-            new_armour,
-            armour: old_armour,
-        })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_old_armour(&self) -> f32 {
-        self.old_armour
-    }
-
-    #[getter]
-    pub fn get_new_armour(&self) -> f32 {
-        self.new_armour
-    }
-
-    #[setter]
-    pub fn set_new_armour(&mut self, new_armour: f32) {
-        self.armour = new_armour;
-    }
-}
-
-impl From<(i32, f32, f32)> for PlayerArmourEvent {
-    fn from(value: (i32, f32, f32)) -> Self {
-        Self {
-            player_id: value.0,
-            old_armour: value.1,
-            new_armour: value.2,
-            armour: value.1,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerArmourEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            PlayerArmourEvent::new(self.player_id, self.old_armour, self.new_armour),
-        ).expect("Failed to create PlayerArmourEvent").into()
-    }
-}
-
-// Ammo
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerAmmoEvent")]
-pub struct PlayerAmmoEvent {
-    player_id: i32,
-    old_ammo: i32,
-    new_ammo: i32,
-    ammo: i32,
-}
-
-impl PlayerAmmoEvent {
-    pub fn get_ammo(&self) -> i32 {
-        self.ammo
-    }
-}
-
-#[pymethods]
-impl PlayerAmmoEvent {
-    #[new]
-    pub fn new(player_id: i32, old_ammo: i32, new_ammo: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerAmmoEvent")).add_subclass(Self {
-            player_id,
-            old_ammo,
-            new_ammo,
-            ammo: old_ammo,
-        })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_old_ammo(&self) -> i32 {
-        self.old_ammo
-    }
-
-    #[getter]
-    pub fn get_new_ammo(&self) -> i32 {
-        self.new_ammo
-    }
-
-    #[setter]
-    pub fn set_new_ammo(&mut self, new_ammo: i32) {
-        self.ammo = new_ammo;
-    }
-}
-
-impl From<(i32, i32, i32)> for PlayerAmmoEvent {
-    fn from(value: (i32, i32, i32)) -> Self {
-        Self {
-            player_id: value.0,
-            old_ammo: value.1,
-            new_ammo: value.2,
-            ammo: value.1,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerAmmoEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            PlayerAmmoEvent::new(self.player_id, self.old_ammo, self.new_ammo),
-        ).expect("Failed to create PlayerAmmoEvent").into()
-    }
-}
-
-// Weapon
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerWeaponEvent")]
-pub struct PlayerWeaponEvent {
-    player_id: i32,
-    old_weapon: i32,
-    new_weapon: i32,
-    weapon: i32,
-}
-
-impl PlayerWeaponEvent {
-    pub fn get_weapon(&self) -> i32 {
-        self.weapon
-    }
-}
-
-#[pymethods]
-impl PlayerWeaponEvent {
-    #[new]
-    pub fn new(player_id: i32, old_weapon: i32, new_weapon: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerWeaponEvent")).add_subclass(Self {
-            player_id,
-            old_weapon,
-            new_weapon,
-            weapon: old_weapon,
-        })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_old_weapon(&self) -> i32 {
-        self.old_weapon
-    }
-
-    #[getter]
-    pub fn get_new_weapon(&self) -> i32 {
-        self.new_weapon
-    }
-
-    #[setter]
-    pub fn set_new_weapon(&mut self, new_weapon: i32) {
-        self.weapon = new_weapon;
-    }
-}
-
-impl From<(i32, i32, i32)> for PlayerWeaponEvent {
-    fn from(value: (i32, i32, i32)) -> Self {
-        Self {
-            player_id: value.0,
-            old_weapon: value.1,
-            new_weapon: value.2,
-            weapon: value.1,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerWeaponEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            PlayerWeaponEvent::new(self.player_id, self.old_weapon, self.new_weapon),
-        ).expect("Failed to create PlayerWeaponEvent").into()
-    }
-}
-
-// Move
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerMoveEvent")]
-pub struct PlayerMoveEvent {
-    player_id: i32,
-    old_position: VectorPy,
-    new_position: VectorPy,
-    pub position: VectorPy,
-}
-
-#[pymethods]
-impl PlayerMoveEvent {
-    #[new]
-    pub fn new(
-        player_id: i32,
-        old_position: VectorPy,
-        new_position: VectorPy,
-    ) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerMoveEvent")).add_subclass(Self {
-            player_id,
-            old_position,
-            new_position,
-            position: old_position,
-        })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_old_position(&self) -> VectorPy {
-        self.old_position
-    }
-
-    #[getter]
-    pub fn get_new_position(&self) -> VectorPy {
-        self.new_position
-    }
-
-    #[setter]
-    pub fn set_new_position(&mut self, new_position: VectorPy) {
-        self.position = new_position;
-    }
-}
-
-impl From<(i32, VectorPy, VectorPy)> for PlayerMoveEvent {
-    fn from(value: (i32, VectorPy, VectorPy)) -> Self {
-        Self {
-            player_id: value.0,
-            old_position: value.1,
-            new_position: value.2,
-            position: value.1,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerMoveEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(
-            py,
-            PlayerMoveEvent::new(self.player_id, self.old_position, self.new_position),
-        ).expect("Failed to create PlayerMoveEvent").into()
-    }
-}
-
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerRequestEnterVehicleEvent")]
-pub struct PlayerRequestEnterVehicleEvent {
-    player_id: i32,
-    vehicle_id: i32,
-}
-
-#[pymethods]
-impl PlayerRequestEnterVehicleEvent {
-    #[new]
-    pub fn new(player_id: i32, vehicle_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerRequestEnterVehicleEvent")).add_subclass(
-            Self {
-                player_id,
-                vehicle_id,
-            },
+    fn password(&self) -> String {
+        self.inner.password.clone()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "IncomingConnectionEvent(player_name={}, ip={}, password={})",
+            self.player_name(),
+            self.ip(),
+            self.password()
         )
     }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_vehicle(&self) -> VehiclePy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_vehicle(self.vehicle_id)
-            .unwrap()
+}
+impl From<player::IncomingConnectionEvent> for IncomingConnectionEvent {
+    fn from(event: player::IncomingConnectionEvent) -> Self {
+        Self { inner: event }
     }
 }
-
-impl From<player::PlayerRequestEnterVehicleEvent> for PlayerRequestEnterVehicleEvent {
-    fn from(value: player::PlayerRequestEnterVehicleEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            vehicle_id: value.vehicle_id,
-        }
+impl PyEvent for IncomingConnectionEvent {
+    fn event_name(&self) -> String {
+        "IncomingConnectionEvent".to_string()
     }
-}
 
-impl PyBaseEvent for PlayerRequestEnterVehicleEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerRequestEnterVehicleEvent::new(self.player_id, self.vehicle_id),
-        ).expect("Failed to create PlayerRequestEnterVehicleEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerEnterVehicleEvent")]
-pub struct PlayerEnterVehicleEvent {
-    player_id: i32,
-    vehicle_id: i32,
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct ClientScriptDataEvent {
+    pub inner: player::ClientScriptDataEvent,
+}
+#[pymethods]
+impl ClientScriptDataEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn stream(&self) -> ReadStream {
+        ReadStream::from(self.inner.data.clone())
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "ClientScriptDataEvent(player={:?}, stream={})",
+            self.player(),
+            self.stream()
+        )
+    }
+}
+impl From<player::ClientScriptDataEvent> for ClientScriptDataEvent {
+    fn from(event: player::ClientScriptDataEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for ClientScriptDataEvent {
+    fn event_name(&self) -> String {
+        "ClientScriptDataEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
 }
 
+// PlayerConnectEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerConnectEvent {
+    pub inner: player::PlayerConnectEvent,
+}
+#[pymethods]
+impl PlayerConnectEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!("PlayerConnectEvent(player={:?})", self.player())
+    }
+}
+impl From<player::PlayerConnectEvent> for PlayerConnectEvent {
+    fn from(event: player::PlayerConnectEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerConnectEvent {
+    fn event_name(&self) -> String {
+        "PlayerConnectEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerDisconnectEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerDisconnectEvent {
+    pub inner: player::PlayerDisconnectEvent,
+}
+#[pymethods]
+impl PlayerDisconnectEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn reason(&self) -> i32 {
+        self.inner.reason
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerDisconnectEvent(player={:?}, reason={})",
+            self.player(),
+            self.reason()
+        )
+    }
+}
+impl From<player::PlayerDisconnectEvent> for PlayerDisconnectEvent {
+    fn from(event: player::PlayerDisconnectEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerDisconnectEvent {
+    fn event_name(&self) -> String {
+        "PlayerDisconnectEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerRequestClassEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerRequestClassEvent {
+    pub inner: player::PlayerRequestClassEvent,
+}
+#[pymethods]
+impl PlayerRequestClassEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn class_id(&self) -> i32 {
+        self.inner.class_id
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerRequestClassEvent(player={:?}, class_id={})",
+            self.player(),
+            self.class_id()
+        )
+    }
+}
+impl From<player::PlayerRequestClassEvent> for PlayerRequestClassEvent {
+    fn from(event: player::PlayerRequestClassEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerRequestClassEvent {
+    fn event_name(&self) -> String {
+        "PlayerRequestClassEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerSpawnEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerSpawnEvent {
+    pub inner: player::PlayerSpawnEvent,
+}
+#[pymethods]
+impl PlayerSpawnEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!("PlayerSpawnEvent(player={:?})", self.player())
+    }
+}
+impl From<player::PlayerSpawnEvent> for PlayerSpawnEvent {
+    fn from(event: player::PlayerSpawnEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerSpawnEvent {
+    fn event_name(&self) -> String {
+        "PlayerSpawnEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerRequestSpawnEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerRequestSpawnEvent {
+    pub inner: player::PlayerRequestSpawnEvent,
+}
+#[pymethods]
+impl PlayerRequestSpawnEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!("PlayerRequestSpawnEvent(player={:?})", self.player())
+    }
+}
+impl From<player::PlayerRequestSpawnEvent> for PlayerRequestSpawnEvent {
+    fn from(event: player::PlayerRequestSpawnEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerRequestSpawnEvent {
+    fn event_name(&self) -> String {
+        "PlayerRequestSpawnEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerDeathEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerDeathEvent {
+    pub inner: player::PlayerDeathEvent,
+}
+#[pymethods]
+impl PlayerDeathEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn killer(&self) -> Option<PlayerPy> {
+        let pool = ENTITY_POOL.lock().unwrap();
+        pool.get_player(self.inner.killer_id).map(|p| *p)
+    }
+    #[getter]
+    fn reason(&self) -> i32 {
+        self.inner.reason
+    }
+    #[getter]
+    fn body(&self) -> i32 {
+        self.inner.body
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerDeathEvent(player={:?}, killer={:?}, reason={}, body={})",
+            self.player(),
+            self.killer(),
+            self.reason(),
+            self.body()
+        )
+    }
+}
+impl From<player::PlayerDeathEvent> for PlayerDeathEvent {
+    fn from(event: player::PlayerDeathEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerDeathEvent {
+    fn event_name(&self) -> String {
+        "PlayerDeathEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerUpdateEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerUpdateEvent {
+    pub inner: player::PlayerUpdateEvent,
+}
+#[pymethods]
+impl PlayerUpdateEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn update(&self) -> i32 {
+        self.inner.update
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerUpdateEvent(player={:?}, update={})",
+            self.player(),
+            self.update()
+        )
+    }
+}
+impl From<player::PlayerUpdateEvent> for PlayerUpdateEvent {
+    fn from(event: player::PlayerUpdateEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerUpdateEvent {
+    fn event_name(&self) -> String {
+        "PlayerUpdateEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerRequestEnterVehicleEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerRequestEnterVehicleEvent {
+    pub inner: player::PlayerRequestEnterVehicleEvent,
+}
+#[pymethods]
+impl PlayerRequestEnterVehicleEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn vehicle(&self) -> VehiclePy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+    }
+    #[getter]
+    fn slot_index(&self) -> i32 {
+        self.inner.slot_index
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerRequestEnterVehicleEvent(player={:?}, vehicle={:?}, slot_index={})",
+            self.player(),
+            self.vehicle(),
+            self.slot_index()
+        )
+    }
+}
+impl From<player::PlayerRequestEnterVehicleEvent> for PlayerRequestEnterVehicleEvent {
+    fn from(event: player::PlayerRequestEnterVehicleEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerRequestEnterVehicleEvent {
+    fn event_name(&self) -> String {
+        "PlayerRequestEnterVehicleEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerEnterVehicleEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerEnterVehicleEvent {
+    pub inner: player::PlayerEnterVehicleEvent,
+}
 #[pymethods]
 impl PlayerEnterVehicleEvent {
-    #[new]
-    pub fn new(player_id: i32, vehicle_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerEnterVehicleEvent")).add_subclass(Self {
-            player_id,
-            vehicle_id,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_vehicle(&self) -> VehiclePy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_vehicle(self.vehicle_id)
-            .unwrap()
+    fn vehicle(&self) -> VehiclePy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+    }
+    #[getter]
+    fn slot_index(&self) -> i32 {
+        self.inner.slot_index
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerEnterVehicleEvent(player={:?}, vehicle={:?}, slot_index={})",
+            self.player(),
+            self.vehicle(),
+            self.slot_index()
+        )
     }
 }
-
 impl From<player::PlayerEnterVehicleEvent> for PlayerEnterVehicleEvent {
-    fn from(value: player::PlayerEnterVehicleEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            vehicle_id: value.vehicle_id,
-        }
+    fn from(event: player::PlayerEnterVehicleEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerEnterVehicleEvent {
+    fn event_name(&self) -> String {
+        "PlayerEnterVehicleEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerEnterVehicleEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerEnterVehicleEvent::new(self.player_id, self.vehicle_id),
-        ).expect("Failed to create PlayerEnterVehicleEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerExitVehicleEvent")]
+// PlayerExitVehicleEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerExitVehicleEvent {
-    player_id: i32,
-    vehicle_id: i32,
+    pub inner: player::PlayerExitVehicleEvent,
 }
-
 #[pymethods]
 impl PlayerExitVehicleEvent {
-    #[new]
-    pub fn new(player_id: i32, vehicle_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerExitVehicleEvent")).add_subclass(Self {
-            player_id,
-            vehicle_id,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_vehicle(&self) -> VehiclePy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_vehicle(self.vehicle_id)
-            .unwrap()
+    fn vehicle(&self) -> VehiclePy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerExitVehicleEvent(player={:?}, vehicle={:?})",
+            self.player(),
+            self.vehicle()
+        )
     }
 }
-
 impl From<player::PlayerExitVehicleEvent> for PlayerExitVehicleEvent {
-    fn from(value: player::PlayerExitVehicleEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            vehicle_id: value.vehicle_id,
-        }
+    fn from(event: player::PlayerExitVehicleEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerExitVehicleEvent {
+    fn event_name(&self) -> String {
+        "PlayerExitVehicleEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerExitVehicleEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerExitVehicleEvent::new(self.player_id, self.vehicle_id),
-        ).expect("Failed to create PlayerExitVehicleEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Name Change Event
-#[pyclass(extends=PlayerEvent)]
+// PlayerNameChangeEvent
 #[derive(Debug, Clone)]
-#[pyo3(name = "PlayerNameChangeEvent")]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerNameChangeEvent {
-    player_id: i32,
-    old_name: String,
-    new_name: String,
+    pub inner: player::PlayerNameChangeEvent,
 }
-
 #[pymethods]
 impl PlayerNameChangeEvent {
-    #[new]
-    pub fn new(player_id: i32, old_name: String, new_name: String) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerNameChangeEvent")).add_subclass(Self {
-            player_id,
-            old_name,
-            new_name,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_old_name(&self) -> String {
-        self.old_name.clone()
+    fn old_name(&self) -> String {
+        self.inner.old_name.clone()
     }
-
     #[getter]
-    pub fn get_new_name(&self) -> String {
-        self.new_name.clone()
+    fn new_name(&self) -> String {
+        self.inner.new_name.clone()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerNameChangeEvent(player={:?}, old_name={}, new_name={})",
+            self.player(),
+            self.old_name(),
+            self.new_name()
+        )
     }
 }
-
 impl From<player::PlayerNameChangeEvent> for PlayerNameChangeEvent {
-    fn from(value: player::PlayerNameChangeEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            old_name: value.old_name,
-            new_name: value.new_name,
-        }
+    fn from(event: player::PlayerNameChangeEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerNameChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerNameChangeEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerNameChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerNameChangeEvent::new(
-                self.player_id,
-                self.old_name.clone(),
-                self.new_name.clone(),
-            ),
-        ).expect("Failed to create PlayerNameChangeEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player State Change Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerStateChangeEvent")]
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerStateChangeEvent {
-    player_id: i32,
-    old_state: i32,
-    new_state: i32,
+    pub inner: player::PlayerStateChangeEvent,
 }
 
 #[pymethods]
 impl PlayerStateChangeEvent {
-    #[new]
-    pub fn new(player_id: i32, old_state: i32, new_state: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerStateChangeEvent")).add_subclass(Self {
-            player_id,
-            old_state,
-            new_state,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_old_state(&self) -> i32 {
-        self.old_state
+    fn old_state(&self) -> i32 {
+        self.inner.old_state
     }
-
     #[getter]
-    pub fn get_new_state(&self) -> i32 {
-        self.new_state
+    fn new_state(&self) -> i32 {
+        self.inner.new_state
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerStateChangeEvent(player={:?}, old_state={}, new_state={})",
+            self.player(),
+            self.old_state(),
+            self.new_state()
+        )
     }
 }
-
 impl From<player::PlayerStateChangeEvent> for PlayerStateChangeEvent {
-    fn from(value: player::PlayerStateChangeEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            old_state: value.old_state,
-            new_state: value.new_state,
-        }
+    fn from(event: player::PlayerStateChangeEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerStateChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerStateChangeEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerStateChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerStateChangeEvent::new(self.player_id, self.old_state, self.new_state),
-        ).expect("Failed to create PlayerStateChangeEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Action Change Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerActionChangeEvent")]
+// PlayerActionChangeEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerActionChangeEvent {
-    player_id: i32,
-    old_action: i32,
-    new_action: i32,
+    pub inner: player::PlayerActionChangeEvent,
 }
-
 #[pymethods]
 impl PlayerActionChangeEvent {
-    #[new]
-    pub fn new(player_id: i32, old_action: i32, new_action: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerActionChangeEvent")).add_subclass(Self {
-            player_id,
-            old_action,
-            new_action,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_old_action(&self) -> i32 {
-        self.old_action
+    fn old_action(&self) -> i32 {
+        self.inner.old_action
     }
-
     #[getter]
-    pub fn get_new_action(&self) -> i32 {
-        self.new_action
+    fn new_action(&self) -> i32 {
+        self.inner.new_action
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerActionChangeEvent(player={:?}, old_action={}, new_action={})",
+            self.player(),
+            self.old_action(),
+            self.new_action()
+        )
     }
 }
-
 impl From<player::PlayerActionChangeEvent> for PlayerActionChangeEvent {
-    fn from(value: player::PlayerActionChangeEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            old_action: value.old_action,
-            new_action: value.new_action,
-        }
+    fn from(event: player::PlayerActionChangeEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerActionChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerActionChangeEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerActionChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerActionChangeEvent::new(self.player_id, self.old_action, self.new_action),
-        ).expect("Failed to create PlayerActionChangeEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player On Fire Change Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerOnFireChangeEvent")]
+// PlayerOnFireChangeEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerOnFireChangeEvent {
-    player_id: i32,
-    is_on_fire: bool,
+    pub inner: player::PlayerOnFireChangeEvent,
 }
-
 #[pymethods]
 impl PlayerOnFireChangeEvent {
-    #[new]
-    pub fn new(player_id: i32, is_on_fire: bool) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerOnFireChangeEvent")).add_subclass(Self {
-            player_id,
-            is_on_fire,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn is_on_fire(&self) -> bool {
-        self.is_on_fire
+    fn is_on_fire(&self) -> bool {
+        self.inner.is_on_fire
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerOnFireChangeEvent(player={:?}, is_on_fire={})",
+            self.player(),
+            self.is_on_fire()
+        )
     }
 }
-
 impl From<player::PlayerOnFireChangeEvent> for PlayerOnFireChangeEvent {
-    fn from(value: player::PlayerOnFireChangeEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            is_on_fire: value.is_on_fire,
-        }
+    fn from(event: player::PlayerOnFireChangeEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerOnFireChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerOnFireChangeEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerOnFireChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerOnFireChangeEvent::new(self.player_id, self.is_on_fire),
-        ).expect("Failed to create PlayerOnFireChangeEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Crouch Change Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerCrouchChangeEvent")]
+// PlayerCrouchChangeEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerCrouchChangeEvent {
-    player_id: i32,
-    is_crouching: bool,
+    pub inner: player::PlayerCrouchChangeEvent,
 }
-
 #[pymethods]
 impl PlayerCrouchChangeEvent {
-    #[new]
-    pub fn new(player_id: i32, is_crouching: bool) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerCrouchChangeEvent")).add_subclass(Self {
-            player_id,
-            is_crouching,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn is_crouching(&self) -> bool {
-        self.is_crouching
+    fn is_crouching(&self) -> bool {
+        self.inner.is_crouching
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerCrouchChangeEvent(player={:?}, is_crouching={})",
+            self.player(),
+            self.is_crouching()
+        )
     }
 }
-
 impl From<player::PlayerCrouchChangeEvent> for PlayerCrouchChangeEvent {
-    fn from(value: player::PlayerCrouchChangeEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            is_crouching: value.is_crouching,
-        }
+    fn from(event: player::PlayerCrouchChangeEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerCrouchChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerCrouchChangeEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerCrouchChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerCrouchChangeEvent::new(self.player_id, self.is_crouching),
-        ).expect("Failed to create PlayerCrouchChangeEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Game Keys Change Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerGameKeysChangeEvent")]
+// PlayerGameKeysChangeEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerGameKeysChangeEvent {
-    player_id: i32,
-    old_keys: u32,
-    new_keys: u32,
+    pub inner: player::PlayerGameKeysChangeEvent,
 }
-
 #[pymethods]
 impl PlayerGameKeysChangeEvent {
-    #[new]
-    pub fn new(player_id: i32, old_keys: u32, new_keys: u32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerGameKeysChangeEvent")).add_subclass(Self {
-            player_id,
-            old_keys,
-            new_keys,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_old_keys(&self) -> u32 {
-        self.old_keys
+    fn old_keys(&self) -> u32 {
+        self.inner.old_keys
     }
-
     #[getter]
-    pub fn get_new_keys(&self) -> u32 {
-        self.new_keys
+    fn new_keys(&self) -> u32 {
+        self.inner.new_keys
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerGameKeysChangeEvent(player={:?}, old_keys={}, new_keys={})",
+            self.player(),
+            self.old_keys(),
+            self.new_keys()
+        )
     }
 }
-
 impl From<player::PlayerGameKeysChangeEvent> for PlayerGameKeysChangeEvent {
-    fn from(value: player::PlayerGameKeysChangeEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            old_keys: value.old_keys,
-            new_keys: value.new_keys,
-        }
+    fn from(event: player::PlayerGameKeysChangeEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerGameKeysChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerGameKeysChangeEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerGameKeysChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerGameKeysChangeEvent::new(self.player_id, self.old_keys, self.new_keys),
-        ).expect("Failed to create PlayerGameKeysChangeEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Begin Typing Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerBeginTypingEvent")]
+// PlayerBeginTypingEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerBeginTypingEvent {
-    player_id: i32,
+    pub inner: player::PlayerBeginTypingEvent,
 }
-
 #[pymethods]
 impl PlayerBeginTypingEvent {
-    #[new]
-    pub fn new(player_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerBeginTypingEvent"))
-            .add_subclass(Self { player_id })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!("PlayerBeginTypingEvent(player={:?})", self.player())
     }
 }
-
-impl From<i32> for PlayerBeginTypingEvent {
-    fn from(value: i32) -> Self {
-        Self { player_id: value }
+impl From<player::PlayerBeginTypingEvent> for PlayerBeginTypingEvent {
+    fn from(event: player::PlayerBeginTypingEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerBeginTypingEvent {
+    fn event_name(&self) -> String {
+        "PlayerBeginTypingEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerBeginTypingEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerBeginTypingEvent::new(self.player_id)).expect("Failed to create PlayerBeginTypingEvent").into()
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player End Typing Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerEndTypingEvent")]
+// PlayerEndTypingEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerEndTypingEvent {
-    player_id: i32,
+    pub inner: player::PlayerEndTypingEvent,
 }
-
 #[pymethods]
 impl PlayerEndTypingEvent {
-    #[new]
-    pub fn new(player_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerEndTypingEvent"))
-            .add_subclass(Self { player_id })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!("PlayerEndTypingEvent(player={:?})", self.player())
     }
 }
-
-impl From<i32> for PlayerEndTypingEvent {
-    fn from(value: i32) -> Self {
-        Self { player_id: value }
+impl From<player::PlayerEndTypingEvent> for PlayerEndTypingEvent {
+    fn from(event: player::PlayerEndTypingEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerEndTypingEvent {
+    fn event_name(&self) -> String {
+        "PlayerEndTypingEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerEndTypingEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerEndTypingEvent::new(self.player_id)).expect("Failed to create PlayerEndTypingEvent").into()
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Away Change Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerAwayChangeEvent")]
+// PlayerAwayChangeEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerAwayChangeEvent {
-    player_id: i32,
-    is_away: bool,
+    pub inner: player::PlayerAwayChangeEvent,
 }
-
 #[pymethods]
 impl PlayerAwayChangeEvent {
-    #[new]
-    pub fn new(player_id: i32, is_away: bool) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerAwayChangeEvent"))
-            .add_subclass(Self { player_id, is_away })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn is_away(&self) -> bool {
-        self.is_away
+    fn is_away(&self) -> bool {
+        self.inner.is_away
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerAwayChangeEvent(player={:?}, is_away={})",
+            self.player(),
+            self.is_away()
+        )
     }
 }
-
 impl From<player::PlayerAwayChangeEvent> for PlayerAwayChangeEvent {
-    fn from(value: player::PlayerAwayChangeEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            is_away: value.is_away,
-        }
+    fn from(event: player::PlayerAwayChangeEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerAwayChangeEvent {
+    fn event_name(&self) -> String {
+        "PlayerAwayChangeEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerAwayChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerAwayChangeEvent::new(self.player_id, self.is_away)).expect("Failed to create PlayerAwayChangeEvent").into()
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Message Event
-#[pyclass(extends=PlayerEvent)]
+// PlayerMessageEvent
 #[derive(Debug, Clone)]
-#[pyo3(name = "PlayerMessageEvent")]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerMessageEvent {
-    player_id: i32,
-    message: String,
+    pub inner: player::PlayerMessageEvent,
 }
-
 #[pymethods]
 impl PlayerMessageEvent {
-    #[new]
-    pub fn new(player_id: i32, message: String) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerMessageEvent"))
-            .add_subclass(Self { player_id, message })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_message(&self) -> String {
-        self.message.clone()
+    fn message(&self) -> String {
+        self.inner.message.clone()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerMessageEvent(player={:?}, message='{}')",
+            self.player(),
+            self.message()
+        )
     }
 }
-
 impl From<player::PlayerMessageEvent> for PlayerMessageEvent {
-    fn from(value: player::PlayerMessageEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            message: value.message,
-        }
+    fn from(event: player::PlayerMessageEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerMessageEvent {
+    fn event_name(&self) -> String {
+        "PlayerMessageEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerMessageEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerMessageEvent::new(self.player_id, self.message.clone()),
-        ).expect("Failed to create PlayerMessageEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Command Event
-#[pyclass(extends=PlayerEvent)]
+// PlayerCommandEvent
 #[derive(Debug, Clone)]
-#[pyo3(name = "PlayerCommandEvent")]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerCommandEvent {
-    player_id: i32,
-    command: String,
-    text: String,
+    pub inner: player::PlayerCommandEvent,
 }
-
 #[pymethods]
 impl PlayerCommandEvent {
-    #[new]
-    pub fn new(player_id: i32, command: String, text: String) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerCommandEvent")).add_subclass(Self {
-            player_id,
-            command,
-            text,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_command(&self) -> String {
-        self.command.clone()
+    fn command(&self) -> String {
+        self.inner.command.clone()
     }
-}
-
-impl From<player::PlayerCommandEvent> for PlayerCommandEvent {
-    fn from(value: player::PlayerCommandEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            command: value.command,
-            text: value.text,
+    #[getter]
+    fn text(&self) -> String {
+        self.inner.text.clone()
+    }
+    #[getter]
+    fn args(&self) -> Vec<String> {
+        let mut res = vec![];
+        // text split ' ' and strip() '  '
+        for arg in self.text().split(' ').filter(|s| !s.is_empty()) {
+            res.push(arg.to_string())
         }
+        res
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerCommandEvent(player={:?}, command='{}', text='{}')",
+            self.player(),
+            self.command(),
+            self.text()
+        )
     }
 }
+impl From<player::PlayerCommandEvent> for PlayerCommandEvent {
+    fn from(event: player::PlayerCommandEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerCommandEvent {
+    fn event_name(&self) -> String {
+        "PlayerCommandEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerCommandEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerCommandEvent::new(self.player_id, self.command.clone(), self.text.clone()),
-        ).expect("Failed to create PlayerCommandEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Private Message Event
-#[pyclass(extends=PlayerEvent)]
+// PlayerPrivateMessageEvent
 #[derive(Debug, Clone)]
-#[pyo3(name = "PlayerPrivateMessageEvent")]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerPrivateMessageEvent {
-    player_id: i32,
-    target_id: i32,
-    message: String,
+    pub inner: player::PlayerPrivateMessageEvent,
 }
-
 #[pymethods]
 impl PlayerPrivateMessageEvent {
-    #[new]
-    pub fn new(player_id: i32, target_id: i32, message: String) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerPrivateMessageEvent")).add_subclass(Self {
-            player_id,
-            target_id,
-            message,
-        })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_target(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.target_id)
-            .unwrap()
+    fn target(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.target_id).unwrap()
     }
-
     #[getter]
-    pub fn get_message(&self) -> String {
-        self.message.clone()
+    fn message(&self) -> String {
+        self.inner.message.clone()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerPrivateMessageEvent(player={:?}, target={:?}, message='{}')",
+            self.player(),
+            self.target(),
+            self.message()
+        )
     }
 }
-
 impl From<player::PlayerPrivateMessageEvent> for PlayerPrivateMessageEvent {
-    fn from(value: player::PlayerPrivateMessageEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            target_id: value.target_id,
-            message: value.message,
-        }
+    fn from(event: player::PlayerPrivateMessageEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerPrivateMessageEvent {
+    fn event_name(&self) -> String {
+        "PlayerPrivateMessageEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerPrivateMessageEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerPrivateMessageEvent::new(self.player_id, self.target_id, self.message.clone()),
-        ).expect("Failed to create PlayerPrivateMessageEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Key Bind Down Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerKeyBindDownEvent")]
+// PlayerKeyBindDownEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerKeyBindDownEvent {
-    player_id: i32,
-    bind_id: i32,
+    pub inner: player::PlayerKeyBindDownEvent,
 }
-
 #[pymethods]
 impl PlayerKeyBindDownEvent {
-    #[new]
-    pub fn new(player_id: i32, bind_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerKeyBindDownEvent"))
-            .add_subclass(Self { player_id, bind_id })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_key(&self) -> KeyBindPy {
-        KeyBindPy::new(self.bind_id)
+    fn key(&self) -> KeyBindPy {
+        get_bindkey(self.inner.bind_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerKeyBindDownEvent(player={:?}, key={:?})",
+            self.player(),
+            self.key()
+        )
     }
 }
-
 impl From<player::PlayerKeyBindDownEvent> for PlayerKeyBindDownEvent {
-    fn from(value: player::PlayerKeyBindDownEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            bind_id: value.bind_id,
-        }
+    fn from(event: player::PlayerKeyBindDownEvent) -> Self {
+        Self { inner: event }
     }
 }
+impl PyEvent for PlayerKeyBindDownEvent {
+    fn event_name(&self) -> String {
+        "PlayerKeyBindDownEvent".to_string()
+    }
 
-impl PyBaseEvent for PlayerKeyBindDownEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerKeyBindDownEvent::new(self.player_id, self.bind_id),
-        ).expect("Failed to create PlayerKeyBindDownEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
-// Player Key Bind Up Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerKeyBindUpEvent")]
+// PlayerKeyBindUpEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
 pub struct PlayerKeyBindUpEvent {
-    player_id: i32,
-    bind_id: i32,
+    pub inner: player::PlayerKeyBindUpEvent,
 }
-
 #[pymethods]
 impl PlayerKeyBindUpEvent {
-    #[new]
-    pub fn new(player_id: i32, bind_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerKeyBindUpEvent"))
-            .add_subclass(Self { player_id, bind_id })
-    }
-
     #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
     }
-
     #[getter]
-    pub fn get_key(&self) -> KeyBindPy {
-        KeyBindPy::new(self.bind_id)
+    fn key(&self) -> KeyBindPy {
+        get_bindkey(self.inner.bind_id).unwrap()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerKeyBindUpEvent(player={:?}, key={:?})",
+            self.player(),
+            self.key()
+        )
     }
 }
-
 impl From<player::PlayerKeyBindUpEvent> for PlayerKeyBindUpEvent {
-    fn from(value: player::PlayerKeyBindUpEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            bind_id: value.bind_id,
-        }
+    fn from(event: player::PlayerKeyBindUpEvent) -> Self {
+        Self { inner: event }
     }
 }
-
-impl PyBaseEvent for PlayerKeyBindUpEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerKeyBindUpEvent::new(self.player_id, self.bind_id)).expect("Failed to create PlayerKeyBindUpEvent").into()
-    }
-}
-
-// Player Spectate Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone, Copy)]
-#[pyo3(name = "PlayerSpectateEvent")]
-pub struct PlayerSpectateEvent {
-    player_id: i32,
-    target_id: i32,
-}
-
-#[pymethods]
-impl PlayerSpectateEvent {
-    #[new]
-    pub fn new(player_id: i32, target_id: i32) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerSpectateEvent")).add_subclass(Self {
-            player_id,
-            target_id,
-        })
+impl PyEvent for PlayerKeyBindUpEvent {
+    fn event_name(&self) -> String {
+        "PlayerKeyBindUpEvent".to_string()
     }
 
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_target(&self) -> Option<PlayerPy> {
-        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        pool.get_player(self.target_id).copied()
-    }
-}
-
-impl From<player::PlayerSpectateEvent> for PlayerSpectateEvent {
-    fn from(value: player::PlayerSpectateEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            target_id: value.target_id,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerSpectateEvent {
-    fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, PlayerSpectateEvent::new(self.player_id, self.target_id)).expect("Failed to create PlayerSpectateEvent").into()
-    }
-}
-
-// Player Crash Report Event
-#[pyclass(extends=PlayerEvent)]
-#[derive(Debug, Clone)]
-#[pyo3(name = "PlayerCrashReportEvent")]
-pub struct PlayerCrashReportEvent {
-    player_id: i32,
-    report: String,
-}
-
-#[pymethods]
-impl PlayerCrashReportEvent {
-    #[new]
-    pub fn new(player_id: i32, report: String) -> PyClassInitializer<Self> {
-        PyClassInitializer::from(PlayerEvent::new("PlayerCrashReportEvent"))
-            .add_subclass(Self { player_id, report })
-    }
-
-    #[getter]
-    pub fn get_player(&self) -> PlayerPy {
-        *ENTITY_POOL
-            .lock()
-            .expect("Failed to lock entity pool")
-            .get_player(self.player_id)
-            .unwrap()
-    }
-
-    #[getter]
-    pub fn get_report(&self) -> String {
-        self.report.clone()
-    }
-}
-
-impl From<player::PlayerCrashReportEvent> for PlayerCrashReportEvent {
-    fn from(value: player::PlayerCrashReportEvent) -> Self {
-        Self {
-            player_id: value.player_id,
-            report: value.report,
-        }
-    }
-}
-
-impl PyBaseEvent for PlayerCrashReportEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PlayerCrashReportEvent::new(self.player_id, self.report.clone()),
-        ).expect("Failed to create PlayerCrashReportEvent").into()
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
     }
 }
 
+// PlayerSpectateEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerSpectateEvent {
+    pub inner: player::PlayerSpectateEvent,
+}
+#[pymethods]
+impl PlayerSpectateEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn target(&self) -> Option<PlayerPy> {
+        let pool = ENTITY_POOL.lock().unwrap();
+        pool.get_player(self.inner.target_id).map(|p| *p)
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerSpectateEvent(player={:?}, target={:?})",
+            self.player(),
+            self.target()
+        )
+    }
+}
+impl From<player::PlayerSpectateEvent> for PlayerSpectateEvent {
+    fn from(event: player::PlayerSpectateEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerSpectateEvent {
+    fn event_name(&self) -> String {
+        "PlayerSpectateEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerCrashReportEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerCrashReportEvent {
+    pub inner: player::PlayerCrashReportEvent,
+}
+#[pymethods]
+impl PlayerCrashReportEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn report(&self) -> String {
+        self.inner.report.clone()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerCrashReportEvent(player={:?}, report='{}')",
+            self.player(),
+            self.report()
+        )
+    }
+}
+impl From<player::PlayerCrashReportEvent> for PlayerCrashReportEvent {
+    fn from(event: player::PlayerCrashReportEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerCrashReportEvent {
+    fn event_name(&self) -> String {
+        "PlayerCrashReportEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// PlayerModuleListEvent
+#[derive(Debug, Clone)]
+#[pyclass(extends=PlayerEvent, subclass)]
+pub struct PlayerModuleListEvent {
+    pub inner: player::PlayerModuleListEvent,
+}
+#[pymethods]
+impl PlayerModuleListEvent {
+    #[getter]
+    fn player(&self) -> PlayerPy {
+        let pool = ENTITY_POOL.lock().unwrap();
+        *pool.get_player(self.inner.player_id).unwrap()
+    }
+    #[getter]
+    fn modules(&self) -> String {
+        self.inner.modules.clone()
+    }
+    fn __repr__(&self) -> String {
+        format!(
+            "PlayerModuleListEvent(player={:?}, modules='{}')",
+            self.player(),
+            self.modules()
+        )
+    }
+}
+impl From<player::PlayerModuleListEvent> for PlayerModuleListEvent {
+    fn from(event: player::PlayerModuleListEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for PlayerModuleListEvent {
+    fn event_name(&self) -> String {
+        "PlayerModuleListEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+// 更新模块定义函数以包含所有新事件
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PlayerEvent>()?;
     m.add_class::<IncomingConnectionEvent>()?;
+    m.add_class::<ClientScriptDataEvent>()?;
     m.add_class::<PlayerConnectEvent>()?;
     m.add_class::<PlayerDisconnectEvent>()?;
-    m.add_class::<ClientScriptDataEvent>()?;
     m.add_class::<PlayerRequestClassEvent>()?;
-    m.add_class::<PlayerRequestSpawnEvent>()?;
     m.add_class::<PlayerSpawnEvent>()?;
+    m.add_class::<PlayerRequestSpawnEvent>()?;
     m.add_class::<PlayerDeathEvent>()?;
-
-    m.add_class::<PlayerHealthEvent>()?;
-    m.add_class::<PlayerArmourEvent>()?;
-    m.add_class::<PlayerAmmoEvent>()?;
-    m.add_class::<PlayerWeaponEvent>()?;
-    m.add_class::<PlayerMoveEvent>()?;
-
+    m.add_class::<PlayerUpdateEvent>()?;
+    m.add_class::<PlayerRequestEnterVehicleEvent>()?;
     m.add_class::<PlayerEnterVehicleEvent>()?;
     m.add_class::<PlayerExitVehicleEvent>()?;
-    m.add_class::<PlayerRequestEnterVehicleEvent>()?;
-
     m.add_class::<PlayerNameChangeEvent>()?;
     m.add_class::<PlayerStateChangeEvent>()?;
     m.add_class::<PlayerActionChangeEvent>()?;
@@ -1812,6 +1404,7 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PlayerKeyBindUpEvent>()?;
     m.add_class::<PlayerSpectateEvent>()?;
     m.add_class::<PlayerCrashReportEvent>()?;
+    m.add_class::<PlayerModuleListEvent>()?;
 
     Ok(())
 }

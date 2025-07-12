@@ -509,7 +509,6 @@ impl PlayerMethods for VcmpFunctions {
     }
 
     fn set_player_position(&self, player: i32, position: Vectorf32) -> VcmpResult<()> {
-        println!("set position: {position:?}");
         let code = (self.inner.SetPlayerPosition)(player, position.x, position.y, position.z);
         if code != 0 {
             Err(VcmpError::from(code))

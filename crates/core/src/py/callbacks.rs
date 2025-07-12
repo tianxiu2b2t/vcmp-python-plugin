@@ -5,13 +5,21 @@ use std::{
 };
 
 use pyo3::{
+    IntoPyObjectExt,
+    exceptions::PyKeyboardInterrupt,
     prelude::*,
     types::{PyCFunction, PyNone},
 };
 use tracing::{Level, event};
-use vcmp_bindings::events::{VcmpEvent, VcmpEventType};
+use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
-use crate::py::events::{server::{ServerFrameEvent, ServerInitialiseEvent, ServerPerformanceReportEvent, ServerShutdownEvent}, PyBaseEvent, PyVcmpEvent};
+use crate::py::{
+    events::{
+        PyVcmpEvent, VcmpEvent, VcmpEventType,
+        abc::{BaseEvent, PyEvent},
+    },
+    get_traceback,
+};
 
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
@@ -36,14 +44,30 @@ impl PyCallbackStorage {
         if !self.callbacks.contains_key(&event_type) {
             self.callbacks.insert(event_type.clone(), Vec::default());
         }
-        self.callbacks
-            .get_mut(&event_type)
-            .unwrap()
-            .push(CallbackFunction { func, priority });
+        // 根据优先级来排列
+        // self.callbacks
+        // .get_mut(&event_type)
+        // .unwrap()
+        // .push(CallbackFunction { func, priority });
+
+        let handlers = self.callbacks.get_mut(&event_type).unwrap();
+        let mut i = 0;
+        while i < handlers.len() {
+            if handlers[i].priority < priority {
+                handlers.insert(i, CallbackFunction { func, priority });
+                return;
+            }
+            i += 1;
+        }
+        handlers.push(CallbackFunction { func, priority });
     }
 
-    pub fn get_handlers(&self, event_type: &VcmpEventType) -> Option<&Vec<CallbackFunction>> {
-        self.callbacks.get(event_type)
+    pub fn get_handlers(&self, event_type: VcmpEventType) -> Option<&Vec<CallbackFunction>> {
+        self.callbacks.get(&event_type)
+    }
+
+    pub fn clear(&mut self) {
+        self.callbacks.clear();
     }
 }
 
@@ -57,25 +81,59 @@ pub static PY_CALLBACK_STORAGE: LazyLock<Mutex<PyCallbackStorage>> =
 pub struct PyCallbackManager {}
 
 impl PyCallbackManager {
-    pub fn handle(&self, event: PyVcmpEvent, abortable: bool) -> bool {
-        Python::with_gil(|py| match self.py_handle(py, event) {
-            Ok(res) => {
-                if res.is_none(py) {
-                    abortable
-                } else {
-                    match res.extract::<bool>(py) {
-                        Ok(res) => res,
-                        Err(_) => abortable,
+    pub fn handle(&self, event: VcmpEvent, abortable: bool) -> bool {
+        event!(Level::DEBUG, "Handling event: {:?}", event);
+        let event_id = callback_utils::increase_event_id();
+        event!(
+            Level::TRACE,
+            "Python with gil before counter: {:?}(ID: {event_id})",
+            callback_utils::PY_GIL_REF_COUNTER.current()
+        );
+        //if callback_utils::PY_GIL_REF_COUNTER.current() >= 1 {
+        //    event!(
+        //        Level::ERROR,
+        //        "Python is already in use, aborting event: {:?}",
+        //        event
+        //    );
+        //    return abortable;
+        //}
+        let res = Python::with_gil(|py| {
+            event!(
+                Level::TRACE,
+                "Python with gil after counter: {:?}(ID: {event_id})",
+                callback_utils::PY_GIL_REF_COUNTER.increase()
+            );
+            let res = match self.py_handle(py, PyVcmpEvent::from(event)) {
+                Ok(res) => {
+                    if res.is_none(py) {
+                        abortable
+                    } else {
+                        match res.extract::<bool>(py) {
+                            Ok(res) => res,
+                            Err(_) => abortable,
+                        }
                     }
                 }
-            }
-            Err(_) => abortable,
-        })
+                Err(_) => abortable,
+            };
+            res
+        });
+        event!(
+            Level::TRACE,
+            "Python with gil after counter: {:?}(ID: {event_id})",
+            callback_utils::PY_GIL_REF_COUNTER.decrease()
+        );
+        res
     }
     fn py_handle(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
-        let event_type = VcmpEventType::from(event.event_enum.clone());
-        let storage = PY_CALLBACK_STORAGE.lock().unwrap();
-        let handlers = storage.get_handlers(&event_type);
+        let kwargs = event.kwargs;
+        let event = event.event_type;
+        let handlers = {
+            let storage = PY_CALLBACK_STORAGE.lock().unwrap();
+            storage
+                .get_handlers(VcmpEventType::from(event.clone()))
+                .cloned()
+        };
         if handlers.is_none() {
             return Ok(PyNone::get(py)
                 .downcast::<PyAny>()
@@ -84,42 +142,60 @@ impl PyCallbackManager {
                 .unbind());
         }
         let handlers = handlers.unwrap();
-        //let mut res = None;
-        let need_arg = {
-            match event_type {
-                VcmpEventType::ServerInitialise => false,
-                VcmpEventType::ServerShutdown => false,
-                _ => true,
-            }
-        };
-        let py_event: Option<Py<PyAny>> = match event.event_enum {
-            VcmpEvent::PluginCommand(_) => None,
-            VcmpEvent::ServerInitialise(_) => Some((ServerInitialiseEvent {}).init(py)),
-            VcmpEvent::ServerFrame(e) => Some((ServerFrameEvent { inner: e }).init(py)),
-            VcmpEvent::ServerShutdown(_) => Some((ServerShutdownEvent {}).init(py)),
-            VcmpEvent::ServerPerformanceReport(e) => Some((ServerPerformanceReportEvent { inner: e}).init(py)),
-            _ => None
-        };
-        //let py_event = py_event.init(py).unwrap();
+
+        let mut result = None;
+
+        let py_event = self.get_py_event(py, event.clone());
+
+        // convert BaseEvent to set_kwargs and convert origin event
+        let _ = py_event.setattr(py, "kwargs", kwargs);
+
         for handler in handlers {
             let func = handler.func.clone();
             match func.call1(py, (py_event.clone(),)) {
                 Ok(res) => {
-                    event!(Level::INFO, "Callback called: {}", res)
-                    //event.abort = res.extract::<bool>(py).unwrap_or(false);
+                    if res.is_none(py) {
+                        continue;
+                    }
+                    result = Some(res.clone());
+                    if let Ok(res) = res.extract::<bool>(py) {
+                        if res {
+                            break;
+                        }
+                    }
                 }
                 Err(e) => {
-                    event!(Level::ERROR, "Failed to call callback: {}", e)
-                    //event.abort = true;
-                    //event.error = Some(e.to_string());
+                    event!(
+                        Level::ERROR,
+                        "Failed to call callback: {}",
+                        get_traceback(&e, Some(py))
+                    );
+                    if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                        vcmp_func().shutdown();
+                        break;
+                    }
                 }
             }
         }
-        Ok(PyNone::get(py)
-            .downcast::<PyAny>()
-            .unwrap()
-            .clone()
-            .unbind())
+
+        if let Err(e) = py.check_signals() {
+            event!(
+                Level::ERROR,
+                "Failed to check signals: {}",
+                get_traceback(&e, Some(py))
+            );
+            if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                vcmp_func().shutdown();
+            }
+        }
+
+        Ok(result.unwrap_or(
+            PyNone::get(py)
+                .downcast::<PyAny>()
+                .unwrap()
+                .clone()
+                .unbind(),
+        ))
     }
 
     pub fn register_func(
@@ -156,10 +232,53 @@ impl PyCallbackManager {
             .unwrap()
         }
     }
+
+    pub fn get_py_event(&self, py: Python<'_>, event: VcmpEvent) -> Py<PyAny> {
+        match event {
+            VcmpEvent::ServerInitialise(event) => event.init(py),
+            VcmpEvent::ServerShutdown(event) => event.init(py),
+            VcmpEvent::ServerFrame(event) => event.init(py),
+            VcmpEvent::ServerPerformanceReport(event) => event.init(py),
+            VcmpEvent::IncomingConnection(event) => event.init(py),
+            VcmpEvent::ClientScriptData(event) => event.init(py),
+            VcmpEvent::PlayerConnect(event) => event.init(py),
+            VcmpEvent::PlayerDisconnect(event) => event.init(py),
+            VcmpEvent::PlayerRequestClass(event) => event.init(py),
+            VcmpEvent::PlayerSpawn(event) => event.init(py),
+            VcmpEvent::PlayerRequestSpawn(event) => event.init(py),
+            VcmpEvent::PlayerDeath(event) => event.init(py),
+            VcmpEvent::PlayerUpdate(event) => event.init(py),
+            VcmpEvent::PlayerRequestEnterVehicle(event) => event.init(py),
+            VcmpEvent::PlayerEnterVehicle(event) => event.init(py),
+            VcmpEvent::PlayerExitVehicle(event) => event.init(py),
+            VcmpEvent::PlayerNameChange(event) => event.init(py),
+            VcmpEvent::PlayerStateChange(event) => event.init(py),
+            VcmpEvent::PlayerActionChange(event) => event.init(py),
+            VcmpEvent::PlayerOnFireChange(event) => event.init(py),
+            VcmpEvent::PlayerCrouchChange(event) => event.init(py),
+            VcmpEvent::PlayerGameKeysChange(event) => event.init(py),
+            VcmpEvent::PlayerBeginTyping(event) => event.init(py),
+            VcmpEvent::PlayerEndTyping(event) => event.init(py),
+            VcmpEvent::PlayerAwayChange(event) => event.init(py),
+            VcmpEvent::PlayerMessage(event) => event.init(py),
+            VcmpEvent::PlayerCommand(event) => event.init(py),
+            VcmpEvent::PlayerPrivateMessage(event) => event.init(py),
+            VcmpEvent::PlayerKeyBindDown(event) => event.init(py),
+            VcmpEvent::PlayerKeyBindUp(event) => event.init(py),
+            VcmpEvent::PlayerSpectate(event) => event.init(py),
+            VcmpEvent::PlayerCrashReport(event) => event.init(py),
+            VcmpEvent::PlayerModuleList(event) => event.init(py),
+        }
+    }
 }
 
 #[pymethods]
 impl PyCallbackManager {
+    pub fn trigger(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
+        println!("{event:?}");
+        self.py_handle(py, event)
+    }
+
     #[pyo3(signature = (priority = 9999, func = None))]
     pub fn on_server_initialise(
         &self,
@@ -199,112 +318,6 @@ impl PyCallbackManager {
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerFrame, func, priority)
     }
-    // 续接现有代码...
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_plugin_command(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PluginCommand, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_entity_streaming(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::EntityStreaming, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_entity_pool(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::EntityPool, func, priority)
-    }
-
-    // 检查点事件
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_checkpoint_entered(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::CheckpointEntered, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_checkpoint_exited(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::CheckpointExited, func, priority)
-    }
-
-    // 对象事件
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_object_shot(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ObjectShot, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_object_touched(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ObjectTouched, func, priority)
-    }
-
-    // 拾取物事件
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_pickup_picked(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PickupPicked, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_pickup_pick_attempt(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PickupPickAttempt, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_pickup_respawn(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PickupRespawn, func, priority)
-    }
-
-    // 玩家事件
     #[pyo3(signature = (priority = 9999, func = None))]
     pub fn on_incoming_connection(
         &self,
@@ -594,37 +607,6 @@ impl PyCallbackManager {
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::PlayerModuleList, func, priority)
     }
-
-    // 载具事件
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_vehicle_update(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleUpdate, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_vehicle_explode(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleExplode, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_vehicle_respawn(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleRespawn, func, priority)
-    }
 }
 
 /// 全局的 callback 管理器
@@ -638,393 +620,40 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-// #[derive(Debug, Clone)]
-// pub struct CallbackFunctionParameter {
-//     pub name: String,
-//     pub annotations: Vec<Py<PyType>>,
-//     pub required: bool,
-//     pub default: Option<Py<PyAny>>,
-// }
-// #[pyclass]
-// #[pyo3(name = "Matcher")]
-// #[derive(Debug, Clone, Copy)]
-// pub struct Matcher {
-//     pub is_finished: bool,
-//     pub result: bool,
-// }
+pub mod callback_utils {
+    use std::sync::{Arc, LazyLock, Mutex, atomic::AtomicUsize};
+    #[derive(Debug, Clone, Default)]
+    pub struct PyGILRefCounter {
+        pub counter: Arc<Mutex<i32>>,
+    }
 
-// impl Default for Matcher {
-//     fn default() -> Self {
-//         Self {
-//             is_finished: false,
-//             result: true, // default
-//         }
-//     }
-// }
+    impl PyGILRefCounter {
+        pub fn increase(&self) -> i32 {
+            let mut counter = self.counter.lock().unwrap();
+            *counter += 1;
 
-// #[pymethods]
-// impl Matcher {
-//     #[pyo3(signature = (result = None))]
-//     pub fn finish(&mut self, py: Python<'_>, result: Option<Py<PyBool>>) -> PyResult<()> {
-//         // if result is None, then None
-//         // if result is not None, then convert to bool
-//         let res = {
-//             match result {
-//                 Some(result) => result.extract::<bool>(py).unwrap(),
-//                 None => true,
-//             }
-//         };
-//         self.is_finished = true;
-//         self.result = res;
+            *counter
+        }
 
-//         // 然后阻止 python 代码继续运行
-//         Err(PyErr::new::<FinishedException, _>("Finished exception"))
-//     }
+        pub fn decrease(&self) -> i32 {
+            let mut counter = self.counter.lock().unwrap();
+            *counter -= 1;
 
-//     #[getter]
-//     pub fn is_finished(&self) -> bool {
-//         self.is_finished
-//     }
+            *counter
+        }
 
-//     pub fn cancel(&mut self, py: Python<'_>) -> PyResult<()> {
-//         self.finish(py, Some(PyBool::new(py, false).into()))
-//     }
-// }
+        pub fn current(&self) -> i32 {
+            let counter = self.counter.lock().unwrap();
+            *counter
+        }
+    }
 
-// pub fn increase_event_id() -> u32 {
-//     EVENT_COUNTER.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
-// }
+    pub static PY_GIL_REF_COUNTER: LazyLock<PyGILRefCounter> =
+        LazyLock::new(|| PyGILRefCounter::default());
 
-// #[derive(Default)]
-// pub struct EventCallRefCounter {
-//     pub counter: Arc<Mutex<i32>>,
-// }
+    pub static EVENT_ID: AtomicUsize = AtomicUsize::new(0);
 
-// impl EventCallRefCounter {
-//     pub fn increase(&self) -> i32 {
-//         let mut counter = self.counter.lock().unwrap();
-//         *counter += 1;
-
-//         *counter
-//     }
-
-//     pub fn decrease(&self) -> i32 {
-//         let mut counter = self.counter.lock().unwrap();
-//         *counter -= 1;
-
-//         *counter
-//     }
-
-//     pub fn current(&self) -> i32 {
-//         let counter = self.counter.lock().unwrap();
-//         *counter
-//     }
-// }
-
-// pub static IS_CALLING: LazyLock<EventCallRefCounter> = LazyLock::new(EventCallRefCounter::default);
-
-// #[pyclass]
-// #[pyo3(name = "CallbackManager")]
-// #[derive(Debug, Clone, Copy, Default)]
-// pub struct CallbackManager;
-
-// impl CallbackManager {
-//     pub fn call_func<T>(&self, event: T, _kwargs: Option<Py<PyDict>>, failed_result: bool) -> bool
-//     where
-//         T: PyClass + crate::py::events::PyBaseEvent + Clone + std::fmt::Debug,
-//     {
-//         let current_id = increase_event_id();
-//         let current_ref = IS_CALLING.increase();
-//         if current_ref >= 2 {
-//             event!(
-//                 Level::ERROR,
-//                 "Too many callbacks are calling, current_ref: {current_ref}, {event:?}"
-//             );
-//             IS_CALLING.decrease();
-//             return failed_result;
-//         }
-//         event!(
-//             Level::DEBUG,
-//             "Calling callbacks for event: ({current_id}, current_ref: {current_ref}) {:?}",
-//             event
-//         );
-
-//         let callbacks = CALLBACKS_STORE.lock().unwrap();
-//         let mut matcher = Matcher::default();
-//         Python::with_gil(|py| {
-//             let py_matcher = Py::new(py, matcher).unwrap();
-//             let instance = event.init(py).expect("Failed to initialize event");
-//             for callback in callbacks.iter() {
-//                 //event!(Level::DEBUG, "Matching callback: {:?}", callback);
-//                 let origin_parameters = callback.params.clone();
-//                 let py_kwargs = PyDict::new(py);
-
-//                 let mut matched = true;
-
-//                 for param in origin_parameters {
-//                     let name = param.name.clone();
-//                     for annotation in param.annotations {
-//                         let annotation = annotation.bind(py);
-//                         if instance.bind(py).is_instance(annotation).unwrap() {
-//                             py_kwargs.set_item(name.clone(), instance.clone()).unwrap();
-//                             break;
-//                         }
-//                         if py_matcher.bind(py).is_instance(annotation).unwrap() {
-//                             py_kwargs
-//                                 .set_item(name.clone(), py_matcher.borrow_mut(py))
-//                                 .unwrap();
-//                             break;
-//                         }
-//                     }
-
-//                     if param.required && !py_kwargs.contains(name.clone()).unwrap() {
-//                         matched = false;
-//                         break;
-//                     } else if !py_kwargs.contains(name.clone()).unwrap() {
-//                         py_kwargs
-//                             .set_item(name.clone(), param.default.clone())
-//                             .unwrap();
-//                     }
-//                 }
-//                 if !matched {
-//                     continue;
-//                 }
-
-//                 event!(Level::DEBUG, "Matched callback: {:?} {:?}", callback, event);
-
-//                 match callback.func.call(py, (), Some(&py_kwargs)) {
-//                     Ok(res) => {
-//                         event!(Level::DEBUG, "Callback result: {:?}", &res);
-//                         // isinstance bool
-//                         let result = res.bind(py);
-//                         if let Ok(r) = result.downcast::<PyBool>() {
-//                             matcher.is_finished = true;
-//                             matcher.result = r.extract::<bool>().unwrap();
-//                         }
-//                     }
-//                     Err(e) => {
-//                         let traceback = get_traceback(&e, Some(py));
-//                         if e.is_instance_of::<PyKeyboardInterrupt>(py) {
-//                             event!(Level::DEBUG, traceback);
-//                             event!(Level::DEBUG, "KeyboardInterrupt");
-//                             vcmp_func().shutdown();
-//                             break;
-//                         }
-//                         event!(
-//                             Level::ERROR,
-//                             "Callback event: {event:?} error: {}",
-//                             traceback
-//                         );
-//                         //if e.is_instance_of::<PyKeyboardInterrupt>(py) {
-//                         //    vcmp_func().shutdown();
-//                         //    break;
-//                         //} else if e.is_instance_of::<FinishedException>(py) {
-//                         //    break;
-//                         //} else {
-//                         //    //event!(
-//                         //    //    Level::ERROR,
-//                         //    //    "Callback event: {event:?} error: {}",
-//                         //    //    get_traceback(e, Some(py))
-//                         //    //);
-//                         //}
-//                     }
-//                 };
-//                 if matcher.is_finished {
-//                     break;
-//                 }
-//             }
-
-//             if let Err(e) = py.check_signals() {
-//                 let traceback = get_traceback(&e, Some(py));
-//                 event!(Level::DEBUG, traceback);
-//                 vcmp_func().shutdown();
-//             }
-//         });
-//         event!(
-//             Level::DEBUG,
-//             "Finished calling callbacks for event: ({current_id}, current_ref: {current_ref}, global_ref: {}) {:?}",
-//             IS_CALLING.current(),
-//             event
-//         );
-//         IS_CALLING.decrease();
-//         matcher.result
-//     }
-// }
-
-// #[pymethods]
-// impl CallbackManager {
-//     //pub fn trigger(&self, py: Python<'_>, event: Py<BaseEvent>, kwargs: Option<Py<PyDict>>) -> bool {
-//     //    let event_bind = event.bind(py);
-//     //    let event_type = event_bind.get_type().;
-//     //
-//     //    false
-//     //}
-//     #[pyo3(signature = (priority = 9999))]
-//     pub fn on<'a>(
-//         &mut self,
-//         py: Python<'a>,
-//         priority: Option<i32>,
-//     ) -> PyResult<pyo3::Bound<'a, pyo3::types::PyCFunction>> {
-//         let priority = priority.unwrap_or(9999);
-//         // we need return a function that can be called with the arguments
-//         // and then call the callback with the arguments
-//         PyCFunction::new_closure(
-//             py,
-//             None,
-//             None,
-//             move |args, _kwargs| -> PyResult<Py<PyFunction>> {
-//                 let func = args
-//                     .get_item(0)
-//                     .unwrap()
-//                     .extract::<Py<PyFunction>>()
-//                     .unwrap();
-//                 let py_clone_func = func.clone();
-
-//                 let parameters = get_function_parameters(func.clone());
-
-//                 let callback = CallbackFunction {
-//                     func: py_clone_func,
-//                     priority,
-//                     params: parameters,
-//                 };
-//                 CALLBACKS_STORE.lock().unwrap().push(callback);
-//                 Ok(func)
-//             },
-//         )
-//     }
-// }
-
-// fn get_function_parameters(func: Py<PyFunction>) -> Vec<CallbackFunctionParameter> {
-//     let mut params = vec![];
-//     Python::with_gil(|py| {
-//         let py_inspect_module =
-//             PyModule::import(py, "inspect").expect("Failed to import inspect module");
-//         let py_getfullargspec_func = py_inspect_module
-//             .getattr("getfullargspec")
-//             .expect("Failed to get getfullargspec function");
-//         let py_getfullargspec = py_getfullargspec_func
-//             .call1((func,))
-//             .expect("Failed to call getfullargspec function");
-//         let py_args = py_getfullargspec
-//             .getattr("args")
-//             .unwrap()
-//             .extract::<Vec<String>>()
-//             .unwrap();
-//         let py_defaults: Vec<Bound<'_, PyAny>> = {
-//             let binding = py_getfullargspec.getattr("defaults").unwrap();
-//             if binding.is_none() {
-//                 vec![]
-//             } else {
-//                 let mut arr = Vec::new();
-//                 for ele in binding.downcast::<PyTuple>().unwrap() {
-//                     arr.push(ele);
-//                 }
-//                 arr
-//             }
-//         };
-//         let py_annontations = {
-//             let binding = py_getfullargspec.getattr("annotations").unwrap();
-//             let dict = binding.downcast::<PyDict>().unwrap();
-//             // 创建新的PyDict
-//             let result = PyDict::new(py);
-//             // 复制所有项
-//             for (k, v) in dict.iter() {
-//                 result.set_item(k, v).unwrap();
-//             }
-//             result
-//         };
-//         let offset = py_args.len() - py_defaults.len();
-//         //let mut args = Vec::new();
-//         for (i, arg) in py_args.iter().enumerate() {
-//             let annotations = {
-//                 let mut arr = Vec::new();
-//                 let binding = py_annontations.get_item(arg).unwrap().unwrap();
-//                 if !binding.is_none() {
-//                     if binding.hasattr("__origin__").unwrap()
-//                         && binding
-//                             .getattr("__origin__")
-//                             .unwrap()
-//                             .extract::<String>()
-//                             .unwrap()
-//                             == "Union"
-//                     {
-//                         let typing_module = PyModule::import(py, "typing").unwrap();
-//                         let typing_module_get_args = typing_module.getattr("get_args").unwrap();
-//                         let typing_module_get_args =
-//                             typing_module_get_args.call1((binding,)).unwrap();
-//                         let typing_module_get_args =
-//                             typing_module_get_args.downcast::<PyTuple>().unwrap();
-//                         for ele in typing_module_get_args {
-//                             arr.push(ele.downcast::<PyType>().unwrap().clone().unbind());
-//                         }
-//                     } else {
-//                         arr.push(binding.downcast::<PyType>().unwrap().clone().unbind());
-//                     }
-//                 }
-//                 arr
-//             };
-//             let required = i < offset;
-//             let default = if (i as i32) - (offset as i32) >= 0 {
-//                 Some(py_defaults[i - offset].clone().unbind())
-//             } else {
-//                 None
-//             };
-//             let param = CallbackFunctionParameter {
-//                 name: arg.clone(),
-//                 annotations: annotations.clone(),
-//                 required,
-//                 default,
-//             };
-//             params.push(param);
-//         }
-//         params
-//     })
-// }
-
-// static CALLBACKS_STORE: LazyLock<Arc<Mutex<Vec<CallbackFunction>>>> =
-//     LazyLock::new(|| Arc::new(Mutex::new(Vec::new())));
-
-// pub static CALLBACK: LazyLock<CallbackManager> = LazyLock::new(CallbackManager::default);
-
-// static EVENT_COUNTER: std::sync::atomic::AtomicU32 = std::sync::atomic::AtomicU32::new(0);
-
-// pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-//     m.add_class::<CallbackManager>()?;
-//     m.add_class::<Matcher>()?;
-//     m.add("callbacks", CALLBACK.into_pyobject(py)?)?;
-//     Ok(())
-// }
-
-// // ===
-
-// pub mod event_helper {
-//     use std::sync::{Arc, Mutex, atomic::AtomicU64};
-
-//     static EVENT_COUNTER: AtomicU64 = AtomicU64::new(0);
-
-//     #[derive(Default)]
-//     pub struct EventCallRefCounter {
-//         pub counter: Arc<Mutex<i32>>,
-//     }
-
-//     impl EventCallRefCounter {
-//         pub fn increase(&self) -> i32 {
-//             let mut counter = self.counter.lock().unwrap();
-//             *counter += 1;
-
-//             *counter
-//         }
-
-//         pub fn decrease(&self) -> i32 {
-//             let mut counter = self.counter.lock().unwrap();
-//             *counter -= 1;
-
-//             *counter
-//         }
-
-//         pub fn current(&self) -> i32 {
-//             let counter = self.counter.lock().unwrap();
-//             *counter
-//         }
-//     }
-// }
+    pub fn increase_event_id() -> usize {
+        EVENT_ID.fetch_add(1, std::sync::atomic::Ordering::SeqCst)
+    }
+}
