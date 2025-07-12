@@ -8,8 +8,12 @@ use pyo3::{
 use crate::py::fix_module_name;
 
 pub mod abc;
+pub mod checkpoint;
+pub mod object;
+pub mod pickup;
 pub mod player;
 pub mod server;
+pub mod vehicle;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum VcmpEventType {
@@ -179,15 +183,35 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     fix_module_name(py, &abc_module, "events.abc");
     m.add_submodule(&abc_module)?;
 
-    let server_module = PyModule::new(py, "server")?;
-    server::module_define(py, &server_module)?;
-    fix_module_name(py, &server_module, "events.server");
-    m.add_submodule(&server_module)?;
+    let checkpoint_module = PyModule::new(py, "checkpoint")?;
+    checkpoint::module_define(py, &checkpoint_module)?;
+    fix_module_name(py, &checkpoint_module, "events.checkpoint");
+    m.add_submodule(&checkpoint_module)?;
+
+    let object_module = PyModule::new(py, "object")?;
+    object::module_define(py, &object_module)?;
+    fix_module_name(py, &object_module, "events.object");
+    m.add_submodule(&object_module)?;
+
+    let pickup_module = PyModule::new(py, "pickup")?;
+    pickup::module_define(py, &pickup_module)?;
+    fix_module_name(py, &pickup_module, "events.pickup");
+    m.add_submodule(&pickup_module)?;
 
     let player_module = PyModule::new(py, "player")?;
     player::module_define(py, &player_module)?;
     fix_module_name(py, &player_module, "events.player");
     m.add_submodule(&player_module)?;
+
+    let server_module = PyModule::new(py, "server")?;
+    server::module_define(py, &server_module)?;
+    fix_module_name(py, &server_module, "events.server");
+    m.add_submodule(&server_module)?;
+
+    let vehicle_module = PyModule::new(py, "vehicle")?;
+    vehicle::module_define(py, &vehicle_module)?;
+    fix_module_name(py, &vehicle_module, "events.vehicle");
+    m.add_submodule(&vehicle_module)?;
 
     m.add_class::<PyVcmpEvent>()?;
 
