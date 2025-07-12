@@ -10,14 +10,15 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
+use crate::cfg::CONFIG;
+
 /// 用于持有 WorkerGuard, 让它别 Drop 了
 ///
 /// 非常好 生命周期, 使我烦死
 static LOG_FILE_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
 
-const MAX_LEVEL: Level = Level::INFO; // 硬编码最大日志级别
-
 pub fn init() {
+    let level = CONFIG.get().unwrap().info_level;
     // 创建按天轮换的文件 appender
     let file_appender = {
         RollingFileAppender::builder()
@@ -30,8 +31,8 @@ pub fn init() {
 
     let _ = LOG_FILE_GUARD.set(guard);
 
-    let file = non_blocking_file.with_max_level(MAX_LEVEL);
-    let stdio = std::io::stdout.with_max_level(MAX_LEVEL);
+    let file = non_blocking_file.with_max_level(level);
+    let stdio = std::io::stdout.with_max_level(level);
 
     let stdout_layer = fmt::layer()
         .with_writer(stdio)
@@ -40,11 +41,15 @@ pub fn init() {
 
     let file_layer = fmt::layer().with_writer(file).with_ansi(false);
 
-    // 初始化订阅者
+    // 初始化
     tracing_subscriber::registry()
         .with(stdout_layer)
         .with(file_layer)
         .init();
 
-    event!(Level::INFO, "tracing 日志设置完成");
+    event!(
+        Level::INFO,
+        "tracing 日志初始化完成，日志等级为 {:?}",
+        level
+    );
 }

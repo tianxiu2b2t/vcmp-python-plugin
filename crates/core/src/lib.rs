@@ -39,7 +39,8 @@ extern "C" fn VcmpPluginInit(
     plugin_callbacks: *mut PluginCallbacks,
     plugin_info: *mut PluginInfo,
 ) -> u32 {
-    // first logger init
+    init_config();
+
     logger::init();
 
     event!(Level::INFO, "loading vcmp-plugin-rs");
@@ -72,7 +73,6 @@ extern "C" fn VcmpPluginInit(
 
     event!(Level::DEBUG, "vcmp-plugin-rs info: {info:?}");
 
-    init_config();
     init_py();
 
     // struct size check
