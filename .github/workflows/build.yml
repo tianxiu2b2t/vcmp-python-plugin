@@ -23,23 +23,13 @@ jobs:
           toolchain: stable
       - run: cargo build --release
 
-      - name: Move Libraries to build (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          mv target/release/*.dll build/
-      - name: Move Libraries to build (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          mv target/release/*.so build/
-          
-
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: libraries_${{ matrix.os }}_${{ matrix.arch }}
           path: |
-            build/*.dll
-            build/*.so
+            target/release/*.dll
+            target/release/*.so
 
       - name: Save Artifact Names
         run: echo "artifact_name=libraries_${{ matrix.os }}_${{ matrix.arch }}" >> $GITHUB_ENV
