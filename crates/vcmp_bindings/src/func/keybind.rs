@@ -1,4 +1,4 @@
-use crate::{func::VcmpFunctions, utils::Keybind};
+use crate::{VcmpError, VcmpResult, func::VcmpFunctions, utils::Keybind};
 
 pub trait KeybindMethods {
     fn register_key_bind(
@@ -15,7 +15,7 @@ pub trait KeybindMethods {
 
     fn get_key_bind_unused_slot(&self) -> i32;
 
-    fn get_key_bind_data(&self, slot: i32) -> Keybind;
+    fn get_key_bind_data(&self, slot: i32) -> VcmpResult<Keybind>;
 }
 
 impl KeybindMethods for VcmpFunctions {
@@ -50,16 +50,19 @@ impl KeybindMethods for VcmpFunctions {
     fn get_key_bind_unused_slot(&self) -> i32 {
         (self.inner.GetKeyBindUnusedSlot)()
     }
-    fn get_key_bind_data(&self, slot: i32) -> Keybind {
+    fn get_key_bind_data(&self, slot: i32) -> VcmpResult<Keybind> {
         let (mut release, mut key, mut key2, mut key3) = (0_u8, 0, 0, 0);
-        (self.inner.GetKeyBindData)(slot, &mut release, &mut key, &mut key2, &mut key3);
-
-        Keybind {
-            slot,
-            can_release: release != 0,
-            key,
-            key2,
-            key3,
+        let code = (self.inner.GetKeyBindData)(slot, &mut release, &mut key, &mut key2, &mut key3);
+        if code != 0 {
+            Err(VcmpError::from(code))
+        } else {
+            Ok(Keybind {
+                slot,
+                can_release: release != 0,
+                key,
+                key2,
+                key3,
+            })
         }
     }
 }

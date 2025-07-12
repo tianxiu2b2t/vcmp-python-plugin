@@ -56,8 +56,8 @@ pub trait PlayerMethods {
 
     fn set_player_world(&self, player: i32, world: i32) -> VcmpResult<()>;
     fn get_player_world(&self, player: i32) -> i32;
-    fn set_player_select_world(&self, player: i32, world: i32) -> VcmpResult<()>;
-    fn get_player_select_world(&self, player: i32) -> i32;
+    fn set_player_secondary_world(&self, player: i32, world: i32) -> VcmpResult<()>;
+    fn get_player_secondary_world(&self, player: i32) -> i32;
     fn get_player_unique_world(&self, player: i32) -> i32;
     fn is_player_world_compatible(&self, player: i32, world: i32) -> bool;
     fn get_player_class(&self, player: i32) -> i32;
@@ -89,9 +89,9 @@ pub trait PlayerMethods {
     fn get_player_immunity(&self, player: i32) -> u32;
     fn set_player_position(&self, player: i32, position: Vectorf32) -> VcmpResult<()>;
     fn get_player_position(&self, player: i32) -> VcmpResult<Vectorf32>;
-    fn set_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
+    fn set_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()>;
     fn get_player_speed(&self, player: i32) -> VcmpResult<Vectorf32>;
-    fn add_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
+    fn add_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()>;
     fn set_player_angle(&self, player: i32, angle: f32) -> VcmpResult<()>;
     fn get_player_angle(&self, player: i32) -> f32;
     fn set_player_alpha(&self, player: i32, alpha: i32, fade_time: u32) -> VcmpResult<()>;
@@ -102,6 +102,7 @@ pub trait PlayerMethods {
     fn is_player_crouching(&self, player: i32) -> bool;
     fn get_player_action(&self, player: i32) -> i32;
     fn get_player_game_keys(&self, player: i32) -> u32;
+    fn get_player_in_vehicle_status(&self, player: i32) -> i32;
     fn put_player_in_vehicle(
         &self,
         player: i32,
@@ -249,19 +250,19 @@ impl PlayerMethods for VcmpFunctions {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerIP)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
     fn get_player_uid(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerUID)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
     fn get_player_uid2(&self, player: i32) -> String {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerUID2)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
     fn kick_player(&self, player: i32) {
         (self.inner.KickPlayer)(player);
@@ -285,7 +286,7 @@ impl PlayerMethods for VcmpFunctions {
         let buf = vec![0u8; 1024];
         let buf_ptr = buf.as_ptr() as *mut i8;
         let _ = (self.inner.GetPlayerName)(player, buf_ptr, 1024);
-        decode_gbk(&buf)
+        decode_gbk(&buf).trim_end_matches('\0').to_string()
     }
 
     fn set_player_name(&self, player: i32, name: &str) {
@@ -318,7 +319,7 @@ impl PlayerMethods for VcmpFunctions {
         (self.inner.GetPlayerWorld)(player)
     }
 
-    fn set_player_select_world(&self, player: i32, world: i32) -> VcmpResult<()> {
+    fn set_player_secondary_world(&self, player: i32, world: i32) -> VcmpResult<()> {
         let code = (self.inner.SetPlayerSecondaryWorld)(player, world);
         if code != 0 {
             Err(VcmpError::from(code))
@@ -327,7 +328,7 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn get_player_select_world(&self, player: i32) -> i32 {
+    fn get_player_secondary_world(&self, player: i32) -> i32 {
         (self.inner.GetPlayerSecondaryWorld)(player)
     }
 
@@ -528,8 +529,8 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn set_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
-        let code = (self.inner.SetPlayerSpeed)(player, x, y, z);
+    fn set_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()> {
+        let code = (self.inner.SetPlayerSpeed)(player, speed.x, speed.y, speed.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -549,8 +550,8 @@ impl PlayerMethods for VcmpFunctions {
         }
     }
 
-    fn add_player_speed(&self, player: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
-        let code = (self.inner.AddPlayerSpeed)(player, x, y, z);
+    fn add_player_speed(&self, player: i32, speed: Vectorf32) -> VcmpResult<()> {
+        let code = (self.inner.AddPlayerSpeed)(player, speed.x, speed.y, speed.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -648,10 +649,10 @@ impl PlayerMethods for VcmpFunctions {
             Ok(())
         }
     }
-    // TODO: GetPlayerInVehicleStatus
-    //fn get_player_in_vehicle_status(&self, player: i32) ->  {
-    //    (self.inner.GetPlayerInVehicleStatus)(player)
-    //}
+
+    fn get_player_in_vehicle_status(&self, player: i32) -> i32 {
+        (self.inner.GetPlayerInVehicleStatus)(player)
+    }
 
     fn get_player_in_vehicle_slot(&self, player: i32) -> i32 {
         (self.inner.GetPlayerInVehicleSlot)(player)

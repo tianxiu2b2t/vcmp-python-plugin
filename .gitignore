@@ -1,18 +1,21 @@
-build
+# vscode
 .lh
 .vscode
-converters
 **/__pycache__/
+
+# py tool 
+build
+
+# root 
+/*.py
+/*.nut
+start.bat
 plugins/
 logs/
 store/
 
 server64.exe
 server32.exe
-
-/*.py
-/*.nut
-start.bat
 
 server_log.txt
 server.cfg
@@ -22,12 +25,22 @@ server32.cfg
 announce.log
 announce.py
 
+# py pdm
 .pdm-python
 pdm.lock
+
+# tool
 tool/
 
-# build
+# py build
 *.egg-info
 
-target
+# test server
 server
+
+
+# cargo
+target
+
+# others
+converters

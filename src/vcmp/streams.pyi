@@ -1,3 +1,6 @@
+from typing import Optional
+
+
 class WriteStream:
     def __init__(self):
         ...
@@ -34,7 +37,7 @@ class WriteStream:
 
 
 class ReadStream:
-    def __init__(self, data):
+    def __init__(self, data: Optional[bytes]):
         ...
 
     def __repr__(self):

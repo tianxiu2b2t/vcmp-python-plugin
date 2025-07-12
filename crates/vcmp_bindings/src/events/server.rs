@@ -1,3 +1,10 @@
+#[derive(Debug, Clone)]
+pub struct ServerInitialiseEvent;
+
+#[derive(Debug, Clone)]
+pub struct ServerShutdownEvent;
+
+#[derive(Debug, Clone)]
 pub struct ServerFrameEvent {
     pub elapsed_time: f32,
 }
@@ -10,6 +17,7 @@ impl From<f32> for ServerFrameEvent {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct ServerPerformanceReportEvent {
     pub entry_count: usize,
     pub descriptions: Vec<String>,

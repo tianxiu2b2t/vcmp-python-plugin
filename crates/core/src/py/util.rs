@@ -1,6 +1,10 @@
 use pyo3::types::{PyDict, PyDictMethods, PyModuleMethods};
 use pyo3::{Bound, PyResult, Python, pyfunction, types::PyModule, wrap_pyfunction};
 
+use crate::functions::player::PlayerPy;
+use crate::pool::ENTITY_POOL;
+use crate::py::types::RGBPy;
+
 pub const SKINS: [(i32, &str); 193] = [
     (0, "Tommy Vercetti"),
     (1, "Cop"),
@@ -418,7 +422,7 @@ pub fn in_poly(x: f64, y: f64, polies: Vec<(f64, f64)>) -> bool {
 
             // Avoid division by zero for vertical lines
             let k = if dx.abs() < 1e-6 {
-                std::f64::INFINITY
+                f64::INFINITY
             } else {
                 dy / dx
             };
@@ -470,14 +474,44 @@ pub fn get_district_name(x: f64, y: f64) -> &'static str {
     }
 }
 
-/*
-    Const for python side
-*/
+#[pyfunction]
+pub fn get_players() -> Vec<PlayerPy> {
+    let pool = ENTITY_POOL.lock().unwrap();
+    pool.get_players()
+}
+
+#[pyfunction]
+pub fn announce_all(announce_type: i32, message: String) {
+    let pool = ENTITY_POOL.lock().unwrap();
+    for player in pool.get_players() {
+        player.announce(announce_type, &message.clone());
+    }
+}
+
+#[pyfunction]
+pub fn message_all(message: String) {
+    let pool = ENTITY_POOL.lock().unwrap();
+    for player in pool.get_players() {
+        player.message(&message.clone());
+    }
+}
+
+#[pyfunction]
+pub fn raw_message_all(color: RGBPy, message: String) {
+    let pool = ENTITY_POOL.lock().unwrap();
+    for player in pool.get_players() {
+        player.raw_message(color, &message.clone());
+    }
+}
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_district_name, m)?)?;
     m.add_function(wrap_pyfunction!(distance_from_point, m)?)?;
     m.add_function(wrap_pyfunction!(in_poly, m)?)?;
+    m.add_function(wrap_pyfunction!(get_players, m)?)?;
+    m.add_function(wrap_pyfunction!(announce_all, m)?)?;
+    m.add_function(wrap_pyfunction!(message_all, m)?)?;
+    m.add_function(wrap_pyfunction!(raw_message_all, m)?)?;
 
     let skin_dict = PyDict::new(py);
     SKINS.iter().for_each(|(k, v)| {

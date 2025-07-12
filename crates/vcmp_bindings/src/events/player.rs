@@ -1,41 +1,45 @@
-use std::{
-    ffi::{CString, c_char},
-    str::FromStr,
-};
+use std::ffi::c_char;
 
 use crate::{PlayerId, VehicleId};
 
 #[derive(Debug, Clone)]
 pub struct IncomingConnectionEvent {
-    player_name: String,
-    pub passowrd: String,
+    pub player_name: String,
+    pub password: String,
     pub ip: String,
-    name_ptr: *mut c_char,
-    name_buffer_len: usize,
+    //name_ptr: *mut c_char,
+    //name_buffer_len: usize,
 }
 
 impl IncomingConnectionEvent {
+    pub fn new(player_name: String, password: String, ip: String) -> Self {
+        Self {
+            player_name,
+            password,
+            ip,
+        }
+    }
     pub fn player_name(&self) -> &str {
         &self.player_name
     }
 
-    pub fn set_player_name(&mut self, name: String) -> bool {
-        let c_name = CString::from_str(&name).expect("invalid name");
-        let c_name_len = c_name.as_bytes().len();
-        if c_name_len > self.name_buffer_len {
-            return false;
-        }
-        // set 0 to name_ptr
-        unsafe {
-            std::ptr::write_bytes(self.name_ptr, 0, self.name_buffer_len);
-        }
-        // write name to name_ptr
-        unsafe {
-            std::ptr::copy_nonoverlapping(c_name.as_ptr(), self.name_ptr, c_name_len);
-        }
-        self.player_name = name;
-        true
-    }
+    //pub fn set_player_name(&mut self, name: String) -> bool {
+    //    let c_name = CString::from_str(&name).expect("invalid name");
+    //    let c_name_len = c_name.as_bytes().len();
+    //    if c_name_len > self.name_buffer_len {
+    //        return false;
+    //    }
+    //    // set 0 to name_ptr
+    //    unsafe {
+    //        std::ptr::write_bytes(self.name_ptr, 0, self.name_buffer_len);
+    //    }
+    //    // write name to name_ptr
+    //    unsafe {
+    //        std::ptr::copy_nonoverlapping(c_name.as_ptr(), self.name_ptr, c_name_len);
+    //    }
+    //    self.player_name = name;
+    //    true
+    //}
 }
 
 impl From<(*mut c_char, usize, *const c_char, *const c_char)> for IncomingConnectionEvent {
@@ -45,14 +49,14 @@ impl From<(*mut c_char, usize, *const c_char, *const c_char)> for IncomingConnec
                 player_name: std::ffi::CStr::from_ptr(value.0)
                     .to_string_lossy()
                     .to_string(),
-                passowrd: std::ffi::CStr::from_ptr(value.2)
+                password: std::ffi::CStr::from_ptr(value.2)
                     .to_string_lossy()
                     .to_string(),
                 ip: std::ffi::CStr::from_ptr(value.3)
                     .to_string_lossy()
                     .to_string(),
-                name_ptr: value.0,
-                name_buffer_len: value.1,
+                //name_ptr: value.0,
+                //name_buffer_len: value.1,
             }
         }
     }
@@ -128,11 +132,11 @@ impl From<i32> for PlayerSpawnEvent {
 }
 
 #[derive(Debug, Clone)]
-pub struct PlayerRequestSpawn {
+pub struct PlayerRequestSpawnEvent {
     pub player_id: PlayerId,
 }
 
-impl From<i32> for PlayerRequestSpawn {
+impl From<i32> for PlayerRequestSpawnEvent {
     fn from(value: i32) -> Self {
         Self { player_id: value }
     }
@@ -410,7 +414,7 @@ impl From<(i32, *const c_char)> for PlayerCommandEvent {
 #[derive(Debug, Clone)]
 pub struct PlayerPrivateMessageEvent {
     pub player_id: PlayerId,
-    pub target_player_id: PlayerId,
+    pub target_id: PlayerId,
     pub message: String,
 }
 
@@ -419,7 +423,7 @@ impl From<(i32, i32, *const c_char)> for PlayerPrivateMessageEvent {
         unsafe {
             Self {
                 player_id: value.0,
-                target_player_id: value.1,
+                target_id: value.1,
                 message: std::ffi::CStr::from_ptr(value.2)
                     .to_string_lossy()
                     .to_string(),
@@ -461,14 +465,14 @@ impl From<(i32, i32)> for PlayerKeyBindUpEvent {
 #[derive(Debug, Clone)]
 pub struct PlayerSpectateEvent {
     pub player_id: PlayerId,
-    pub target_player_id: PlayerId,
+    pub target_id: PlayerId,
 }
 
 impl From<(i32, i32)> for PlayerSpectateEvent {
     fn from(value: (i32, i32)) -> Self {
         Self {
             player_id: value.0,
-            target_player_id: value.1,
+            target_id: value.1,
         }
     }
 }

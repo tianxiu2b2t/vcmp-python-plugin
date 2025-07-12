@@ -1,17 +1,34 @@
 use std::ffi::CString;
 use std::path::Path;
+use std::sync::{LazyLock, Mutex};
 
-use pyo3::{Bound, Py, PyResult, Python, pymodule};
-
-use pyo3::types::{PyModule, PyModuleMethods};
+use pyo3::types::{PyModule, PyModuleMethods, PyTracebackMethods};
+use pyo3::{Bound, Py, PyErr, PyResult, Python, pyfunction, pymodule, wrap_pyfunction};
+use tracing::{Level, event};
 
 use crate::cfg::CONFIG;
 use crate::functions;
+use crate::functions::checkpoint::CheckPointPy;
+use crate::functions::marker::MarkerPy;
+use crate::functions::object::ObjectPy;
+use crate::functions::pickup::PickupPy;
+use crate::functions::player::PlayerPy;
+use crate::functions::vehicle::VehiclePy;
 
+pub mod callbacks;
 pub mod events;
+pub mod exceptions;
 pub mod streams;
 pub mod types;
 pub mod util;
+
+#[derive(Clone, Debug, Default)]
+pub struct GlobalVar {
+    pub need_reload: bool,
+}
+
+pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> =
+    LazyLock::new(|| Mutex::new(GlobalVar::default()));
 
 #[cfg(target_os = "linux")]
 fn get_wchar_t(content: &str) -> Vec<i32> {
@@ -36,19 +53,55 @@ fn get_wchar_t(content: &str) -> Vec<u16> {
 fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     let util_module = PyModule::new(py, "util")?;
     util::module_define(py, &util_module)?;
+    fix_module_name(py, &util_module, "util");
     m.add_submodule(&util_module)?;
 
     let streams_module = PyModule::new(py, "streams")?;
     streams::module_define(py, &streams_module)?;
+    fix_module_name(py, &streams_module, "streams");
     m.add_submodule(&streams_module)?;
 
     let types_module = PyModule::new(py, "types")?;
     types::module_define(py, &types_module)?;
+    fix_module_name(py, &types_module, "types");
     m.add_submodule(&types_module)?;
 
     let funcs_module = PyModule::new(py, "functions")?;
     functions::module_define(py, &funcs_module)?;
+    fix_module_name(py, &funcs_module, "functions");
     m.add_submodule(&funcs_module)?;
+
+    let callbacks_module = PyModule::new(py, "callback")?;
+    callbacks::module_define(py, &callbacks_module)?;
+    fix_module_name(py, &callbacks_module, "callback");
+    m.add_submodule(&callbacks_module)?;
+
+    {
+        let events_module = PyModule::new(py, "events")?;
+        events::module_define(py, &events_module)?;
+        fix_module_name(py, &events_module, "events");
+        m.add_submodule(&events_module)?;
+    }
+
+    let exceptions_module = PyModule::new(py, "exceptions")?;
+    exceptions::module_define(py, &exceptions_module)?;
+    fix_module_name(py, &exceptions_module, "exceptions");
+    m.add_submodule(&exceptions_module)?;
+
+    {
+        // import instance from player, ...
+        let instance_module = PyModule::new(py, "instance")?;
+        instance_module.add_class::<PlayerPy>()?;
+        instance_module.add_class::<VehiclePy>()?;
+        instance_module.add_class::<CheckPointPy>()?;
+        instance_module.add_class::<ObjectPy>()?;
+        instance_module.add_class::<PickupPy>()?;
+        instance_module.add_class::<MarkerPy>()?;
+        fix_module_name(py, &instance_module, "instance");
+        m.add_submodule(&instance_module)?;
+    }
+
+    m.add_function(wrap_pyfunction!(reload, m)?)?;
 
     Ok(())
 }
@@ -68,6 +121,14 @@ pub fn init_py_module() {
             Some(register_module::__pyo3_init),
         );
     }
+}
+
+pub fn fix_module_name(py: Python<'_>, module: &Bound<'_, PyModule>, name: &str) {
+    pyo3::py_run!(
+        py,
+        module,
+        format!("import sys; sys.modules['vcmp.{name}'] = module").as_str()
+    );
 }
 
 pub fn init_py() {
@@ -102,10 +163,10 @@ pub fn init_py() {
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
 
-        println!("Status: {}", pyo3::ffi::Py_IsInitialized());
-    };
+        event!(Level::INFO, "Status: {}", pyo3::ffi::Py_IsInitialized());
+    }
 
-    println!("Python init");
+    event!(Level::INFO, "Python init done");
 
     if CONFIG.get().unwrap().preloader {
         load_script_as_module();
@@ -116,9 +177,9 @@ pub fn load_script_as_module() {
     let script_path = CONFIG.get().unwrap().script_path.as_str();
     let res = raw_load_script_as_module(Path::new(script_path));
     if let Err(e) = res {
-        println!("Error: {e}");
+        event!(Level::ERROR, "Error: {}", get_traceback(&e, None));
     } else {
-        println!("Script loaded");
+        event!(Level::INFO, "Script loaded");
     }
 }
 
@@ -156,7 +217,7 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
             b'\\' => result.push_str("\\\\"),
             b'\'' => result.push_str("\\'"),
             b'"' => result.push_str("\\\""),
-            b'\0' => result.push_str("\\0"),
+            b'\0' => result.push_str("\\x00"),
             // 可打印ASCII字符（32-126）
             32..=126 => result.push(byte as char),
             // 其他字节用十六进制表示
@@ -166,4 +227,31 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
 
     result.push('\'');
     result
+}
+
+/// 重新加载？
+///
+#[pyfunction]
+pub fn reload() -> PyResult<()> {
+    let mut var = GLOBAL_VAR.lock().unwrap();
+    var.need_reload = true;
+    Ok(())
+}
+
+/// 获取 python 错误信息
+///
+/// 可以提供一个 gil 来减少 gil 获取次数
+pub fn get_traceback(py_err: &PyErr, py: Option<Python<'_>>) -> String {
+    let traceback = match py {
+        Some(py) => match py_err.traceback(py) {
+            Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
+            None => "Traceback (most recent call last):\n  (Rust) Code".to_string(),
+        },
+        None => Python::with_gil(|py| match py_err.traceback(py) {
+            Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
+            None => "Traceback (most recent call last):\n  (Rust) Code".to_string(),
+        }),
+    };
+
+    format!("{traceback}{py_err}")
 }

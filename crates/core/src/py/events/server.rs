@@ -1,0 +1,161 @@
+use pyo3::{
+    Bound, Py, PyAny, PyClassInitializer, PyResult, Python, pyclass, pymethods,
+    types::{PyModule, PyModuleMethods},
+};
+use vcmp_bindings::events::server;
+
+use crate::py::events::abc::{BaseEvent, PyEvent};
+
+#[derive(Debug, Clone)]
+#[pyclass(extends=BaseEvent, subclass)]
+pub struct ServerEvent {}
+impl ServerEvent {
+    pub fn new() -> (Self, BaseEvent) {
+        (Self {}, BaseEvent::default())
+    }
+}
+impl PyEvent for ServerEvent {
+    fn event_name(&self) -> String {
+        "ServerEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[pyclass(extends=ServerEvent, subclass)]
+pub struct ServerInitialiseEvent {}
+impl PyEvent for ServerInitialiseEvent {
+    fn event_name(&self) -> String {
+        "ServerInitialiseEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone, Default)]
+#[pyclass(extends=ServerEvent, subclass)]
+pub struct ServerShutdownEvent {}
+impl PyEvent for ServerShutdownEvent {
+    fn event_name(&self) -> String {
+        "ServerShutdownEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone)]
+#[pyclass(extends=ServerEvent, subclass)]
+pub struct ServerFrameEvent {
+    pub inner: server::ServerFrameEvent,
+}
+#[pymethods]
+impl ServerFrameEvent {
+    #[getter]
+    fn elapsed_time(&self) -> f32 {
+        self.inner.elapsed_time
+    }
+    fn __repr__(&self) -> String {
+        format!("ServerFrameEvent(elapsed_time={})", self.elapsed_time())
+    }
+}
+impl From<server::ServerFrameEvent> for ServerFrameEvent {
+    fn from(event: server::ServerFrameEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for ServerFrameEvent {
+    fn event_name(&self) -> String {
+        "ServerFrameEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+#[derive(Debug, Clone)]
+#[pyclass(extends=ServerEvent, subclass)]
+pub struct ServerPerformanceReportEvent {
+    pub inner: server::ServerPerformanceReportEvent,
+}
+#[pymethods]
+impl ServerPerformanceReportEvent {
+    #[getter]
+    fn descriptions(&self) -> Vec<String> {
+        self.inner.descriptions.clone()
+    }
+
+    #[getter]
+    fn times(&self) -> Vec<u64> {
+        self.inner.times.clone()
+    }
+
+    #[getter]
+    fn entry_count(&self) -> usize {
+        self.inner.entry_count
+    }
+
+    fn __repr__(&self) -> String {
+        format!(
+            "ServerPerformanceReportEvent(descriptions={:?}, times={:?}, entry_count={})",
+            self.descriptions(),
+            self.times(),
+            self.entry_count()
+        )
+    }
+}
+impl From<server::ServerPerformanceReportEvent> for ServerPerformanceReportEvent {
+    fn from(event: server::ServerPerformanceReportEvent) -> Self {
+        Self { inner: event }
+    }
+}
+impl PyEvent for ServerPerformanceReportEvent {
+    fn event_name(&self) -> String {
+        "ServerPerformanceReportEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
+pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<ServerEvent>()?;
+    m.add_class::<ServerInitialiseEvent>()?;
+    m.add_class::<ServerShutdownEvent>()?;
+    m.add_class::<ServerFrameEvent>()?;
+    m.add_class::<ServerPerformanceReportEvent>()?;
+    Ok(())
+}

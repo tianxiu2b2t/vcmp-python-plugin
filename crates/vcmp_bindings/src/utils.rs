@@ -5,6 +5,7 @@ use crate::{MarkerId, types::WorldId};
 /*
     Color 类
 */
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Color {
     pub r: u8,
     pub g: u8,
@@ -58,10 +59,21 @@ impl Display for Color {
     }
 }
 
+impl Default for Color {
+    fn default() -> Self {
+        Self {
+            r: 255,
+            g: 255,
+            b: 255,
+            a: 255,
+        }
+    }
+}
+
 /*
     Vector 类
 */
-
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Vectorf32 {
     pub x: f32,
     pub y: f32,
@@ -83,6 +95,22 @@ impl Vectorf32 {
     }
 }
 
+impl From<(f32, f32, f32)> for Vectorf32 {
+    fn from(value: (f32, f32, f32)) -> Self {
+        Self {
+            x: value.0,
+            y: value.1,
+            z: value.2,
+        }
+    }
+}
+
+impl Default for Vectorf32 {
+    fn default() -> Self {
+        Self::new(0.0, 0.0, 0.0)
+    }
+}
+
 impl Display for Vectorf32 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Vector(x={}, y={}, z={})", self.x, self.y, self.z)
@@ -93,6 +121,7 @@ impl Display for Vectorf32 {
     Quaternion 类
 */
 
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct Quaternionf32 {
     pub x: f32,
     pub y: f32,
@@ -113,6 +142,12 @@ impl Display for Quaternionf32 {
             "Quaternion(x={}, y={}, z={}, w={})",
             self.x, self.y, self.z, self.w
         )
+    }
+}
+
+impl Default for Quaternionf32 {
+    fn default() -> Self {
+        Self::new(0.0, 0.0, 0.0, 0.0)
     }
 }
 
@@ -151,7 +186,7 @@ impl Display for WorldBounds {
 /*
     Wasted Settings
 */
-
+#[derive(Clone, Copy, Debug)]
 pub struct WastedSettings {
     pub death_timer: u32,
     pub fade_timer: u32,

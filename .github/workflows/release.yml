@@ -24,52 +24,21 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install CMake
-        uses: ssrobins/install-cmake@v1
+      - uses: actions-rs/toolchain@v1
         with:
-          version: 4.0.1
-
-      - name: Clone Dependencies
-        run: |
-          git clone https://github.com/pybind/pybind11.git
-
-      - name: Configure CMake (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          if [ "$ARCH" = "x64" ]; then
-            cmake -G "Visual Studio 17 2022" -A x64 -S . -B build -DCMAKE_BUILD_TYPE=Release
-          else
-            cmake -G "Visual Studio 17 2022" -A Win32 -S . -B build -DCMAKE_BUILD_TYPE=Release
-          fi
-        shell: bash
-        env:
-          ARCH: ${{ matrix.arch }}
-
-      - name: Configure CMake (Linux)
-        if: runner.os == 'Linux'
-        run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-          strings /usr/lib/x86_64-linux-gnu/libstdc++.so.6 | grep GLIBCXX
-          strings /lib/x86_64-linux-gnu/libc.so.6 | grep GLIBC
-
-      - name: Build with CMake
-        run: cmake --build build --config Release
-
-      - name: Move DLLs to build (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          mv build/Release/*.dll build/
+          toolchain: stable
+      - run: cargo build --release
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
+          name: libraries_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
           path: |
-            build/*.dll
-            build/*.so
+            target/release/*.dll
+            target/release/*.so
 
       - name: Save Artifact Names
-        run: echo "artifact_name=DLLs_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
+        run: echo "artifact_name=libraries_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
 
   release_and_publish:
     # 发布到 GitHub Release 和 PyPI

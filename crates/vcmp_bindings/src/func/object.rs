@@ -1,10 +1,13 @@
 use crate::{
     PlayerId, VcmpError, VcmpResult,
     func::VcmpFunctions,
+    options::VcmpEntityPool,
     utils::{Quaternionf32, Vectorf32},
 };
 
 pub trait ObjectMethods {
+    fn is_object_alive(&self, object_id: i32) -> bool;
+
     fn create_object(&self, model_index: i32, world: i32, position: Vectorf32, alpha: i32) -> i32;
 
     fn delete_object(&self, object_id: i32) -> VcmpResult<()>;
@@ -21,25 +24,11 @@ pub trait ObjectMethods {
 
     fn get_object_alpha(&self, object_id: i32) -> i32;
 
-    fn move_object_to(
-        &self,
-        object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
-        duration: u32,
-    ) -> VcmpResult<()>;
+    fn move_object_to(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()>;
 
-    fn move_object_by(
-        &self,
-        object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
-        duration: u32,
-    ) -> VcmpResult<()>;
+    fn move_object_by(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()>;
 
-    fn set_object_position(&self, object_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()>;
+    fn set_object_position(&self, object_id: i32, position: Vectorf32) -> VcmpResult<()>;
 
     fn get_object_position(&self, object_id: i32) -> VcmpResult<Vectorf32>;
 
@@ -85,6 +74,10 @@ pub trait ObjectMethods {
 }
 
 impl ObjectMethods for VcmpFunctions {
+    fn is_object_alive(&self, object_id: i32) -> bool {
+        (self.inner.CheckEntityExists)(VcmpEntityPool::Object.into(), object_id) != 0
+    }
+
     fn create_object(&self, model_index: i32, world: i32, position: Vectorf32, alpha: i32) -> i32 {
         (self.inner.CreateObject)(
             model_index,
@@ -139,15 +132,9 @@ impl ObjectMethods for VcmpFunctions {
         (self.inner.GetObjectAlpha)(object_id)
     }
 
-    fn move_object_to(
-        &self,
-        object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
-        duration: u32,
-    ) -> VcmpResult<()> {
-        let code = (self.inner.MoveObjectTo)(object_id, x, y, z, duration);
+    fn move_object_to(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()> {
+        let code =
+            (self.inner.MoveObjectTo)(object_id, position.x, position.y, position.z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -155,15 +142,9 @@ impl ObjectMethods for VcmpFunctions {
         }
     }
 
-    fn move_object_by(
-        &self,
-        object_id: i32,
-        x: f32,
-        y: f32,
-        z: f32,
-        duration: u32,
-    ) -> VcmpResult<()> {
-        let code = (self.inner.MoveObjectBy)(object_id, x, y, z, duration);
+    fn move_object_by(&self, object_id: i32, position: Vectorf32, duration: u32) -> VcmpResult<()> {
+        let code =
+            (self.inner.MoveObjectBy)(object_id, position.x, position.y, position.z, duration);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
@@ -171,8 +152,8 @@ impl ObjectMethods for VcmpFunctions {
         }
     }
 
-    fn set_object_position(&self, object_id: i32, x: f32, y: f32, z: f32) -> VcmpResult<()> {
-        let code = (self.inner.SetObjectPosition)(object_id, x, y, z);
+    fn set_object_position(&self, object_id: i32, position: Vectorf32) -> VcmpResult<()> {
+        let code = (self.inner.SetObjectPosition)(object_id, position.x, position.y, position.z);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {

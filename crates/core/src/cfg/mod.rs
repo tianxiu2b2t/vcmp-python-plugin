@@ -1,8 +1,11 @@
 use std::{
     fmt::{Display, Formatter},
     path::Path,
+    str::FromStr,
     sync::OnceLock,
 };
+
+use tracing::{Level, event};
 
 pub mod cli_env;
 
@@ -11,7 +14,13 @@ pub struct Config {
     pub preloader: bool,     // 直接在 VcmpPluginInit 时候加载
     pub script_path: String, // 脚本路径
     pub virtual_env: String, // 虚拟环境路径 (建议是包)
-    pub debug: bool,         // 是否调试
+    pub info_level: Level,   // 日志等级
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl Config {
@@ -20,7 +29,7 @@ impl Config {
             preloader: false,
             script_path: "".to_string(),
             virtual_env: "".to_string(),
-            debug: false,
+            info_level: Level::INFO,
         }
     }
 
@@ -35,8 +44,8 @@ impl Config {
     pub fn set_virtual_env(&mut self, virtual_env: String) {
         self.virtual_env = virtual_env;
     }
-    pub fn set_debug(&mut self, debug: bool) {
-        self.debug = debug;
+    pub fn set_info_level(&mut self, info_level: Level) {
+        self.info_level = info_level;
     }
 }
 
@@ -48,13 +57,10 @@ impl Display for Config {
             preloader: {},
             script_path: "{}",
             virtual_env: {:?},
-            debug: {}
+            info_level: {:?},
         }}
         "#,
-            self.preloader,
-            self.script_path,
-            self.virtual_env.clone(),
-            self.debug
+            self.preloader, self.script_path, self.virtual_env, self.info_level
         )
     }
 }
@@ -87,22 +93,23 @@ fn init_config_from_cfg() -> Option<Config> {
         value
     };
 
-    config.debug = find_value("python_debug").parse().unwrap_or(false);
     config.preloader = find_value("python_preloader").parse().unwrap_or(false);
     config.script_path = find_value("python_script_path").to_string();
     config.virtual_env = find_value("python_virtual_env").to_string();
+    config.info_level =
+        Level::from_str(find_value("python_info_level").as_str()).unwrap_or(Level::INFO);
 
     Some(config)
 }
 
 fn init_config_from_toml() -> Option<Config> {
-    return None;
+    None
 }
 
 pub fn init_config() {
     CONFIG.get_or_init(|| {
-        init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or(Config::new()))
+        init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or_default())
     });
 
-    println!("{}", CONFIG.get().unwrap());
+    event!(Level::DEBUG, "{}", CONFIG.get().unwrap());
 }

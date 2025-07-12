@@ -1,25 +1,30 @@
 use crate::func::VcmpFunctions;
+use crate::options::VcmpEntityPool;
 use crate::utils::{Color, Marker, Vectorf32};
 
 pub trait MarkerMethods {
     fn create_marker(
         &self,
         world: i32,
-        pos: (f32, f32, f32),
+        pos: Vectorf32,
         scale: i32,
         color: Color,
         sprite: i32,
         index: Option<i32>,
     ) -> i32;
     fn destory_marker(&self, marker: i32);
+    fn is_marker_alive(&self, marker: i32) -> bool;
     fn get_marker_info(&self, marker: i32) -> Marker;
 }
 
 impl MarkerMethods for VcmpFunctions {
+    fn is_marker_alive(&self, marker: i32) -> bool {
+        (self.inner.CheckEntityExists)(VcmpEntityPool::Marker.into(), marker) != 0
+    }
     fn create_marker(
         &self,
         world: i32,
-        pos: (f32, f32, f32),
+        pos: Vectorf32,
         scale: i32,
         color: Color,
         sprite: i32,
@@ -29,9 +34,9 @@ impl MarkerMethods for VcmpFunctions {
         (self.inner.CreateCoordBlip)(
             idx,
             world,
-            pos.0,
-            pos.1,
-            pos.2,
+            pos.x,
+            pos.y,
+            pos.z,
             scale,
             color.as_rgba(),
             sprite,
