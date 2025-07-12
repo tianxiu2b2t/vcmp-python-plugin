@@ -67,7 +67,7 @@ jobs:
       - name: Move downloaded DLLs to libraries folder and clean empty folders
         run: |
           mkdir -p libraries
-              
+
           # 处理 Windows DLL 文件
           for file in dl_libraries/**/*.dll; do
             if [[ $file =~ libraries_windows-latest_x64_([0-9]+)\.([0-9]+) ]]; then
@@ -78,10 +78,10 @@ jobs:
               cp "$file" "libraries/$new_name"
             fi
           done
-              
+
           # 处理 Linux SO 文件
           for file in dl_libraries/**/*.so; do
-            if [[ $file =~ libraries_linux-latest_x64_([0-9]+)\.([0-9]+) ]]; then
+            if [[ $file =~ libraries_ubuntu-22.04_x64_([0-9]+)\.([0-9]+) ]]; then
               major="${BASH_REMATCH[1]}"
               minor="${BASH_REMATCH[2]}"
               version="${major}${minor}"
@@ -89,7 +89,7 @@ jobs:
               cp "$file" "libraries/$new_name"
             fi
           done
-              
+
           # 清理下载目录
           rm -rf dl_libraries
         
