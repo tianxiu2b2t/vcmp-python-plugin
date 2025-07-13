@@ -976,6 +976,18 @@ impl Version {
     fn value(&self) -> i32 {
         (*self).into()
     }
+
+    fn __repr__(&self) -> String {
+        match self {
+            Version::v04rel002() => "04rel002".to_string(),
+            Version::v04rel003() => "04rel003".to_string(),
+            Version::v04rel004() => "04rel004".to_string(),
+            Version::v04rel006() => "04rel006".to_string(),
+            Version::v0_4_7_0() => "0.4.7.0".to_string(),
+            Version::v0_4_7_1() => "0.4.7.1".to_string(),
+            Version::Unknown(x) => format!("Version({})", x),
+        }
+    }
 }
 
 impl From<i32> for Version {
