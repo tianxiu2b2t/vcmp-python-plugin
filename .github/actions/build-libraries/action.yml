@@ -17,6 +17,9 @@ runs:
   steps:
     - name: Setup Environment
       uses: ./.github/actions/setup-environment
+      with:
+        python-version: ${{ inputs.python-version }}
+        
     - run: cargo build --release
       shell: bash
 
