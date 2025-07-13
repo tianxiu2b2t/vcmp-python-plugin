@@ -1,10 +1,9 @@
-name: Build and Upload DLL & Create tagged release and publish to PyPI
+name: Release and Publish
 
 on:
   push:
     tags:
       - v*
-  workflow_dispatch:
 
 jobs:
   build_and_upload:

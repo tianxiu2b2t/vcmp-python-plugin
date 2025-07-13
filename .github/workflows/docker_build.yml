@@ -1,5 +1,5 @@
 
-name: Docker build
+name: Docker Build Preview
 
 on:
   push: 
