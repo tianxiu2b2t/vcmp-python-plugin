@@ -1,5 +1,5 @@
-name: Setup Python
-description: Setup Python
+name: Setup Python & Cargo
+description: Setup Python & Cargo
 
 inputs:
   python-version:
@@ -10,9 +10,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
     - uses: pdm-project/setup-pdm@v4
       name: Setup PDM
       with:
@@ -26,7 +23,7 @@ runs:
         python-version: ${{ inputs.python-version }}
         architecture: "x64"
         cache: true
-      
-    # echo python version
-    - name: Echo Python Version
-      run: "echo \"Python version: ${{ env.PYTHON_VERSION }}\""
+
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable

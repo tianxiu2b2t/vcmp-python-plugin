@@ -1,0 +1,30 @@
+name: Build Libraries
+description: Setup Python
+
+inputs:
+  os:
+    description: OS Version
+    required: true
+
+  python-version:
+    description: Python version
+    required: false
+    default: "3.10"
+  
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/setup-environment
+    - run: cargo build --release
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: libraries_${{ inputs.os }}_x64_${{ inputs.python-version }}
+        path: |
+          target/release/*.dll
+          target/release/*.so
+
+    - name: Save Artifact Names
+      run: echo "artifact_name=libraries_${{ inputs.os }}_x64_${{ inputs.python-version }}" >> $GITHUB_ENV
