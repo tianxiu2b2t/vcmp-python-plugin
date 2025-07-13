@@ -18,7 +18,7 @@ use crate::cfg::CONFIG;
 static LOG_FILE_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
 
 pub fn init() {
-    let level = CONFIG.get().unwrap().info_level;
+    let level = CONFIG.get().unwrap().log_level;
     // 创建按天轮换的文件 appender
     let file_appender = {
         RollingFileAppender::builder()

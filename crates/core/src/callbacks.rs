@@ -540,11 +540,8 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
             let current_health = vcmp_func().get_vehicle_health(vehicle_id);
             let last_health = vehicle.last_health;
             if current_health != last_health {
-                let event = VehicleHealthChangeEvent::from((
-                    vehicle_id,
-                    last_health,
-                    current_health,
-                ));
+                let event =
+                    VehicleHealthChangeEvent::from((vehicle_id, last_health, current_health));
                 let health_res =
                     PY_CALLBACK_MANAGER.handle(VcmpEvent::VehicleHealthChange(event), true);
                 if !health_res {
@@ -565,7 +562,11 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                 ));
                 let move_res = PY_CALLBACK_MANAGER.handle(VcmpEvent::VehicleMove(event), true);
                 if !move_res {
-                    let _ = vcmp_func().set_vehicle_position(vehicle_id, event.current_position.into(), Some(false));
+                    let _ = vcmp_func().set_vehicle_position(
+                        vehicle_id,
+                        event.current_position.into(),
+                        Some(false),
+                    );
                 }
                 vehicle.last_pos = event.current_position.get_entity_pos();
             }

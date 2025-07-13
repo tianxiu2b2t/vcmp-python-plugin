@@ -78,7 +78,7 @@ pub struct PyCallbackManager {}
 
 impl PyCallbackManager {
     pub fn handle(&self, event: VcmpEvent, abortable: bool) -> bool {
-        event!(Level::DEBUG, "Handling event: {:?}", event);
+        event!(Level::TRACE, "Handling event: {:?}", event);
         let event_id = callback_utils::increase_event_id();
         event!(
             Level::TRACE,
@@ -792,12 +792,7 @@ impl PyCallbackManager {
     }
 
     #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_custom(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
+    pub fn on_custom(&self, py: Python<'_>, priority: u16, func: Option<Py<PyAny>>) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::Custom, func, priority)
     }
 }

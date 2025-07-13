@@ -1,4 +1,7 @@
-use std::{fmt::Debug, ops::{Add, Sub, Mul, Div}};
+use std::{
+    fmt::Debug,
+    ops::{Add, Div, Mul, Sub},
+};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,

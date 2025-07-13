@@ -5,16 +5,22 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use crate::{functions::{checkpoint::CheckPointPy, object::ObjectPy, pickup::PickupPy, player::PlayerPy, vehicle::VehiclePy}, py::{fix_module_name, types::VectorPy}};
+use crate::{
+    functions::{
+        checkpoint::CheckPointPy, object::ObjectPy, pickup::PickupPy, player::PlayerPy,
+        vehicle::VehiclePy,
+    },
+    py::{fix_module_name, types::VectorPy},
+};
 
 pub mod abc;
 pub mod checkpoint;
+pub mod custom;
 pub mod object;
 pub mod pickup;
 pub mod player;
 pub mod server;
 pub mod vehicle;
-pub mod custom;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum VcmpEventType {
@@ -85,7 +91,7 @@ pub enum VcmpEventType {
     VehicleHealthChange,
 
     // Custom
-    Custom
+    Custom,
 }
 
 #[derive(Debug, Clone)]
@@ -279,14 +285,18 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn server_frame(elapsed_time: f32) -> Self {
-        Self::new(VcmpEvent::ServerFrame(
-            server::ServerFrameEvent::new(elapsed_time),
-        ))
+        Self::new(VcmpEvent::ServerFrame(server::ServerFrameEvent::new(
+            elapsed_time,
+        )))
     }
 
     #[staticmethod]
     #[pyo3(signature = (descriptions, times, entry_count = None))]
-    fn server_performance_report(descriptions: Vec<String>, times: Vec<u64>, entry_count: Option<usize>) -> Self {
+    fn server_performance_report(
+        descriptions: Vec<String>,
+        times: Vec<u64>,
+        entry_count: Option<usize>,
+    ) -> Self {
         let count = entry_count.unwrap_or(std::cmp::max(descriptions.len(), times.len()));
         // fill descriptions and times with empty strings and 0s respectively
         let mut descriptions = descriptions;
@@ -305,7 +315,7 @@ impl PyVcmpEvent {
             checkpoint::CheckpointEnteredEvent::new(checkpoint, player),
         ))
     }
-    
+
     #[staticmethod]
     fn checkpoint_exited(checkpoint: CheckPointPy, player: PlayerPy) -> Self {
         Self::new(VcmpEvent::CheckpointExited(
@@ -315,18 +325,18 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn object_shot(object: ObjectPy, player: PlayerPy, weapon_id: i32) -> Self {
-        Self::new(VcmpEvent::ObjectShot(
-            object::ObjectShotEvent::new(object, player, weapon_id),
-        ))
+        Self::new(VcmpEvent::ObjectShot(object::ObjectShotEvent::new(
+            object, player, weapon_id,
+        )))
     }
-    
+
     #[staticmethod]
     fn object_touched(object: ObjectPy, player: PlayerPy) -> Self {
-        Self::new(VcmpEvent::ObjectTouched(
-            object::ObjectTouchedEvent::new(object, player),
-        ))
+        Self::new(VcmpEvent::ObjectTouched(object::ObjectTouchedEvent::new(
+            object, player,
+        )))
     }
-    
+
     #[staticmethod]
     fn pickup_pick_attempt(pickup: PickupPy, player: PlayerPy) -> Self {
         Self::new(VcmpEvent::PickupPickAttempt(
@@ -336,19 +346,19 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn pickup_picked(pickup: PickupPy, player: PlayerPy) -> Self {
-        Self::new(VcmpEvent::PickupPicked(
-            pickup::PickupPickedEvent::new(pickup, player),
-        ))
+        Self::new(VcmpEvent::PickupPicked(pickup::PickupPickedEvent::new(
+            pickup, player,
+        )))
     }
 
     #[staticmethod]
     fn pickup_respawn(pickup: PickupPy) -> Self {
-        Self::new(VcmpEvent::PickupRespawn(
-            pickup::PickupRespawnEvent::new(pickup),
-        ))
+        Self::new(VcmpEvent::PickupRespawn(pickup::PickupRespawnEvent::new(
+            pickup,
+        )))
     }
 
-        #[staticmethod]
+    #[staticmethod]
     fn incoming_connection(ip: String, player_name: String, password: String) -> Self {
         Self::new(VcmpEvent::IncomingConnection(
             player::IncomingConnectionEvent::new(ip, player_name, password),
@@ -364,9 +374,9 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn player_connect(player: PlayerPy) -> Self {
-        Self::new(VcmpEvent::PlayerConnect(
-            player::PlayerConnectEvent::new(player),
-        ))
+        Self::new(VcmpEvent::PlayerConnect(player::PlayerConnectEvent::new(
+            player,
+        )))
     }
 
     #[staticmethod]
@@ -385,9 +395,9 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn player_spawn(player: PlayerPy) -> Self {
-        Self::new(VcmpEvent::PlayerSpawn(
-            player::PlayerSpawnEvent::new(player),
-        ))
+        Self::new(VcmpEvent::PlayerSpawn(player::PlayerSpawnEvent::new(
+            player,
+        )))
     }
 
     #[staticmethod]
@@ -399,16 +409,16 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn player_death(player: PlayerPy, killer: Option<PlayerPy>, reason: i32, body: i32) -> Self {
-        Self::new(VcmpEvent::PlayerDeath(
-            player::PlayerDeathEvent::new(player, killer, reason, body),
-        ))
+        Self::new(VcmpEvent::PlayerDeath(player::PlayerDeathEvent::new(
+            player, killer, reason, body,
+        )))
     }
 
     #[staticmethod]
     fn player_update(player: PlayerPy, update: i32) -> Self {
-        Self::new(VcmpEvent::PlayerUpdate(
-            player::PlayerUpdateEvent::new(player, update),
-        ))
+        Self::new(VcmpEvent::PlayerUpdate(player::PlayerUpdateEvent::new(
+            player, update,
+        )))
     }
 
     #[staticmethod]
@@ -497,16 +507,16 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn player_message(player: PlayerPy, message: String) -> Self {
-        Self::new(VcmpEvent::PlayerMessage(
-            player::PlayerMessageEvent::new(player, message),
-        ))
+        Self::new(VcmpEvent::PlayerMessage(player::PlayerMessageEvent::new(
+            player, message,
+        )))
     }
 
     #[staticmethod]
     fn player_command(player: PlayerPy, command: String, text: String) -> Self {
-        Self::new(VcmpEvent::PlayerCommand(
-            player::PlayerCommandEvent::new(player, command, text),
-        ))
+        Self::new(VcmpEvent::PlayerCommand(player::PlayerCommandEvent::new(
+            player, command, text,
+        )))
     }
 
     #[staticmethod]
@@ -532,9 +542,9 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn player_spectate(player: PlayerPy, target: Option<PlayerPy>) -> Self {
-        Self::new(VcmpEvent::PlayerSpectate(
-            player::PlayerSpectateEvent::new(player, target),
-        ))
+        Self::new(VcmpEvent::PlayerSpectate(player::PlayerSpectateEvent::new(
+            player, target,
+        )))
     }
 
     #[staticmethod]
@@ -582,16 +592,19 @@ impl PyVcmpEvent {
 
     #[staticmethod]
     fn player_move(player: PlayerPy, old_position: VectorPy, new_position: VectorPy) -> Self {
-        Self::new(VcmpEvent::PlayerMove(
-            player::PlayerMoveEvent::new(player, old_position, new_position),
-        ))
+        Self::new(VcmpEvent::PlayerMove(player::PlayerMoveEvent::new(
+            player,
+            old_position,
+            new_position,
+        )))
     }
 
     #[staticmethod]
     fn vehicle_update(vehicle: VehiclePy, update_type: i32) -> Self {
-        Self::new(VcmpEvent::VehicleUpdate(
-            vehicle::VehicleUpdateEvent::new(vehicle, update_type),
-        ))
+        Self::new(VcmpEvent::VehicleUpdate(vehicle::VehicleUpdateEvent::new(
+            vehicle,
+            update_type,
+        )))
     }
 
     #[staticmethod]
@@ -611,9 +624,11 @@ impl PyVcmpEvent {
     // Vehicle Extra
     #[staticmethod]
     fn vehicle_move(vehicle: VehiclePy, old_position: VectorPy, new_position: VectorPy) -> Self {
-        Self::new(VcmpEvent::VehicleMove(
-            vehicle::VehicleMoveEvent::new(vehicle, old_position, new_position),
-        ))
+        Self::new(VcmpEvent::VehicleMove(vehicle::VehicleMoveEvent::new(
+            vehicle,
+            old_position,
+            new_position,
+        )))
     }
 
     #[staticmethod]
@@ -627,9 +642,8 @@ impl PyVcmpEvent {
     #[staticmethod]
     #[pyo3(signature = (**kwargs))]
     fn custom(kwargs: Option<HashMap<String, Py<PyAny>>>) -> Self {
-        Self::new(VcmpEvent::Custom(
-            custom::CustomEvent::default(),
-        )).with_kwargs(kwargs.unwrap_or_default())
+        Self::new(VcmpEvent::Custom(custom::CustomEvent::default()))
+            .with_kwargs(kwargs.unwrap_or_default())
     }
 }
 

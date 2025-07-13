@@ -11,6 +11,10 @@ requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
 
+[project.urls]
+homepage = "https://github.com/tianxiu2b2t/vcmp-python-plugin"
+repository = "https://github.com/tianxiu2b2t/vcmp-python-plugin"
+
 
 [tool.pdm]
 distribution = true

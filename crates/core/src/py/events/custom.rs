@@ -1,9 +1,9 @@
 use pyo3::{
-    pyclass, types::{PyModule, PyModuleMethods}, Bound, Py, PyAny, PyClassInitializer, PyResult, Python
+    Bound, Py, PyAny, PyClassInitializer, PyResult, Python, pyclass,
+    types::{PyModule, PyModuleMethods},
 };
 
 use crate::py::events::abc::{BaseEvent, PyEvent};
-
 
 #[derive(Debug, Clone, Default)]
 #[pyclass(extends=BaseEvent, subclass)]
@@ -22,7 +22,6 @@ impl PyEvent for CustomEvent {
         .into_any()
     }
 }
-
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CustomEvent>()?;

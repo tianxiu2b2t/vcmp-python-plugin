@@ -34,7 +34,6 @@ impl PyEvent for CheckpointEvent {
     }
 }
 
-
 #[derive(Debug, Clone)]
 #[pyclass(extends=CheckpointEvent, subclass)]
 pub struct CheckpointEnteredEvent {

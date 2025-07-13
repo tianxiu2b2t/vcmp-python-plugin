@@ -13,6 +13,7 @@ pub mod functions;
 pub mod cfg;
 pub mod pool;
 pub mod py;
+pub mod update;
 
 /// 插件版本
 ///
@@ -104,6 +105,8 @@ extern "C" fn VcmpPluginInit(
     init_callbacks(callbacks);
 
     event!(Level::INFO, "vcmp-plugin-rs loaded");
+
+    update::init();
 
     1
 }
