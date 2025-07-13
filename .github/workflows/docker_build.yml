@@ -20,11 +20,12 @@ jobs:
         with:
           python-version: 3.13
           os: ubuntu-22.04
+        id: build_libraries
 
       - name: Download Libraries
         uses: ./.github/actions/download-libraries
         with:
-          artifacts: ${{ build.outputs.artifact_name }}
+          artifacts: ${{ needs.build_libraries.outputs.artifact_name }}
           output_target: libraries
     
   build-multiarch:
