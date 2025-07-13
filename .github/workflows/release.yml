@@ -46,6 +46,11 @@ jobs:
           artifacts: ${{ needs.build_and_upload.outputs.artifact_name }}
           output_target: libraries
 
+      - name: Copy into vcmp Libraries Folder
+        run: |
+          mkdir -p ./src/vcmp/libraries
+          cp -r libraries/* ./src/vcmp/libraries
+
       - uses: actions/setup-node@v3
         with:
           node-version: 16.x
