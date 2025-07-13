@@ -1,12 +1,13 @@
-name: Build and Upload DLL & Create tagged release and publish to PyPI
+name: Release to GitHub+PyPI+Docker
 
+# 触发条件：标签推送（v*）或手动触发（正式发布）
 on:
   push:
-    tags:
-      - v*
+    tags: [ v* ]
   workflow_dispatch:
 
 jobs:
+  # 1. 构建artifact（复用工作流）
   build_and_upload:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -15,141 +16,71 @@ jobs:
         arch: ['x64']
         python-version: ['3.10', '3.11', '3.12', '3.13']
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    uses: ./.github/workflows/.build-and-upload.yml
+    with:
+      os: ${{ matrix.os }}
+      arch: ${{ matrix.arch }}
+      python-version: ${{ matrix.python-version }}
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-      - run: cargo build --release
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: libraries_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
-          path: |
-            target/release/*.dll
-            target/release/*.so
-
-      - name: Save Artifact Names
-        run: echo "artifact_name=libraries_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
-
+  # 2. 发布流程（依赖构建结果）
   release_and_publish:
-    # 发布到 GitHub Release 和 PyPI
     runs-on: ubuntu-latest
     needs: build_and_upload
-
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Set env
-        run: |
-          echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+      - name: Set Release Version
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-      - name: List Artifacts
-        run: |
-          echo "Artifacts available: ${{ needs.build_and_upload.outputs.artifact_name }}"
-  
-      - name: Download DLL Artifacts
-        uses: actions/download-artifact@v4
+      # 处理artifact（复用复合动作）
+      - name: Process Artifacts
+        uses: ./.github/actions/process-artifacts
         with:
-          name: ${{ needs.build_and_upload.outputs.artifact_name }} # 动态获取工件名称
-          path: ./dl_libraries
+          artifact-name: ${{ needs.build_and_upload.outputs.artifact-name }}
+          output-dir: libraries
 
-      - name: Move downloaded DLLs to libraries folder and clean empty folders
-        run: |
-          mkdir -p libraries
-
-          # 处理 Windows DLL 文件
-          for file in dl_libraries/**/*.dll; do
-            if [[ $file =~ libraries_windows-latest_x64_([0-9]+)\.([0-9]+) ]]; then
-              major="${BASH_REMATCH[1]}"
-              minor="${BASH_REMATCH[2]}"
-              version="${major}${minor}"
-              new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.dll"
-              cp "$file" "libraries/$new_name"
-            fi
-          done
-
-          # 处理 Linux SO 文件
-          for file in dl_libraries/**/*.so; do
-            if [[ $file =~ libraries_ubuntu-22.04_x64_([0-9]+)\.([0-9]+) ]]; then
-              major="${BASH_REMATCH[1]}"
-              minor="${BASH_REMATCH[2]}"
-              version="${major}${minor}"
-              new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.so"
-              cp "$file" "libraries/$new_name"
-            fi
-          done
-
-          # 清理下载目录
-          rm -rf dl_libraries
-        
-      - name: Copy into vcmp libraries folder
+      - name: Copy to Source Directory
         run: |
           mkdir -p ./src/vcmp/libraries
           cp -r libraries/* ./src/vcmp/libraries
-          
-      - name: List Artifacts after download
-        run: ls -a ./libraries
 
-      - uses: actions/setup-node@v3
+      # 创建GitHub Release
+      - name: Create GitHub Release
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
-
-      - name: Create release
-        run: npx changelogithub-chinese
+      - run: npx changelogithub-chinese
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
-      - name: Set up Python for PyPI
+      # 发布到PyPI
+      - name: Publish to PyPI
         uses: actions/setup-python@v4
         with:
           python-version: 3.12
-
-      - name: Install dependencies for PyPI
-        run: |
+      - run: |
           python -m pip install --upgrade pip
           pip install pdm twine
-
-      - name: Build and publish package to PyPI
-        run: |
           pdm build
           twine upload dist/*
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
 
-      - name: Upload DLL to Release
+      # 上传artifact到GitHub Release
+      - name: Upload to Release
         uses: softprops/action-gh-release@v1
         with:
           files: ./libraries/*
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-        
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      # 构建并推送Docker（正式标签）
+      - name: Build and Push Docker
+        uses: ./.github/actions/build-docker
         with:
-          username: ${{ secrets.HUB_USERNAME }}
-          password: ${{ secrets.HUB_PASSWORD }}
-          
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: true
           tags: |
             atianxiua/vcmp-python:latest
             atianxiua/vcmp-python:${{ env.RELEASE_VERSION }}
-          platforms: linux/amd64

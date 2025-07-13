@@ -1,0 +1,51 @@
+# 复合动作：下载artifact并按Python版本重命名DLL/SO
+name: "Process Artifacts"
+description: "Download, rename and move artifacts"
+
+inputs:
+  artifact-name:
+    description: "Artifact名称"
+    required: true
+  output-dir:
+    description: "输出目录"
+    required: true
+    default: "libraries"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ./dl_libraries
+
+    - name: Move and Rename Files
+      shell: bash
+      run: |
+        mkdir -p ${{ inputs.output-dir }}
+
+        # 处理Windows DLL
+        for file in dl_libraries/**/*.dll; do
+          if [[ $file =~ libraries_windows-latest_x64_([0-9]+)\.([0-9]+) ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            version="${major}${minor}"
+            new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.dll"
+            cp "$file" "${{ inputs.output-dir }}/$new_name"
+          fi
+        done
+
+        # 处理Linux SO
+        for file in dl_libraries/**/*.so; do
+          if [[ $file =~ libraries_ubuntu-22.04_x64_([0-9]+)\.([0-9]+) ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            version="${major}${minor}"
+            new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.so"
+            cp "$file" "${{ inputs.output-dir }}/$new_name"
+          fi
+        done
+
+        # 清理临时目录
+        rm -rf dl_libraries
