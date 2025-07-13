@@ -15,7 +15,8 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: ./.github/actions/setup-environment
+    - name: Setup Environment
+      uses: ./.github/actions/setup-environment
     - run: cargo build --release
       shell: bash
 

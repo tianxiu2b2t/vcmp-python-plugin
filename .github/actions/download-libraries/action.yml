@@ -1,0 +1,60 @@
+name: Build Libraries
+description: Setup Python
+
+inputs:
+  artifacts:
+    required: true
+    description: The name of the artifact to download
+  
+  output_target:
+    required: true
+    description: The target directory for the downloaded artifacts
+  
+
+runs:
+  using: "composite"
+  steps:
+    - name: List Artifacts
+      run: |
+        echo "Artifacts available: ${{ inputs.artifacts }}"
+      shell: bash
+  
+    - name: Download Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: ${{ inputs.artifacts }} # 动态获取工件名称
+        path: $RUNNER_TEMP/dl_libraries
+
+    - name: Process Artifacts
+      shell: bash
+      run: |
+        mkdir -p ${{ inputs.output_target }}
+
+        # 处理 Windows DLL 文件
+        for file in $RUNNER_TEMP/dl_libraries/**/*.dll; do
+          if [[ $file =~ libraries_windows-latest_x64_([0-9]+)\.([0-9]+) ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            version="${major}${minor}"
+            new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.dll"
+            cp "$file" "${{ inputs.output_target }}/$new_name"
+          fi
+        done
+
+        # 处理 Linux SO 文件
+        for file in $RUNNER_TEMP/dl_libraries/**/*.so; do
+          if [[ $file =~ libraries_ubuntu-22.04_x64_([0-9]+)\.([0-9]+) ]]; then
+            major="${BASH_REMATCH[1]}"
+            minor="${BASH_REMATCH[2]}"
+            version="${major}${minor}"
+            new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.so"
+            cp "$file" "${{ inputs.output_target }}/$new_name"
+          fi
+        done
+
+        # 清理下载目录
+        rm -rf $RUNNER_TEMP/dl_libraries
+        
+    - name: List Artifacts after Download
+      run: ls -a ./${{ inputs.output_target }}
+      shell: bash
