@@ -1,5 +1,5 @@
 name: Build Libraries
-description: Setup Python
+description: Build Libraries and Setup Python
 
 inputs:
   os:
