@@ -14,13 +14,11 @@ use vcmp_bindings::events::object;
 #[derive(Debug, Clone)]
 #[pyclass(extends=BaseEvent, subclass)]
 pub struct ObjectEvent {}
-
 impl ObjectEvent {
     pub fn new() -> (Self, BaseEvent) {
         (Self {}, BaseEvent::default())
     }
 }
-
 impl PyEvent for ObjectEvent {
     fn event_name(&self) -> String {
         "ObjectEvent".to_string()
@@ -41,7 +39,6 @@ impl PyEvent for ObjectEvent {
 pub struct ObjectShotEvent {
     pub inner: object::ObjectShotEvent,
 }
-
 #[pymethods]
 impl ObjectShotEvent {
     #[getter]
@@ -70,13 +67,22 @@ impl ObjectShotEvent {
         )
     }
 }
-
 impl From<object::ObjectShotEvent> for ObjectShotEvent {
     fn from(event: object::ObjectShotEvent) -> Self {
         Self { inner: event }
     }
 }
-
+impl ObjectShotEvent {
+    pub fn new(object: ObjectPy, player: PlayerPy, weapon_id: i32) -> Self {
+        Self {
+            inner: object::ObjectShotEvent {
+                object_id: object.get_id(),
+                player_id: player.get_id(),
+                weapon_id,
+            },
+        }
+    }
+}
 impl PyEvent for ObjectShotEvent {
     fn event_name(&self) -> String {
         "ObjectShotEvent".to_string()
@@ -97,7 +103,6 @@ impl PyEvent for ObjectShotEvent {
 pub struct ObjectTouchedEvent {
     pub inner: object::ObjectTouchedEvent,
 }
-
 #[pymethods]
 impl ObjectTouchedEvent {
     #[getter]
@@ -120,13 +125,21 @@ impl ObjectTouchedEvent {
         )
     }
 }
-
 impl From<object::ObjectTouchedEvent> for ObjectTouchedEvent {
     fn from(event: object::ObjectTouchedEvent) -> Self {
         Self { inner: event }
     }
 }
-
+impl ObjectTouchedEvent {
+    pub fn new(object: ObjectPy, player: PlayerPy) -> Self {
+        Self {
+            inner: object::ObjectTouchedEvent {
+                object_id: object.get_id(),
+                player_id: player.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for ObjectTouchedEvent {
     fn event_name(&self) -> String {
         "ObjectTouchedEvent".to_string()

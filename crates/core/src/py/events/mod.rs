@@ -5,7 +5,7 @@ use pyo3::{
     types::{PyModule, PyModuleMethods},
 };
 
-use crate::py::fix_module_name;
+use crate::{functions::{checkpoint::CheckPointPy, object::ObjectPy, pickup::PickupPy, player::PlayerPy, vehicle::VehiclePy}, py::{fix_module_name, types::VectorPy}};
 
 pub mod abc;
 pub mod checkpoint;
@@ -270,7 +270,7 @@ impl PyVcmpEvent {
     #[staticmethod]
     fn server_frame(elapsed_time: f32) -> Self {
         Self::new(VcmpEvent::ServerFrame(
-            server::ServerFrameEvent::from(elapsed_time),
+            server::ServerFrameEvent::new(elapsed_time),
         ))
     }
 
@@ -285,13 +285,333 @@ impl PyVcmpEvent {
         times.resize(count, 0);
 
         Self::new(VcmpEvent::ServerPerformanceReport(
-            server::ServerPerformanceReportEvent::from((descriptions, times, entry_count)),
+            server::ServerPerformanceReportEvent::new(descriptions, times, count),
         ))
     }
 
+    #[staticmethod]
+    fn checkpoint_entered(checkpoint: CheckPointPy, player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::CheckpointEntered(
+            checkpoint::CheckpointEnteredEvent::new(checkpoint, player),
+        ))
+    }
     
+    #[staticmethod]
+    fn checkpoint_exited(checkpoint: CheckPointPy, player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::CheckpointExited(
+            checkpoint::CheckpointExitedEvent::new(checkpoint, player),
+        ))
+    }
 
-    // TODO: this func
+    #[staticmethod]
+    fn object_shot(object: ObjectPy, player: PlayerPy, weapon_id: i32) -> Self {
+        Self::new(VcmpEvent::ObjectShot(
+            object::ObjectShotEvent::new(object, player, weapon_id),
+        ))
+    }
+    
+    #[staticmethod]
+    fn object_touched(object: ObjectPy, player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::ObjectTouched(
+            object::ObjectTouchedEvent::new(object, player),
+        ))
+    }
+    
+    #[staticmethod]
+    fn pickup_pick_attempt(pickup: PickupPy, player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::PickupPickAttempt(
+            pickup::PickupPickAttemptEvent::new(pickup, player),
+        ))
+    }
+
+    #[staticmethod]
+    fn pickup_picked(pickup: PickupPy, player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::PickupPicked(
+            pickup::PickupPickedEvent::new(pickup, player),
+        ))
+    }
+
+    #[staticmethod]
+    fn pickup_respawn(pickup: PickupPy) -> Self {
+        Self::new(VcmpEvent::PickupRespawn(
+            pickup::PickupRespawnEvent::new(pickup),
+        ))
+    }
+
+        #[staticmethod]
+    fn incoming_connection(ip: String, player_name: String, password: String) -> Self {
+        Self::new(VcmpEvent::IncomingConnection(
+            player::IncomingConnectionEvent::new(ip, player_name, password),
+        ))
+    }
+
+    #[staticmethod]
+    fn client_script_data(player: PlayerPy, data: Vec<u8>) -> Self {
+        Self::new(VcmpEvent::ClientScriptData(
+            player::ClientScriptDataEvent::new(player, data),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_connect(player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::PlayerConnect(
+            player::PlayerConnectEvent::new(player),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_disconnect(player: PlayerPy, reason: i32) -> Self {
+        Self::new(VcmpEvent::PlayerDisconnect(
+            player::PlayerDisconnectEvent::new(player, reason),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_request_class(player: PlayerPy, class_id: i32) -> Self {
+        Self::new(VcmpEvent::PlayerRequestClass(
+            player::PlayerRequestClassEvent::new(player, class_id),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_spawn(player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::PlayerSpawn(
+            player::PlayerSpawnEvent::new(player),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_request_spawn(player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::PlayerRequestSpawn(
+            player::PlayerRequestSpawnEvent::new(player),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_death(player: PlayerPy, killer: Option<PlayerPy>, reason: i32, body: i32) -> Self {
+        Self::new(VcmpEvent::PlayerDeath(
+            player::PlayerDeathEvent::new(player, killer, reason, body),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_update(player: PlayerPy, update: i32) -> Self {
+        Self::new(VcmpEvent::PlayerUpdate(
+            player::PlayerUpdateEvent::new(player, update),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_request_enter_vehicle(player: PlayerPy, vehicle: VehiclePy, slot_index: i32) -> Self {
+        Self::new(VcmpEvent::PlayerRequestEnterVehicle(
+            player::PlayerRequestEnterVehicleEvent::new(player, vehicle, slot_index),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_enter_vehicle(player: PlayerPy, vehicle: VehiclePy, slot_index: i32) -> Self {
+        Self::new(VcmpEvent::PlayerEnterVehicle(
+            player::PlayerEnterVehicleEvent::new(player, vehicle, slot_index),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_exit_vehicle(player: PlayerPy, vehicle: VehiclePy) -> Self {
+        Self::new(VcmpEvent::PlayerExitVehicle(
+            player::PlayerExitVehicleEvent::new(player, vehicle),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_name_change(player: PlayerPy, old_name: String, new_name: String) -> Self {
+        Self::new(VcmpEvent::PlayerNameChange(
+            player::PlayerNameChangeEvent::new(player, old_name, new_name),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_state_change(player: PlayerPy, old_state: i32, new_state: i32) -> Self {
+        Self::new(VcmpEvent::PlayerStateChange(
+            player::PlayerStateChangeEvent::new(player, old_state, new_state),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_action_change(player: PlayerPy, old_action: i32, new_action: i32) -> Self {
+        Self::new(VcmpEvent::PlayerActionChange(
+            player::PlayerActionChangeEvent::new(player, old_action, new_action),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_on_fire_change(player: PlayerPy, is_on_fire: bool) -> Self {
+        Self::new(VcmpEvent::PlayerOnFireChange(
+            player::PlayerOnFireChangeEvent::new(player, is_on_fire),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_crouch_change(player: PlayerPy, is_crouching: bool) -> Self {
+        Self::new(VcmpEvent::PlayerCrouchChange(
+            player::PlayerCrouchChangeEvent::new(player, is_crouching),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_game_keys_change(player: PlayerPy, old_keys: u32, new_keys: u32) -> Self {
+        Self::new(VcmpEvent::PlayerGameKeysChange(
+            player::PlayerGameKeysChangeEvent::new(player, old_keys, new_keys),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_begin_typing(player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::PlayerBeginTyping(
+            player::PlayerBeginTypingEvent::new(player),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_end_typing(player: PlayerPy) -> Self {
+        Self::new(VcmpEvent::PlayerEndTyping(
+            player::PlayerEndTypingEvent::new(player),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_away_change(player: PlayerPy, is_away: bool) -> Self {
+        Self::new(VcmpEvent::PlayerAwayChange(
+            player::PlayerAwayChangeEvent::new(player, is_away),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_message(player: PlayerPy, message: String) -> Self {
+        Self::new(VcmpEvent::PlayerMessage(
+            player::PlayerMessageEvent::new(player, message),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_command(player: PlayerPy, command: String, text: String) -> Self {
+        Self::new(VcmpEvent::PlayerCommand(
+            player::PlayerCommandEvent::new(player, command, text),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_private_message(player: PlayerPy, target: PlayerPy, message: String) -> Self {
+        Self::new(VcmpEvent::PlayerPrivateMessage(
+            player::PlayerPrivateMessageEvent::new(player, target, message),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_key_bind_down(player: PlayerPy, bind_id: i32) -> Self {
+        Self::new(VcmpEvent::PlayerKeyBindDown(
+            player::PlayerKeyBindDownEvent::new(player, bind_id),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_key_bind_up(player: PlayerPy, bind_id: i32) -> Self {
+        Self::new(VcmpEvent::PlayerKeyBindUp(
+            player::PlayerKeyBindUpEvent::new(player, bind_id),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_spectate(player: PlayerPy, target: Option<PlayerPy>) -> Self {
+        Self::new(VcmpEvent::PlayerSpectate(
+            player::PlayerSpectateEvent::new(player, target),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_crash_report(player: PlayerPy, report: String) -> Self {
+        Self::new(VcmpEvent::PlayerCrashReport(
+            player::PlayerCrashReportEvent::new(player, report),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_module_list(player: PlayerPy, modules: String) -> Self {
+        Self::new(VcmpEvent::PlayerModuleList(
+            player::PlayerModuleListEvent::new(player, modules),
+        ))
+    }
+
+    // Extra events
+    #[staticmethod]
+    fn player_health_change(player: PlayerPy, old_health: f32, new_health: f32) -> Self {
+        Self::new(VcmpEvent::PlayerHealthChange(
+            player::PlayerHealthChangeEvent::new(player, old_health, new_health),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_armour_change(player: PlayerPy, old_armour: f32, new_armour: f32) -> Self {
+        Self::new(VcmpEvent::PlayerArmourChange(
+            player::PlayerArmourChangeEvent::new(player, old_armour, new_armour),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_weapon_change(player: PlayerPy, old_weapon: i32, new_weapon: i32) -> Self {
+        Self::new(VcmpEvent::PlayerWeaponChange(
+            player::PlayerWeaponChangeEvent::new(player, old_weapon, new_weapon),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_ammo_change(player: PlayerPy, old_ammo: i32, new_ammo: i32) -> Self {
+        Self::new(VcmpEvent::PlayerAmmoChange(
+            player::PlayerAmmoChangeEvent::new(player, old_ammo, new_ammo),
+        ))
+    }
+
+    #[staticmethod]
+    fn player_move(player: PlayerPy, old_position: VectorPy, new_position: VectorPy) -> Self {
+        Self::new(VcmpEvent::PlayerMove(
+            player::PlayerMoveEvent::new(player, old_position, new_position),
+        ))
+    }
+
+    #[staticmethod]
+    fn vehicle_update(vehicle: VehiclePy, update_type: i32) -> Self {
+        Self::new(VcmpEvent::VehicleUpdate(
+            vehicle::VehicleUpdateEvent::new(vehicle, update_type),
+        ))
+    }
+
+    #[staticmethod]
+    fn vehicle_explode(vehicle: VehiclePy) -> Self {
+        Self::new(VcmpEvent::VehicleExplode(
+            vehicle::VehicleExplodeEvent::new(vehicle),
+        ))
+    }
+
+    #[staticmethod]
+    fn vehicle_respawn(vehicle: VehiclePy) -> Self {
+        Self::new(VcmpEvent::VehicleRespawn(
+            vehicle::VehicleRespawnEvent::new(vehicle),
+        ))
+    }
+
+    // Vehicle Extra
+    #[staticmethod]
+    fn vehicle_move(vehicle: VehiclePy, old_position: VectorPy, new_position: VectorPy) -> Self {
+        Self::new(VcmpEvent::VehicleMove(
+            vehicle::VehicleMoveEvent::new(vehicle, old_position, new_position),
+        ))
+    }
+
+    #[staticmethod]
+    fn vehicle_health_change(vehicle: VehiclePy, old_health: f32, new_health: f32) -> Self {
+        Self::new(VcmpEvent::VehicleHealthChange(
+            vehicle::VehicleHealthChangeEvent::new(vehicle, old_health, new_health),
+        ))
+    }
 }
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

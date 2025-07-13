@@ -14,13 +14,11 @@ use vcmp_bindings::events::checkpoint;
 #[derive(Debug, Clone)]
 #[pyclass(extends=BaseEvent, subclass)]
 pub struct CheckpointEvent {}
-
 impl CheckpointEvent {
     pub fn new() -> (Self, BaseEvent) {
         (Self {}, BaseEvent::default())
     }
 }
-
 impl PyEvent for CheckpointEvent {
     fn event_name(&self) -> String {
         "CheckpointEvent".to_string()
@@ -36,12 +34,12 @@ impl PyEvent for CheckpointEvent {
     }
 }
 
+
 #[derive(Debug, Clone)]
 #[pyclass(extends=CheckpointEvent, subclass)]
 pub struct CheckpointEnteredEvent {
     pub inner: checkpoint::CheckpointEnteredEvent,
 }
-
 #[pymethods]
 impl CheckpointEnteredEvent {
     #[getter]
@@ -64,13 +62,21 @@ impl CheckpointEnteredEvent {
         )
     }
 }
-
 impl From<checkpoint::CheckpointEnteredEvent> for CheckpointEnteredEvent {
     fn from(event: checkpoint::CheckpointEnteredEvent) -> Self {
         Self { inner: event }
     }
 }
-
+impl CheckpointEnteredEvent {
+    pub fn new(checkpoint: CheckPointPy, player: PlayerPy) -> Self {
+        Self {
+            inner: checkpoint::CheckpointEnteredEvent {
+                checkpoint_id: checkpoint.get_id(),
+                player_id: player.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for CheckpointEnteredEvent {
     fn event_name(&self) -> String {
         "CheckpointEnteredEvent".to_string()
@@ -91,7 +97,6 @@ impl PyEvent for CheckpointEnteredEvent {
 pub struct CheckpointExitedEvent {
     pub inner: checkpoint::CheckpointExitedEvent,
 }
-
 #[pymethods]
 impl CheckpointExitedEvent {
     #[getter]
@@ -114,13 +119,21 @@ impl CheckpointExitedEvent {
         )
     }
 }
-
 impl From<checkpoint::CheckpointExitedEvent> for CheckpointExitedEvent {
     fn from(event: checkpoint::CheckpointExitedEvent) -> Self {
         Self { inner: event }
     }
 }
-
+impl CheckpointExitedEvent {
+    pub fn new(checkpoint: CheckPointPy, player: PlayerPy) -> Self {
+        Self {
+            inner: checkpoint::CheckpointExitedEvent {
+                checkpoint_id: checkpoint.get_id(),
+                player_id: player.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for CheckpointExitedEvent {
     fn event_name(&self) -> String {
         "CheckpointExitedEvent".to_string()
@@ -135,7 +148,6 @@ impl PyEvent for CheckpointExitedEvent {
         .into_any()
     }
 }
-
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CheckpointEvent>()?;
     m.add_class::<CheckpointEnteredEvent>()?;

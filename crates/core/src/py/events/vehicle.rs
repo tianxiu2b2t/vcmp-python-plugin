@@ -68,6 +68,16 @@ impl From<vehicle::VehicleUpdateEvent> for VehicleUpdateEvent {
         Self { inner: event }
     }
 }
+impl VehicleUpdateEvent {
+    pub fn new(vehicle: VehiclePy, update_type: i32) -> Self {
+        Self {
+            inner: vehicle::VehicleUpdateEvent {
+                vehicle_id: vehicle.get_id(),
+                update_type,
+            },
+        }
+    }
+}
 impl PyEvent for VehicleUpdateEvent {
     fn event_name(&self) -> String {
         "VehicleUpdateEvent".to_string()
@@ -105,6 +115,15 @@ impl From<vehicle::VehicleExplodeEvent> for VehicleExplodeEvent {
         Self { inner: event }
     }
 }
+impl VehicleExplodeEvent {
+    pub fn new(vehicle: VehiclePy) -> Self {
+        Self {
+            inner: vehicle::VehicleExplodeEvent {
+                vehicle_id: vehicle.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for VehicleExplodeEvent {
     fn event_name(&self) -> String {
         "VehicleExplodeEvent".to_string()
@@ -140,6 +159,15 @@ impl VehicleRespawnEvent {
 impl From<vehicle::VehicleRespawnEvent> for VehicleRespawnEvent {
     fn from(event: vehicle::VehicleRespawnEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl VehicleRespawnEvent {
+    pub fn new(vehicle: VehiclePy) -> Self {
+        Self {
+            inner: vehicle::VehicleRespawnEvent {
+                vehicle_id: vehicle.get_id(),
+            },
+        }
     }
 }
 impl PyEvent for VehicleRespawnEvent {
@@ -212,6 +240,16 @@ impl From<(i32, VectorPy, VectorPy)> for VehicleMoveEvent {
         }
     }
 }
+impl VehicleMoveEvent {
+    pub fn new(vehicle: VehiclePy, old_position: VectorPy, new_position: VectorPy) -> Self {
+        Self {
+            vehicle_id: vehicle.get_id(),
+            old_position,
+            new_position,
+            current_position: new_position,
+        }
+    }
+}
 impl PyEvent for VehicleMoveEvent {
     fn event_name(&self) -> String {
         "VehicleMoveEvent".to_string()
@@ -279,6 +317,16 @@ impl From<(i32, f32, f32)> for VehicleHealthChangeEvent {
             old_health: value.1,
             new_health: value.2,
             current_health: value.2,
+        }
+    }
+}
+impl VehicleHealthChangeEvent {
+    pub fn new(vehicle: VehiclePy, old_health: f32, new_health: f32) -> Self {
+        Self {
+            vehicle_id: vehicle.get_id(),
+            old_health,
+            new_health,
+            current_health: new_health,
         }
     }
 }

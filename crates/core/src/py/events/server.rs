@@ -85,6 +85,13 @@ impl From<server::ServerFrameEvent> for ServerFrameEvent {
         Self { inner: event }
     }
 }
+impl ServerFrameEvent {
+    pub fn new(elapsed_time: f32) -> Self {
+        Self {
+            inner: server::ServerFrameEvent { elapsed_time },
+        }
+    }
+}
 impl PyEvent for ServerFrameEvent {
     fn event_name(&self) -> String {
         "ServerFrameEvent".to_string()
@@ -134,6 +141,17 @@ impl ServerPerformanceReportEvent {
 impl From<server::ServerPerformanceReportEvent> for ServerPerformanceReportEvent {
     fn from(event: server::ServerPerformanceReportEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl ServerPerformanceReportEvent {
+    pub fn new(descriptions: Vec<String>, times: Vec<u64>, entry_count: usize) -> Self {
+        Self {
+            inner: server::ServerPerformanceReportEvent {
+                entry_count,
+                descriptions,
+                times,
+            },
+        }
     }
 }
 impl PyEvent for ServerPerformanceReportEvent {

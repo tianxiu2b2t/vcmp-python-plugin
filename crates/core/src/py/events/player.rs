@@ -74,6 +74,17 @@ impl From<player::IncomingConnectionEvent> for IncomingConnectionEvent {
         Self { inner: event }
     }
 }
+impl IncomingConnectionEvent {
+    pub fn new(ip: String, player_name: String, password: String) -> Self {
+        Self {
+            inner: player::IncomingConnectionEvent {
+                ip,
+                player_name,
+                password,
+            },
+        }
+    }
+}
 impl PyEvent for IncomingConnectionEvent {
     fn event_name(&self) -> String {
         "IncomingConnectionEvent".to_string()
@@ -118,6 +129,16 @@ impl From<player::ClientScriptDataEvent> for ClientScriptDataEvent {
         Self { inner: event }
     }
 }
+impl ClientScriptDataEvent {
+    pub fn new(player: PlayerPy, data: Vec<u8>) -> Self {
+        Self {
+            inner: player::ClientScriptDataEvent {
+                player_id: player.get_id(),
+                data,
+            },
+        }
+    }
+}
 impl PyEvent for ClientScriptDataEvent {
     fn event_name(&self) -> String {
         "ClientScriptDataEvent".to_string()
@@ -153,6 +174,15 @@ impl PlayerConnectEvent {
 impl From<player::PlayerConnectEvent> for PlayerConnectEvent {
     fn from(event: player::PlayerConnectEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerConnectEvent {
+    pub fn new(player: PlayerPy) -> Self {
+        Self {
+            inner: player::PlayerConnectEvent {
+                player_id: player.get_id(),
+            },
+        }
     }
 }
 impl PyEvent for PlayerConnectEvent {
@@ -200,6 +230,16 @@ impl From<player::PlayerDisconnectEvent> for PlayerDisconnectEvent {
         Self { inner: event }
     }
 }
+impl PlayerDisconnectEvent {
+    pub fn new(player: PlayerPy, reason: i32) -> Self {
+        Self {
+            inner: player::PlayerDisconnectEvent {
+                player_id: player.get_id(),
+                reason,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerDisconnectEvent {
     fn event_name(&self) -> String {
         "PlayerDisconnectEvent".to_string()
@@ -245,6 +285,16 @@ impl From<player::PlayerRequestClassEvent> for PlayerRequestClassEvent {
         Self { inner: event }
     }
 }
+impl PlayerRequestClassEvent {
+    pub fn new(player: PlayerPy, class_id: i32) -> Self {
+        Self {
+            inner: player::PlayerRequestClassEvent {
+                player_id: player.get_id(),
+                class_id,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerRequestClassEvent {
     fn event_name(&self) -> String {
         "PlayerRequestClassEvent".to_string()
@@ -282,6 +332,15 @@ impl From<player::PlayerSpawnEvent> for PlayerSpawnEvent {
         Self { inner: event }
     }
 }
+impl PlayerSpawnEvent {
+    pub fn new(player: PlayerPy) -> Self {
+        Self {
+            inner: player::PlayerSpawnEvent {
+                player_id: player.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for PlayerSpawnEvent {
     fn event_name(&self) -> String {
         "PlayerSpawnEvent".to_string()
@@ -317,6 +376,15 @@ impl PlayerRequestSpawnEvent {
 impl From<player::PlayerRequestSpawnEvent> for PlayerRequestSpawnEvent {
     fn from(event: player::PlayerRequestSpawnEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerRequestSpawnEvent {
+    pub fn new(player: PlayerPy) -> Self {
+        Self {
+            inner: player::PlayerRequestSpawnEvent {
+                player_id: player.get_id(),
+            },
+        }
     }
 }
 impl PyEvent for PlayerRequestSpawnEvent {
@@ -375,6 +443,18 @@ impl From<player::PlayerDeathEvent> for PlayerDeathEvent {
         Self { inner: event }
     }
 }
+impl PlayerDeathEvent {
+    pub fn new(player: PlayerPy, killer: Option<PlayerPy>, reason: i32, body: i32) -> Self {
+        Self {
+            inner: player::PlayerDeathEvent {
+                player_id: player.get_id(),
+                killer_id: killer.map(|p| p.get_id()).unwrap_or(-1),
+                reason,
+                body,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerDeathEvent {
     fn event_name(&self) -> String {
         "PlayerDeathEvent".to_string()
@@ -418,6 +498,16 @@ impl PlayerUpdateEvent {
 impl From<player::PlayerUpdateEvent> for PlayerUpdateEvent {
     fn from(event: player::PlayerUpdateEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerUpdateEvent {
+    pub fn new(player: PlayerPy, update: i32) -> Self {
+        Self {
+            inner: player::PlayerUpdateEvent {
+                player_id: player.get_id(),
+                update,
+            },
+        }
     }
 }
 impl PyEvent for PlayerUpdateEvent {
@@ -471,6 +561,17 @@ impl From<player::PlayerRequestEnterVehicleEvent> for PlayerRequestEnterVehicleE
         Self { inner: event }
     }
 }
+impl PlayerRequestEnterVehicleEvent {
+    pub fn new(player: PlayerPy, vehicle: VehiclePy, slot_index: i32) -> Self {
+        Self {
+            inner: player::PlayerRequestEnterVehicleEvent {
+                player_id: player.get_id(),
+                vehicle_id: vehicle.get_id(),
+                slot_index,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerRequestEnterVehicleEvent {
     fn event_name(&self) -> String {
         "PlayerRequestEnterVehicleEvent".to_string()
@@ -522,6 +623,17 @@ impl From<player::PlayerEnterVehicleEvent> for PlayerEnterVehicleEvent {
         Self { inner: event }
     }
 }
+impl PlayerEnterVehicleEvent {
+    pub fn new(player: PlayerPy, vehicle: VehiclePy, slot_index: i32) -> Self {
+        Self {
+            inner: player::PlayerEnterVehicleEvent {
+                player_id: player.get_id(),
+                vehicle_id: vehicle.get_id(),
+                slot_index,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerEnterVehicleEvent {
     fn event_name(&self) -> String {
         "PlayerEnterVehicleEvent".to_string()
@@ -566,6 +678,16 @@ impl PlayerExitVehicleEvent {
 impl From<player::PlayerExitVehicleEvent> for PlayerExitVehicleEvent {
     fn from(event: player::PlayerExitVehicleEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerExitVehicleEvent {
+    pub fn new(player: PlayerPy, vehicle: VehiclePy) -> Self {
+        Self {
+            inner: player::PlayerExitVehicleEvent {
+                player_id: player.get_id(),
+                vehicle_id: vehicle.get_id(),
+            },
+        }
     }
 }
 impl PyEvent for PlayerExitVehicleEvent {
@@ -618,6 +740,17 @@ impl From<player::PlayerNameChangeEvent> for PlayerNameChangeEvent {
         Self { inner: event }
     }
 }
+impl PlayerNameChangeEvent {
+    pub fn new(player: PlayerPy, old_name: String, new_name: String) -> Self {
+        Self {
+            inner: player::PlayerNameChangeEvent {
+                player_id: player.get_id(),
+                old_name,
+                new_name,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerNameChangeEvent {
     fn event_name(&self) -> String {
         "PlayerNameChangeEvent".to_string()
@@ -666,6 +799,17 @@ impl PlayerStateChangeEvent {
 impl From<player::PlayerStateChangeEvent> for PlayerStateChangeEvent {
     fn from(event: player::PlayerStateChangeEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerStateChangeEvent {
+    pub fn new(player: PlayerPy, old_state: i32, new_state: i32) -> Self {
+        Self {
+            inner: player::PlayerStateChangeEvent {
+                player_id: player.get_id(),
+                old_state,
+                new_state,
+            },
+        }
     }
 }
 impl PyEvent for PlayerStateChangeEvent {
@@ -718,6 +862,17 @@ impl From<player::PlayerActionChangeEvent> for PlayerActionChangeEvent {
         Self { inner: event }
     }
 }
+impl PlayerActionChangeEvent {
+    pub fn new(player: PlayerPy, old_action: i32, new_action: i32) -> Self {
+        Self {
+            inner: player::PlayerActionChangeEvent {
+                player_id: player.get_id(),
+                old_action,
+                new_action,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerActionChangeEvent {
     fn event_name(&self) -> String {
         "PlayerActionChangeEvent".to_string()
@@ -763,6 +918,16 @@ impl From<player::PlayerOnFireChangeEvent> for PlayerOnFireChangeEvent {
         Self { inner: event }
     }
 }
+impl PlayerOnFireChangeEvent {
+    pub fn new(player: PlayerPy, is_on_fire: bool) -> Self {
+        Self {
+            inner: player::PlayerOnFireChangeEvent {
+                player_id: player.get_id(),
+                is_on_fire,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerOnFireChangeEvent {
     fn event_name(&self) -> String {
         "PlayerOnFireChangeEvent".to_string()
@@ -806,6 +971,16 @@ impl PlayerCrouchChangeEvent {
 impl From<player::PlayerCrouchChangeEvent> for PlayerCrouchChangeEvent {
     fn from(event: player::PlayerCrouchChangeEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerCrouchChangeEvent {
+    pub fn new(player: PlayerPy, is_crouching: bool) -> Self {
+        Self {
+            inner: player::PlayerCrouchChangeEvent {
+                player_id: player.get_id(),
+                is_crouching,
+            },
+        }
     }
 }
 impl PyEvent for PlayerCrouchChangeEvent {
@@ -858,6 +1033,17 @@ impl From<player::PlayerGameKeysChangeEvent> for PlayerGameKeysChangeEvent {
         Self { inner: event }
     }
 }
+impl PlayerGameKeysChangeEvent {
+    pub fn new(player: PlayerPy, old_keys: u32, new_keys: u32) -> Self {
+        Self {
+            inner: player::PlayerGameKeysChangeEvent {
+                player_id: player.get_id(),
+                old_keys,
+                new_keys,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerGameKeysChangeEvent {
     fn event_name(&self) -> String {
         "PlayerGameKeysChangeEvent".to_string()
@@ -895,6 +1081,15 @@ impl From<player::PlayerBeginTypingEvent> for PlayerBeginTypingEvent {
         Self { inner: event }
     }
 }
+impl PlayerBeginTypingEvent {
+    pub fn new(player: PlayerPy) -> Self {
+        Self {
+            inner: player::PlayerBeginTypingEvent {
+                player_id: player.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for PlayerBeginTypingEvent {
     fn event_name(&self) -> String {
         "PlayerBeginTypingEvent".to_string()
@@ -930,6 +1125,15 @@ impl PlayerEndTypingEvent {
 impl From<player::PlayerEndTypingEvent> for PlayerEndTypingEvent {
     fn from(event: player::PlayerEndTypingEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerEndTypingEvent {
+    pub fn new(player: PlayerPy) -> Self {
+        Self {
+            inner: player::PlayerEndTypingEvent {
+                player_id: player.get_id(),
+            },
+        }
     }
 }
 impl PyEvent for PlayerEndTypingEvent {
@@ -977,6 +1181,16 @@ impl From<player::PlayerAwayChangeEvent> for PlayerAwayChangeEvent {
         Self { inner: event }
     }
 }
+impl PlayerAwayChangeEvent {
+    pub fn new(player: PlayerPy, is_away: bool) -> Self {
+        Self {
+            inner: player::PlayerAwayChangeEvent {
+                player_id: player.get_id(),
+                is_away,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerAwayChangeEvent {
     fn event_name(&self) -> String {
         "PlayerAwayChangeEvent".to_string()
@@ -1020,6 +1234,16 @@ impl PlayerMessageEvent {
 impl From<player::PlayerMessageEvent> for PlayerMessageEvent {
     fn from(event: player::PlayerMessageEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerMessageEvent {
+    pub fn new(player: PlayerPy, message: String) -> Self {
+        Self {
+            inner: player::PlayerMessageEvent {
+                player_id: player.get_id(),
+                message,
+            },
+        }
     }
 }
 impl PyEvent for PlayerMessageEvent {
@@ -1082,6 +1306,17 @@ impl From<player::PlayerCommandEvent> for PlayerCommandEvent {
         Self { inner: event }
     }
 }
+impl PlayerCommandEvent {
+    pub fn new(player: PlayerPy, command: String, text: String) -> Self {
+        Self {
+            inner: player::PlayerCommandEvent {
+                player_id: player.get_id(),
+                command,
+                text,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerCommandEvent {
     fn event_name(&self) -> String {
         "PlayerCommandEvent".to_string()
@@ -1133,6 +1368,17 @@ impl From<player::PlayerPrivateMessageEvent> for PlayerPrivateMessageEvent {
         Self { inner: event }
     }
 }
+impl PlayerPrivateMessageEvent {
+    pub fn new(player: PlayerPy, target: PlayerPy, message: String) -> Self {
+        Self {
+            inner: player::PlayerPrivateMessageEvent {
+                player_id: player.get_id(),
+                target_id: target.get_id(),
+                message,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerPrivateMessageEvent {
     fn event_name(&self) -> String {
         "PlayerPrivateMessageEvent".to_string()
@@ -1178,6 +1424,16 @@ impl From<player::PlayerKeyBindDownEvent> for PlayerKeyBindDownEvent {
         Self { inner: event }
     }
 }
+impl PlayerKeyBindDownEvent {
+    pub fn new(player: PlayerPy, bind_id: i32) -> Self {
+        Self {
+            inner: player::PlayerKeyBindDownEvent {
+                player_id: player.get_id(),
+                bind_id,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerKeyBindDownEvent {
     fn event_name(&self) -> String {
         "PlayerKeyBindDownEvent".to_string()
@@ -1221,6 +1477,16 @@ impl PlayerKeyBindUpEvent {
 impl From<player::PlayerKeyBindUpEvent> for PlayerKeyBindUpEvent {
     fn from(event: player::PlayerKeyBindUpEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerKeyBindUpEvent {
+    pub fn new(player: PlayerPy, bind_id: i32) -> Self {
+        Self {
+            inner: player::PlayerKeyBindUpEvent {
+                player_id: player.get_id(),
+                bind_id,
+            },
+        }
     }
 }
 impl PyEvent for PlayerKeyBindUpEvent {
@@ -1269,6 +1535,16 @@ impl From<player::PlayerSpectateEvent> for PlayerSpectateEvent {
         Self { inner: event }
     }
 }
+impl PlayerSpectateEvent {
+    pub fn new(player: PlayerPy, target: Option<PlayerPy>) -> Self {
+        Self {
+            inner: player::PlayerSpectateEvent {
+                player_id: player.get_id(),
+                target_id: target.map(|p| p.get_id()).unwrap_or(-1),
+            },
+        }
+    }
+}
 impl PyEvent for PlayerSpectateEvent {
     fn event_name(&self) -> String {
         "PlayerSpectateEvent".to_string()
@@ -1314,6 +1590,16 @@ impl From<player::PlayerCrashReportEvent> for PlayerCrashReportEvent {
         Self { inner: event }
     }
 }
+impl PlayerCrashReportEvent {
+    pub fn new(player: PlayerPy, report: String) -> Self {
+        Self {
+            inner: player::PlayerCrashReportEvent {
+                player_id: player.get_id(),
+                report,
+            },
+        }
+    }
+}
 impl PyEvent for PlayerCrashReportEvent {
     fn event_name(&self) -> String {
         "PlayerCrashReportEvent".to_string()
@@ -1357,6 +1643,16 @@ impl PlayerModuleListEvent {
 impl From<player::PlayerModuleListEvent> for PlayerModuleListEvent {
     fn from(event: player::PlayerModuleListEvent) -> Self {
         Self { inner: event }
+    }
+}
+impl PlayerModuleListEvent {
+    pub fn new(player: PlayerPy, modules: String) -> Self {
+        Self {
+            inner: player::PlayerModuleListEvent {
+                player_id: player.get_id(),
+                modules,
+            },
+        }
     }
 }
 impl PyEvent for PlayerModuleListEvent {
@@ -1431,6 +1727,16 @@ impl From<(i32, f32, f32)> for PlayerHealthChangeEvent {
         }
     }
 }
+impl PlayerHealthChangeEvent {
+    pub fn new(player: PlayerPy, old_health: f32, new_health: f32) -> Self {
+        Self {
+            player_id: player.get_id(),
+            old_health,
+            new_health,
+            current_health: new_health,
+        }
+    }
+}
 impl PyEvent for PlayerHealthChangeEvent {
     fn event_name(&self) -> String {
         "PlayerHealthChangeEvent".to_string()
@@ -1498,6 +1804,16 @@ impl From<(i32, f32, f32)> for PlayerArmourChangeEvent {
             old_armour: value.1,
             new_armour: value.2,
             current_armour: value.2,
+        }
+    }
+}
+impl PlayerArmourChangeEvent {
+    pub fn new(player: PlayerPy, old_armour: f32, new_armour: f32) -> Self {
+        Self {
+            player_id: player.get_id(),
+            old_armour,
+            new_armour,
+            current_armour: new_armour,
         }
     }
 }
@@ -1571,6 +1887,16 @@ impl From<(i32, i32, i32)> for PlayerWeaponChangeEvent {
         }
     }
 }
+impl PlayerWeaponChangeEvent {
+    pub fn new(player: PlayerPy, old_weapon: i32, new_weapon: i32) -> Self {
+        Self {
+            player_id: player.get_id(),
+            old_weapon,
+            new_weapon,
+            current_weapon: new_weapon,
+        }
+    }
+}
 impl PyEvent for PlayerWeaponChangeEvent {
     fn event_name(&self) -> String {
         "PlayerWeaponChangeEvent".to_string()
@@ -1641,6 +1967,16 @@ impl From<(i32, i32, i32)> for PlayerAmmoChangeEvent {
         }
     }
 }
+impl PlayerAmmoChangeEvent {
+    pub fn new(player: PlayerPy, old_ammo: i32, new_ammo: i32) -> Self {
+        Self {
+            player_id: player.get_id(),
+            old_ammo,
+            new_ammo,
+            current_ammo: new_ammo,
+        }
+    }
+}
 impl PyEvent for PlayerAmmoChangeEvent {
     fn event_name(&self) -> String {
         "PlayerAmmoChangeEvent".to_string()
@@ -1708,6 +2044,16 @@ impl From<(i32, VectorPy, VectorPy)> for PlayerMoveEvent {
             old_position: value.1,
             new_position: value.2,
             current_position: value.2,
+        }
+    }
+}
+impl PlayerMoveEvent {
+    pub fn new(player: PlayerPy, old_position: VectorPy, new_position: VectorPy) -> Self {
+        Self {
+            player_id: player.get_id(),
+            old_position,
+            new_position,
+            current_position: new_position,
         }
     }
 }

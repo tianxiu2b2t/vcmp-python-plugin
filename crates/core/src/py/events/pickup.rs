@@ -14,13 +14,11 @@ use vcmp_bindings::events::pickup;
 #[derive(Debug, Clone)]
 #[pyclass(extends=BaseEvent, subclass)]
 pub struct PickupEvent {}
-
 impl PickupEvent {
     pub fn new() -> (Self, BaseEvent) {
         (Self {}, BaseEvent::default())
     }
 }
-
 impl PyEvent for PickupEvent {
     fn event_name(&self) -> String {
         "PickupEvent".to_string()
@@ -41,7 +39,6 @@ impl PyEvent for PickupEvent {
 pub struct PickupPickAttemptEvent {
     pub inner: pickup::PickupPickAttemptEvent,
 }
-
 #[pymethods]
 impl PickupPickAttemptEvent {
     #[getter]
@@ -64,13 +61,21 @@ impl PickupPickAttemptEvent {
         )
     }
 }
-
 impl From<pickup::PickupPickAttemptEvent> for PickupPickAttemptEvent {
     fn from(event: pickup::PickupPickAttemptEvent) -> Self {
         Self { inner: event }
     }
 }
-
+impl PickupPickAttemptEvent {
+    pub fn new(pickup: PickupPy, player: PlayerPy) -> Self {
+        Self {
+            inner: pickup::PickupPickAttemptEvent {
+                pickup_id: pickup.get_id(),
+                player_id: player.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for PickupPickAttemptEvent {
     fn event_name(&self) -> String {
         "PickupPickAttemptEvent".to_string()
@@ -91,7 +96,6 @@ impl PyEvent for PickupPickAttemptEvent {
 pub struct PickupPickedEvent {
     pub inner: pickup::PickupPickedEvent,
 }
-
 #[pymethods]
 impl PickupPickedEvent {
     #[getter]
@@ -114,13 +118,21 @@ impl PickupPickedEvent {
         )
     }
 }
-
 impl From<pickup::PickupPickedEvent> for PickupPickedEvent {
     fn from(event: pickup::PickupPickedEvent) -> Self {
         Self { inner: event }
     }
 }
-
+impl PickupPickedEvent {
+    pub fn new(pickup: PickupPy, player: PlayerPy) -> Self {
+        Self {
+            inner: pickup::PickupPickedEvent {
+                pickup_id: pickup.get_id(),
+                player_id: player.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for PickupPickedEvent {
     fn event_name(&self) -> String {
         "PickupPickedEvent".to_string()
@@ -141,7 +153,6 @@ impl PyEvent for PickupPickedEvent {
 pub struct PickupRespawnEvent {
     pub inner: pickup::PickupRespawnEvent,
 }
-
 #[pymethods]
 impl PickupRespawnEvent {
     #[getter]
@@ -154,13 +165,20 @@ impl PickupRespawnEvent {
         format!("PickupRespawnEvent(pickup={:?})", self.pickup())
     }
 }
-
 impl From<pickup::PickupRespawnEvent> for PickupRespawnEvent {
     fn from(event: pickup::PickupRespawnEvent) -> Self {
         Self { inner: event }
     }
 }
-
+impl PickupRespawnEvent {
+    pub fn new(pickup: PickupPy) -> Self {
+        Self {
+            inner: pickup::PickupRespawnEvent {
+                pickup_id: pickup.get_id(),
+            },
+        }
+    }
+}
 impl PyEvent for PickupRespawnEvent {
     fn event_name(&self) -> String {
         "PickupRespawnEvent".to_string()
