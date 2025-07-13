@@ -7,7 +7,7 @@ use crate::py::events::{
 };
 use crate::py::types::VectorPy;
 use vcmp_bindings::events::{checkpoint, object, pickup, player, server, vehicle};
-use vcmp_bindings::func::PlayerMethods;
+use vcmp_bindings::func::{PlayerMethods, QueryVehicle, SetVehicle};
 use vcmp_bindings::vcmp_func;
 use vcmp_bindings::{options::VcmpEntityPool, raw::PluginCallbacks};
 
@@ -533,6 +533,44 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
 /// FFI callback for vehicle update
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
+    {
+        let mut vehicle = *ENTITY_POOL.lock().unwrap().get_vehicle(vehicle_id).unwrap();
+        {
+            // health change
+            let current_health = vcmp_func().get_vehicle_health(vehicle_id);
+            let last_health = vehicle.last_health;
+            if current_health != last_health {
+                let event = VehicleHealthChangeEvent::from((
+                    vehicle_id,
+                    last_health,
+                    current_health,
+                ));
+                let health_res =
+                    PY_CALLBACK_MANAGER.handle(VcmpEvent::VehicleHealthChange(event), true);
+                if !health_res {
+                    let _ = vcmp_func().set_vehicle_health(vehicle_id, event.current_health);
+                }
+                vehicle.last_health = event.current_health;
+            }
+        }
+        {
+            // move change
+            let current_pos = vehicle.get_position().get_entity_pos();
+            let last_pos = vehicle.last_pos;
+            if current_pos != last_pos {
+                let event = VehicleMoveEvent::from((
+                    vehicle_id,
+                    VectorPy::from(last_pos),
+                    VectorPy::from(current_pos),
+                ));
+                let move_res = PY_CALLBACK_MANAGER.handle(VcmpEvent::VehicleMove(event), true);
+                if !move_res {
+                    let _ = vcmp_func().set_vehicle_position(vehicle_id, event.current_position.into(), Some(false));
+                }
+                vehicle.last_pos = event.current_position.get_entity_pos();
+            }
+        }
+    }
     let binding_event = vehicle::VehicleUpdateEvent::from((vehicle_id, update_type));
     let _ = PY_CALLBACK_MANAGER.handle(
         VcmpEvent::VehicleUpdate(VehicleUpdateEvent::from(binding_event)),
