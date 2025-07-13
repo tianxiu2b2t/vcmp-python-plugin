@@ -40,14 +40,14 @@ pub fn init() {
                 .expect("Failed to build log file writer.")
         };
         let (non_blocking_file, guard) = tracing_appender::non_blocking(file_appender);
-    
+
         let _ = LOG_FILE_GUARD.set(guard);
         let file = non_blocking_file.with_max_level(level);
         let file_layer = fmt::layer().with_writer(file).with_ansi(false);
-        registry.with(file_layer);
+        registry.with(file_layer).init();
+    } else {
+        registry.init();        
     }
-    
-    registry.init();
 
     event!(
         Level::INFO,
