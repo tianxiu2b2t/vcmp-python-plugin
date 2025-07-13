@@ -267,6 +267,30 @@ impl PyVcmpEvent {
         ))
     }
 
+    #[staticmethod]
+    fn server_frame(elapsed_time: f32) -> Self {
+        Self::new(VcmpEvent::ServerFrame(
+            server::ServerFrameEvent::from(elapsed_time),
+        ))
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (descriptions, times, entry_count = None))]
+    fn server_performance_report(descriptions: Vec<String>, times: Vec<u64>, entry_count: Option<usize>) -> Self {
+        let count = entry_count.unwrap_or(std::cmp::max(descriptions.len(), times.len()));
+        // fill descriptions and times with empty strings and 0s respectively
+        let mut descriptions = descriptions;
+        let mut times = times;
+        descriptions.resize(count, "".to_string());
+        times.resize(count, 0);
+
+        Self::new(VcmpEvent::ServerPerformanceReport(
+            server::ServerPerformanceReportEvent::from((descriptions, times, entry_count)),
+        ))
+    }
+
+    
+
     // TODO: this func
 }
 

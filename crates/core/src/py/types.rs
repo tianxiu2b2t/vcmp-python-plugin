@@ -1,4 +1,4 @@
-use std::{fmt::Debug, ops::Add};
+use std::{fmt::Debug, ops::{Add, Sub, Mul, Div}};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
@@ -493,6 +493,54 @@ impl Add for VectorPy {
     }
 }
 
+impl Sub for VectorPy {
+    type Output = Self;
+    fn sub(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_pos();
+        let other = rhs.get_entity_pos();
+
+        self.set_entity_pos(
+            Some(origin.x - other.x),
+            Some(origin.y - other.y),
+            Some(origin.z - other.z),
+        );
+
+        self
+    }
+}
+
+impl Div for VectorPy {
+    type Output = Self;
+    fn div(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_pos();
+        let other = rhs.get_entity_pos();
+
+        self.set_entity_pos(
+            Some(origin.x / other.x),
+            Some(origin.y / other.y),
+            Some(origin.z / other.z),
+        );
+
+        self
+    }
+}
+
+impl Mul for VectorPy {
+    type Output = Self;
+    fn mul(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_pos();
+        let other = rhs.get_entity_pos();
+
+        self.set_entity_pos(
+            Some(origin.x * other.x),
+            Some(origin.y * other.y),
+            Some(origin.z * other.z),
+        );
+
+        self
+    }
+}
+
 impl Default for VectorPy {
     fn default() -> Self {
         Self {
@@ -579,6 +627,46 @@ impl VectorPy {
         let pos = self.get_entity_pos();
         format!("Vector(x={}, y={}, z={})", pos.x, pos.y, pos.z)
     }
+
+    // support - + / * for VectorPy
+    fn __add__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
+        py.allow_threads(|| self.clone() + other.clone())
+    }
+
+    fn __sub__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
+        py.allow_threads(|| self.clone() - other.clone())
+    }
+
+    fn __mul__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
+        py.allow_threads(|| self.clone() * other.clone())
+    }
+
+    fn __truediv__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
+        py.allow_threads(|| self.clone() / other.clone())
+    }
+
+    pub fn distance(&self, py: Python<'_>, other: &VectorPy) -> f32 {
+        py.allow_threads(|| {
+            let origin = self.get_entity_pos();
+            let other = other.get_entity_pos();
+
+            ((origin.x - other.x).powi(2) + (origin.y - other.y).powi(2)).sqrt()
+        })
+    }
+
+    pub fn distance_with_z(&self, py: Python<'_>, other: &VectorPy) -> f32 {
+        py.allow_threads(|| {
+            let origin = self.get_entity_pos();
+            let other = other.get_entity_pos();
+
+            ((origin.x - other.x).powi(2)
+                + (origin.y - other.y).powi(2)
+                + (origin.z - other.z).powi(2))
+            .sqrt()
+        })
+    }
+
+    // distance from
 }
 
 #[derive(Clone, Debug, Copy)]
@@ -696,6 +784,57 @@ impl Add for QuaternionPy {
     }
 }
 
+impl Sub for QuaternionPy {
+    type Output = Self;
+    fn sub(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_quaternion();
+        let other = rhs.get_entity_quaternion();
+
+        self.set_entity_quaternion(
+            Some(origin.x - other.x),
+            Some(origin.y - other.y),
+            Some(origin.z - other.z),
+            Some(origin.w - other.w),
+        );
+
+        self
+    }
+}
+
+impl Mul for QuaternionPy {
+    type Output = Self;
+    fn mul(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_quaternion();
+        let other = rhs.get_entity_quaternion();
+
+        self.set_entity_quaternion(
+            Some(origin.x * other.x),
+            Some(origin.y * other.y),
+            Some(origin.z * other.z),
+            Some(origin.w * other.w),
+        );
+
+        self
+    }
+}
+
+impl Div for QuaternionPy {
+    type Output = Self;
+    fn div(mut self, rhs: Self) -> Self {
+        let origin = self.get_entity_quaternion();
+        let other = rhs.get_entity_quaternion();
+
+        self.set_entity_quaternion(
+            Some(origin.x / other.x),
+            Some(origin.y / other.y),
+            Some(origin.z / other.z),
+            Some(origin.w / other.w),
+        );
+
+        self
+    }
+}
+
 impl Default for QuaternionPy {
     fn default() -> Self {
         Self {
@@ -768,6 +907,22 @@ impl QuaternionPy {
         py.allow_threads(|| {
             self.set_entity_quaternion(None, Some(value), None, None);
         });
+    }
+
+    fn __add__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
+        py.allow_threads(|| self.clone() + other.clone())
+    }
+
+    fn __sub__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
+        py.allow_threads(|| self.clone() - other.clone())
+    }
+
+    fn __mul__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
+        py.allow_threads(|| self.clone() * other.clone())
+    }
+
+    fn __div__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
+        py.allow_threads(|| self.clone() / other.clone())
     }
 
     fn __repr__(&self) -> String {
