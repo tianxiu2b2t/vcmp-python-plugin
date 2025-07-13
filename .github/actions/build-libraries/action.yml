@@ -17,6 +17,7 @@ runs:
   steps:
     - uses: ./.github/actions/setup-environment
     - run: cargo build --release
+      shell: bash
 
     - name: Upload Artifact
       uses: actions/upload-artifact@v4
@@ -25,6 +26,8 @@ runs:
         path: |
           target/release/*.dll
           target/release/*.so
+          
 
     - name: Save Artifact Names
       run: echo "artifact_name=libraries_${{ inputs.os }}_x64_${{ inputs.python-version }}" >> $GITHUB_ENV
+      shell: bash
