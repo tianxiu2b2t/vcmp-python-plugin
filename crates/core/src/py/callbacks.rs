@@ -281,6 +281,7 @@ impl PyCallbackManager {
             VcmpEvent::VehicleUpdate(event) => event.init(py),
             VcmpEvent::VehicleMove(event) => event.init(py),
             VcmpEvent::VehicleHealthChange(event) => event.init(py),
+            VcmpEvent::Custom(event) => event.init(py),
         }
     }
 }
@@ -288,7 +289,6 @@ impl PyCallbackManager {
 #[pymethods]
 impl PyCallbackManager {
     pub fn trigger(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
-        println!("{event:?}");
         self.py_handle(py, event)
     }
 
@@ -789,6 +789,16 @@ impl PyCallbackManager {
         func: Option<Py<PyAny>>,
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::VehicleHealthChange, func, priority)
+    }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_custom(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::Custom, func, priority)
     }
 }
 

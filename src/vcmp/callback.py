@@ -1,10 +1,10 @@
 from typing import Callable, Optional, Any
 
-from vcmp.events.abc import Event
+from vcmp.events import EventBuilder
 
 
 class CallbackManager:
-    def trigger(self, event: Event) -> Callable[..., Any]: ...
+    def trigger(self, event: EventBuilder) -> Callable[..., Any]: ...
     
     def on_server_initialise(
         self,
@@ -301,6 +301,12 @@ class CallbackManager:
     ) -> Callable[..., Any]: ...
     
     def on_vehicle_health_change(
+        self,
+        priority: int = 9999,
+        func: Optional[Callable[..., Any]] = None
+    ) -> Callable[..., Any]: ...
+
+    def on_custom(
         self,
         priority: int = 9999,
         func: Optional[Callable[..., Any]] = None

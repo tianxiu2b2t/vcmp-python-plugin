@@ -12,6 +12,13 @@ pub struct BaseEvent {
     kwargs: HashMap<String, Py<PyAny>>,
 }
 
+impl BaseEvent {
+    pub fn kwargs(&mut self, kwargs: HashMap<String, Py<PyAny>>) -> Self {
+        self.kwargs = kwargs;
+        self.clone()
+    }
+}
+
 #[pymethods]
 impl BaseEvent {
     #[getter]

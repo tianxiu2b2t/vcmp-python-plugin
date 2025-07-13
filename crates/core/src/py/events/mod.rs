@@ -14,6 +14,7 @@ pub mod pickup;
 pub mod player;
 pub mod server;
 pub mod vehicle;
+pub mod custom;
 
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum VcmpEventType {
@@ -82,6 +83,9 @@ pub enum VcmpEventType {
     // Vehicle Extra
     VehicleMove,
     VehicleHealthChange,
+
+    // Custom
+    Custom
 }
 
 #[derive(Debug, Clone)]
@@ -149,6 +153,9 @@ pub enum VcmpEvent {
     // Vehicle Extra
     VehicleMove(vehicle::VehicleMoveEvent),
     VehicleHealthChange(vehicle::VehicleHealthChangeEvent),
+
+    // Custom
+    Custom(custom::CustomEvent),
 }
 
 impl From<VcmpEvent> for VcmpEventType {
@@ -219,6 +226,9 @@ impl From<VcmpEvent> for VcmpEventType {
             // Vehicle Extra
             VcmpEvent::VehicleMove(_) => Self::VehicleMove,
             VcmpEvent::VehicleHealthChange(_) => Self::VehicleHealthChange,
+
+            // Custom
+            VcmpEvent::Custom(_) => Self::Custom,
         }
     }
 }
@@ -612,6 +622,15 @@ impl PyVcmpEvent {
             vehicle::VehicleHealthChangeEvent::new(vehicle, old_health, new_health),
         ))
     }
+
+    // Custom
+    #[staticmethod]
+    #[pyo3(signature = (**kwargs))]
+    fn custom(kwargs: Option<HashMap<String, Py<PyAny>>>) -> Self {
+        Self::new(VcmpEvent::Custom(
+            custom::CustomEvent::default(),
+        )).with_kwargs(kwargs.unwrap_or_default())
+    }
 }
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -651,6 +670,12 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_submodule(&vehicle_module)?;
 
     m.add_class::<PyVcmpEvent>()?;
+
+    // Custom
+    let custom_module = PyModule::new(py, "custom")?;
+    custom::module_define(py, &custom_module)?;
+    fix_module_name(py, &custom_module, "events.custom");
+    m.add_submodule(&custom_module)?;
 
     Ok(())
 }
