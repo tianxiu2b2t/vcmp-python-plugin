@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Setup Python environment
-        uses: ./.github/actions/setup-python
+        uses: ./.github/actions/setup-environment
         with:
           python-version: ${{ matrix.python-version }}
 
