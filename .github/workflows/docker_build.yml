@@ -1,12 +1,11 @@
-name: Docker Preview Build (next tag)
 
-# 触发条件：master分支推送（推送预览版Docker镜像）
+name: Docker build
+
 on:
-  push:
+  push: 
     branches: [ master ]
 
 jobs:
-  # 1. 构建artifact（复用工作流）
   build_and_upload:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -14,29 +13,96 @@ jobs:
         os: [ubuntu-22.04]
         arch: ['x64']
         python-version: ['3.13']
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    uses: ./.github/workflows/.build-and-upload.yml
-    with:
-      os: ${{ matrix.os }}
-      arch: ${{ matrix.arch }}
-      python-version: ${{ matrix.python-version }}
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
 
-  # 2. 构建并推送Docker预览版
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - run: cargo build --release
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: libraries_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}
+          path: |
+            target/release/*.dll
+            target/release/*.so
+
+      - name: Save Artifact Names
+        run: echo "artifact_name=libraries_${{ matrix.os }}_${{ matrix.arch }}_${{ matrix.python-version }}" >> $GITHUB_ENV
+    
   build-multiarch:
     runs-on: ubuntu-latest
     needs: build_and_upload
     steps:
       - uses: actions/checkout@v4
+      - name: Set env
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-      # 处理artifact（复用复合动作）
-      - name: Process Artifacts
-        uses: ./.github/actions/process-artifacts
+      - name: List Artifacts
+        run: |
+          echo "Artifacts available: ${{ needs.build_and_upload.outputs.artifact_name }}"
+  
+      - name: Download DLL Artifacts
+        uses: actions/download-artifact@v4
         with:
-          artifact-name: ${{ needs.build_and_upload.outputs.artifact-name }}
-          output-dir: libraries
+          name: ${{ needs.build_and_upload.outputs.artifact_name }} # 动态获取工件名称
+          path: ./dl_libraries
 
-      # 推送Docker预览版（标签为next）
-      - name: Build and Push Docker (next)
-        uses: ./.github/actions/build-docker
+      - name: Move downloaded DLLs to libraries folder and clean empty folders
+        run: |
+          mkdir -p libraries
+
+          # 处理 Windows DLL 文件
+          for file in dl_libraries/**/*.dll; do
+            if [[ $file =~ libraries_windows-latest_x64_([0-9]+)\.([0-9]+) ]]; then
+              major="${BASH_REMATCH[1]}"
+              minor="${BASH_REMATCH[2]}"
+              version="${major}${minor}"
+              new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.dll"
+              cp "$file" "libraries/$new_name"
+            fi
+          done
+
+          # 处理 Linux SO 文件
+          for file in dl_libraries/**/*.so; do
+            if [[ $file =~ libraries_ubuntu-22.04_x64_([0-9]+)\.([0-9]+) ]]; then
+              major="${BASH_REMATCH[1]}"
+              minor="${BASH_REMATCH[2]}"
+              version="${major}${minor}"
+              new_name="vcmp-python-plugin-04rel64-rspyo3-py${version}.so"
+              cp "$file" "libraries/$new_name"
+            fi
+          done
+
+          # 清理下载目录
+          rm -rf dl_libraries
+          
+      - name: List Artifacts after download
+        run: ls -a ./libraries
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          tags: atianxiua/vcmp-python:next
+          username: ${{ secrets.HUB_USERNAME }}
+          password: ${{ secrets.HUB_PASSWORD }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: |
+            atianxiua/vcmp-python:next
+          platforms: linux/amd64

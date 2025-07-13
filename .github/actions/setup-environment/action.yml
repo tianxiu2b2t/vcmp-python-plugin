@@ -1,0 +1,32 @@
+name: Setup Python
+description: Setup Python
+
+inputs:
+  python-version:
+    description: Python version
+    required: false
+    default: "3.10"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - uses: pdm-project/setup-pdm@v4
+      name: Setup PDM
+      with:
+        python-version: ${{ inputs.python-version }}
+        architecture: "x64"
+        cache: true
+
+    - uses: actions/setup-python@v4
+      name: Setup Python
+      with:
+        python-version: ${{ inputs.python-version }}
+        architecture: "x64"
+        cache: true
+      
+    # echo python version
+    - name: Echo Python Version
+      run: "echo \"Python version: ${{ env.PYTHON_VERSION }}\""
