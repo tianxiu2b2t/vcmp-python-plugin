@@ -132,7 +132,7 @@ impl PlayerPy {
     }
 
     #[getter]
-    pub fn get_player_aim_direction(&self, py: Python<'_>) -> VectorPy {
+    pub fn get_aim_direction(&self, py: Python<'_>) -> VectorPy {
         py.allow_threads(|| {
             let res = vcmp_func().get_player_aim_direction(self.id);
             if let Ok(pos) = res {
@@ -144,7 +144,7 @@ impl PlayerPy {
     }
 
     #[getter]
-    pub fn get_player_aim_position(&self, py: Python<'_>) -> VectorPy {
+    pub fn get_aim_position(&self, py: Python<'_>) -> VectorPy {
         py.allow_threads(|| {
             let res = vcmp_func().get_player_aim_position(self.id);
             if let Ok(pos) = res {

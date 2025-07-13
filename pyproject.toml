@@ -1,6 +1,6 @@
 [project]
 name = "vcmp-python-plugin"
-version = "2.0.0-5"
+version = "2.0.0-6"
 description = "Python for VC:MP Server Plugin"
 authors = [
     {name = "shenjack", email = "3695888@qq.com"},
