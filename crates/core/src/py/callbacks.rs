@@ -235,6 +235,7 @@ impl PyCallbackManager {
             VcmpEvent::ServerShutdown(event) => event.init(py),
             VcmpEvent::ServerFrame(event) => event.init(py),
             VcmpEvent::ServerPerformanceReport(event) => event.init(py),
+            VcmpEvent::ServerReloaded(event) => event.init(py),
             VcmpEvent::IncomingConnection(event) => event.init(py),
             VcmpEvent::ClientScriptData(event) => event.init(py),
             VcmpEvent::PlayerConnect(event) => event.init(py),

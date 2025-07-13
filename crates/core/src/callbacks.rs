@@ -1,6 +1,5 @@
 use std::os::raw::c_char;
 
-use crate::py::GLOBAL_VAR;
 use crate::py::callbacks::PY_CALLBACK_MANAGER;
 use crate::py::events::{
     VcmpEvent, checkpoint::*, object::*, pickup::*, player::*, server::*, vehicle::*,
@@ -11,7 +10,7 @@ use vcmp_bindings::func::{PlayerMethods, QueryVehicle, SetVehicle};
 use vcmp_bindings::vcmp_func;
 use vcmp_bindings::{options::VcmpEntityPool, raw::PluginCallbacks};
 
-use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script_as_module};
+use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script, py::reload};
 use tracing::{Level, event};
 
 // use crate::py::callbacks::CALLBACK;
@@ -19,7 +18,7 @@ use tracing::{Level, event};
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
     if !CONFIG.get().unwrap().preloader {
-        load_script_as_module();
+        load_script();
     }
 
     let _ =
@@ -33,11 +32,7 @@ pub extern "C" fn on_server_init() -> u8 {
 pub extern "C" fn on_server_frame(elapsed_time: f32) {
     // first check need reload
 
-    let mut var = GLOBAL_VAR.lock().unwrap();
-    if var.need_reload {
-        var.need_reload = false;
-        load_script_as_module();
-    }
+    reload();
 
     // println!("[Rust] Server frame callback time: {}", elapsed_time);
     let _ = PY_CALLBACK_MANAGER.handle(
@@ -162,6 +157,13 @@ pub unsafe extern "C" fn on_client_script_data(client_id: i32, data: *const u8, 
 /// FFI callback for player class request
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_player_request_class(player_id: i32, class_id: i32) -> u8 {
+    {
+        // set loaded
+        let pool = ENTITY_POOL.lock().unwrap();
+        let mut player = *pool.get_player(player_id).unwrap();
+        player.loaded = true;
+    }
+
     let binding_event = player::PlayerRequestClassEvent::from((player_id, class_id));
     PY_CALLBACK_MANAGER.handle(
         VcmpEvent::PlayerRequestClass(PlayerRequestClassEvent::from(binding_event)),

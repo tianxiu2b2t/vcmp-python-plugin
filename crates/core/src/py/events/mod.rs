@@ -30,6 +30,9 @@ pub enum VcmpEventType {
     ServerFrame,
     ServerPerformanceReport,
 
+    // Server Extra
+    ServerReloaded,
+
     // Player
     IncomingConnection,
     ClientScriptData,
@@ -96,11 +99,16 @@ pub enum VcmpEventType {
 
 #[derive(Debug, Clone)]
 pub enum VcmpEvent {
+    // Server
     ServerInitialise(server::ServerInitialiseEvent),
     ServerShutdown(server::ServerShutdownEvent),
     ServerFrame(server::ServerFrameEvent),
     ServerPerformanceReport(server::ServerPerformanceReportEvent),
 
+    // Server Extra
+    ServerReloaded(server::ServerReloadedEvent),
+
+    // Player
     IncomingConnection(player::IncomingConnectionEvent),
     ClientScriptData(player::ClientScriptDataEvent),
     PlayerConnect(player::PlayerConnectEvent),
@@ -172,6 +180,9 @@ impl From<VcmpEvent> for VcmpEventType {
             VcmpEvent::ServerShutdown(_) => Self::ServerShutdown,
             VcmpEvent::ServerFrame(_) => Self::ServerFrame,
             VcmpEvent::ServerPerformanceReport(_) => Self::ServerPerformanceReport,
+
+            // Server Extra
+            VcmpEvent::ServerReloaded(_) => Self::ServerReloaded,
 
             // Player
             VcmpEvent::IncomingConnection(_) => Self::IncomingConnection,
@@ -264,7 +275,7 @@ impl From<VcmpEvent> for PyVcmpEvent {
 
 #[pymethods]
 impl PyVcmpEvent {
-    fn with_kwargs(&mut self, kwargs: HashMap<String, Py<PyAny>>) -> Self {
+    pub fn with_kwargs(&mut self, kwargs: HashMap<String, Py<PyAny>>) -> Self {
         self.kwargs = kwargs;
         self.clone()
     }
@@ -307,6 +318,12 @@ impl PyVcmpEvent {
         Self::new(VcmpEvent::ServerPerformanceReport(
             server::ServerPerformanceReportEvent::new(descriptions, times, count),
         ))
+    }
+
+    #[staticmethod]
+    #[pyo3(signature = (elapsed_time))]
+    fn server_reloaded(elapsed_time: f64) -> Self {
+        Self::new(VcmpEvent::ServerReloaded(server::ServerReloadedEvent::new(elapsed_time)))
     }
 
     #[staticmethod]

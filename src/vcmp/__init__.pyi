@@ -5,7 +5,7 @@ from . import callbacks
 from . import events
 from . import instance
 
-def reload():
+def reload(**kwargs):
     """
     Reloads the module.
     

@@ -46,7 +46,7 @@ pub fn init() {
         let file_layer = fmt::layer().with_writer(file).with_ansi(false);
         registry.with(file_layer).init();
     } else {
-        registry.init();        
+        registry.init();
     }
 
     event!(

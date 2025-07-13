@@ -169,6 +169,50 @@ impl PyEvent for ServerPerformanceReportEvent {
     }
 }
 
+// Extra
+#[derive(Debug, Clone)]
+#[pyclass(extends=ServerEvent, subclass)]
+pub struct ServerReloadedEvent {
+    /// 花费多长时间
+    pub elapsed_time: f64,
+}
+#[pymethods]
+impl ServerReloadedEvent {
+    #[getter]
+    fn elapsed_time(&self) -> f64 {
+        self.elapsed_time
+    }
+    fn __repr__(&self) -> String {
+        format!("ServerReloadedEvent(elapsed_time={})", self.elapsed_time())
+    }
+}
+impl From<f64> for ServerReloadedEvent {
+    fn from(value: f64) -> Self {
+        Self {
+            elapsed_time: value,
+        }
+    }
+}
+impl ServerReloadedEvent {
+    pub fn new(elapsed_time: f64) -> Self {
+        Self { elapsed_time }
+    }
+}
+impl PyEvent for ServerReloadedEvent {
+    fn event_name(&self) -> String {
+        "ServerReloadedEvent".to_string()
+    }
+
+    fn init(&self, py: Python<'_>) -> Py<PyAny> {
+        Py::new(
+            py,
+            PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
+        )
+        .unwrap()
+        .into_any()
+    }
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ServerEvent>()?;
     m.add_class::<ServerInitialiseEvent>()?;

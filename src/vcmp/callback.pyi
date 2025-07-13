@@ -29,6 +29,12 @@ class CallbackManager:
         priority: int = 9999,
         func: Optional[Callable[..., Any]] = None
     ) -> Callable[..., Any]: ...
+
+    def on_server_reloaded(
+        self,
+        priority: int = 9999,
+        func: Optional[Callable[..., Any]] = None
+    ) -> Callable[..., Any]: ...
     
     def on_incoming_connection(
         self,

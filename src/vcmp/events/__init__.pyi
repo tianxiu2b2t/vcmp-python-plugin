@@ -38,6 +38,9 @@ class EventBuilder:
         times: list[int],
         entry_count: Optional[int] = None
     ) -> 'EventBuilder': ...
+
+    @staticmethod
+    def server_reloaded(elapsed_time: float) -> 'EventBuilder': ...
     
     # Checkpoint events
     @staticmethod

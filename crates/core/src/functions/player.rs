@@ -31,6 +31,10 @@ pub struct PlayerPy {
     pub last_position: Vectorf32,
     pub last_weapon: i32,
     pub last_ammo: i32,
+    /*
+        存储是否加载
+    */
+    pub loaded: bool,
 }
 
 impl PlayerPy {
@@ -42,6 +46,7 @@ impl PlayerPy {
             last_position: Vectorf32::default(),
             last_weapon: 0,
             last_ammo: 0,
+            loaded: false,
         }
     }
 }
@@ -705,8 +710,8 @@ impl PlayerPy {
     }
 
     #[getter]
-    pub fn get_spawned(&self, py: Python<'_>) -> bool {
-        py.allow_threads(|| vcmp_func().is_player_spawned(self.id))
+    pub fn get_spawned(&self) -> bool {
+        vcmp_func().is_player_spawned(self.id)
     }
 
     #[getter]

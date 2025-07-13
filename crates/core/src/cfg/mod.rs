@@ -72,8 +72,12 @@ impl Display for Config {
             file_log: {},
         }}
         "#,
-            self.preloader, self.script_path, self.virtual_env, self.log_level,
-            self.check_update, self.file_log
+            self.preloader,
+            self.script_path,
+            self.virtual_env,
+            self.log_level,
+            self.check_update,
+            self.file_log
         )
     }
 }
