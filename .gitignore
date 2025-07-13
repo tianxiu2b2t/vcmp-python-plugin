@@ -27,7 +27,6 @@ announce.py
 
 # py pdm
 .pdm-python
-pdm.lock
 
 # tool
 tool/
