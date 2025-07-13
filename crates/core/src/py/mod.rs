@@ -56,6 +56,17 @@ pub struct GlobalVar {
     pub reload_var: Option<HashMap<String, Py<PyAny>>>,
 }
 
+
+/// 非常好的 CPython signal, 使我 OSError: Signal 2 ignored due to race condition
+/// ^^
+pub static IGNORE_MODULES: LazyLock<Vec<String>> = LazyLock::new(|| {
+    vec![
+        "signal".to_string(),
+        "_signal".to_string(),
+    ]
+});
+
+
 pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> =
     LazyLock::new(|| Mutex::new(GlobalVar::default()));
 
@@ -328,18 +339,17 @@ pub fn reload() {
         event!(Level::DEBUG, "Unload modules");
         {
             // 删 python 加载的模块
-            let modules = var.capture_modules.clone();
-            if let Some(modules) = modules {
-                pyo3::py_run!(
-                    py,
-                    modules,
-                    r#"import sys;
-                    for m in list(sys.modules.keys()):
-                        if m not in modules and not m.startswith("vcmp"):
-                            del sys.modules[m]
-                    "#
-                )
-            }
+            let captures = var.capture_modules.clone();
+            let modules = IGNORE_MODULES.clone().into_iter().chain(captures.unwrap_or_default()).collect::<Vec<_>>();
+            pyo3::py_run!(
+                py,
+                modules,
+                r#"import sys;
+                for m in list(sys.modules.keys()):
+                    if m not in modules and not m.startswith("vcmp"):
+                        del sys.modules[m]
+                "#
+            )
         }
 
         event!(Level::DEBUG, "Reload script");
@@ -398,15 +408,6 @@ pub fn reload() {
 
     var.need_reload = false;
 
-    // 1. call disconnect player
-    // 2. call server unload
-    // 3. reload the script
-    // 4. call server init
-    // 5. call player join
-    // 6. call player request class
-    // 7. if player spawned, then call spawned
-    // 8. call server reloaded event!
-    // 9. well done!
 }
 
 pub fn load_script() {
