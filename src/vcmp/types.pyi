@@ -1,5 +1,4 @@
-from enum import IntEnum, auto
-
+from enum import IntEnum
 
 class ServerSettings:
     @property
@@ -11,13 +10,12 @@ class ServerSettings:
     @property
     def flags(self) -> int: ...
 
-
 class WastedSettings:
     death_timer: int
     fade_timer: int
     fade_in_speed: float
     fade_out_speed: float
-    color: 'RGB'
+    color: "RGB"
     corpse_fade_start: int
     corpse_fade_time: int
 
@@ -26,8 +24,7 @@ class Vector:
     y: float
     z: float
 
-    def __init__(self, x: float, y: float, z: float):
-        ...
+    def __init__(self, x: float, y: float, z: float): ...
 
 class Quaternion:
     x: float
@@ -35,8 +32,7 @@ class Quaternion:
     z: float
     w: float
 
-    def __init__(self, x: float, y: float, z: float, w: float):
-        ...
+    def __init__(self, x: float, y: float, z: float, w: float): ...
 
 class RGB:
     r: int
@@ -51,16 +47,16 @@ class RGB:
     def as_hex(self) -> str: ...
     def as_hexa(self) -> str: ...
     def __repr__(self) -> str: ...
-
     @staticmethod
-    def from_rgb(value: int, a: int = 255) -> 'RGB': ...
+    def from_rgb(value: int, a: int = 255) -> "RGB": ...
     @staticmethod
-    def from_rgba(value: int) -> 'RGB': ...
+    def from_rgba(value: int) -> "RGB": ...
     @staticmethod
-    def from_argb(value: int) -> 'RGB': ...
+    def from_argb(value: int) -> "RGB": ...
 
 class Version(IntEnum):
-    """ Version enum. """
+    """Version enum."""
+
     v04rel002 = 66215
     v04rel003 = 66230
     v04rel004 = 67000
@@ -69,8 +65,7 @@ class Version(IntEnum):
     v0_4_7_1 = 67710
 
 class KeyCode(IntEnum):
-    """ Key codes. """
-
+    """Key codes."""
 
     VK_LBUTTON = 0x01
     VK_RBUTTON = 0x02
@@ -245,19 +240,18 @@ class KeyCode(IntEnum):
     VK_OEM_CLEAR = 0xFE
     VK_UNKNOWN = 0xFF
 
-
 class EntityPool(IntEnum):
     @staticmethod
-    def vehicle() -> 'EntityPool': ...
+    def vehicle() -> "EntityPool": ...
     @staticmethod
-    def object() -> 'EntityPool': ...
+    def object() -> "EntityPool": ...
     @staticmethod
-    def pickup() -> 'EntityPool': ...
+    def pickup() -> "EntityPool": ...
     @staticmethod
-    def radio() -> 'EntityPool': ...
+    def radio() -> "EntityPool": ...
     @staticmethod
-    def player() -> 'EntityPool': ...
+    def player() -> "EntityPool": ...
     @staticmethod
-    def marker() -> 'EntityPool': ...
+    def marker() -> "EntityPool": ...
     @staticmethod
-    def checkpoint() -> 'EntityPool': ...
+    def checkpoint() -> "EntityPool": ...

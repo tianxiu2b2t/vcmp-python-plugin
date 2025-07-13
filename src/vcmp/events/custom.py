@@ -1,4 +1,4 @@
 from .abc import Event
 
-class CustomEvent(Event):
-    ...
+
+class CustomEvent(Event): ...

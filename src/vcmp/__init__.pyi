@@ -8,7 +8,7 @@ from . import instance
 def reload(**kwargs):
     """
     Reloads the module.
-    
+
     Call this function to reload the module after next server frame.
     """
     pass

@@ -1,7 +1,6 @@
 from vcmp.functions.player import Player
 from vcmp.types import RGB
 
-
 WEAPON_NAMES: dict[int, str] = ...
 WEAPON_MODELS: dict[int, int] = ...
 
@@ -14,6 +13,7 @@ VEHICLE_CLASSIC_RC: list[int] = ...
 
 SKINS: dict[int, str] = ...
 
+
 def distance_from_point(
     x: float,
     y: float,
@@ -23,12 +23,14 @@ def distance_from_point(
     """Returns the distance between two points."""
     ...
 
+
 def get_district_name(
     x: float,
     y: float,
 ) -> str:
     """Returns the district name of the given coordinates."""
     ...
+
 
 def in_poly(
     x: float,
@@ -38,20 +40,8 @@ def in_poly(
     """Returns True if the given point is inside the polygon."""
     ...
 
-def get_players() -> list[Player]:
-    ...
 
-def announce_all(
-    announce_type: int,
-    message: str
-):
-    ...
-
-def message_all(message: str):
-    ...
-
-def raw_message_all(
-    color: RGB,
-    message: str
-):
-    ...
+def get_players() -> list[Player]: ...
+def announce_all(announce_type: int, message: str): ...
+def message_all(message: str): ...
+def raw_message_all(color: RGB, message: str): ...

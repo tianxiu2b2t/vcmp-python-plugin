@@ -1,17 +1,19 @@
 from .abc import Event
 
-class ServerEvent(Event):
-    ...
 
-class ServerInitialiseEvent(ServerEvent):
-    ...
+class ServerEvent(Event): ...
 
-class ServerShutdownEvent(ServerEvent):
-    ...
+
+class ServerInitialiseEvent(ServerEvent): ...
+
+
+class ServerShutdownEvent(ServerEvent): ...
+
 
 class ServerFrameEvent(ServerEvent):
     @property
     def elapsed_time(self) -> float: ...
+
 
 class ServerPerformanceReportEvent(ServerEvent):
     @property
@@ -20,3 +22,8 @@ class ServerPerformanceReportEvent(ServerEvent):
     def descriptions(self) -> list[str]: ...
     @property
     def times(self) -> list[int]: ...
+
+
+class ServerReloadedEvent(ServerEvent):
+    @property
+    def elapsed_time(self) -> float: ...
