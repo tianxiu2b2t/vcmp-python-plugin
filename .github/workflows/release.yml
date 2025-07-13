@@ -31,7 +31,10 @@ jobs:
     needs: build_and_upload
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Code (all commits)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set env
         run: |
