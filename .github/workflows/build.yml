@@ -18,7 +18,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         
-      - uses: ./.github/actioons/build-libraries
+      - uses: ./.github/actions/build-libraries
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
