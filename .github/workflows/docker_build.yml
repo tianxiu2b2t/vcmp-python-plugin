@@ -28,5 +28,7 @@ jobs:
       - name: Build Docker Image
         uses: ./.github/actions/build-docker-image
         with:
+          hub_username: ${{ secrets.HUB_USERNAME }}
+          hub_password: ${{ secrets.HUB_PASSWORD }}
           tags: |
             atianxiua/vcmp-python:next
