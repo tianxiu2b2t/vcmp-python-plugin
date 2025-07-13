@@ -19,19 +19,7 @@ static LOG_FILE_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
 
 pub fn init() {
     let level = CONFIG.get().unwrap().log_level;
-    // 创建按天轮换的文件 appender
-    let file_appender = {
-        RollingFileAppender::builder()
-            .filename_suffix("vcmp-rs.log") // 要后缀!
-            .rotation(Rotation::DAILY)
-            .build("logs")
-            .expect("Failed to build log file writer.")
-    };
-    let (non_blocking_file, guard) = tracing_appender::non_blocking(file_appender);
 
-    let _ = LOG_FILE_GUARD.set(guard);
-
-    let file = non_blocking_file.with_max_level(level);
     let stdio = std::io::stdout.with_max_level(level);
 
     let stdout_layer = fmt::layer()
@@ -39,13 +27,27 @@ pub fn init() {
         .with_line_number(true)
         .with_thread_ids(true);
 
-    let file_layer = fmt::layer().with_writer(file).with_ansi(false);
-
     // 初始化
-    tracing_subscriber::registry()
-        .with(stdout_layer)
-        .with(file_layer)
-        .init();
+    let registry = tracing_subscriber::registry().with(stdout_layer);
+
+    if CONFIG.get().unwrap().file_log {
+        // 创建按天轮换的文件 appender
+        let file_appender = {
+            RollingFileAppender::builder()
+                .filename_suffix("vcmp-rs.log") // 要后缀!
+                .rotation(Rotation::DAILY)
+                .build("logs")
+                .expect("Failed to build log file writer.")
+        };
+        let (non_blocking_file, guard) = tracing_appender::non_blocking(file_appender);
+    
+        let _ = LOG_FILE_GUARD.set(guard);
+        let file = non_blocking_file.with_max_level(level);
+        let file_layer = fmt::layer().with_writer(file).with_ansi(false);
+        registry.with(file_layer);
+    }
+    
+    registry.init();
 
     event!(
         Level::INFO,

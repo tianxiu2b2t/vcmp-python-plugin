@@ -74,18 +74,23 @@ pub fn check() {
         .split("\"")
         .nth(0)
         .unwrap();
-    event!(Level::DEBUG, "Latest version: {}", tag_name);
-    event!(Level::DEBUG, "Current version: {}", INFO.version);
     if tag_name != INFO.version {
-        event!(Level::INFO, "New version available: {}", tag_name);
+        event!(
+            Level::INFO,
+            "New version available: {}, current version: {}",
+            tag_name,
+            INFO.version
+        );
     }
 }
 
 pub fn init() {
     // 开线程，防止阻塞
     let _ = thread::spawn(|| {
-        let start_time = Instant::now();
-        check();
-        thread::sleep(Duration::from_secs(10) - start_time.elapsed());
+        loop {
+            let start_time = Instant::now();
+            check();
+            thread::sleep(Duration::from_secs(86400) - start_time.elapsed());
+        }
     });
 }

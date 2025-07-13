@@ -16,6 +16,7 @@ pub struct Config {
     pub virtual_env: String, // 虚拟环境路径 (建议是包)
     pub log_level: Level,    // 日志等级
     pub check_update: bool,
+    pub file_log: bool,
 }
 
 impl Default for Config {
@@ -32,6 +33,7 @@ impl Config {
             virtual_env: "".to_string(),
             log_level: Level::INFO,
             check_update: true,
+            file_log: false,
         }
     }
 
@@ -49,6 +51,12 @@ impl Config {
     pub fn set_log_level(&mut self, log_level: Level) {
         self.log_level = log_level;
     }
+    pub fn set_check_update(&mut self, check_update: bool) {
+        self.check_update = check_update;
+    }
+    pub fn set_file_log(&mut self, file_log: bool) {
+        self.file_log = file_log;
+    }
 }
 
 impl Display for Config {
@@ -60,9 +68,12 @@ impl Display for Config {
             script_path: "{}",
             virtual_env: {:?},
             log_level: {:?},
+            check_update: {},
+            file_log: {},
         }}
         "#,
-            self.preloader, self.script_path, self.virtual_env, self.log_level
+            self.preloader, self.script_path, self.virtual_env, self.log_level,
+            self.check_update, self.file_log
         )
     }
 }
@@ -101,6 +112,7 @@ fn init_config_from_cfg() -> Option<Config> {
     config.log_level =
         Level::from_str(find_value("python_log_level").as_str()).unwrap_or(Level::INFO);
     config.check_update = find_value("python_check_update").parse().unwrap_or(true);
+    config.file_log = find_value("python_file_log").parse().unwrap_or(false);
 
     Some(config)
 }

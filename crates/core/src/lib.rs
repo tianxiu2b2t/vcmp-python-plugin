@@ -22,7 +22,11 @@ pub mod update;
 #[allow(clippy::zero_prefixed_literal)]
 pub const PLUGIN_VERSION: u32 = 00_01_01;
 
-use crate::{callbacks::init_callbacks, cfg::init_config, py::init_py};
+use crate::{
+    callbacks::init_callbacks,
+    cfg::{CONFIG, init_config},
+    py::init_py,
+};
 
 /// 日志
 pub mod logger;
@@ -106,7 +110,9 @@ extern "C" fn VcmpPluginInit(
 
     event!(Level::INFO, "vcmp-plugin-rs loaded");
 
-    update::init();
+    if CONFIG.get().unwrap().check_update {
+        update::init();
+    }
 
     1
 }
