@@ -1,4 +1,4 @@
-name: Build and Upload DLL
+name: Build Preview Libraries
 
 on:
   push:
@@ -15,10 +15,11 @@ jobs:
         python-version: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
-        
-      - uses: ./.github/actions/build-libraries
+      
+      - name: Build Libraries
+        uses: ./.github/actions/build-libraries
         with:
           python-version: ${{ matrix.python-version }}
           os: ${{ matrix.os }}
