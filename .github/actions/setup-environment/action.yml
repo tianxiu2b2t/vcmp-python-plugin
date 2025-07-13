@@ -17,13 +17,6 @@ runs:
         architecture: "x64"
         cache: true
 
-    - uses: actions/setup-python@v4
-      name: Setup Python
-      with:
-        python-version: ${{ inputs.python-version }}
-        architecture: "x64"
-        cache: true
-
     - uses: actions-rs/toolchain@v1
       with:
         toolchain: stable
