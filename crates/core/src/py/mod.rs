@@ -56,16 +56,10 @@ pub struct GlobalVar {
     pub reload_var: Option<HashMap<String, Py<PyAny>>>,
 }
 
-
 /// 非常好的 CPython signal, 使我 OSError: Signal 2 ignored due to race condition
 /// ^^
-pub static IGNORE_MODULES: LazyLock<Vec<String>> = LazyLock::new(|| {
-    vec![
-        "signal".to_string(),
-        "_signal".to_string(),
-    ]
-});
-
+pub static IGNORE_MODULES: LazyLock<Vec<String>> =
+    LazyLock::new(|| vec!["signal".to_string(), "_signal".to_string()]);
 
 pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> =
     LazyLock::new(|| Mutex::new(GlobalVar::default()));
@@ -196,11 +190,11 @@ pub fn get_traceback(py_err: &PyErr, py: Option<Python<'_>>) -> String {
     let traceback = match py {
         Some(py) => match py_err.traceback(py) {
             Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
-            None => "Traceback (most recent call last):\n  (Rust) Code".to_string(),
+            None => "Traceback (most recent call last):\n  (Rust) Code\n\n".to_string(),
         },
         None => Python::with_gil(|py| match py_err.traceback(py) {
             Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
-            None => "Traceback (most recent call last):\n  (Rust) Code".to_string(),
+            None => "Traceback (most recent call last):\n  (Rust) Code\n\n".to_string(),
         }),
     };
 
@@ -309,7 +303,11 @@ pub fn reload() {
 
         // record loaded
         let loaded = py.allow_threads(|| {
-            players.iter().filter(|p| p.get_var_loaded()).map(|p| p.get_id()).collect::<Vec<_>>()
+            players
+                .iter()
+                .filter(|p| p.get_var_loaded())
+                .map(|p| p.get_id())
+                .collect::<Vec<_>>()
         });
         event!(Level::DEBUG, "Loaded players: {:?}", loaded.clone());
 
@@ -340,7 +338,11 @@ pub fn reload() {
         {
             // 删 python 加载的模块
             let captures = var.capture_modules.clone();
-            let modules = IGNORE_MODULES.clone().into_iter().chain(captures.unwrap_or_default()).collect::<Vec<_>>();
+            let modules = IGNORE_MODULES
+                .clone()
+                .into_iter()
+                .chain(captures.unwrap_or_default())
+                .collect::<Vec<_>>();
             pyo3::py_run!(
                 py,
                 modules,
@@ -407,7 +409,6 @@ pub fn reload() {
     event!(Level::INFO, "Script reloaded");
 
     var.need_reload = false;
-
 }
 
 pub fn load_script() {
