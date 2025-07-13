@@ -323,7 +323,9 @@ impl PyVcmpEvent {
     #[staticmethod]
     #[pyo3(signature = (elapsed_time))]
     fn server_reloaded(elapsed_time: f64) -> Self {
-        Self::new(VcmpEvent::ServerReloaded(server::ServerReloadedEvent::new(elapsed_time)))
+        Self::new(VcmpEvent::ServerReloaded(server::ServerReloadedEvent::new(
+            elapsed_time,
+        )))
     }
 
     #[staticmethod]

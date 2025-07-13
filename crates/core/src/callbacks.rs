@@ -159,9 +159,9 @@ pub unsafe extern "C" fn on_client_script_data(client_id: i32, data: *const u8, 
 pub unsafe extern "C" fn on_player_request_class(player_id: i32, class_id: i32) -> u8 {
     {
         // set loaded
-        let pool = ENTITY_POOL.lock().unwrap();
-        let mut player = *pool.get_player(player_id).unwrap();
-        player.loaded = true;
+        let mut pool = ENTITY_POOL.lock().unwrap();
+        let player = pool.get_mut_player(player_id).unwrap();
+        player.set_var_loaded(true);
     }
 
     let binding_event = player::PlayerRequestClassEvent::from((player_id, class_id));
@@ -445,12 +445,13 @@ pub unsafe extern "C" fn on_player_module_list(player_id: i32, modules: *const c
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
     {
-        let mut player = *ENTITY_POOL.lock().unwrap().get_player(player_id).unwrap();
+        let mut pool = ENTITY_POOL.lock().unwrap();
+        let player = pool.get_mut_player(player_id).unwrap();
         // first health
         {
             // use raw vcmp_bindings
             let current_health = vcmp_func().get_player_health(player_id);
-            let last_health = player.last_health;
+            let last_health = player.get_var_last_health();
             if current_health != last_health {
                 let event = PlayerHealthChangeEvent::from((player_id, last_health, current_health));
                 let health_res =
@@ -458,13 +459,13 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 if !health_res {
                     let _ = vcmp_func().set_player_health(player_id, event.current_health);
                 }
-                player.last_health = event.current_health;
+                player.set_var_last_health(event.current_health);
             }
         }
         // then armour
         {
             let current_armour = vcmp_func().get_player_armour(player_id);
-            let last_armour = player.last_armour;
+            let last_armour = player.get_var_last_armour();
             if current_armour != last_armour {
                 let event = PlayerArmourChangeEvent::from((player_id, last_armour, current_armour));
                 let armour_res =
@@ -472,13 +473,13 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 if !armour_res {
                     let _ = vcmp_func().set_player_armour(player_id, event.current_armour);
                 }
-                player.last_armour = event.current_armour;
+                player.set_var_last_armour(event.current_armour);
             }
         }
         // then weapon
         {
             let current_weapon = vcmp_func().get_player_weapon(player_id);
-            let last_weapon = player.last_weapon;
+            let last_weapon = player.get_var_last_weapon();
             if current_weapon != last_weapon {
                 let event = PlayerWeaponChangeEvent::from((player_id, last_weapon, current_weapon));
                 let weapon_res =
@@ -486,14 +487,14 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 if !weapon_res {
                     let _ = vcmp_func().give_player_weapon(player_id, event.current_weapon, 0);
                 }
-                player.last_weapon = event.current_weapon;
+                player.set_var_last_weapon(event.current_weapon);
             }
         }
         // then ammo, not block it
         {
             let current_ammo = vcmp_func().get_player_weapon_ammo(player_id);
             let current_wep = vcmp_func().get_player_weapon(player_id);
-            let last_ammo = player.last_ammo;
+            let last_ammo = player.get_var_last_ammo();
             if current_ammo != last_ammo {
                 let event = PlayerAmmoChangeEvent::from((player_id, last_ammo, current_ammo));
                 let res = PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerAmmoChange(event), true);
@@ -502,13 +503,13 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                     let restore_ammo = event.current_ammo - real_ammo;
                     let _ = vcmp_func().give_player_weapon(player_id, current_wep, restore_ammo);
                 }
-                player.last_ammo = event.current_ammo;
+                player.set_var_last_ammo(event.current_ammo);
             }
         }
         // then move
         {
             let current_pos = player.get_position().get_entity_pos();
-            let last_pos = player.last_position;
+            let last_pos = player.get_var_last_position();
             if current_pos != last_pos {
                 let event = PlayerMoveEvent::from((
                     player_id,
@@ -519,7 +520,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 if !move_res {
                     player.set_position(event.current_position.get_entity_pos());
                 }
-                player.last_position = event.current_position.get_entity_pos();
+                player.set_var_last_position(event.current_position.get_entity_pos());
             }
         }
     }

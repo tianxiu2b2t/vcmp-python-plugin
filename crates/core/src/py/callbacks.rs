@@ -62,8 +62,10 @@ impl PyCallbackStorage {
         self.callbacks.get(&event_type)
     }
 
-    pub fn clear(&mut self) {
+    pub fn clear(&mut self) -> usize {
+        let count = self.callbacks.iter().map(|(_, v)| v.len()).sum::<usize>();
         self.callbacks.clear();
+        count
     }
 }
 
@@ -122,6 +124,17 @@ impl PyCallbackManager {
         res
     }
     fn py_handle(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
+        if let Err(e) = py.check_signals() {
+            event!(
+                Level::ERROR,
+                "Failed to check signals: {}",
+                get_traceback(&e, Some(py))
+            );
+            if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                vcmp_func().shutdown();
+            }
+        }
+
         let kwargs = event.kwargs;
         let event = event.event_type;
         let handlers = {
@@ -171,17 +184,6 @@ impl PyCallbackManager {
                         break;
                     }
                 }
-            }
-        }
-
-        if let Err(e) = py.check_signals() {
-            event!(
-                Level::ERROR,
-                "Failed to check signals: {}",
-                get_traceback(&e, Some(py))
-            );
-            if e.is_instance_of::<PyKeyboardInterrupt>(py) {
-                vcmp_func().shutdown();
             }
         }
 

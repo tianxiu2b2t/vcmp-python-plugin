@@ -26,15 +26,15 @@ pub struct PlayerPy {
     /*
         存储一些变量，用于检查更新的
     */
-    pub last_health: f32,
-    pub last_armour: f32,
-    pub last_position: Vectorf32,
-    pub last_weapon: i32,
-    pub last_ammo: i32,
+    last_health: f32,
+    last_armour: f32,
+    last_position: Vectorf32,
+    last_weapon: i32,
+    last_ammo: i32,
     /*
         存储是否加载
     */
-    pub loaded: bool,
+    loaded: bool,
 }
 
 impl PlayerPy {
@@ -48,6 +48,54 @@ impl PlayerPy {
             last_ammo: 0,
             loaded: false,
         }
+    }
+
+    pub fn set_var_last_health(&mut self, health: f32) {
+        self.last_health = health;
+    }
+
+    pub fn set_var_last_armour(&mut self, armour: f32) {
+        self.last_armour = armour;
+    }
+
+    pub fn set_var_last_position(&mut self, position: Vectorf32) {
+        self.last_position = position;
+    }
+
+    pub fn set_var_last_weapon(&mut self, weapon: i32) {
+        self.last_weapon = weapon;
+    }
+
+    pub fn set_var_last_ammo(&mut self, ammo: i32) {
+        self.last_ammo = ammo;
+    }
+
+    pub fn set_var_loaded(&mut self, loaded: bool) {
+        self.loaded = loaded;
+    }
+
+    pub fn get_var_last_health(&self) -> f32 {
+        self.last_health
+    }
+
+    pub fn get_var_last_armour(&self) -> f32 {
+        self.last_armour
+    }
+
+    pub fn get_var_last_position(&self) -> Vectorf32 {
+        self.last_position
+    }
+
+    pub fn get_var_last_weapon(&self) -> i32 {
+        self.last_weapon
+    }
+
+    pub fn get_var_last_ammo(&self) -> i32 {
+        self.last_ammo
+    }
+
+    pub fn get_var_loaded(&self) -> bool {
+        self.loaded
     }
 }
 

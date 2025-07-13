@@ -17,7 +17,7 @@ use crate::functions::pickup::PickupPy;
 use crate::functions::player::PlayerPy;
 use crate::functions::vehicle::VehiclePy;
 use crate::pool::ENTITY_POOL;
-use crate::py::callbacks::PY_CALLBACK_MANAGER;
+use crate::py::callbacks::{PY_CALLBACK_MANAGER, PY_CALLBACK_STORAGE};
 use crate::py::events::player::{
     PlayerConnectEvent, PlayerDisconnectEvent, PlayerRequestClassEvent, PlayerSpawnEvent,
 };
@@ -298,12 +298,9 @@ pub fn reload() {
 
         // record loaded
         let loaded = py.allow_threads(|| {
-            players
-                .iter()
-                .filter(|p| p.loaded)
-                .map(|p| p.get_id())
-                .collect::<Vec<_>>()
+            players.iter().filter(|p| p.get_var_loaded()).map(|p| p.get_id()).collect::<Vec<_>>()
         });
+        event!(Level::DEBUG, "Loaded players: {:?}", loaded.clone());
 
         event!(Level::DEBUG, "Callback manager trigger player disconnect");
         for player in players.clone() {
@@ -322,6 +319,11 @@ pub fn reload() {
             PyVcmpEvent::from(VcmpEvent::ServerShutdown(ServerShutdownEvent::default()))
                 .with_kwargs(kwargs.clone()),
         );
+
+        py.allow_threads(|| {
+            let count = PY_CALLBACK_STORAGE.lock().unwrap().clear();
+            event!(Level::DEBUG, "Cleared {count} callback(s)");
+        });
 
         event!(Level::DEBUG, "Unload modules");
         {

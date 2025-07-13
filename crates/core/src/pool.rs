@@ -53,6 +53,10 @@ impl<E: EntityPoolTrait> AnEntityPool<E> {
         self.pool.get(&entity_id)
     }
 
+    pub fn get_mut_entity(&mut self, entity_id: EntityId) -> Option<&mut E> {
+        self.pool.get_mut(&entity_id)
+    }
+
     pub fn entities(&self) -> impl Iterator<Item = &E> {
         self.pool.values()
     }
@@ -155,6 +159,10 @@ impl EntityPool {
     // 更具体的获取方法
     pub fn get_player(&self, player_id: EntityId) -> Option<&PlayerPy> {
         self.players.get_entity(player_id)
+    }
+
+    pub fn get_mut_player(&mut self, player_id: EntityId) -> Option<&mut PlayerPy> {
+        self.players.get_mut_entity(player_id)
     }
 
     pub fn get_vehicle(&self, vehicle_id: EntityId) -> Option<&VehiclePy> {
