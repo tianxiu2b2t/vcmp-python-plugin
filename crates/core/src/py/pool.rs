@@ -1,8 +1,7 @@
-use crate::functions::marker::MarkerPy;
-use crate::functions::object::ObjectPy;
-use crate::functions::pickup::PickupPy;
-use crate::functions::player::PlayerPy;
-use crate::functions::{checkpoint::CheckPointPy, vehicle::VehiclePy};
+use crate::functions::{
+    checkpoint::CheckPointPy, marker::MarkerPy, object::ObjectPy, pickup::PickupPy,
+    player::PlayerPy, vehicle::VehiclePy,
+};
 use crate::pool::ENTITY_POOL;
 
 use pyo3::types::PyModuleMethods;
