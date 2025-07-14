@@ -578,6 +578,14 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
     {
+        let mut pool = ENTITY_POOL.lock().unwrap();
+        let vehicle = pool.get_mut_vehicle(vehicle_id).unwrap();
+        if vehicle.get_var_updating() {
+            return;
+        }
+        vehicle.set_var_updating(true);
+    }
+    {
         {
             // health change
             let current_health = vcmp_func().get_vehicle_health(vehicle_id);
@@ -626,6 +634,12 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
         VcmpEvent::VehicleUpdate(VehicleUpdateEvent::from(binding_event)),
         false,
     );
+
+    {
+        let mut pool = ENTITY_POOL.lock().unwrap();
+        let vehicle = pool.get_mut_vehicle(vehicle_id).unwrap();
+        vehicle.set_var_updating(false);
+    }
 }
 
 /// # Safety

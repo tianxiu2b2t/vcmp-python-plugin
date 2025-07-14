@@ -29,6 +29,7 @@ pub struct VehiclePy {
     // storage var
     last_pos: Vectorf32,
     last_health: f32,
+    updating: bool
 }
 
 impl VehiclePy {
@@ -37,7 +38,16 @@ impl VehiclePy {
             id,
             last_pos: Vectorf32::default(),
             last_health: 1000.0,
+            updating: false
         }
+    }
+
+    pub fn set_var_updating(&mut self, updating: bool) {
+        self.updating = updating;
+    }
+
+    pub fn get_var_updating(&self) -> bool {
+        self.updating
     }
 
     pub fn set_var_last_position(&mut self, pos: Vectorf32) {
