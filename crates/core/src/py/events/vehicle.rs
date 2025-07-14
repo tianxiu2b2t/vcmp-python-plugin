@@ -218,7 +218,12 @@ impl VehicleMoveEvent {
 
     #[setter]
     fn set_current_position(&mut self, position: VectorPy) {
-        self.current_position = position
+        self.current_position = position;
+        {
+            let mut pool = ENTITY_POOL.lock().unwrap();
+            let vehicle = pool.get_mut_vehicle(self.vehicle_id).unwrap();
+            vehicle.set_var_last_position(self.current_position.into());
+        };
     }
 
     fn __repr__(&self) -> String {
@@ -232,22 +237,26 @@ impl VehicleMoveEvent {
 }
 impl From<(i32, VectorPy, VectorPy)> for VehicleMoveEvent {
     fn from(value: (i32, VectorPy, VectorPy)) -> Self {
-        Self {
+        let mut this = Self {
             vehicle_id: value.0,
             old_position: value.1,
             new_position: value.2,
-            current_position: value.2,
-        }
+            current_position: VectorPy::default(),
+        };
+        this.set_current_position(value.2);
+        this
     }
 }
 impl VehicleMoveEvent {
     pub fn new(vehicle: VehiclePy, old_position: VectorPy, new_position: VectorPy) -> Self {
-        Self {
+        let mut this = Self {
             vehicle_id: vehicle.get_id(),
             old_position,
             new_position,
-            current_position: new_position,
-        }
+            current_position: VectorPy::default(),
+        };
+        this.set_current_position(new_position);
+        this
     }
 }
 impl PyEvent for VehicleMoveEvent {
@@ -298,7 +307,12 @@ impl VehicleHealthChangeEvent {
 
     #[setter]
     fn set_current_health(&mut self, health: f32) {
-        self.current_health = health
+        self.current_health = health;
+        {
+            let mut pool = ENTITY_POOL.lock().unwrap();
+            let vehicle = pool.get_mut_vehicle(self.vehicle_id).unwrap();
+            vehicle.set_var_last_health(self.current_health);
+        };
     }
 
     fn __repr__(&self) -> String {
@@ -312,22 +326,26 @@ impl VehicleHealthChangeEvent {
 }
 impl From<(i32, f32, f32)> for VehicleHealthChangeEvent {
     fn from(value: (i32, f32, f32)) -> Self {
-        Self {
+        let mut this = Self {
             vehicle_id: value.0,
             old_health: value.1,
             new_health: value.2,
-            current_health: value.2,
-        }
+            current_health: 0.0,
+        };
+        this.set_current_health(value.2);
+        this
     }
 }
 impl VehicleHealthChangeEvent {
     pub fn new(vehicle: VehiclePy, old_health: f32, new_health: f32) -> Self {
-        Self {
+        let mut this = Self {
             vehicle_id: vehicle.get_id(),
             old_health,
             new_health,
-            current_health: new_health,
-        }
+            current_health: 0.0,
+        };
+        this.set_current_health(new_health);
+        this
     }
 }
 impl PyEvent for VehicleHealthChangeEvent {

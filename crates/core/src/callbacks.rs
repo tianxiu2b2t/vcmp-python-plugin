@@ -594,11 +594,6 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                 if !health_res {
                     let _ = vcmp_func().set_vehicle_health(vehicle_id, event.current_health);
                 }
-                {
-                    let mut pool = ENTITY_POOL.lock().unwrap();
-                    let vehicle = pool.get_mut_vehicle(vehicle_id).unwrap();
-                    vehicle.set_var_last_health(event.current_health);
-                };
             }
         }
         {
@@ -623,11 +618,6 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                         Some(false),
                     );
                 }
-                {
-                    let mut pool = ENTITY_POOL.lock().unwrap();
-                    let vehicle = pool.get_mut_vehicle(vehicle_id).unwrap();
-                    vehicle.set_var_last_position(event.current_position.into());
-                };
             }
         }
     }

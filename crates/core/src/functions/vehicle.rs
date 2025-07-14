@@ -36,7 +36,7 @@ impl VehiclePy {
         Self {
             id,
             last_pos: Vectorf32::default(),
-            last_health: 100.0,
+            last_health: 1000.0,
         }
     }
 
