@@ -1,4 +1,5 @@
 use std::ops::Add as _;
+use std::collections::HashMap;
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,
@@ -7,8 +8,7 @@ use pyo3::{
 };
 use vcmp_bindings::{
     func::{
-        QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods,
-        VehicleMethods,
+        PlayerMethods, QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods, VehicleMethods
     },
     utils::Vectorf32,
     vcmp_func,
@@ -561,6 +561,41 @@ impl VehiclePy {
     #[getter]
     fn get_wrecked(&self) -> bool {
         vcmp_func().is_vehicle_wrecked(self.id)
+    }
+
+    #[getter]
+    fn get_driver(&self) -> Option<PlayerPy> {
+        let pool = ENTITY_POOL.lock().unwrap();
+        for player in pool.get_players() {
+            if vcmp_func().get_player_vehicle_id(player.get_id()) == self.id && vcmp_func().get_player_in_vehicle_slot(player.get_id()) == 0 {
+                return Some(player);
+            }
+        }
+        None
+    }
+
+    #[getter]
+    fn get_passengers(&self) -> Vec<PlayerPy> {
+        let mut passenger_seats: HashMap<i32, Vec<PlayerPy>> = HashMap::new();
+        let pool = ENTITY_POOL.lock().unwrap();
+        for player in pool.get_players() {
+            if vcmp_func().get_player_vehicle_id(player.get_id()) == self.id {
+                let slot = vcmp_func().get_player_in_vehicle_slot(player.get_id());
+                if passenger_seats.contains_key(&slot) {
+                    passenger_seats.get_mut(&slot).unwrap().push(player);
+                } else {
+                    passenger_seats.insert(slot, vec![player]);
+                }
+            }
+        }
+        let mut passengers: Vec<PlayerPy> = Vec::new();
+        // Sort passengers by seat number
+        let mut slots = passenger_seats.keys().into_iter().collect::<Vec<_>>();
+        slots.sort();
+        for slot in slots {
+            passengers.extend(passenger_seats.get(slot).unwrap());
+        }
+        passengers
     }
 }
 
