@@ -192,8 +192,11 @@ impl PlayerMethods for VcmpFunctions {
         message: &str,
     ) -> VcmpResult<()> {
         let color = color.as_rgba();
-        let msg_ptr = message.as_ptr() as *const i8;
-        println!("send_client_message: {color} {color:#08x} {message:?} {msg_ptr:p}");
+        // set rgba, a to 255
+        let color = (color & 0xFFFFFF00) | 0x000000FF;
+        // append \0
+        let msg = format!("{}\0", message);
+        let msg_ptr = msg.as_ptr() as *const i8;
         let code = (self.inner.SendClientMessage)(player_id, color, msg_ptr);
         if code != 0 {
             Err(VcmpError::from(code))
