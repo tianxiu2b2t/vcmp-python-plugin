@@ -459,13 +459,12 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 let health_res =
                     PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerHealthChange(event), true);
                 if !health_res {
-                    let _ = vcmp_func().set_player_health(player_id, event.current_health);
+                    let _ = vcmp_func().set_player_health(player_id, {
+                        let mut pool = ENTITY_POOL.lock().unwrap();
+                        let player = pool.get_mut_player(player_id).unwrap();
+                        player.get_var_last_health()
+                    });
                 }
-                {
-                    let mut pool = ENTITY_POOL.lock().unwrap();
-                    let player = pool.get_mut_player(player_id).unwrap();
-                    player.set_var_last_health(event.current_health);
-                };
             }
         }
         // then armour
@@ -481,13 +480,12 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 let armour_res =
                     PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerArmourChange(event), true);
                 if !armour_res {
-                    let _ = vcmp_func().set_player_armour(player_id, event.current_armour);
+                    let _ = vcmp_func().set_player_armour(player_id, {
+                        let mut pool = ENTITY_POOL.lock().unwrap();
+                        let player = pool.get_mut_player(player_id).unwrap();
+                        player.get_var_last_armour()
+                    });
                 }
-                {
-                    let mut pool = ENTITY_POOL.lock().unwrap();
-                    let player = pool.get_mut_player(player_id).unwrap();
-                    player.set_var_last_armour(event.current_armour);
-                };
             }
         }
         // then weapon
@@ -503,13 +501,16 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 let weapon_res =
                     PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerWeaponChange(event), true);
                 if !weapon_res {
-                    let _ = vcmp_func().give_player_weapon(player_id, event.current_weapon, 0);
+                    let _ = vcmp_func().give_player_weapon(
+                        player_id,
+                        {
+                            let mut pool = ENTITY_POOL.lock().unwrap();
+                            let player = pool.get_mut_player(player_id).unwrap();
+                            player.get_var_last_weapon()
+                        },
+                        0,
+                    );
                 }
-                {
-                    let mut pool = ENTITY_POOL.lock().unwrap();
-                    let player = pool.get_mut_player(player_id).unwrap();
-                    player.set_var_last_weapon(event.current_weapon);
-                };
             }
         }
         // then ammo, not block it
@@ -526,14 +527,13 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 let res = PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerAmmoChange(event), true);
                 if !res {
                     let real_ammo = vcmp_func().get_player_weapon_ammo(player_id);
-                    let restore_ammo = event.current_ammo - real_ammo;
+                    let restore_ammo = {
+                        let mut pool = ENTITY_POOL.lock().unwrap();
+                        let player = pool.get_mut_player(player_id).unwrap();
+                        player.get_var_last_ammo()
+                    } - real_ammo;
                     let _ = vcmp_func().give_player_weapon(player_id, current_wep, restore_ammo);
                 }
-                {
-                    let mut pool = ENTITY_POOL.lock().unwrap();
-                    let player = pool.get_mut_player(player_id).unwrap();
-                    player.set_var_last_ammo(event.current_ammo);
-                };
             }
         }
         // then move
@@ -554,14 +554,12 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 ));
                 let move_res = PY_CALLBACK_MANAGER.handle(VcmpEvent::PlayerMove(event), true);
                 if !move_res {
-                    let _ =
-                        vcmp_func().set_player_position(player_id, event.current_position.into());
+                    let _ = vcmp_func().set_player_position(player_id, {
+                        let mut pool = ENTITY_POOL.lock().unwrap();
+                        let player = pool.get_mut_player(player_id).unwrap();
+                        player.get_var_last_position()
+                    });
                 }
-                {
-                    let mut pool = ENTITY_POOL.lock().unwrap();
-                    let player = pool.get_mut_player(player_id).unwrap();
-                    player.set_var_last_position(event.current_position.get_entity_pos());
-                };
             }
         }
     }
@@ -600,7 +598,11 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                 let health_res =
                     PY_CALLBACK_MANAGER.handle(VcmpEvent::VehicleHealthChange(event), true);
                 if !health_res {
-                    let _ = vcmp_func().set_vehicle_health(vehicle_id, event.current_health);
+                    let _ = vcmp_func().set_vehicle_health(vehicle_id, {
+                        let mut pool = ENTITY_POOL.lock().unwrap();
+                        let vehicle = pool.get_mut_vehicle(vehicle_id).unwrap();
+                        vehicle.get_var_last_health()
+                    });
                 }
             }
         }
@@ -622,7 +624,12 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                 if !move_res {
                     let _ = vcmp_func().set_vehicle_position(
                         vehicle_id,
-                        event.current_position.into(),
+                        {
+                            // fix object clone bug
+                            let mut pool = ENTITY_POOL.lock().unwrap();
+                            let vehicle = pool.get_mut_vehicle(vehicle_id).unwrap();
+                            vehicle.get_var_last_position()
+                        },
                         Some(false),
                     );
                 }

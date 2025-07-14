@@ -31,6 +31,7 @@ pub struct PlayerPy {
     last_position: Vectorf32,
     last_weapon: i32,
     last_ammo: i32,
+    updating: bool,
     /*
         存储是否加载
     */
@@ -47,7 +48,16 @@ impl PlayerPy {
             last_weapon: 0,
             last_ammo: 0,
             loaded: false,
+            updating: false,
         }
+    }
+
+    pub fn set_var_updating(&mut self, updating: bool) {
+        self.updating = updating;
+    }
+
+    pub fn get_var_updating(&self) -> bool {
+        self.updating
     }
 
     pub fn set_var_last_health(&mut self, health: f32) {

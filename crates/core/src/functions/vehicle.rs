@@ -29,7 +29,7 @@ pub struct VehiclePy {
     // storage var
     last_pos: Vectorf32,
     last_health: f32,
-    updating: bool
+    updating: bool,
 }
 
 impl VehiclePy {
@@ -38,7 +38,7 @@ impl VehiclePy {
             id,
             last_pos: Vectorf32::default(),
             last_health: 1000.0,
-            updating: false
+            updating: false,
         }
     }
 

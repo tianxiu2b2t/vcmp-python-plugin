@@ -222,7 +222,7 @@ impl VehicleMoveEvent {
         {
             let mut pool = ENTITY_POOL.lock().unwrap();
             let vehicle = pool.get_mut_vehicle(self.vehicle_id).unwrap();
-            vehicle.set_var_last_position(self.current_position.into());
+            vehicle.set_var_last_position(self.current_position.get_entity_pos());
         };
     }
 

@@ -1705,7 +1705,12 @@ impl PlayerHealthChangeEvent {
 
     #[setter]
     fn set_current_health(&mut self, health: f32) {
-        self.current_health = health
+        self.current_health = health;
+        {
+            let mut pool = ENTITY_POOL.lock().unwrap();
+            let player = pool.get_mut_player(self.player_id).unwrap();
+            player.set_var_last_health(self.current_health);
+        };
     }
 
     fn __repr__(&self) -> String {
@@ -1719,22 +1724,26 @@ impl PlayerHealthChangeEvent {
 }
 impl From<(i32, f32, f32)> for PlayerHealthChangeEvent {
     fn from(value: (i32, f32, f32)) -> Self {
-        Self {
+        let mut this = Self {
             player_id: value.0,
             old_health: value.1,
             new_health: value.2,
-            current_health: value.2,
-        }
+            current_health: 0.0,
+        };
+        this.set_current_health(value.2);
+        this
     }
 }
 impl PlayerHealthChangeEvent {
     pub fn new(player: PlayerPy, old_health: f32, new_health: f32) -> Self {
-        Self {
+        let mut this = Self {
             player_id: player.get_id(),
             old_health,
             new_health,
-            current_health: new_health,
-        }
+            current_health: 0.0,
+        };
+        this.set_current_health(new_health);
+        this
     }
 }
 impl PyEvent for PlayerHealthChangeEvent {
@@ -1785,7 +1794,12 @@ impl PlayerArmourChangeEvent {
 
     #[setter]
     fn set_current_armour(&mut self, armour: f32) {
-        self.current_armour = armour
+        self.current_armour = armour;
+        {
+            let mut pool = ENTITY_POOL.lock().unwrap();
+            let player = pool.get_mut_player(self.player_id).unwrap();
+            player.set_var_last_armour(self.current_armour);
+        };
     }
 
     fn __repr__(&self) -> String {
@@ -1799,22 +1813,26 @@ impl PlayerArmourChangeEvent {
 }
 impl From<(i32, f32, f32)> for PlayerArmourChangeEvent {
     fn from(value: (i32, f32, f32)) -> Self {
-        Self {
+        let mut this = Self {
             player_id: value.0,
             old_armour: value.1,
             new_armour: value.2,
-            current_armour: value.2,
-        }
+            current_armour: 0.0,
+        };
+        this.set_current_armour(value.2);
+        this
     }
 }
 impl PlayerArmourChangeEvent {
     pub fn new(player: PlayerPy, old_armour: f32, new_armour: f32) -> Self {
-        Self {
+        let mut this = Self {
             player_id: player.get_id(),
             old_armour,
             new_armour,
-            current_armour: new_armour,
-        }
+            current_armour: 0.0,
+        };
+        this.set_current_armour(new_armour);
+        this
     }
 }
 impl PyEvent for PlayerArmourChangeEvent {
@@ -1865,7 +1883,12 @@ impl PlayerWeaponChangeEvent {
 
     #[setter]
     fn set_current_weapon(&mut self, weapon: i32) {
-        self.current_weapon = weapon
+        self.current_weapon = weapon;
+        {
+            let mut pool = ENTITY_POOL.lock().unwrap();
+            let player = pool.get_mut_player(self.player_id).unwrap();
+            player.set_var_last_weapon(self.current_weapon);
+        };
     }
 
     fn __repr__(&self) -> String {
@@ -1879,22 +1902,26 @@ impl PlayerWeaponChangeEvent {
 }
 impl From<(i32, i32, i32)> for PlayerWeaponChangeEvent {
     fn from(value: (i32, i32, i32)) -> Self {
-        Self {
+        let mut this = Self {
             player_id: value.0,
             old_weapon: value.1,
             new_weapon: value.2,
-            current_weapon: value.2,
-        }
+            current_weapon: 0,
+        };
+        this.set_current_weapon(value.2);
+        this
     }
 }
 impl PlayerWeaponChangeEvent {
     pub fn new(player: PlayerPy, old_weapon: i32, new_weapon: i32) -> Self {
-        Self {
+        let mut this = Self {
             player_id: player.get_id(),
             old_weapon,
             new_weapon,
-            current_weapon: new_weapon,
-        }
+            current_weapon: 0,
+        };
+        this.set_current_weapon(new_weapon);
+        this
     }
 }
 impl PyEvent for PlayerWeaponChangeEvent {
@@ -1945,7 +1972,12 @@ impl PlayerAmmoChangeEvent {
 
     #[setter]
     fn set_current_ammo(&mut self, ammo: i32) {
-        self.current_ammo = ammo
+        self.current_ammo = ammo;
+        {
+            let mut pool = ENTITY_POOL.lock().unwrap();
+            let player = pool.get_mut_player(self.player_id).unwrap();
+            player.set_var_last_ammo(self.current_ammo);
+        };
     }
 
     fn __repr__(&self) -> String {
@@ -1959,22 +1991,26 @@ impl PlayerAmmoChangeEvent {
 }
 impl From<(i32, i32, i32)> for PlayerAmmoChangeEvent {
     fn from(value: (i32, i32, i32)) -> Self {
-        Self {
+        let mut this = Self {
             player_id: value.0,
             old_ammo: value.1,
             new_ammo: value.2,
-            current_ammo: value.2,
-        }
+            current_ammo: 0,
+        };
+        this.set_current_ammo(value.2);
+        this
     }
 }
 impl PlayerAmmoChangeEvent {
     pub fn new(player: PlayerPy, old_ammo: i32, new_ammo: i32) -> Self {
-        Self {
+        let mut this = Self {
             player_id: player.get_id(),
             old_ammo,
             new_ammo,
-            current_ammo: new_ammo,
-        }
+            current_ammo: 0,
+        };
+        this.set_current_ammo(new_ammo);
+        this
     }
 }
 impl PyEvent for PlayerAmmoChangeEvent {
@@ -2025,7 +2061,12 @@ impl PlayerMoveEvent {
 
     #[setter]
     fn set_current_position(&mut self, position: VectorPy) {
-        self.current_position = position
+        self.current_position = position;
+        {
+            let mut pool = ENTITY_POOL.lock().unwrap();
+            let player = pool.get_mut_player(self.player_id).unwrap();
+            player.set_var_last_position(self.current_position.get_entity_pos());
+        };
     }
 
     fn __repr__(&self) -> String {
@@ -2039,22 +2080,26 @@ impl PlayerMoveEvent {
 }
 impl From<(i32, VectorPy, VectorPy)> for PlayerMoveEvent {
     fn from(value: (i32, VectorPy, VectorPy)) -> Self {
-        Self {
+        let mut this = Self {
             player_id: value.0,
             old_position: value.1,
             new_position: value.2,
-            current_position: value.2,
-        }
+            current_position: VectorPy::default(),
+        };
+        this.set_current_position(value.2);
+        this
     }
 }
 impl PlayerMoveEvent {
     pub fn new(player: PlayerPy, old_position: VectorPy, new_position: VectorPy) -> Self {
-        Self {
+        let mut this = Self {
             player_id: player.get_id(),
             old_position,
             new_position,
-            current_position: new_position,
-        }
+            current_position: VectorPy::default(),
+        };
+        this.set_current_position(new_position);
+        this
     }
 }
 impl PyEvent for PlayerMoveEvent {
