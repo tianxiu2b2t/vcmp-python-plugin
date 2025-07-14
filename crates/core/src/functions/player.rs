@@ -132,8 +132,8 @@ impl PlayerPy {
         let _ = vcmp_func().send_client_message(self.id, Color::default(), message);
     }
 
-    pub fn raw_message(&self, color: impl Into<Color>, message: &str) {
-        let _ = vcmp_func().send_client_message(self.id, color.into(), message);
+    pub fn raw_message(&self, color: Color, message: &str) {
+        let _ = vcmp_func().send_client_message(self.id, color, message);
     }
     pub fn announce(&self, announce_type: i32, message: &str) {
         let _ = vcmp_func().send_announce(self.id, announce_type, message);

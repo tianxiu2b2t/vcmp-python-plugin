@@ -500,7 +500,7 @@ pub fn message_all(message: String) {
 pub fn raw_message_all(color: RGBPy, message: String) {
     let pool = ENTITY_POOL.lock().unwrap();
     for player in pool.get_players() {
-        player.raw_message(color, &message.clone());
+        player.raw_message(color.into(), &message.clone());
     }
 }
 
