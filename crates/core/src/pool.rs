@@ -169,6 +169,10 @@ impl EntityPool {
         self.vehicles.get_entity(vehicle_id)
     }
 
+    pub fn get_mut_vehicle(&mut self, vehicle_id: EntityId) -> Option<&mut VehiclePy> {
+        self.vehicles.get_mut_entity(vehicle_id)
+    }
+
     pub fn get_object(&self, object_id: EntityId) -> Option<&ObjectPy> {
         self.objects.get_entity(object_id)
     }
@@ -187,6 +191,26 @@ impl EntityPool {
 
     pub fn get_players(&self) -> Vec<PlayerPy> {
         self.players.entities().cloned().collect()
+    }
+
+    pub fn get_vehicles(&self) -> Vec<VehiclePy> {
+        self.vehicles.entities().cloned().collect()
+    }
+
+    pub fn get_objects(&self) -> Vec<ObjectPy> {
+        self.objects.entities().cloned().collect()
+    }
+
+    pub fn get_pickups(&self) -> Vec<PickupPy> {
+        self.pickups.entities().cloned().collect()
+    }
+
+    pub fn get_markers(&self) -> Vec<MarkerPy> {
+        self.markers.entities().cloned().collect()
+    }
+
+    pub fn get_checkpoints(&self) -> Vec<CheckPointPy> {
+        self.checkpoints.entities().cloned().collect()
     }
 }
 

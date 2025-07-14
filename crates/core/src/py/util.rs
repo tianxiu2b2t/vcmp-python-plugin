@@ -508,7 +508,6 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_district_name, m)?)?;
     m.add_function(wrap_pyfunction!(distance_from_point, m)?)?;
     m.add_function(wrap_pyfunction!(in_poly, m)?)?;
-    m.add_function(wrap_pyfunction!(get_players, m)?)?;
     m.add_function(wrap_pyfunction!(announce_all, m)?)?;
     m.add_function(wrap_pyfunction!(message_all, m)?)?;
     m.add_function(wrap_pyfunction!(raw_message_all, m)?)?;
