@@ -99,12 +99,12 @@ impl MarkerPy {
 }
 
 #[pyfunction]
-pub fn create_marker(model: i32, world: i32, position: VectorPy, scale: i32, color: RGBPy) {
+pub fn create_marker(model: i32, world: i32, position: VectorPy, scale: i32, color: RGBPy) -> MarkerPy {
     let id = vcmp_func().create_marker(world, position.into(), scale, color.into(), model, None);
 
     let pool = ENTITY_POOL.lock().unwrap();
 
-    pool.get_marker(id).map(|m| *m).unwrap_or(MarkerPy::new(id));
+    pool.get_marker(id).map(|m| *m).unwrap_or(MarkerPy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
