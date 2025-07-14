@@ -24,15 +24,16 @@
 
 ### 开发进度
 
-目前 `master` 是主分支, `rwir` 分支上正在将进行 rust 重写的工作, 欢迎贡献
+目前 `master` 是主分支, ~~`rwir` 分支上正在将进行 rust 重写的工作~~, 在修一些小问题，欢迎贡献
 
 > lets RWIR!
 
-> 注：目前 `master` 分支暂不维护，目前 `Release` 版本为 `1.2.10.6` 处于稳定状态
+> 注：目前 `rwir` 分支合并成 `master` 分支，目前处于 `PreRelease` 版本（测试版），但目前的 `Release` 版本为 `1.2.10.6` 处于稳定状态
 
 ## 鸣谢
 
-[ysc3839](https://github.com/ysc3839/vcmp-python-plugin)
+[ysc3839](https://github.com/ysc3839/vcmp-python-plugin) 提供一些 Python 开发思路
+[shenjack](https://github.com/shenjackyuanjie/icalingua-bridge-bot) 帮助解决一些~~很屎的~~代码，并且提供了一些参考代码
 
 ## 使用
 
@@ -54,8 +55,18 @@ pip install vcmp-python-plugin
 4. 修改 server.cfg 文件，添加以下内容
 
 ```cfg
-plugins vcmp-python-plugin-cpy<py_version>-rel64.dll
-pythonscript main.py
+plugins python04rel64rspyo3py<python version>.dll
+# 非必要不要开启……
+# python_preloader false
+python_script_path main.py
+# 虚拟环境，比如 .venv/lib/python3.8/site-packages
+# python_virtual_env 
+# 日志等级，默认 INFO
+# python_log_level INFO
+# 检查更新，默认为 true
+# python check_update true
+# 是否记录日志，默认为 false
+# python_file_log
 ```
 
 5. 启动你的服务器
@@ -63,82 +74,8 @@ pythonscript main.py
 server.exe
 ```
 
-## 示例脚本
+## 示例脚本 ~~（等有缘人提供）~~
 main.py:
 ```python
-import sys
-from vcmp import callbacks, run
-from vcmp.events.server import ServerInitialiseEvent
-from vcmp.events.player import PlayerCommandEvent, PlayerEnterVehicleEvent, PlayerRequestEnterVehicleEvent
-from vcmp.callbacks import Matcher
-from vcmp.functions import plugin, server, vehicle
 
-from vcmp.instance import get_vehicle_from_id
-
-@callbacks.on()
-def server_initialise(event: ServerInitialiseEvent):
-    print("Server Loaded")
-
-@callbacks.on()
-def _(matcher: Matcher, event: PlayerRequestEnterVehicleEvent):
-    matcher.send("You request enter a vehicle.")
-    matcher.finish()
-
-@callbacks.on()
-def _(matcher: Matcher, event: PlayerEnterVehicleEvent):
-    matcher.send("You enter a vehicle.")
-    matcher.finish()
-
-@callbacks.on()
-def command(matcher: Matcher, event: PlayerCommandEvent):
-    cmd = event.cmd.lower()
-    text = event.text
-    if cmd == "car":
-        if not text.isdigit():
-            matcher.send("Unable to spawn car. Please enter a valid car id.")
-            matcher.finish()
-
-        car_id = int(text)
-        player = event.player
-        veh = vehicle.create_vehicle(car_id, player.world, player.position, player.angle)
-        player.vehicle = veh
-        matcher.send(f"Spawned car with id {car_id}.")
-        matcher.finish()
-
-    if cmd == "pos":
-        player = event.player
-        matcher.send(f"Your position is {player.position}.")
-        matcher.finish()
-
-    if cmd == "eject":
-        player = event.player
-        player.vehicle = None
-
-    if cmd == "veh":
-        player = event.player
-        if not text.isdigit():
-            matcher.send("Please enter a valid car index id.")
-            matcher.finish()
-        
-        index = int(text)
-        veh = get_vehicle_from_id(index)
-        if veh is None:
-            matcher.send("Unable to find vehicle.")
-            matcher.finish()
-
-        player.vehicle = veh
-        matcher.send(f"Teleported to vehicle with index {index}.")
-        matcher.finish()
-
-def main():
-    #server.set_servername(f"Python Test Server of Python {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
-    #print(server.get_server_version(), server.get_servername())
-    #print(plugin.get_plugins())
-    print(f"Server runs on {server.get_server_version()} version")
-
-if __name__ == '__main__':
-    #run(main) # 避免阻塞主线程，也可以在主线程调用 （强烈推荐 run(main) ）
-    print(
-        "Python is running by __main__"
-    )
 ```
