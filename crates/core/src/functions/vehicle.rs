@@ -27,8 +27,8 @@ pub struct VehiclePy {
     id: i32,
 
     // storage var
-    pub last_pos: Vectorf32,
-    pub last_health: f32,
+    last_pos: Vectorf32,
+    last_health: f32,
 }
 
 impl VehiclePy {
@@ -38,6 +38,22 @@ impl VehiclePy {
             last_pos: Vectorf32::default(),
             last_health: 100.0,
         }
+    }
+
+    pub fn set_var_last_position(&mut self, pos: Vectorf32) {
+        self.last_pos = pos;
+    }
+
+    pub fn set_var_last_health(&mut self, health: f32) {
+        self.last_health = health;
+    }
+
+    pub fn get_var_last_position(&self) -> Vectorf32 {
+        self.last_pos
+    }
+
+    pub fn get_var_last_health(&self) -> f32 {
+        self.last_health
     }
 
     pub fn _position(&self) -> VectorPy {

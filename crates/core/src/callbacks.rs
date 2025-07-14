@@ -537,11 +537,12 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
     {
-        let mut vehicle = *ENTITY_POOL.lock().unwrap().get_vehicle(vehicle_id).unwrap();
+        let mut pool = ENTITY_POOL.lock().unwrap();
+        let vehicle = pool.get_mut_vehicle(vehicle_id).unwrap();
         {
             // health change
             let current_health = vcmp_func().get_vehicle_health(vehicle_id);
-            let last_health = vehicle.last_health;
+            let last_health = vehicle.get_var_last_health();
             if current_health != last_health {
                 let event =
                     VehicleHealthChangeEvent::from((vehicle_id, last_health, current_health));
@@ -550,13 +551,13 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                 if !health_res {
                     let _ = vcmp_func().set_vehicle_health(vehicle_id, event.current_health);
                 }
-                vehicle.last_health = event.current_health;
+                vehicle.set_var_last_health(event.current_health);
             }
         }
         {
             // move change
             let current_pos = vehicle.get_position().get_entity_pos();
-            let last_pos = vehicle.last_pos;
+            let last_pos = vehicle.get_var_last_position();
             if current_pos != last_pos {
                 let event = VehicleMoveEvent::from((
                     vehicle_id,
@@ -571,7 +572,7 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                         Some(false),
                     );
                 }
-                vehicle.last_pos = event.current_position.get_entity_pos();
+                vehicle.set_var_last_position(event.current_position.get_entity_pos());
             }
         }
     }
