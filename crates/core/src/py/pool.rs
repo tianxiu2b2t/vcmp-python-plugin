@@ -5,6 +5,7 @@ use crate::functions::{
 use crate::pool::ENTITY_POOL;
 
 use pyo3::types::PyModuleMethods;
+use pyo3::{Py, PyAny};
 use pyo3::{Bound, PyResult, Python, pyfunction, types::PyModule, wrap_pyfunction};
 
 #[pyfunction]
@@ -93,6 +94,17 @@ pub fn clear_all() -> usize {
     clear_vehicles() + clear_objects() + clear_markers() + clear_checkpoints() + clear_pickups()
 }
 
+#[pyfunction]
+pub fn find_player(py: Python<'_>, value: Py<PyAny>) -> Option<PlayerPy> {
+    if let Ok(id) = value.extract::<i32>(py) {
+        get_players().iter().find(|p| p.get_id() == id).cloned()
+    } else if let Ok(name) = value.extract::<String>(py) {
+        get_players().iter().find(|p| p.get_name() == name).cloned()
+    } else {
+        None
+    }
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_players, m)?)?;
     m.add_function(wrap_pyfunction!(get_vehicles, m)?)?;
@@ -106,5 +118,6 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(clear_checkpoints, m)?)?;
     m.add_function(wrap_pyfunction!(clear_pickups, m)?)?;
     m.add_function(wrap_pyfunction!(clear_all, m)?)?;
+    m.add_function(wrap_pyfunction!(find_player, m)?)?;
     Ok(())
 }
