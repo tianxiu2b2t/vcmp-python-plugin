@@ -81,7 +81,7 @@ impl CheckPointPy {
         let _ = vcmp_func().set_checkpoint_colour(self.id, color.into());
     }
 
-    fn delete(&self) {
+    pub fn delete(&self) {
         let _ = vcmp_func().delete_checkpoint(self.id);
     }
 

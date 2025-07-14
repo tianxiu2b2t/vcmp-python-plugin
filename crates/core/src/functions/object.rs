@@ -84,7 +84,7 @@ impl ObjectPy {
         let _ = vcmp_func().set_object_alpha(self.id, alpha, duration.unwrap_or_default());
     }
 
-    fn delete(&self) {
+    pub fn delete(&self) {
         let _ = vcmp_func().delete_object(self.id);
     }
 

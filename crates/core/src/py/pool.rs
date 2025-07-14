@@ -43,6 +43,56 @@ pub fn get_checkpoints() -> Vec<CheckPointPy> {
     pool.get_checkpoints()
 }
 
+#[pyfunction]
+pub fn clear_vehicles() -> usize {
+    let size = get_vehicles().len();
+    for vehicle in get_vehicles() {
+        vehicle.delete();
+    }
+    size
+}
+
+#[pyfunction]
+pub fn clear_objects() -> usize {
+    let size = get_objects().len();
+    for object in get_objects() {
+        object.delete();
+    }
+    size
+}
+
+#[pyfunction]
+pub fn clear_markers() -> usize {
+    let size = get_markers().len();
+    for marker in get_markers() {
+        marker.delete();
+    }
+    size
+}
+
+#[pyfunction]
+pub fn clear_checkpoints() -> usize {
+    let size = get_checkpoints().len();
+    for checkpoint in get_checkpoints() {
+        checkpoint.delete();
+    }
+    size
+}
+
+#[pyfunction]
+pub fn clear_pickups() -> usize {
+    let size = get_pickups().len();
+    for pickup in get_pickups() {
+        pickup.delete();
+    }
+    size
+}
+
+#[pyfunction]
+pub fn clear_all() -> usize {
+    clear_vehicles() + clear_objects() + clear_markers() + clear_checkpoints() + clear_pickups()
+}
+
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_players, m)?)?;
     m.add_function(wrap_pyfunction!(get_vehicles, m)?)?;
@@ -50,5 +100,11 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(get_objects, m)?)?;
     m.add_function(wrap_pyfunction!(get_markers, m)?)?;
     m.add_function(wrap_pyfunction!(get_checkpoints, m)?)?;
+    m.add_function(wrap_pyfunction!(clear_vehicles, m)?)?;
+    m.add_function(wrap_pyfunction!(clear_objects, m)?)?;
+    m.add_function(wrap_pyfunction!(clear_markers, m)?)?;
+    m.add_function(wrap_pyfunction!(clear_checkpoints, m)?)?;
+    m.add_function(wrap_pyfunction!(clear_pickups, m)?)?;
+    m.add_function(wrap_pyfunction!(clear_all, m)?)?;
     Ok(())
 }

@@ -227,9 +227,7 @@ impl VehiclePy {
         let _ = vcmp_func().set_vehicle_damage_data(self.id, damage);
     }
 
-    fn delete(&self) {
-        #[cfg(debug_assertions)]
-        println!("Deleting vehicle {}", self.id);
+    pub fn delete(&self) {
         let _ = vcmp_func().delete_vehicle(self.id);
     }
 

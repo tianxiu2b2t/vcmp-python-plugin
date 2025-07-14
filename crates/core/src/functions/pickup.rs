@@ -87,7 +87,7 @@ impl PickupPy {
         let _ = vcmp_func().set_pickup_automatic(self.id, automatic);
     }
 
-    fn delete(&self) {
+    pub fn delete(&self) {
         let _ = vcmp_func().delete_pickup(self.id);
     }
 
