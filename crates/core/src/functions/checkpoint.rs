@@ -135,6 +135,10 @@ impl CheckPointPy {
     fn set_world(&self, world: i32) {
         let _ = vcmp_func().set_checkpoint_world(self.id, world);
     }
+
+    fn __repr__(&self) -> String {
+        format!("CheckPoint(id={})", self.id)
+    }
 }
 
 #[pyfunction]

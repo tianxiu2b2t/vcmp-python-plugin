@@ -122,6 +122,10 @@ impl VehiclePy {
         self.id == other.id
     }
 
+    fn __repr__(&self) -> String {
+        format!("Vehicle(id={})", self.id)
+    }
+
     #[getter]
     pub fn get_id(&self) -> i32 {
         self.id

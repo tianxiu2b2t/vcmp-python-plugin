@@ -35,6 +35,10 @@ impl KeyBindPy {
         self.slot
     }
 
+    fn __repr__(&self) -> String {
+        format!("KeyBind(slot={}, key={}, key2={}, key3={})", self.slot, self.get_key(), self.get_key2(), self.get_key3())
+    }
+
     #[getter]
     pub fn can_release(&self) -> bool {
         let res = vcmp_func().get_key_bind_data(self.slot);

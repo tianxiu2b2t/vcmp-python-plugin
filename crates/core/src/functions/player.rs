@@ -150,6 +150,10 @@ impl PlayerPy {
         self.id == other.id
     }
 
+    fn __repr__(&self) -> String {
+        format!("Player(id={}, name={})", self.id, self.get_name())
+    }
+
     #[getter]
     pub fn get_action(&self, py: Python<'_>) -> i32 {
         py.allow_threads(|| vcmp_func().get_player_action(self.id))
@@ -511,8 +515,8 @@ impl PlayerPy {
     }
 
     #[getter]
-    pub fn get_name(&self, py: Python<'_>) -> String {
-        py.allow_threads(|| vcmp_func().get_player_name(self.id))
+    pub fn get_name(&self) -> String {
+        vcmp_func().get_player_name(self.id)
     }
 
     #[setter]

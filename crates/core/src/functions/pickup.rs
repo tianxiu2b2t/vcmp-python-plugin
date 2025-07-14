@@ -62,6 +62,10 @@ impl PickupPy {
         self.id == other.id
     }
 
+    fn __repr__(&self) -> String {
+        format!("Pickup(id={})", self.id)
+    }
+
     fn add_position(&self, position: VectorPy) {
         let origin = self._position();
         let _ = origin.add(position);

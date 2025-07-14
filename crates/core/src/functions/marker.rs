@@ -92,6 +92,10 @@ impl MarkerPy {
     pub fn delete(&self) {
         vcmp_func().destory_marker(self.id);
     }
+
+    fn __repr__(&self) -> String {
+        format!("Marker(id={})", self.id)
+    }
 }
 
 #[pyfunction]
