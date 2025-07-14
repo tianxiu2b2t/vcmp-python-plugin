@@ -5,8 +5,8 @@ use crate::functions::{
 use crate::pool::ENTITY_POOL;
 
 use pyo3::types::PyModuleMethods;
-use pyo3::{Py, PyAny};
 use pyo3::{Bound, PyResult, Python, pyfunction, types::PyModule, wrap_pyfunction};
+use pyo3::{Py, PyAny};
 
 #[pyfunction]
 pub fn get_players() -> Vec<PlayerPy> {

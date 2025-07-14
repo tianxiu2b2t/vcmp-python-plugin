@@ -1,5 +1,5 @@
-use std::ops::Add as _;
 use std::collections::HashMap;
+use std::ops::Add as _;
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,
@@ -8,7 +8,8 @@ use pyo3::{
 };
 use vcmp_bindings::{
     func::{
-        PlayerMethods, QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions, VehicleHandlingMethods, VehicleMethods
+        PlayerMethods, QueryVehicle, QueryVehicleOptions, SetVehicle, SetVehicleOptions,
+        VehicleHandlingMethods, VehicleMethods,
     },
     utils::Vectorf32,
     vcmp_func,
@@ -567,7 +568,9 @@ impl VehiclePy {
     fn get_driver(&self) -> Option<PlayerPy> {
         let pool = ENTITY_POOL.lock().unwrap();
         for player in pool.get_players() {
-            if vcmp_func().get_player_vehicle_id(player.get_id()) == self.id && vcmp_func().get_player_in_vehicle_slot(player.get_id()) == 0 {
+            if vcmp_func().get_player_vehicle_id(player.get_id()) == self.id
+                && vcmp_func().get_player_in_vehicle_slot(player.get_id()) == 0
+            {
                 return Some(player);
             }
         }
