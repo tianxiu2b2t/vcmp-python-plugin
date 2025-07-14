@@ -209,7 +209,7 @@ impl ObjectPy {
     fn set_rotation_euler(&self, vector: VectorPy) {
         self.rotate_to_euler(vector, Some(0))
     }
-    
+
     fn __repr__(&self) -> String {
         format!("Object(id={})", self.id)
     }

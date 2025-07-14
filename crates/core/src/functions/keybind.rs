@@ -36,7 +36,13 @@ impl KeyBindPy {
     }
 
     fn __repr__(&self) -> String {
-        format!("KeyBind(slot={}, key={}, key2={}, key3={})", self.slot, self.get_key(), self.get_key2(), self.get_key3())
+        format!(
+            "KeyBind(slot={}, key={}, key2={}, key3={})",
+            self.slot,
+            self.get_key(),
+            self.get_key2(),
+            self.get_key3()
+        )
     }
 
     #[getter]
