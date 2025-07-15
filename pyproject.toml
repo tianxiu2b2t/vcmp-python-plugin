@@ -1,10 +1,10 @@
 [project]
 name = "vcmp-python-plugin"
-version = "2.0.0-21"
+version = "2.0.0-22"
 description = "Python for VC:MP Server Plugin"
 authors = [
-    {name = "shenjack", email = "3695888@qq.com"},
     {name = "tianxiu2b2t", email = "atianxiua@163.com"},
+    {name = "shenjack", email = "3695888@qq.com"},
 ]
 dependencies = []
 requires-python = ">=3.10"

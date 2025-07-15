@@ -189,7 +189,12 @@ impl PyCallbackManager {
                         if let Some(error_handler) = error_handler {
                             match error_handler.call1(py, (e.clone_ref(py),)) {
                                 Ok(_) => {}
-                                Err(e) => {
+                                Err(handler_err) => {
+                                    event!(
+                                        Level::ERROR,
+                                        "Failed to call error handler: {}",
+                                        get_traceback(&handler_err, Some(py))
+                                    );
                                     event!(
                                         Level::ERROR,
                                         "Failed to call callback: {}",

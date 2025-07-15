@@ -155,6 +155,7 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_submodule(&pool_module)?;
 
     m.add_function(wrap_pyfunction!(py_reload, m)?)?;
+    m.add_function(wrap_pyfunction!(py_set_error_handler, m)?)?;
 
     Ok(())
 }
@@ -440,8 +441,7 @@ pub fn load_script() {
         if let Err(e) = res {
             event!(
                 Level::ERROR,
-                "Failed to load script: {}\n{}",
-                e,
+                "Failed to load script: {}",
                 get_traceback(&e, Some(py))
             );
         } else {

@@ -14,7 +14,7 @@ def reload(**kwargs):
     """
     pass
 
-def set_error_handler(handler: Optional[Callable[[Any], Any]] = None):
+def set_error_handler(handler: Optional[Callable[[BaseException], Any]] = None):
     """
     Sets the error handler.
 
@@ -22,8 +22,8 @@ def set_error_handler(handler: Optional[Callable[[Any], Any]] = None):
 
     Parameters
     ----------
-    handler : Optional[Callable[Any], Any]
-        The error handler. If None, the default error handler is used.
+    handler : Optional[Callable[BaseException], Any]
+        The error handler. If None, the default message will be output to rust logger.
     """
     pass
 
