@@ -4,7 +4,9 @@ use std::path::Path;
 use std::sync::{LazyLock, Mutex};
 use std::time::Instant;
 
-use pyo3::types::{PyAnyMethods, PyModule, PyModuleMethods, PyTracebackMethods};
+use pyo3::types::{
+    PyAnyMethods, PyDict, PyDictMethods, PyModule, PyModuleMethods, PyTracebackMethods,
+};
 use pyo3::{Bound, Py, PyAny, PyErr, PyResult, Python, pyfunction, pymodule, wrap_pyfunction};
 use tracing::{Level, event};
 
@@ -289,7 +291,7 @@ pub fn py_set_error_handler(handler: Py<PyAny>) {
 pub fn reload() {
     // check if need reload
     {
-        let mut var = GLOBAL_VAR.lock().unwrap();
+        let var = GLOBAL_VAR.lock().unwrap();
         if !var.need_reload {
             return;
         }
@@ -297,30 +299,37 @@ pub fn reload() {
     event!(Level::DEBUG, "Script start reload");
     let start_time = Instant::now();
 
-    Python::with_gil(|py| {
-        let kwargs = var.reload_var.clone().unwrap_or_default();
-
-        var.reload_var = None;
-
+    let kwargs = {
+        let mut var = GLOBAL_VAR.lock().unwrap();
+        let kwargs = var.reload_var.take().unwrap_or_default();
         event!(Level::DEBUG, "Reload kwargs: {:?}", kwargs.clone());
+        kwargs
+    };
+    let players = {
+        let pool = ENTITY_POOL.lock().unwrap();
+        pool.get_players().clone()
+    };
 
-        let players = py.allow_threads(|| {
-            let pool = ENTITY_POOL.lock().unwrap();
-            pool.get_players().clone()
-        });
+    event!(Level::DEBUG, "Reload players: {:?}", players.len());
 
-        event!(Level::DEBUG, "Reload players: {:?}", players.len());
+    let loaded = {
+        players
+            .iter()
+            .filter(|p| p.get_var_loaded())
+            .map(|p| p.get_id())
+            .collect::<Vec<_>>()
+    };
+    event!(Level::DEBUG, "Loaded players: {:?}", loaded.clone());
+    let capture_modules = {
+        GLOBAL_VAR
+            .lock()
+            .unwrap()
+            .capture_modules
+            .clone()
+            .unwrap_or_default()
+    };
 
-        // record loaded
-        let loaded = py.allow_threads(|| {
-            players
-                .iter()
-                .filter(|p| p.get_var_loaded())
-                .map(|p| p.get_id())
-                .collect::<Vec<_>>()
-        });
-        event!(Level::DEBUG, "Loaded players: {:?}", loaded.clone());
-
+    Python::with_gil(|py| {
         event!(Level::DEBUG, "Callback manager trigger player disconnect");
         for player in players.clone() {
             let _ = PY_CALLBACK_MANAGER.trigger(
@@ -347,25 +356,25 @@ pub fn reload() {
         event!(Level::DEBUG, "Unload modules");
         {
             // 删 python 加载的模块
-            let captures = var.capture_modules.clone();
+            // Copy 一份新的 IGNORE_MODULES 防止修改原数组
             let modules = IGNORE_MODULES
                 .clone()
                 .into_iter()
-                .chain(captures.unwrap_or_default())
+                .chain(capture_modules)
                 .collect::<Vec<_>>();
-            pyo3::py_run!(
-                py,
-                modules,
-                r#"import sys;
-                for m in list(sys.modules.keys()):
-                    if m not in modules and not m.startswith("vcmp"):
-                        del sys.modules[m]
-                "#
-            )
+            let py_sys_modules = py.import("sys").unwrap().getattr("modules").unwrap();
+            let py_modules_unbind = py_sys_modules.extract::<Py<PyDict>>().unwrap();
+            let py_modules = py_modules_unbind.bind(py);
+            for m in py_modules.keys() {
+                let m = m.extract::<String>().unwrap();
+                if modules.contains(&m) || (&m).starts_with("vcmp") {
+                    continue;
+                }
+                let _ = py_modules.del_item(m);
+            }
         }
 
         event!(Level::DEBUG, "Reload script");
-        //init_py_module();
         py.allow_threads(|| {
             load_script();
         });
