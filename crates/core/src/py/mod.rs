@@ -26,7 +26,6 @@ use crate::py::events::{PyVcmpEvent, VcmpEvent};
 
 pub mod callbacks;
 pub mod events;
-pub mod exceptions;
 pub mod pool;
 pub mod streams;
 pub mod types;
@@ -135,11 +134,6 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
         fix_module_name(py, &events_module, "events");
         m.add_submodule(&events_module)?;
     }
-
-    let exceptions_module = PyModule::new(py, "exceptions")?;
-    exceptions::module_define(py, &exceptions_module)?;
-    fix_module_name(py, &exceptions_module, "exceptions");
-    m.add_submodule(&exceptions_module)?;
 
     {
         // import instance from player, ...

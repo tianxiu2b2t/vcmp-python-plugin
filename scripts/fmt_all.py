@@ -6,6 +6,6 @@ if __name__ == "__main__":
     except subprocess.CalledProcessError:
         print("Failed to format all files, use stable")
         subprocess.run(["cargo", "fmt", "--all"])
-    
+
     # py
-    subprocess.run(["black", "src"])
+    subprocess.run(["ruff", "format", "src"])

@@ -1,4 +1,4 @@
-from typing import Optional, Tuple
+from typing import Optional
 
 from vcmp.types import Vector, RGB
 from .player import Player

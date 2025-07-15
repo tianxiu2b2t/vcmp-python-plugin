@@ -1,5 +1,3 @@
-from typing import Optional
-
 from vcmp.types import Vector, RGB
 
 

@@ -13,7 +13,7 @@ use tracing::{Level, event};
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
 use crate::py::{
-    events::{abc::PyEvent, custom::PyTracebackEvent, PyVcmpEvent, VcmpEvent, VcmpEventType},
+    events::{PyVcmpEvent, VcmpEvent, VcmpEventType, abc::PyEvent, custom::PyTracebackEvent},
     get_traceback,
 };
 
@@ -123,17 +123,18 @@ impl PyCallbackManager {
         );
         res
     }
-    
+
     fn py_handle(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
-        if let Err(e) = py.check_signals() { // 正常都是 Error 的
+        if let Err(e) = py.check_signals() {
+            // 正常都是 Error 的
             event!(
                 Level::DEBUG,
-                "Failed to check signals: {}", 
+                "Failed to check signals: {}",
                 get_traceback(&e, Some(py))
             );
             if e.is_instance_of::<PyKeyboardInterrupt>(py) {
                 vcmp_func().shutdown();
-            } 
+            }
         }
 
         let kwargs = event.kwargs;
@@ -141,9 +142,7 @@ impl PyCallbackManager {
         let event = event.event_type;
         let handlers = {
             let storage = PY_CALLBACK_STORAGE.lock().unwrap();
-            storage
-                .get_handlers(event_type)
-                .cloned()
+            storage.get_handlers(event_type).cloned()
         };
         if handlers.is_none() {
             return Ok(PyNone::get(py)
@@ -197,7 +196,14 @@ impl PyCallbackManager {
                                 get_traceback(&e, Some(py))
                             );
                         } else if let Some(traceback) = e.traceback(py) {
-                            let _ = self.py_handle(py, PyVcmpEvent::from(VcmpEvent::Traceback(PyTracebackEvent::new(traceback.unbind())))).unwrap();
+                            let _ = self
+                                .py_handle(
+                                    py,
+                                    PyVcmpEvent::from(VcmpEvent::Traceback(PyTracebackEvent::new(
+                                        traceback.unbind(),
+                                    ))),
+                                )
+                                .unwrap();
                         }
                     }
                 }
@@ -818,7 +824,12 @@ impl PyCallbackManager {
     }
 
     #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_traceback(&self, py: Python<'_>, priority: u16, func: Option<Py<PyAny>>) -> Py<PyAny> {
+    pub fn on_traceback(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::Traceback, func, priority)
     }
 }

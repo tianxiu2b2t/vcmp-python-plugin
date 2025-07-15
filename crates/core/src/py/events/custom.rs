@@ -1,5 +1,6 @@
 use pyo3::{
-    pyclass, pymethods, types::{PyModule, PyModuleMethods, PyTraceback}, Bound, Py, PyAny, PyClassInitializer, PyErr, PyResult, Python
+    Bound, Py, PyAny, PyClassInitializer, PyErr, PyResult, Python, pyclass, pymethods,
+    types::{PyModule, PyModuleMethods, PyTraceback},
 };
 
 use crate::py::events::abc::{BaseEvent, PyEvent};
@@ -53,8 +54,12 @@ impl PyTracebackEvent {
     }
     pub fn from_err(py: Option<Python<'_>>, err: Py<PyErr>) -> Self {
         match py {
-            Some(py) => Self { traceback: err.extract::<Py<PyTraceback>>(py).unwrap()},
-            None => Python::with_gil(|py| Self { traceback: err.extract::<Py<PyTraceback>>(py).unwrap()})
+            Some(py) => Self {
+                traceback: err.extract::<Py<PyTraceback>>(py).unwrap(),
+            },
+            None => Python::with_gil(|py| Self {
+                traceback: err.extract::<Py<PyTraceback>>(py).unwrap(),
+            }),
         }
     }
 }

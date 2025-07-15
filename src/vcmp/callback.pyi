@@ -165,4 +165,5 @@ class CallbackManager:
     def on_traceback(
         self, priority: int = 9999, func: Optional[EVENT_FUNCTION] = None
     ) -> EVENT_FUNCTION: ...
+
 callbacks: CallbackManager = ...  # type: ignore

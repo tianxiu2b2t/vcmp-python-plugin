@@ -1,5 +1,3 @@
-from typing import Tuple, Optional
-
 from .abc import Event
 from vcmp.functions.vehicle import Vehicle
 from vcmp.types import Vector

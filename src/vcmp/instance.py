@@ -4,3 +4,12 @@ from vcmp.functions.object import Object
 from vcmp.functions.checkpoint import CheckPoint
 from vcmp.functions.marker import Marker
 from vcmp.functions.pickup import Pickup
+
+__all__ = [
+    "Player",
+    "Vehicle",
+    "Object",
+    "CheckPoint",
+    "Marker",
+    "Pickup",
+]

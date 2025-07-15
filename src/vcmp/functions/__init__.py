@@ -8,3 +8,16 @@ from . import pickup
 from . import player
 from . import server
 from . import vehicle
+
+__all__ = [
+    "checkpoint",
+    "environment",
+    "keybind",
+    "marker",
+    "misc",
+    "object",
+    "pickup",
+    "player",
+    "server",
+    "vehicle",
+]

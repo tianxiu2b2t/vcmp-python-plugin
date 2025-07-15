@@ -1,8 +1,6 @@
-from typing import Optional
-
 from .abc import Event
 from vcmp.functions.checkpoint import CheckPoint
-from .player import Player
+from vcmp.functions.player import Player
 
 class CheckpointEvent(Event): ...
 

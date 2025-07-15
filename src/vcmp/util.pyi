@@ -1,4 +1,3 @@
-from vcmp.functions.player import Player
 from vcmp.types import RGB
 
 WEAPON_NAMES: dict[int, str] = ...

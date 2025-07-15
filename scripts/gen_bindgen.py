@@ -45,8 +45,6 @@ def gen_binding_and_process():
 
     content = content[:raw_start_pos] + raw_content + content[raw_end_pos:]
 
-
-
     with open(target_file, "w", encoding="utf-8") as bind_file:
         bind_file.write(content)
 
