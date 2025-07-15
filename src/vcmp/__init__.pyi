@@ -1,3 +1,4 @@
+from typing import Any, Callable, Optional
 from . import util
 from . import streams
 from . import functions
@@ -10,6 +11,19 @@ def reload(**kwargs):
     Reloads the module.
 
     Call this function to reload the module after next server frame.
+    """
+    pass
+
+def set_error_handler(handler: Optional[Callable[[Any], Any]] = None):
+    """
+    Sets the error handler.
+
+    The error handler is called when an error occurs in the module.
+
+    Parameters
+    ----------
+    handler : Optional[Callable[Any], Any]
+        The error handler. If None, the default error handler is used.
     """
     pass
 

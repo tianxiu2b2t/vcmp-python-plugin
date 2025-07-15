@@ -54,6 +54,7 @@ pub struct GlobalVar {
     pub need_reload: bool,
     pub capture_modules: Option<Vec<String>>,
     pub reload_var: Option<HashMap<String, Py<PyAny>>>,
+    pub error_handler: Option<Py<PyAny>>,
 }
 
 /// 非常好的 CPython signal, 使我 OSError: Signal 2 ignored due to race condition
@@ -276,6 +277,12 @@ pub fn py_reload(kwargs: Option<HashMap<String, Py<PyAny>>>) {
     );
     var.need_reload = true;
     var.reload_var = kwargs;
+}
+
+#[pyfunction]
+#[pyo3(name = "set_error_handler", signature = (handler))]
+pub fn py_set_error_handler(handler: Py<PyAny>) {
+    GLOBAL_VAR.lock().unwrap().error_handler = Some(handler);
 }
 
 pub fn reload() {

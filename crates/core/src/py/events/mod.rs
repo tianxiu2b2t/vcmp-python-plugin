@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use pyo3::{
     Bound, Py, PyAny, PyResult, Python, pyclass, pymethods,
-    types::{PyModule, PyModuleMethods, PyTraceback},
+    types::{PyModule, PyModuleMethods},
 };
 
 use crate::{
@@ -171,7 +171,6 @@ pub enum VcmpEvent {
 
     // Custom
     Custom(custom::CustomEvent),
-    Traceback(custom::PyTracebackEvent),
 }
 
 impl From<VcmpEvent> for VcmpEventType {
@@ -248,7 +247,6 @@ impl From<VcmpEvent> for VcmpEventType {
 
             // Custom
             VcmpEvent::Custom(_) => Self::Custom,
-            VcmpEvent::Traceback(_) => Self::Traceback,
         }
     }
 }
@@ -666,14 +664,6 @@ impl PyVcmpEvent {
     fn custom(kwargs: Option<HashMap<String, Py<PyAny>>>) -> Self {
         Self::new(VcmpEvent::Custom(custom::CustomEvent::default()))
             .with_kwargs(kwargs.unwrap_or_default())
-    }
-
-    #[staticmethod]
-    #[pyo3(signature = (traceback))]
-    fn traceback(traceback: Py<PyTraceback>) -> Self {
-        Self::new(VcmpEvent::Traceback(custom::PyTracebackEvent::new(
-            traceback,
-        )))
     }
 }
 

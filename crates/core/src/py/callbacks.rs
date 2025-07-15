@@ -13,8 +13,8 @@ use tracing::{Level, event};
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
 use crate::py::{
-    events::{PyVcmpEvent, VcmpEvent, VcmpEventType, abc::PyEvent, custom::PyTracebackEvent},
-    get_traceback,
+    events::{abc::PyEvent, PyVcmpEvent, VcmpEvent, VcmpEventType},
+    get_traceback, GLOBAL_VAR,
 };
 
 #[derive(Debug, Clone)]
@@ -184,26 +184,20 @@ impl PyCallbackManager {
                         vcmp_func().shutdown();
                         break;
                     } else {
-                        // py handle error
-                        if event_type == VcmpEventType::Traceback || {
-                            let storage = PY_CALLBACK_STORAGE.lock().unwrap();
-                            let handlers = storage.get_handlers(VcmpEventType::Traceback);
-                            handlers.is_none() || handlers.unwrap().is_empty()
-                        } {
-                            event!(
-                                Level::ERROR,
-                                "Failed to call callback: {}",
-                                get_traceback(&e, Some(py))
-                            );
-                        } else if let Some(traceback) = e.traceback(py) {
-                            let _ = self
-                                .py_handle(
-                                    py,
-                                    PyVcmpEvent::from(VcmpEvent::Traceback(PyTracebackEvent::new(
-                                        traceback.unbind(),
-                                    ))),
-                                )
-                                .unwrap();
+                        let error_handler = {
+                            GLOBAL_VAR.lock().unwrap().error_handler.clone()
+                        };
+                        if let Some(error_handler) = error_handler {
+                            match error_handler.call1(py, (e.clone_ref(py),)) {
+                                Ok(_) => {}
+                                Err(e) => {
+                                    event!(
+                                        Level::ERROR,
+                                        "Failed to call callback: {}",
+                                        get_traceback(&e, Some(py))
+                                    );           
+                                }
+                            }
                         }
                     }
                 }
@@ -308,7 +302,6 @@ impl PyCallbackManager {
             VcmpEvent::VehicleMove(event) => event.init(py),
             VcmpEvent::VehicleHealthChange(event) => event.init(py),
             VcmpEvent::Custom(event) => event.init(py),
-            VcmpEvent::Traceback(event) => event.init(py),
         }
     }
 }
@@ -821,16 +814,6 @@ impl PyCallbackManager {
     #[pyo3(signature = (priority = 9999, func = None))]
     pub fn on_custom(&self, py: Python<'_>, priority: u16, func: Option<Py<PyAny>>) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::Custom, func, priority)
-    }
-
-    #[pyo3(signature = (priority = 9999, func = None))]
-    pub fn on_traceback(
-        &self,
-        py: Python<'_>,
-        priority: u16,
-        func: Option<Py<PyAny>>,
-    ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::Traceback, func, priority)
     }
 }
 
