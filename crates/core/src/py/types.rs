@@ -979,13 +979,13 @@ impl Version {
 
     fn __repr__(&self) -> String {
         match self {
-            Version::v04rel002() => "04rel002".to_string(),
-            Version::v04rel003() => "04rel003".to_string(),
-            Version::v04rel004() => "04rel004".to_string(),
-            Version::v04rel006() => "04rel006".to_string(),
-            Version::v0_4_7_0() => "0.4.7.0".to_string(),
-            Version::v0_4_7_1() => "0.4.7.1".to_string(),
-            Version::Unknown(x) => format!("Version({})", x),
+            Version::v04rel002() => "04rel002(66215)".to_string(),
+            Version::v04rel003() => "04rel003(66230)".to_string(),
+            Version::v04rel004() => "04rel004(67000)".to_string(),
+            Version::v04rel006() => "04rel006(67400)".to_string(),
+            Version::v0_4_7_0() => "0.4.7.0(67700".to_string(),
+            Version::v0_4_7_1() => "0.4.7.1(67710".to_string(),
+            Version::Unknown(x) => format!("Unknown({})", x),
         }
     }
 }
