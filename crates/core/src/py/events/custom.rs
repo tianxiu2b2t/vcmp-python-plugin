@@ -28,7 +28,6 @@ impl PyEvent for CustomEvent {
     }
 }
 
-
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<CustomEvent>()?;
     Ok(())

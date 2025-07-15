@@ -13,8 +13,9 @@ use tracing::{Level, event};
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
 use crate::py::{
-    events::{abc::PyEvent, PyVcmpEvent, VcmpEvent, VcmpEventType},
-    get_traceback, GLOBAL_VAR,
+    GLOBAL_VAR,
+    events::{PyVcmpEvent, VcmpEvent, VcmpEventType, abc::PyEvent},
+    get_traceback,
 };
 
 #[derive(Debug, Clone)]
@@ -184,9 +185,7 @@ impl PyCallbackManager {
                         vcmp_func().shutdown();
                         break;
                     } else {
-                        let error_handler = {
-                            GLOBAL_VAR.lock().unwrap().error_handler.clone()
-                        };
+                        let error_handler = { GLOBAL_VAR.lock().unwrap().error_handler.clone() };
                         if let Some(error_handler) = error_handler {
                             match error_handler.call1(py, (e.clone_ref(py),)) {
                                 Ok(_) => {}
@@ -195,7 +194,7 @@ impl PyCallbackManager {
                                         Level::ERROR,
                                         "Failed to call callback: {}",
                                         get_traceback(&e, Some(py))
-                                    );           
+                                    );
                                 }
                             }
                         }
