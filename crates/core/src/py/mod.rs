@@ -288,9 +288,11 @@ pub fn py_set_error_handler(handler: Py<PyAny>) {
 
 pub fn reload() {
     // check if need reload
-    let mut var = GLOBAL_VAR.lock().unwrap();
-    if !var.need_reload {
-        return;
+    {
+        let mut var = GLOBAL_VAR.lock().unwrap();
+        if !var.need_reload {
+            return;
+        }
     }
     event!(Level::DEBUG, "Script start reload");
     let start_time = Instant::now();
@@ -416,7 +418,10 @@ pub fn reload() {
 
     event!(Level::INFO, "Script reloaded");
 
-    var.need_reload = false;
+    {
+        let mut var = GLOBAL_VAR.lock().unwrap();
+        var.need_reload = false;
+    }
 }
 
 pub fn load_script() {
