@@ -13,7 +13,7 @@ use tracing::{Level, event};
 use vcmp_bindings::{func::ServerMethods, vcmp_func};
 
 use crate::py::{
-    events::{PyVcmpEvent, VcmpEvent, VcmpEventType, abc::PyEvent},
+    events::{abc::PyEvent, custom::PyTracebackEvent, PyVcmpEvent, VcmpEvent, VcmpEventType},
     get_traceback,
 };
 
@@ -123,24 +123,26 @@ impl PyCallbackManager {
         );
         res
     }
+    
     fn py_handle(&self, py: Python<'_>, event: PyVcmpEvent) -> PyResult<Py<PyAny>> {
-        if let Err(e) = py.check_signals() {
+        if let Err(e) = py.check_signals() { // 正常都是 Error 的
             event!(
-                Level::ERROR,
-                "Failed to check signals: {}",
+                Level::DEBUG,
+                "Failed to check signals: {}", 
                 get_traceback(&e, Some(py))
             );
             if e.is_instance_of::<PyKeyboardInterrupt>(py) {
                 vcmp_func().shutdown();
-            }
+            } 
         }
 
         let kwargs = event.kwargs;
+        let event_type = VcmpEventType::from(event.event_type.clone());
         let event = event.event_type;
         let handlers = {
             let storage = PY_CALLBACK_STORAGE.lock().unwrap();
             storage
-                .get_handlers(VcmpEventType::from(event.clone()))
+                .get_handlers(event_type)
                 .cloned()
         };
         if handlers.is_none() {
@@ -174,14 +176,29 @@ impl PyCallbackManager {
                     }
                 }
                 Err(e) => {
-                    event!(
-                        Level::ERROR,
-                        "Failed to call callback: {}",
-                        get_traceback(&e, Some(py))
-                    );
                     if e.is_instance_of::<PyKeyboardInterrupt>(py) {
+                        event!(
+                            Level::DEBUG,
+                            "Failed to call callback: {}",
+                            get_traceback(&e, Some(py))
+                        );
                         vcmp_func().shutdown();
                         break;
+                    } else {
+                        // py handle error
+                        if event_type == VcmpEventType::Traceback || {
+                            let storage = PY_CALLBACK_STORAGE.lock().unwrap();
+                            let handlers = storage.get_handlers(VcmpEventType::Traceback);
+                            handlers.is_none() || handlers.unwrap().is_empty()
+                        } {
+                            event!(
+                                Level::ERROR,
+                                "Failed to call callback: {}",
+                                get_traceback(&e, Some(py))
+                            );
+                        } else if let Some(traceback) = e.traceback(py) {
+                            let _ = self.py_handle(py, PyVcmpEvent::from(VcmpEvent::Traceback(PyTracebackEvent::new(traceback.unbind())))).unwrap();
+                        }
                     }
                 }
             }
@@ -285,6 +302,7 @@ impl PyCallbackManager {
             VcmpEvent::VehicleMove(event) => event.init(py),
             VcmpEvent::VehicleHealthChange(event) => event.init(py),
             VcmpEvent::Custom(event) => event.init(py),
+            VcmpEvent::Traceback(event) => event.init(py),
         }
     }
 }
@@ -798,6 +816,11 @@ impl PyCallbackManager {
     pub fn on_custom(&self, py: Python<'_>, priority: u16, func: Option<Py<PyAny>>) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::Custom, func, priority)
     }
+
+    #[pyo3(signature = (priority = 9999, func = None))]
+    pub fn on_traceback(&self, py: Python<'_>, priority: u16, func: Option<Py<PyAny>>) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::Traceback, func, priority)
+    }
 }
 
 /// 全局的 callback 管理器
@@ -811,6 +834,7 @@ pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+/// 为了调试callback的
 pub mod callback_utils {
     use std::sync::{Arc, LazyLock, Mutex, atomic::AtomicUsize};
     #[derive(Debug, Clone, Default)]
