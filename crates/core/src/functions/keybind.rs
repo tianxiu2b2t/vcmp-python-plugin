@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,
     types::{PyModule, PyModuleMethods},
@@ -12,6 +14,12 @@ use crate::py::types::KeyCode;
 #[pyo3(name = "KeyBind")]
 pub struct KeyBindPy {
     slot: i32,
+}
+
+impl Display for KeyBindPy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.__repr__())
+    }
 }
 
 impl KeyBindPy {

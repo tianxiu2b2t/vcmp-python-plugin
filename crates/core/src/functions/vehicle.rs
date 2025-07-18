@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 use std::ops::Add as _;
 
 use pyo3::{
@@ -31,6 +31,12 @@ pub struct VehiclePy {
     last_pos: Vectorf32,
     last_health: f32,
     updating: bool,
+}
+
+impl Display for VehiclePy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Vehicle({})", self.id)
+    }
 }
 
 impl VehiclePy {

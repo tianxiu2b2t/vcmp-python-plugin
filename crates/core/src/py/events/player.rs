@@ -118,7 +118,7 @@ impl ClientScriptDataEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "ClientScriptDataEvent(player={:?}, stream={})",
+            "ClientScriptDataEvent(player={}, stream={})",
             self.player(),
             self.stream()
         )
@@ -168,7 +168,7 @@ impl PlayerConnectEvent {
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
-        format!("PlayerConnectEvent(player={:?})", self.player())
+        format!("PlayerConnectEvent(player={})", self.player())
     }
 }
 impl From<player::PlayerConnectEvent> for PlayerConnectEvent {
@@ -219,7 +219,7 @@ impl PlayerDisconnectEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerDisconnectEvent(player={:?}, reason={})",
+            "PlayerDisconnectEvent(player={}, reason={})",
             self.player(),
             self.reason()
         )
@@ -274,7 +274,7 @@ impl PlayerRequestClassEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerRequestClassEvent(player={:?}, class_id={})",
+            "PlayerRequestClassEvent(player={}, class_id={})",
             self.player(),
             self.class_id()
         )
@@ -324,7 +324,7 @@ impl PlayerSpawnEvent {
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
-        format!("PlayerSpawnEvent(player={:?})", self.player())
+        format!("PlayerSpawnEvent(player={})", self.player())
     }
 }
 impl From<player::PlayerSpawnEvent> for PlayerSpawnEvent {
@@ -370,7 +370,7 @@ impl PlayerRequestSpawnEvent {
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
-        format!("PlayerRequestSpawnEvent(player={:?})", self.player())
+        format!("PlayerRequestSpawnEvent(player={})", self.player())
     }
 }
 impl From<player::PlayerRequestSpawnEvent> for PlayerRequestSpawnEvent {
@@ -430,9 +430,9 @@ impl PlayerDeathEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerDeathEvent(player={:?}, killer={:?}, reason={}, body={})",
+            "PlayerDeathEvent(player={}, killer={}, reason={}, body={})",
             self.player(),
-            self.killer(),
+            self.killer().map(|k| format!("{}", k)).unwrap_or("None".to_string()),
             self.reason(),
             self.body()
         )
@@ -489,7 +489,7 @@ impl PlayerUpdateEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerUpdateEvent(player={:?}, update={})",
+            "PlayerUpdateEvent(player={}, update={})",
             self.player(),
             self.update()
         )
@@ -549,7 +549,7 @@ impl PlayerRequestEnterVehicleEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerRequestEnterVehicleEvent(player={:?}, vehicle={:?}, slot_index={})",
+            "PlayerRequestEnterVehicleEvent(player={}, vehicle={}, slot_index={})",
             self.player(),
             self.vehicle(),
             self.slot_index()
@@ -611,7 +611,7 @@ impl PlayerEnterVehicleEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerEnterVehicleEvent(player={:?}, vehicle={:?}, slot_index={})",
+            "PlayerEnterVehicleEvent(player={}, vehicle={}, slot_index={})",
             self.player(),
             self.vehicle(),
             self.slot_index()
@@ -669,7 +669,7 @@ impl PlayerExitVehicleEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerExitVehicleEvent(player={:?}, vehicle={:?})",
+            "PlayerExitVehicleEvent(player={}, vehicle={})",
             self.player(),
             self.vehicle()
         )
@@ -728,7 +728,7 @@ impl PlayerNameChangeEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerNameChangeEvent(player={:?}, old_name={}, new_name={})",
+            "PlayerNameChangeEvent(player={}, old_name={}, new_name={})",
             self.player(),
             self.old_name(),
             self.new_name()
@@ -789,7 +789,7 @@ impl PlayerStateChangeEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerStateChangeEvent(player={:?}, old_state={}, new_state={})",
+            "PlayerStateChangeEvent(player={}, old_state={}, new_state={})",
             self.player(),
             self.old_state(),
             self.new_state()
@@ -850,7 +850,7 @@ impl PlayerActionChangeEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerActionChangeEvent(player={:?}, old_action={}, new_action={})",
+            "PlayerActionChangeEvent(player={}, old_action={}, new_action={})",
             self.player(),
             self.old_action(),
             self.new_action()
@@ -907,7 +907,7 @@ impl PlayerOnFireChangeEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerOnFireChangeEvent(player={:?}, is_on_fire={})",
+            "PlayerOnFireChangeEvent(player={}, is_on_fire={})",
             self.player(),
             self.is_on_fire()
         )
@@ -962,7 +962,7 @@ impl PlayerCrouchChangeEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerCrouchChangeEvent(player={:?}, is_crouching={})",
+            "PlayerCrouchChangeEvent(player={}, is_crouching={})",
             self.player(),
             self.is_crouching()
         )
@@ -1021,7 +1021,7 @@ impl PlayerGameKeysChangeEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerGameKeysChangeEvent(player={:?}, old_keys={}, new_keys={})",
+            "PlayerGameKeysChangeEvent(player={}, old_keys={}, new_keys={})",
             self.player(),
             self.old_keys(),
             self.new_keys()
@@ -1073,7 +1073,7 @@ impl PlayerBeginTypingEvent {
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
-        format!("PlayerBeginTypingEvent(player={:?})", self.player())
+        format!("PlayerBeginTypingEvent(player={})", self.player())
     }
 }
 impl From<player::PlayerBeginTypingEvent> for PlayerBeginTypingEvent {
@@ -1119,7 +1119,7 @@ impl PlayerEndTypingEvent {
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
-        format!("PlayerEndTypingEvent(player={:?})", self.player())
+        format!("PlayerEndTypingEvent(player={})", self.player())
     }
 }
 impl From<player::PlayerEndTypingEvent> for PlayerEndTypingEvent {
@@ -1170,7 +1170,7 @@ impl PlayerAwayChangeEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerAwayChangeEvent(player={:?}, is_away={})",
+            "PlayerAwayChangeEvent(player={}, is_away={})",
             self.player(),
             self.is_away()
         )
@@ -1225,7 +1225,7 @@ impl PlayerMessageEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerMessageEvent(player={:?}, message='{}')",
+            "PlayerMessageEvent(player={}, message='{}')",
             self.player(),
             self.message()
         )
@@ -1294,7 +1294,7 @@ impl PlayerCommandEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PlayerCommandEvent(player={:?}, command='{}', text='{}')",
+            "PlayerCommandEvent(player={}, command='{}', text='{}')",
             self.player(),
             self.command(),
             self.text()
@@ -1356,7 +1356,7 @@ impl PlayerPrivateMessageEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerPrivateMessageEvent(player={:?}, target={:?}, message='{}')",
+            "PlayerPrivateMessageEvent(player={}, target={}, message='{}')",
             self.player(),
             self.target(),
             self.message()
@@ -1413,7 +1413,7 @@ impl PlayerKeyBindDownEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerKeyBindDownEvent(player={:?}, key={:?})",
+            "PlayerKeyBindDownEvent(player={}, key={})",
             self.player(),
             self.key()
         )
@@ -1468,7 +1468,7 @@ impl PlayerKeyBindUpEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerKeyBindUpEvent(player={:?}, key={:?})",
+            "PlayerKeyBindUpEvent(player={}, key={})",
             self.player(),
             self.key()
         )
@@ -1524,9 +1524,9 @@ impl PlayerSpectateEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerSpectateEvent(player={:?}, target={:?})",
+            "PlayerSpectateEvent(player={}, target={})",
             self.player(),
-            self.target()
+            self.target().map(|t| format!("{}", t)).unwrap_or("None".to_string())
         )
     }
 }
@@ -1579,7 +1579,7 @@ impl PlayerCrashReportEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerCrashReportEvent(player={:?}, report='{}')",
+            "PlayerCrashReportEvent(player={}, report='{}')",
             self.player(),
             self.report()
         )
@@ -1634,7 +1634,7 @@ impl PlayerModuleListEvent {
     }
     fn __repr__(&self) -> String {
         format!(
-            "PlayerModuleListEvent(player={:?}, modules='{}')",
+            "PlayerModuleListEvent(player={}, modules='{}')",
             self.player(),
             self.modules()
         )
@@ -1715,7 +1715,7 @@ impl PlayerHealthChangeEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PlayerHealthChangeEvent(player={:?}, old_health={}, new_health={})",
+            "PlayerHealthChangeEvent(player={}, old_health={}, new_health={})",
             self.player(),
             self.get_old_health(),
             self.get_new_health()
@@ -1804,7 +1804,7 @@ impl PlayerArmourChangeEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PlayerArmourChangeEvent(player={:?}, old_armour={}, new_armour={})",
+            "PlayerArmourChangeEvent(player={}, old_armour={}, new_armour={})",
             self.player(),
             self.get_old_armour(),
             self.get_new_armour()
@@ -1893,7 +1893,7 @@ impl PlayerWeaponChangeEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PlayerWeaponChangeEvent(player={:?}, old_weapon={}, new_weapon={})",
+            "PlayerWeaponChangeEvent(player={}, old_weapon={}, new_weapon={})",
             self.player(),
             self.get_old_weapon(),
             self.get_new_weapon()
@@ -1982,7 +1982,7 @@ impl PlayerAmmoChangeEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PlayerWeaponChangeEvent(player={:?}, old_ammo={}, new_ammo={})",
+            "PlayerWeaponChangeEvent(player={}, old_ammo={}, new_ammo={})",
             self.player(),
             self.get_old_ammo(),
             self.get_new_ammo()
@@ -2071,7 +2071,7 @@ impl PlayerMoveEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PlayerMoveEvent(player={:?}, old_position={:?}, new_position={:?})",
+            "PlayerMoveEvent(player={}, old_position={:?}, new_position={:?})",
             self.player(),
             self.get_old_position(),
             self.get_new_position()

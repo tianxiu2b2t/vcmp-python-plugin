@@ -55,7 +55,7 @@ impl PickupPickAttemptEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PickupPickAttemptEvent(pickup={:?}, player={:?})",
+            "PickupPickAttemptEvent(pickup={}, player={})",
             self.pickup(),
             self.player(),
         )
@@ -112,7 +112,7 @@ impl PickupPickedEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "PickupPickedEvent(pickup={:?}, player={:?})",
+            "PickupPickedEvent(pickup={}, player={})",
             self.pickup(),
             self.player()
         )
@@ -162,7 +162,7 @@ impl PickupRespawnEvent {
     }
 
     fn __repr__(&self) -> String {
-        format!("PickupRespawnEvent(pickup={:?})", self.pickup())
+        format!("PickupRespawnEvent(pickup={})", self.pickup())
     }
 }
 impl From<pickup::PickupRespawnEvent> for PickupRespawnEvent {

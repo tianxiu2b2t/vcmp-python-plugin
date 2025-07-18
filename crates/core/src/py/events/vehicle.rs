@@ -57,7 +57,7 @@ impl VehicleUpdateEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "VehicleUpdateEvent(vehicle={:?}, update_type={})",
+            "VehicleUpdateEvent(vehicle={}, update_type={})",
             self.vehicle(),
             self.update_type()
         )
@@ -107,7 +107,7 @@ impl VehicleExplodeEvent {
     }
 
     fn __repr__(&self) -> String {
-        format!("VehicleExplodeEvent(vehicle={:?})", self.vehicle())
+        format!("VehicleExplodeEvent(vehicle={})", self.vehicle())
     }
 }
 impl From<vehicle::VehicleExplodeEvent> for VehicleExplodeEvent {
@@ -153,7 +153,7 @@ impl VehicleRespawnEvent {
     }
 
     fn __repr__(&self) -> String {
-        format!("VehicleRespawnEvent(vehicle={:?})", self.vehicle())
+        format!("VehicleRespawnEvent(vehicle={})", self.vehicle())
     }
 }
 impl From<vehicle::VehicleRespawnEvent> for VehicleRespawnEvent {
@@ -228,7 +228,7 @@ impl VehicleMoveEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "VehicleMoveEvent(vehicle={:?}, old_position={:?}, new_position={:?})",
+            "VehicleMoveEvent(vehicle={}, old_position={:?}, new_position={:?})",
             self.vehicle(),
             self.get_old_position(),
             self.get_new_position()
@@ -317,7 +317,7 @@ impl VehicleHealthChangeEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "VehicleHealthChangeEvent(vehicle={:?}, old_health={}, new_health={})",
+            "VehicleHealthChangeEvent(vehicle={}, old_health={}, new_health={})",
             self.vehicle(),
             self.get_old_health(),
             self.get_new_health()

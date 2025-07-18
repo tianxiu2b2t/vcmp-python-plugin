@@ -294,6 +294,7 @@ impl PlayerMethods for VcmpFunctions {
     }
 
     fn set_player_name(&self, player: i32, name: &str) {
+        let name = format!("{}\0", name); // append \0
         let name_ptr = name.as_ptr() as *const i8;
         (self.inner.SetPlayerName)(player, name_ptr);
     }

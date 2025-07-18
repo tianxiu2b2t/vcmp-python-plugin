@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::{fmt::Display, ops::Add};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pymethods,
@@ -37,6 +37,13 @@ pub struct PlayerPy {
     */
     loaded: bool,
 }
+
+impl Display for PlayerPy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Player(id={}, name={}))", self.id, self.get_name())
+    }
+}
+
 
 impl PlayerPy {
     pub fn new(id: i32) -> Self {

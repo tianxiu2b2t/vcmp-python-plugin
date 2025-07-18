@@ -60,7 +60,7 @@ impl ObjectShotEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "ObjectShotEvent(object={:?}, player={:?}, weapon_id={})",
+            "ObjectShotEvent(object={}, player={}, weapon_id={})",
             self.object(),
             self.player(),
             self.weapon_id()
@@ -119,7 +119,7 @@ impl ObjectTouchedEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "ObjectTouchedEvent(object={:?}, player={:?})",
+            "ObjectTouchedEvent(object={}, player={})",
             self.object(),
             self.player()
         )

@@ -55,7 +55,7 @@ impl CheckpointEnteredEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "CheckpointEnteredEvent(checkpoint={:?}, player={:?})",
+            "CheckpointEnteredEvent(checkpoint={}, player={})",
             self.checkpoint(),
             self.player()
         )
@@ -112,7 +112,7 @@ impl CheckpointExitedEvent {
 
     fn __repr__(&self) -> String {
         format!(
-            "CheckpointExitedEvent(checkpoint={:?}, player={:?})",
+            "CheckpointExitedEvent(checkpoint={}, player={})",
             self.checkpoint(),
             self.player()
         )

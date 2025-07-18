@@ -1,4 +1,4 @@
-use std::ops::Add;
+use std::{fmt::Display, ops::Add};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,
@@ -18,6 +18,12 @@ use crate::{
 #[pyo3(name = "Object")]
 pub struct ObjectPy {
     id: i32,
+}
+
+impl Display for ObjectPy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Object({})", self.id)
+    }
 }
 
 impl ObjectPy {

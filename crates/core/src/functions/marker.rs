@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,
     types::{PyModule, PyModuleMethods},
@@ -15,6 +17,12 @@ use crate::{
 #[pyo3(name = "Marker")]
 pub struct MarkerPy {
     id: i32,
+}
+
+impl Display for MarkerPy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Marker(id={})", self.id)
+    }
 }
 
 impl MarkerPy {

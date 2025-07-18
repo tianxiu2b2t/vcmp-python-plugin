@@ -1,4 +1,7 @@
-use std::ops::Add;
+use std::{
+    ops::Add,
+    fmt::Display
+};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,
@@ -18,6 +21,12 @@ use crate::{
 #[pyo3(name = "CheckPoint")]
 pub struct CheckPointPy {
     id: i32,
+}
+
+impl Display for CheckPointPy {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "CheckPoint({})", self.id)
+    }
 }
 
 impl CheckPointPy {
