@@ -1,9 +1,10 @@
 [workspace]
 members = [
     "crates/vcmp_bindings",
+    "crates/npc_bindings",
     "crates/core"
 ]
-resolver = "2"
+resolver = "3"
 
 [profile.release]
 debug = true 
