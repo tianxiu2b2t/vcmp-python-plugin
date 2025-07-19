@@ -432,7 +432,9 @@ impl PlayerDeathEvent {
         format!(
             "PlayerDeathEvent(player={}, killer={}, reason={}, body={})",
             self.player(),
-            self.killer().map(|k| format!("{}", k)).unwrap_or("None".to_string()),
+            self.killer()
+                .map(|k| format!("{}", k))
+                .unwrap_or("None".to_string()),
             self.reason(),
             self.body()
         )
@@ -1526,7 +1528,9 @@ impl PlayerSpectateEvent {
         format!(
             "PlayerSpectateEvent(player={}, target={})",
             self.player(),
-            self.target().map(|t| format!("{}", t)).unwrap_or("None".to_string())
+            self.target()
+                .map(|t| format!("{}", t))
+                .unwrap_or("None".to_string())
         )
     }
 }

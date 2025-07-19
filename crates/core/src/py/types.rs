@@ -301,6 +301,16 @@ impl RGBPy {
         format!("#{:08X}", self.as_rgba())
     }
 
+    #[new]
+    #[pyo3(signature = (r, g, b, a = 255))]
+    pub fn new(r: u8, g: u8, b: u8, a: u8) -> Self {
+        Self {
+            inner: Color::from_rgba(
+                ((r as u32) << 24) | ((g as u32) << 16) | ((b as u32) << 8) | (a as u32),
+            ),
+        }
+    }
+
     fn __repr__(&self) -> String {
         let (r, b, g, a) = (self.inner.r, self.inner.b, self.inner.g, self.inner.a);
         format!("RGB(r={r}, b={b}, g={g}, a={a})")

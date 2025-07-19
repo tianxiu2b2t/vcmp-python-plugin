@@ -1,5 +1,5 @@
-use std::{collections::HashMap, fmt::Display};
 use std::ops::Add as _;
+use std::{collections::HashMap, fmt::Display};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,

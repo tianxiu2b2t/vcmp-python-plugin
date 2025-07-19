@@ -44,7 +44,6 @@ impl Display for PlayerPy {
     }
 }
 
-
 impl PlayerPy {
     pub fn new(id: i32) -> Self {
         Self {

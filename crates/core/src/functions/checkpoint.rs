@@ -1,7 +1,4 @@
-use std::{
-    ops::Add,
-    fmt::Display
-};
+use std::{fmt::Display, ops::Add};
 
 use pyo3::{
     Bound, PyResult, Python, pyclass, pyfunction, pymethods,

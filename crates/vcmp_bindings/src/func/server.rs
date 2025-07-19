@@ -69,7 +69,10 @@ impl ServerMethods for VcmpFunctions {
         setting
     }
     fn get_server_name(&self) -> String {
-        self.server_settings().server_name().trim_end_matches("\0").to_string()
+        self.server_settings()
+            .server_name()
+            .trim_end_matches("\0")
+            .to_string()
     }
     fn get_server_password(&self) -> String {
         let buf = vec![0u8; 1024];
