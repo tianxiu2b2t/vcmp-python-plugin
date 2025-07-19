@@ -190,7 +190,11 @@ impl EntityPool {
     }
 
     pub fn get_players(&self) -> Vec<PlayerPy> {
-        self.players.entities().cloned().filter(|p| p.get_var_reload_joined()).collect()
+        self.players
+            .entities()
+            .cloned()
+            .filter(|p| p.get_var_reload_joined())
+            .collect()
     }
 
     pub fn get_all_players(&self) -> Vec<PlayerPy> {

@@ -35,7 +35,7 @@ pub struct PlayerPy {
     // 用于判断是否进入的
     loaded: bool,
     // 一个重载的时候判断是否进入的
-    reload_joined: bool
+    reload_joined: bool,
 }
 
 impl Display for PlayerPy {
@@ -55,7 +55,7 @@ impl PlayerPy {
             last_ammo: 0,
             loaded: false,
             updating: false,
-            reload_joined: true // 默认初始化就是为 true
+            reload_joined: true, // 默认初始化就是为 true
         }
     }
 
