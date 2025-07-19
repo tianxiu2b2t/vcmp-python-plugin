@@ -30,6 +30,11 @@
 
 > 注：目前 `rwir` 分支合并成 `master` 分支，目前处于 `PreRelease` 版本（测试版），但目前的 `Release` 版本为 `1.2.10.6` 处于稳定状态
 
+
+## TODO
+- [ ] 实现 NPC 插件（habi）的 bindings
+- [ ] 实现 Exports 出来的 bindings
+
 ## 鸣谢
 
 [ysc3839](https://github.com/ysc3839/vcmp-python-plugin) 提供一些 Python 开发思路
