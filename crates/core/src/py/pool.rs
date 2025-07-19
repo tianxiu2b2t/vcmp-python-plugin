@@ -12,7 +12,11 @@ use pyo3::{Py, PyAny};
 #[pyo3(signature = (all = false))]
 pub fn get_players(all: bool) -> Vec<PlayerPy> {
     let pool = ENTITY_POOL.lock().unwrap();
-    pool.get_players()
+    if all {
+        pool.get_all_players()
+    } else {
+        pool.get_players()
+    }
 }
 
 #[pyfunction]
@@ -100,7 +104,10 @@ pub fn find_player(py: Python<'_>, value: Py<PyAny>) -> Option<PlayerPy> {
     if let Ok(id) = value.extract::<i32>(py) {
         get_players(true).iter().find(|p| p.get_id() == id).cloned()
     } else if let Ok(name) = value.extract::<String>(py) {
-        get_players(true).iter().find(|p| p.get_name() == name).cloned()
+        get_players(true)
+            .iter()
+            .find(|p| p.get_name() == name)
+            .cloned()
     } else {
         None
     }
