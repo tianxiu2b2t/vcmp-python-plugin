@@ -18,6 +18,8 @@ use crate::py::{
     get_traceback,
 };
 
+pub const DEFAULT_CALLBACK_PRIORITY: u16 = 65535;
+
 #[derive(Debug, Clone)]
 pub struct CallbackFunction {
     /// 万物皆可 Call
@@ -27,7 +29,7 @@ pub struct CallbackFunction {
     ///         ...
     /// ```
     pub func: Py<PyAny>,
-    /// 从 0 开始到最后的 9999
+    /// 从 0 开始到最后的 65535
     pub priority: u16,
 }
 
@@ -42,15 +44,12 @@ impl PyCallbackStorage {
             self.callbacks.insert(event_type.clone(), Vec::default());
         }
         // 根据优先级来排列
-        // self.callbacks
-        // .get_mut(&event_type)
-        // .unwrap()
-        // .push(CallbackFunction { func, priority });
+        // 最高的优先，最后的最后来执行
 
         let handlers = self.callbacks.get_mut(&event_type).unwrap();
         let mut i = 0;
         while i < handlers.len() {
-            if handlers[i].priority < priority {
+            if handlers[i].priority > priority { // fuck CodeGeeX why 1 < 500 ?  [500, 1]
                 handlers.insert(i, CallbackFunction { func, priority });
                 return;
             }
@@ -316,7 +315,7 @@ impl PyCallbackManager {
         self.py_handle(py, event)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_server_initialise(
         &self,
         py: Python<'_>,
@@ -326,7 +325,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::ServerInitialise, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_server_shutdown(
         &self,
         py: Python<'_>,
@@ -336,7 +335,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::ServerShutdown, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_server_performance_report(
         &self,
         py: Python<'_>,
@@ -346,7 +345,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::ServerPerformanceReport, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_server_frame(
         &self,
         py: Python<'_>,
@@ -355,7 +354,7 @@ impl PyCallbackManager {
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerFrame, func, priority)
     }
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_incoming_connection(
         &self,
         py: Python<'_>,
@@ -365,7 +364,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::IncomingConnection, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_client_script_data(
         &self,
         py: Python<'_>,
@@ -375,7 +374,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::ClientScriptData, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_connect(
         &self,
         py: Python<'_>,
@@ -385,7 +384,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerConnect, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_disconnect(
         &self,
         py: Python<'_>,
@@ -395,7 +394,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerDisconnect, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_request_class(
         &self,
         py: Python<'_>,
@@ -405,7 +404,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerRequestClass, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_spawn(
         &self,
         py: Python<'_>,
@@ -415,7 +414,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerSpawn, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_request_spawn(
         &self,
         py: Python<'_>,
@@ -425,7 +424,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerRequestSpawn, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_death(
         &self,
         py: Python<'_>,
@@ -435,7 +434,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerDeath, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_update(
         &self,
         py: Python<'_>,
@@ -445,7 +444,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerUpdate, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_request_enter_vehicle(
         &self,
         py: Python<'_>,
@@ -455,7 +454,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerRequestEnterVehicle, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_enter_vehicle(
         &self,
         py: Python<'_>,
@@ -465,7 +464,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerEnterVehicle, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_exit_vehicle(
         &self,
         py: Python<'_>,
@@ -475,7 +474,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerExitVehicle, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_name_change(
         &self,
         py: Python<'_>,
@@ -485,7 +484,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerNameChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_state_change(
         &self,
         py: Python<'_>,
@@ -495,7 +494,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerStateChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_action_change(
         &self,
         py: Python<'_>,
@@ -505,7 +504,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerActionChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_on_fire_change(
         &self,
         py: Python<'_>,
@@ -515,7 +514,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerOnFireChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_crouch_change(
         &self,
         py: Python<'_>,
@@ -525,7 +524,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerCrouchChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_game_keys_change(
         &self,
         py: Python<'_>,
@@ -535,7 +534,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerGameKeysChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_begin_typing(
         &self,
         py: Python<'_>,
@@ -545,7 +544,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerBeginTyping, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_end_typing(
         &self,
         py: Python<'_>,
@@ -555,7 +554,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerEndTyping, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_away_change(
         &self,
         py: Python<'_>,
@@ -565,7 +564,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerAwayChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_message(
         &self,
         py: Python<'_>,
@@ -575,7 +574,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerMessage, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_command(
         &self,
         py: Python<'_>,
@@ -585,7 +584,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerCommand, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_private_message(
         &self,
         py: Python<'_>,
@@ -595,7 +594,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerPrivateMessage, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_key_bind_down(
         &self,
         py: Python<'_>,
@@ -605,7 +604,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerKeyBindDown, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_key_bind_up(
         &self,
         py: Python<'_>,
@@ -615,7 +614,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerKeyBindUp, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_spectate(
         &self,
         py: Python<'_>,
@@ -625,7 +624,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerSpectate, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_crash_report(
         &self,
         py: Python<'_>,
@@ -635,7 +634,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerCrashReport, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_module_list(
         &self,
         py: Python<'_>,
@@ -645,7 +644,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerModuleList, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_health_change(
         &self,
         py: Python<'_>,
@@ -655,7 +654,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerHealthChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_armour_change(
         &self,
         py: Python<'_>,
@@ -665,7 +664,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerArmourChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_weapon_change(
         &self,
         py: Python<'_>,
@@ -675,7 +674,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerWeaponChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_ammo_change(
         &self,
         py: Python<'_>,
@@ -685,7 +684,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerAmmoChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_player_move(
         &self,
         py: Python<'_>,
@@ -695,7 +694,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PlayerMove, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_pickup_pick_attempt(
         &self,
         py: Python<'_>,
@@ -705,7 +704,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PickupPickAttempt, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_pickup_picked(
         &self,
         py: Python<'_>,
@@ -715,7 +714,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PickupPicked, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_pickup_respawn(
         &self,
         py: Python<'_>,
@@ -725,7 +724,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::PickupRespawn, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_checkpoint_entered(
         &self,
         py: Python<'_>,
@@ -735,7 +734,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::CheckpointEntered, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_checkpoint_exited(
         &self,
         py: Python<'_>,
@@ -745,7 +744,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::CheckpointExited, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_object_shot(
         &self,
         py: Python<'_>,
@@ -755,7 +754,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::ObjectShot, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_object_touched(
         &self,
         py: Python<'_>,
@@ -765,7 +764,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::ObjectTouched, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_vehicle_explode(
         &self,
         py: Python<'_>,
@@ -775,7 +774,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::VehicleExplode, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_vehicle_respawn(
         &self,
         py: Python<'_>,
@@ -785,7 +784,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::VehicleRespawn, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_vehicle_update(
         &self,
         py: Python<'_>,
@@ -795,7 +794,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::VehicleUpdate, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_vehicle_move(
         &self,
         py: Python<'_>,
@@ -805,7 +804,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::VehicleMove, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_vehicle_health_change(
         &self,
         py: Python<'_>,
@@ -815,7 +814,7 @@ impl PyCallbackManager {
         self.register_func(py, VcmpEventType::VehicleHealthChange, func, priority)
     }
 
-    #[pyo3(signature = (priority = 9999, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_custom(&self, py: Python<'_>, priority: u16, func: Option<Py<PyAny>>) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::Custom, func, priority)
     }
