@@ -6,7 +6,15 @@ from vcmp.functions.checkpoint import CheckPoint
 from vcmp.functions.marker import Marker
 from vcmp.functions.object import Object
 
-def get_players() -> list[Player]: ...
+def get_players(all: bool = False) -> list[Player]: 
+    """
+    Get all players in the server.
+
+    :param all: If True, returns all players, including fake disconnected ones. Default is False.
+    :type all: bool, optional
+    :return: A list of players.
+    :rtype: list[Player]
+    """
 def get_vehicles() -> list[Vehicle]: ...
 def get_pickups() -> list[Pickup]: ...
 def get_checkpoints() -> list[CheckPoint]: ...
