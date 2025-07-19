@@ -27,6 +27,17 @@ def set_error_handler(handler: Optional[Callable[[BaseException], Any]] = None):
     """
     pass
 
+def get_error_handler() -> Optional[Callable[[BaseException], Any]]:
+    """
+    Gets the error handler.
+
+    Returns
+    -------
+    Optional[Callable[BaseException], Any]
+        The error handler.
+    """
+    pass
+
 __all__ = [
     "util",
     "streams",
@@ -35,4 +46,6 @@ __all__ = [
     "events",
     "instance",
     "reload",
+    "set_error_handler",
+    "get_error_handler",
 ]

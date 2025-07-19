@@ -158,6 +158,7 @@ fn register_module(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_function(wrap_pyfunction!(py_reload, m)?)?;
     m.add_function(wrap_pyfunction!(py_set_error_handler, m)?)?;
+    m.add_function(wrap_pyfunction!(py_get_error_handler, m)?)?;
 
     Ok(())
 }
@@ -286,6 +287,12 @@ pub fn py_reload(kwargs: Option<HashMap<String, Py<PyAny>>>) {
 #[pyo3(name = "set_error_handler", signature = (handler))]
 pub fn py_set_error_handler(handler: Py<PyAny>) {
     GLOBAL_VAR.lock().unwrap().error_handler = Some(handler);
+}
+
+#[pyfunction]
+#[pyo3(name = "get_error_handler")]
+pub fn py_get_error_handler() -> Option<Py<PyAny>> {
+    GLOBAL_VAR.lock().unwrap().error_handler.clone()
 }
 
 pub fn reload() {
