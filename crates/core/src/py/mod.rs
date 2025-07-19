@@ -319,14 +319,6 @@ pub fn reload() {
 
     event!(Level::DEBUG, "Reload players: {:?}", players.len());
 
-    let loaded = {
-        players
-            .iter()
-            .filter(|p| p.get_var_loaded())
-            .map(|p| p.get_id())
-            .collect::<Vec<_>>()
-    };
-    event!(Level::DEBUG, "Loaded players: {:?}", loaded.clone());
     let capture_modules = {
         GLOBAL_VAR
             .lock()
@@ -347,7 +339,8 @@ pub fn reload() {
                 .with_kwargs(kwargs.clone()),
             );
             {
-                let mut player = player;
+                let mut pool = ENTITY_POOL.lock().unwrap();
+                let player = pool.get_mut_player(player.get_id()).unwrap();
                 player.set_var_reload_joined(false);
             }
         }
@@ -398,10 +391,17 @@ pub fn reload() {
                 .with_kwargs(kwargs.clone()),
         );
 
+        // 重新获取玩家，防止玩家断开连接后，玩家列表为空
+        let players = {
+            let pool = ENTITY_POOL.lock().unwrap();
+            pool.get_all_players().clone()
+        };
+
         event!(Level::DEBUG, "Callback manager trigger player join");
         for player in players.clone() {
             {
-                let mut player = player;
+                let mut pool = ENTITY_POOL.lock().unwrap();
+                let player = pool.get_mut_player(player.get_id()).unwrap();
                 player.set_var_reload_joined(true);
             }
             let _ = PY_CALLBACK_MANAGER.trigger(
@@ -409,8 +409,7 @@ pub fn reload() {
                 PyVcmpEvent::from(VcmpEvent::PlayerConnect(PlayerConnectEvent::new(player)))
                     .with_kwargs(kwargs.clone()),
             );
-            let id = player.get_id();
-            if !loaded.contains(&id) {
+            if !player.get_var_loaded() {
                 continue;
             }
             let _ = PY_CALLBACK_MANAGER.trigger(
