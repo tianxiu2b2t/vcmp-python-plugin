@@ -49,7 +49,8 @@ impl PyCallbackStorage {
         let handlers = self.callbacks.get_mut(&event_type).unwrap();
         let mut i = 0;
         while i < handlers.len() {
-            if handlers[i].priority > priority { // fuck CodeGeeX why 1 < 500 ?  [500, 1]
+            if handlers[i].priority > priority {
+                // fuck CodeGeeX why 1 < 500 ?  [500, 1]
                 handlers.insert(i, CallbackFunction { func, priority });
                 return;
             }
@@ -87,14 +88,7 @@ impl PyCallbackManager {
             "Python with gil before counter: {:?}(ID: {event_id})",
             callback_utils::PY_GIL_REF_COUNTER.current()
         );
-        //if callback_utils::PY_GIL_REF_COUNTER.current() >= 1 {
-        //    event!(
-        //        Level::ERROR,
-        //        "Python is already in use, aborting event: {:?}",
-        //        event
-        //    );
-        //    return abortable;
-        //}
+
         let res = Python::with_gil(|py| {
             event!(
                 Level::TRACE,
@@ -828,6 +822,7 @@ pub static PY_CALLBACK_MANAGER: LazyLock<PyCallbackManager> =
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyCallbackManager>()?;
     m.add("callbacks", PY_CALLBACK_MANAGER.into_pyobject(py)?)?;
+    m.add("DEFAULT_PRIORITY", DEFAULT_CALLBACK_PRIORITY)?;
     Ok(())
 }
 
