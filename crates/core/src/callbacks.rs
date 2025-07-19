@@ -513,7 +513,7 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 }
             }
         }
-        // then ammo, not block it
+        // then ammo
         {
             let current_ammo = vcmp_func().get_player_weapon_ammo(player_id);
             let current_wep = vcmp_func().get_player_weapon(player_id);

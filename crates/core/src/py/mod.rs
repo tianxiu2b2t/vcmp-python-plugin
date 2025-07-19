@@ -314,7 +314,7 @@ pub fn reload() {
     };
     let players = {
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_players().clone()
+        pool.get_all_players().clone()
     };
 
     event!(Level::DEBUG, "Reload players: {:?}", players.len());
@@ -346,6 +346,10 @@ pub fn reload() {
                 )))
                 .with_kwargs(kwargs.clone()),
             );
+            {
+                let mut player = player;
+                player.set_var_reload_joined(false);
+            }
         }
 
         event!(Level::DEBUG, "Callback manager trigger server shutdown");
@@ -396,6 +400,10 @@ pub fn reload() {
 
         event!(Level::DEBUG, "Callback manager trigger player join");
         for player in players.clone() {
+            {
+                let mut player = player;
+                player.set_var_reload_joined(true);
+            }
             let _ = PY_CALLBACK_MANAGER.trigger(
                 py,
                 PyVcmpEvent::from(VcmpEvent::PlayerConnect(PlayerConnectEvent::new(player)))

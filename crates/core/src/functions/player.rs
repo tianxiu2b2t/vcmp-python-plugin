@@ -32,10 +32,10 @@ pub struct PlayerPy {
     last_weapon: i32,
     last_ammo: i32,
     updating: bool,
-    /*
-        存储是否加载
-    */
+    // 用于判断是否进入的
     loaded: bool,
+    // 一个重载的时候判断是否进入的
+    reload_joined: bool
 }
 
 impl Display for PlayerPy {
@@ -55,6 +55,7 @@ impl PlayerPy {
             last_ammo: 0,
             loaded: false,
             updating: false,
+            reload_joined: true // 默认初始化就是为 true
         }
     }
 
@@ -112,6 +113,14 @@ impl PlayerPy {
 
     pub fn get_var_loaded(&self) -> bool {
         self.loaded
+    }
+
+    pub fn get_var_reload_joined(&self) -> bool {
+        self.reload_joined
+    }
+
+    pub fn set_var_reload_joined(&mut self, reload_joined: bool) {
+        self.reload_joined = reload_joined;
     }
 }
 
