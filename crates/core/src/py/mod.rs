@@ -303,7 +303,7 @@ pub fn reload() {
             return;
         }
     }
-    event!(Level::DEBUG, "Script start reload");
+    event!(Level::INFO, "Script start reload");
     let start_time = Instant::now();
 
     let kwargs = {
@@ -327,6 +327,7 @@ pub fn reload() {
             .clone()
             .unwrap_or_default()
     };
+    let mut elapsed_time = 0f64;
 
     Python::with_gil(|py| {
         event!(Level::DEBUG, "Callback manager trigger player disconnect");
@@ -433,13 +434,16 @@ pub fn reload() {
         let _ = PY_CALLBACK_MANAGER.trigger(
             py,
             PyVcmpEvent::from(VcmpEvent::ServerReloaded(ServerReloadedEvent::new(
-                start_time.elapsed().as_secs_f64(),
+                {
+                    elapsed_time = start_time.elapsed().as_secs_f64();
+                    elapsed_time
+                },
             )))
             .with_kwargs(kwargs.clone()),
         );
     });
 
-    event!(Level::INFO, "Script reloaded");
+    event!(Level::INFO, "Script reloaded, elapsed time: {elapsed_time:.2?}");
 
     {
         let mut var = GLOBAL_VAR.lock().unwrap();
