@@ -9,12 +9,12 @@ use vcmp_bindings::{func::ServerMethods, vcmp_func};
 use crate::py::types::ServerSettingsPy;
 
 #[pyfunction]
-pub fn set_server_name(server_name: &str) {
+pub fn set_servername(server_name: &str) {
     let _ = vcmp_func().set_server_name(server_name);
 }
 
 #[pyfunction]
-pub fn get_server_name() -> String {
+pub fn get_servername() -> String {
     vcmp_func().get_server_name()
 }
 
