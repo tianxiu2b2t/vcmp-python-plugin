@@ -64,8 +64,8 @@ pub fn get_server_settings() -> ServerSettingsPy {
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(set_server_name, m)?)?;
-    m.add_function(wrap_pyfunction!(get_server_name, m)?)?;
+    m.add_function(wrap_pyfunction!(set_servername, m)?)?;
+    m.add_function(wrap_pyfunction!(get_servername, m)?)?;
     m.add_function(wrap_pyfunction!(set_gamemode, m)?)?;
     m.add_function(wrap_pyfunction!(get_gamemode, m)?)?;
     m.add_function(wrap_pyfunction!(set_password, m)?)?;
