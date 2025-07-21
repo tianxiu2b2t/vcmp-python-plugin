@@ -94,10 +94,23 @@ pub fn init_py_environment() {
 
         config.install_signal_handlers = 0; // 必须设置为 false，不然会导致 Server 捕捉不到信号，从而导致进程无法正常退出
 
-        pyo3::ffi::Py_InitializeFromConfig(&config as *const _);
+        let status = pyo3::ffi::Py_InitializeFromConfig(&config as *const _);
 
-        // 疑似 Linux 在 Python 的问题？
-        // pyo3::ffi::PyEval_SaveThread();
+        if pyo3::ffi::PyStatus_Exception(status) != 0 {
+            let message = {
+                let msg = status.err_msg;
+                if msg.is_null() {
+                    "unknown".to_string()
+                } else {
+                    let msg = CString::from_raw(msg as *mut _);
+                    msg.to_string_lossy().into_owned()
+                }
+            };
+            event!(Level::ERROR, "Python initialize failed, message: {message}");
+            exit(1);
+        }
+
+        pyo3::ffi::PyEval_SaveThread();
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
 
