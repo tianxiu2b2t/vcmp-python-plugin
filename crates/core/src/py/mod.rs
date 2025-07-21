@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::ffi::CString;
 use std::path::Path;
+use std::process::exit;
 use std::sync::{LazyLock, Mutex};
 use std::time::Instant;
 
@@ -95,11 +96,18 @@ pub fn init_py_environment() {
 
         pyo3::ffi::Py_InitializeFromConfig(&config as *const _);
 
-        pyo3::ffi::PyEval_SaveThread();
+        /// 疑似 Linux 在 Python 的问题？
+        // pyo3::ffi::PyEval_SaveThread();
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
 
-        event!(Level::INFO, "Status: {}", pyo3::ffi::Py_IsInitialized());
+        let initialized = pyo3::ffi::Py_IsInitialized() != 0;
+        if initialized {
+            event!(Level::INFO, "Python initialized");
+        } else {
+            event!(Level::ERROR, "Python initialize failed");
+            exit(1);
+        }
     }
 }
 
