@@ -9,7 +9,7 @@ authors = [
 repository = "https://github.com/tianxiu2b2t/vcmp-python-plugin"
 
 [dependencies]
-pyo3 = { version = "0.25.1", features = ["py-clone", "auto-initialize"]}
+pyo3 = { version = "0.25.1", features = ["py-clone"]}
 rand = "0.9.1"
 toml = "0.8.23"
 tracing = "0.1.41"
