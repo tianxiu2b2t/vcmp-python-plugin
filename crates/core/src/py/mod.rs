@@ -96,7 +96,7 @@ pub fn init_py_environment() {
 
         pyo3::ffi::Py_InitializeFromConfig(&config as *const _);
 
-        /// 疑似 Linux 在 Python 的问题？
+        // 疑似 Linux 在 Python 的问题？
         // pyo3::ffi::PyEval_SaveThread();
 
         pyo3::ffi::PyConfig_Clear(config_ptr);
