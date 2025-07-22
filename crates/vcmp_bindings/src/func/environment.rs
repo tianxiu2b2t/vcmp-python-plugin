@@ -352,7 +352,7 @@ impl SetEnvironmentWorld for VcmpFunctions {
     }
     fn set_time(&self, time: i32) {
         // total 1440 = 0
-        let hour = time % 24;
+        let hour = time / 60 % 24;
         let minute = time % 60;
         self.set_hour(hour);
         self.set_minute(minute)
