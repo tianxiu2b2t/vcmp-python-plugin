@@ -348,6 +348,17 @@ impl PyCallbackManager {
     ) -> Py<PyAny> {
         self.register_func(py, VcmpEventType::ServerFrame, func, priority)
     }
+
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    pub fn on_server_reloaded(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::ServerReloaded, func, priority)
+    }
+
     #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
     pub fn on_incoming_connection(
         &self,

@@ -454,17 +454,18 @@ pub fn reload() {
         event!(Level::DEBUG, "Callback manager trigger server reloaded");
         let _ = PY_CALLBACK_MANAGER.trigger(
             py,
-            PyVcmpEvent::from(VcmpEvent::ServerReloaded(ServerReloadedEvent::new(
-                {
-                    elapsed_time = start_time.elapsed().as_secs_f64();
-                    elapsed_time
-                },
-            )))
+            PyVcmpEvent::from(VcmpEvent::ServerReloaded(ServerReloadedEvent::new({
+                elapsed_time = start_time.elapsed().as_secs_f64();
+                elapsed_time
+            })))
             .with_kwargs(kwargs.clone()),
         );
     });
 
-    event!(Level::INFO, "Script reloaded, elapsed time: {elapsed_time:.2?}");
+    event!(
+        Level::INFO,
+        "Script reloaded, elapsed time: {elapsed_time:.2?}"
+    );
 
     {
         let mut var = GLOBAL_VAR.lock().unwrap();
