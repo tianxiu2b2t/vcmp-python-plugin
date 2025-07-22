@@ -219,5 +219,6 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ServerShutdownEvent>()?;
     m.add_class::<ServerFrameEvent>()?;
     m.add_class::<ServerPerformanceReportEvent>()?;
+    m.add_class::<ServerReloadedEvent>()?;
     Ok(())
 }

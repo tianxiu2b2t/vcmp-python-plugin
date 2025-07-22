@@ -84,3 +84,11 @@ main.py:
 ```python
 
 ```
+
+## Build
+
+1. 安装 Python 和 rustc & cargo 依赖
+2. 进入目录
+```bash
+cargo build --release
+```
