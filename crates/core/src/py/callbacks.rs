@@ -31,6 +31,7 @@ pub struct CallbackFunction {
     pub func: Py<PyAny>,
     /// 从 0 开始到最后的 65535
     pub priority: u16,
+    pub tag: Option<String>,
 }
 
 #[derive(Default)]
@@ -39,7 +40,13 @@ pub struct PyCallbackStorage {
 }
 
 impl PyCallbackStorage {
-    pub fn register_func(&mut self, event_type: VcmpEventType, func: Py<PyAny>, priority: u16) {
+    pub fn register_func(
+        &mut self,
+        event_type: VcmpEventType,
+        func: Py<PyAny>,
+        priority: u16,
+        tag: Option<String>,
+    ) {
         if !self.callbacks.contains_key(&event_type) {
             self.callbacks.insert(event_type.clone(), Vec::default());
         }
@@ -51,12 +58,23 @@ impl PyCallbackStorage {
         while i < handlers.len() {
             if handlers[i].priority > priority {
                 // fuck CodeGeeX why 1 < 500 ?  [500, 1]
-                handlers.insert(i, CallbackFunction { func, priority });
+                handlers.insert(
+                    i,
+                    CallbackFunction {
+                        func,
+                        priority,
+                        tag,
+                    },
+                );
                 return;
             }
             i += 1;
         }
-        handlers.push(CallbackFunction { func, priority });
+        handlers.push(CallbackFunction {
+            func,
+            priority,
+            tag,
+        });
     }
 
     pub fn get_handlers(&self, event_type: VcmpEventType) -> Option<&Vec<CallbackFunction>> {
@@ -67,6 +85,30 @@ impl PyCallbackStorage {
         let count = self.callbacks.iter().map(|(_, v)| v.len()).sum::<usize>();
         self.callbacks.clear();
         count
+    }
+
+    pub fn size(&self) -> usize {
+        self.callbacks.iter().map(|(_, v)| v.len()).sum::<usize>()
+    }
+
+    pub fn get_handlers_by_tag(
+        &self,
+        event_type: &VcmpEventType,
+        tag: Option<String>,
+    ) -> Vec<&CallbackFunction> {
+        let mut handlers = Vec::new();
+        if let Some(callback_handlers) = self.callbacks.get(&event_type) {
+            for handler in callback_handlers {
+                if handler.tag == tag {
+                    handlers.push(handler);
+                }
+            }
+        }
+        // sort by priority
+        // 1 is higher
+        // 65535 is lower
+        handlers.sort_by_key(|handler| handler.priority);
+        handlers
     }
 }
 
@@ -216,12 +258,15 @@ impl PyCallbackManager {
         event_type: VcmpEventType,
         func: Option<Py<PyAny>>,
         priority: u16,
+        tag: Option<String>,
     ) -> Py<PyAny> {
         if let Some(func) = func {
-            PY_CALLBACK_STORAGE
-                .lock()
-                .unwrap()
-                .register_func(event_type, func.clone(), priority);
+            PY_CALLBACK_STORAGE.lock().unwrap().register_func(
+                event_type,
+                func.clone(),
+                priority,
+                tag.clone(),
+            );
             func
         } else {
             PyCFunction::new_closure(
@@ -234,6 +279,7 @@ impl PyCallbackManager {
                         event_type,
                         func.clone(),
                         priority,
+                        tag.clone(),
                     );
                     Ok(func)
                 },
@@ -309,524 +355,604 @@ impl PyCallbackManager {
         self.py_handle(py, event)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_server_initialise(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ServerInitialise, func, priority)
+        self.register_func(py, VcmpEventType::ServerInitialise, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_server_shutdown(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ServerShutdown, func, priority)
+        self.register_func(py, VcmpEventType::ServerShutdown, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_server_performance_report(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ServerPerformanceReport, func, priority)
+        self.register_func(
+            py,
+            VcmpEventType::ServerPerformanceReport,
+            func,
+            priority,
+            tag,
+        )
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_server_frame(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ServerFrame, func, priority)
+        self.register_func(py, VcmpEventType::ServerFrame, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_server_reloaded(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ServerReloaded, func, priority)
+        self.register_func(py, VcmpEventType::ServerReloaded, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_incoming_connection(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::IncomingConnection, func, priority)
+        self.register_func(py, VcmpEventType::IncomingConnection, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_client_script_data(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ClientScriptData, func, priority)
+        self.register_func(py, VcmpEventType::ClientScriptData, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_connect(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerConnect, func, priority)
+        self.register_func(py, VcmpEventType::PlayerConnect, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_disconnect(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerDisconnect, func, priority)
+        self.register_func(py, VcmpEventType::PlayerDisconnect, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_request_class(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerRequestClass, func, priority)
+        self.register_func(py, VcmpEventType::PlayerRequestClass, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_spawn(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerSpawn, func, priority)
+        self.register_func(py, VcmpEventType::PlayerSpawn, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_request_spawn(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerRequestSpawn, func, priority)
+        self.register_func(py, VcmpEventType::PlayerRequestSpawn, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_death(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerDeath, func, priority)
+        self.register_func(py, VcmpEventType::PlayerDeath, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_update(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerUpdate, func, priority)
+        self.register_func(py, VcmpEventType::PlayerUpdate, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_request_enter_vehicle(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerRequestEnterVehicle, func, priority)
+        self.register_func(
+            py,
+            VcmpEventType::PlayerRequestEnterVehicle,
+            func,
+            priority,
+            tag,
+        )
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_enter_vehicle(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerEnterVehicle, func, priority)
+        self.register_func(py, VcmpEventType::PlayerEnterVehicle, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_exit_vehicle(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerExitVehicle, func, priority)
+        self.register_func(py, VcmpEventType::PlayerExitVehicle, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_name_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerNameChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerNameChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_state_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerStateChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerStateChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_action_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerActionChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerActionChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_on_fire_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerOnFireChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerOnFireChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_crouch_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerCrouchChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerCrouchChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_game_keys_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerGameKeysChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerGameKeysChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_begin_typing(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerBeginTyping, func, priority)
+        self.register_func(py, VcmpEventType::PlayerBeginTyping, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_end_typing(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerEndTyping, func, priority)
+        self.register_func(py, VcmpEventType::PlayerEndTyping, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_away_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerAwayChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerAwayChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_message(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerMessage, func, priority)
+        self.register_func(py, VcmpEventType::PlayerMessage, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_command(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerCommand, func, priority)
+        self.register_func(py, VcmpEventType::PlayerCommand, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_private_message(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerPrivateMessage, func, priority)
+        self.register_func(py, VcmpEventType::PlayerPrivateMessage, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_key_bind_down(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerKeyBindDown, func, priority)
+        self.register_func(py, VcmpEventType::PlayerKeyBindDown, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_key_bind_up(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerKeyBindUp, func, priority)
+        self.register_func(py, VcmpEventType::PlayerKeyBindUp, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_spectate(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerSpectate, func, priority)
+        self.register_func(py, VcmpEventType::PlayerSpectate, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_crash_report(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerCrashReport, func, priority)
+        self.register_func(py, VcmpEventType::PlayerCrashReport, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_module_list(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerModuleList, func, priority)
+        self.register_func(py, VcmpEventType::PlayerModuleList, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_health_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerHealthChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerHealthChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_armour_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerArmourChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerArmourChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_weapon_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerWeaponChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerWeaponChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_ammo_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerAmmoChange, func, priority)
+        self.register_func(py, VcmpEventType::PlayerAmmoChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_player_move(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PlayerMove, func, priority)
+        self.register_func(py, VcmpEventType::PlayerMove, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_pickup_pick_attempt(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PickupPickAttempt, func, priority)
+        self.register_func(py, VcmpEventType::PickupPickAttempt, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_pickup_picked(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PickupPicked, func, priority)
+        self.register_func(py, VcmpEventType::PickupPicked, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_pickup_respawn(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::PickupRespawn, func, priority)
+        self.register_func(py, VcmpEventType::PickupRespawn, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_checkpoint_entered(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::CheckpointEntered, func, priority)
+        self.register_func(py, VcmpEventType::CheckpointEntered, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_checkpoint_exited(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::CheckpointExited, func, priority)
+        self.register_func(py, VcmpEventType::CheckpointExited, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_object_shot(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ObjectShot, func, priority)
+        self.register_func(py, VcmpEventType::ObjectShot, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_object_touched(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::ObjectTouched, func, priority)
+        self.register_func(py, VcmpEventType::ObjectTouched, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_vehicle_explode(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleExplode, func, priority)
+        self.register_func(py, VcmpEventType::VehicleExplode, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_vehicle_respawn(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleRespawn, func, priority)
+        self.register_func(py, VcmpEventType::VehicleRespawn, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_vehicle_update(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleUpdate, func, priority)
+        self.register_func(py, VcmpEventType::VehicleUpdate, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_vehicle_move(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleMove, func, priority)
+        self.register_func(py, VcmpEventType::VehicleMove, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
     pub fn on_vehicle_health_change(
         &self,
         py: Python<'_>,
         priority: u16,
         func: Option<Py<PyAny>>,
+        tag: Option<String>,
     ) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::VehicleHealthChange, func, priority)
+        self.register_func(py, VcmpEventType::VehicleHealthChange, func, priority, tag)
     }
 
-    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None))]
-    pub fn on_custom(&self, py: Python<'_>, priority: u16, func: Option<Py<PyAny>>) -> Py<PyAny> {
-        self.register_func(py, VcmpEventType::Custom, func, priority)
+    #[pyo3(signature = (priority = DEFAULT_CALLBACK_PRIORITY, func = None, tag = None))]
+    pub fn on_custom(
+        &self,
+        py: Python<'_>,
+        priority: u16,
+        func: Option<Py<PyAny>>,
+        tag: Option<String>,
+    ) -> Py<PyAny> {
+        self.register_func(py, VcmpEventType::Custom, func, priority, tag)
+    }
+
+    #[pyo3(signature = (event_type, tag = None))]
+    pub fn get_register_callbacks(
+        &self,
+        py: Python<'_>,
+        event_type: VcmpEventType,
+        tag: Option<String>,
+    ) -> PyResult<Vec<Py<PyAny>>> {
+        let storage = PY_CALLBACK_STORAGE.lock().unwrap();
+        let handlers = storage.get_handlers_by_tag(&event_type, tag);
+        Ok(handlers.into_iter().map(|h| h.func.clone_ref(py)).collect())
     }
 }
 
 /// 全局的 callback 管理器
-
 pub static PY_CALLBACK_MANAGER: LazyLock<PyCallbackManager> =
     LazyLock::new(|| PyCallbackManager::default());
 

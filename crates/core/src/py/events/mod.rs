@@ -22,6 +22,8 @@ pub mod player;
 pub mod server;
 pub mod vehicle;
 
+#[pyclass]
+#[pyo3(name = "EventType")]
 #[derive(Debug, Clone, Copy, Eq, Hash, PartialEq)]
 pub enum VcmpEventType {
     // Server
@@ -95,7 +97,6 @@ pub enum VcmpEventType {
 
     // Custom
     Custom,
-    Traceback,
 }
 
 #[derive(Debug, Clone)]

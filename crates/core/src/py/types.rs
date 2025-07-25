@@ -22,7 +22,7 @@ use vcmp_bindings::{
     utils::{Color, Quaternionf32, WastedSettings},
 };
 
-use crate::consts::EntityId;
+use crate::{consts::EntityId, py::events::VcmpEventType};
 
 #[derive(Clone, Debug, Copy)]
 #[pyclass]
@@ -1464,5 +1464,6 @@ pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<QuaternionPy>()?;
     m.add_class::<Version>()?;
     m.add_class::<KeyCode>()?;
+    m.add_class::<VcmpEventType>()?;
     Ok(())
 }
