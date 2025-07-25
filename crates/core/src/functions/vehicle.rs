@@ -573,7 +573,10 @@ impl VehiclePy {
     #[getter]
     fn get_driver(&self) -> Option<PlayerPy> {
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_players().into_iter().find(|&player| vcmp_func().get_player_vehicle_id(player.get_id()) == self.id && vcmp_func().get_player_in_vehicle_slot(player.get_id()) == 0)
+        pool.get_players().into_iter().find(|&player| {
+            vcmp_func().get_player_vehicle_id(player.get_id()) == self.id
+                && vcmp_func().get_player_in_vehicle_slot(player.get_id()) == 0
+        })
     }
 
     #[getter]
@@ -631,9 +634,7 @@ pub fn create_vehicle(
     );
 
     let pool = ENTITY_POOL.lock().unwrap();
-    pool.get_vehicle(id)
-        .copied()
-        .unwrap_or(VehiclePy::new(id))
+    pool.get_vehicle(id).copied().unwrap_or(VehiclePy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

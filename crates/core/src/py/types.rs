@@ -643,15 +643,15 @@ impl VectorPy {
 
     // support - + / * for VectorPy
     fn __add__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| self.clone() + other.clone())
+        py.allow_threads(|| *self + *other)
     }
 
     fn __sub__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| self.clone() - other.clone())
+        py.allow_threads(|| *self - *other)
     }
 
     fn __mul__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| self.clone() * other.clone())
+        py.allow_threads(|| *self * *other)
     }
 
     fn __truediv__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
@@ -923,19 +923,19 @@ impl QuaternionPy {
     }
 
     fn __add__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| self.clone() + other.clone())
+        py.allow_threads(|| *self + *other)
     }
 
     fn __sub__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| self.clone() - other.clone())
+        py.allow_threads(|| *self - *other)
     }
 
     fn __mul__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| self.clone() * other.clone())
+        py.allow_threads(|| *self * *other)
     }
 
     fn __div__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| self.clone() / other.clone())
+        py.allow_threads(|| *self / *other)
     }
 
     fn __repr__(&self) -> String {

@@ -257,7 +257,10 @@ pub fn capture_modules(py: Option<Python<'_>>) {
         let sys_modules = py.import("sys").unwrap().getattr("modules").unwrap();
         sys_modules
             .extract::<HashMap<String, Py<PyAny>>>()
-            .unwrap().keys().cloned().collect::<Vec<String>>()
+            .unwrap()
+            .keys()
+            .cloned()
+            .collect::<Vec<String>>()
     };
     let modules = match py {
         Some(py) => func(py),

@@ -21,6 +21,7 @@ use crate::py::{
 pub const DEFAULT_CALLBACK_PRIORITY: u16 = 65535;
 
 #[derive(Debug, Clone)]
+#[pyclass]
 pub struct CallbackFunction {
     /// 万物皆可 Call
     /// ```python
@@ -32,6 +33,27 @@ pub struct CallbackFunction {
     /// 从 0 开始到最后的 65535
     pub priority: u16,
     pub tag: Option<String>,
+}
+
+#[pymethods]
+impl CallbackFunction {
+    #[getter]
+    fn get_tag(&self) -> Option<String> {
+        self.tag.clone()
+    }
+    #[getter]
+    fn get_priority(&self) -> u16 {
+        self.priority
+    }
+    #[getter]
+    fn get_func(&self) -> Py<PyAny> {
+        self.func.clone()
+    }
+
+    fn delete(&self) {
+        let mut storage = PY_CALLBACK_STORAGE.lock().unwrap();
+        storage.remove(self.func.clone())
+    }
 }
 
 #[derive(Default)]
@@ -47,9 +69,7 @@ impl PyCallbackStorage {
         priority: u16,
         tag: Option<String>,
     ) {
-        if !self.callbacks.contains_key(&event_type) {
-            self.callbacks.insert(event_type.clone(), Vec::default());
-        }
+        self.callbacks.entry(event_type).or_default();
         // 根据优先级来排列
         // 最高的优先，最后的最后来执行
 
@@ -82,13 +102,13 @@ impl PyCallbackStorage {
     }
 
     pub fn clear(&mut self) -> usize {
-        let count = self.callbacks.iter().map(|(_, v)| v.len()).sum::<usize>();
+        let count = self.callbacks.values().map(|v| v.len()).sum::<usize>();
         self.callbacks.clear();
         count
     }
 
     pub fn size(&self) -> usize {
-        self.callbacks.iter().map(|(_, v)| v.len()).sum::<usize>()
+        self.callbacks.values().map(|v| v.len()).sum::<usize>()
     }
 
     pub fn get_handlers_by_tag(
@@ -97,7 +117,7 @@ impl PyCallbackStorage {
         tag: Option<String>,
     ) -> Vec<&CallbackFunction> {
         let mut handlers = Vec::new();
-        if let Some(callback_handlers) = self.callbacks.get(&event_type) {
+        if let Some(callback_handlers) = self.callbacks.get(event_type) {
             for handler in callback_handlers {
                 if handler.tag == tag {
                     handlers.push(handler);
@@ -109,6 +129,12 @@ impl PyCallbackStorage {
         // 65535 is lower
         handlers.sort_by_key(|handler| handler.priority);
         handlers
+    }
+
+    pub fn remove(&mut self, func: Py<PyAny>) {
+        self.callbacks.values_mut().for_each(|handlers| {
+            handlers.retain(|handler| !handler.func.is(&func));
+        });
     }
 }
 
@@ -149,8 +175,7 @@ impl PyCallbackManager {
                     }
                 }
                 Err(_) => abortable,
-            };
-            res
+            }
         });
         event!(
             Level::TRACE,
@@ -204,9 +229,10 @@ impl PyCallbackManager {
                         continue;
                     }
                     result = Some(res.clone());
-                    if let Ok(res) = res.extract::<bool>(py) && res {
-                            break;
-                        }
+                    if let Ok(res) = res.extract::<bool>(py)
+                        && res
+                    {
+                        break;
                     }
                 }
                 Err(e) => {
@@ -949,6 +975,11 @@ impl PyCallbackManager {
         let handlers = storage.get_handlers_by_tag(&event_type, tag);
         Ok(handlers.into_iter().map(|h| h.func.clone_ref(py)).collect())
     }
+
+    pub fn remove_callback(&self, callback: Py<PyAny>) {
+        let mut storage = PY_CALLBACK_STORAGE.lock().unwrap();
+        storage.remove(callback);
+    }
 }
 
 /// 全局的 callback 管理器
@@ -957,6 +988,7 @@ pub static PY_CALLBACK_MANAGER: LazyLock<PyCallbackManager> =
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyCallbackManager>()?;
+    m.add_class::<CallbackFunction>()?;
     m.add("callbacks", PY_CALLBACK_MANAGER.into_pyobject(py)?)?;
     m.add("DEFAULT_PRIORITY", DEFAULT_CALLBACK_PRIORITY)?;
     Ok(())
@@ -992,7 +1024,7 @@ pub mod callback_utils {
     }
 
     pub static PY_GIL_REF_COUNTER: LazyLock<PyGILRefCounter> =
-        LazyLock::new(|| PyGILRefCounter::default());
+        LazyLock::new(PyGILRefCounter::default);
 
     pub static EVENT_ID: AtomicUsize = AtomicUsize::new(0);
 

@@ -5,7 +5,7 @@ use std::{
 };
 
 use toml;
-use tracing::{event, Level};
+use tracing::{Level, event};
 use ureq;
 
 #[derive(Debug, Clone)]
@@ -61,7 +61,7 @@ pub fn get_repo() -> String {
 pub fn check() {
     let repo = get_repo();
     let info = get_info();
-    
+
     let session = ureq::get(format!(
         "https://api.github.com/repos/{repo}/releases/latest"
     ))
@@ -69,7 +69,7 @@ pub fn check() {
     .user_agent(format!("VCMP-Python-Plugin-Checker/{}", info.version))
     .build()
     .call();
-    
+
     if let Err(e) = session {
         event!(Level::ERROR, "Failed to check for updates: {}", e);
         return;
@@ -83,7 +83,7 @@ pub fn check() {
         .split("\"")
         .next()
         .unwrap();
-    
+
     if tag_name != info.version {
         event!(
             Level::INFO,
@@ -104,4 +104,3 @@ pub fn init() {
         }
     });
 }
-    
