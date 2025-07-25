@@ -187,7 +187,7 @@ pub fn create_pickup(
 
     let pool = ENTITY_POOL.lock().unwrap();
 
-    pool.get_pickup(id).map(|p| *p).unwrap_or(PickupPy::new(id))
+    pool.get_pickup(id).copied().unwrap_or(PickupPy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

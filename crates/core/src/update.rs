@@ -1,11 +1,11 @@
 use std::{
-    cell::LazyCell,
+    sync::OnceLock,
     thread,
     time::{Duration, Instant},
 };
 
 use toml;
-use tracing::{Level, event};
+use tracing::{event, Level};
 use ureq;
 
 #[derive(Debug, Clone)]
@@ -14,36 +14,42 @@ pub struct PluginInfo {
     pub url: String,
 }
 
-pub const INFO: LazyCell<PluginInfo> = LazyCell::new(|| {
-    let pyproject_content = include_str!("../../../pyproject.toml");
-    let pyproject = toml::from_str::<toml::Table>(pyproject_content).unwrap();
-    let version = pyproject
-        .get("project")
-        .unwrap()
-        .get("version")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .to_string();
-    let repo_url = pyproject
-        .get("project")
-        .unwrap()
-        .get("urls")
-        .unwrap()
-        .get("repository")
-        .unwrap()
-        .as_str()
-        .unwrap()
-        .to_string();
-    PluginInfo {
-        version,
-        url: repo_url,
-    }
-});
+// 使用标准库的OnceLock实现线程安全的延迟初始化
+pub static INFO: OnceLock<PluginInfo> = OnceLock::new();
+
+// 辅助函数：获取PluginInfo实例（首次调用时初始化）
+fn get_info() -> &'static PluginInfo {
+    INFO.get_or_init(|| {
+        let pyproject_content = include_str!("../../../pyproject.toml");
+        let pyproject = toml::from_str::<toml::Table>(pyproject_content).unwrap();
+        let version = pyproject
+            .get("project")
+            .unwrap()
+            .get("version")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string();
+        let repo_url = pyproject
+            .get("project")
+            .unwrap()
+            .get("urls")
+            .unwrap()
+            .get("repository")
+            .unwrap()
+            .as_str()
+            .unwrap()
+            .to_string();
+        PluginInfo {
+            version,
+            url: repo_url,
+        }
+    })
+}
 
 pub fn get_repo() -> String {
-    // https://github.com/author/reop/
-    let url = INFO.url.clone();
+    let info = get_info();
+    let url = info.url.clone();
     url.replace("https://github.com/", "")
         .split("/")
         .take(2)
@@ -54,13 +60,16 @@ pub fn get_repo() -> String {
 
 pub fn check() {
     let repo = get_repo();
+    let info = get_info();
+    
     let session = ureq::get(format!(
         "https://api.github.com/repos/{repo}/releases/latest"
     ))
     .config()
-    .user_agent(format!("VCMP-Python-Plugin-Checker/{}", INFO.version))
+    .user_agent(format!("VCMP-Python-Plugin-Checker/{}", info.version))
     .build()
     .call();
+    
     if let Err(e) = session {
         event!(Level::ERROR, "Failed to check for updates: {}", e);
         return;
@@ -72,20 +81,21 @@ pub fn check() {
         .nth(1)
         .unwrap()
         .split("\"")
-        .nth(0)
+        .next()
         .unwrap();
-    if tag_name != INFO.version {
+    
+    if tag_name != info.version {
         event!(
             Level::INFO,
             "New version available: {}, current version: {}",
             tag_name,
-            INFO.version
+            info.version
         );
     }
 }
 
 pub fn init() {
-    // 开线程，防止阻塞
+    // 现在可以安全地在多线程中使用INFO了
     let _ = thread::spawn(|| {
         loop {
             let start_time = Instant::now();
@@ -94,3 +104,4 @@ pub fn init() {
         }
     });
 }
+    

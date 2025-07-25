@@ -114,7 +114,7 @@ pub unsafe extern "C" fn on_incoming_connection(
 pub unsafe extern "C" fn on_player_connect(player_id: i32) {
     // Update entity pool
     unsafe {
-        let _ = on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 0);
+        on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 0);
     }
 
     let binding_event = player::PlayerConnectEvent::from(player_id);
@@ -136,7 +136,7 @@ pub unsafe extern "C" fn on_player_disconnect(player_id: i32, reason: i32) {
 
     // Update entity pool
     unsafe {
-        let _ = on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 1);
+        on_entity_pool_change(VcmpEntityPool::Player as i32, player_id, 1);
     }
 }
 

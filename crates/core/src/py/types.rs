@@ -655,7 +655,7 @@ impl VectorPy {
     }
 
     fn __truediv__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| self.clone() / other.clone())
+        py.allow_threads(|| *self / *other)
     }
 
     pub fn distance(&self, py: Python<'_>, other: &VectorPy) -> f32 {
@@ -995,7 +995,7 @@ impl Version {
             Version::v04rel006() => "04rel006(67400)".to_string(),
             Version::v0_4_7_0() => "0.4.7.0(67700)".to_string(),
             Version::v0_4_7_1() => "0.4.7.1(67710)".to_string(),
-            Version::Unknown(x) => format!("Unknown({})", x),
+            Version::Unknown(x) => format!("Unknown({x})"),
         }
     }
 }

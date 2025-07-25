@@ -335,6 +335,7 @@ pub fn set_vehicles_forced_respawn_height(height: f32) {
 }
 
 #[pyfunction]
+#[allow(clippy::too_many_arguments)]
 pub fn add_player_class(
     team: i32,
     color: RGBPy,

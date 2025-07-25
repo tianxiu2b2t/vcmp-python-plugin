@@ -169,7 +169,7 @@ pub fn create_checkpoint(
     let pool = ENTITY_POOL.lock().unwrap();
 
     pool.get_checkpoint(id)
-        .map(|c| *c)
+        .copied()
         .unwrap_or(CheckPointPy::new(id))
 }
 

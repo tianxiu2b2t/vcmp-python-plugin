@@ -227,7 +227,7 @@ pub fn create_object(model: i32, world: i32, pos: VectorPy, alpha: i32) -> Objec
 
     let pool = ENTITY_POOL.lock().unwrap();
 
-    pool.get_object(id).map(|o| *o).unwrap_or(ObjectPy::new(id))
+    pool.get_object(id).copied().unwrap_or(ObjectPy::new(id))
 }
 
 pub fn module_define(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {

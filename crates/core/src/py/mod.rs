@@ -257,10 +257,7 @@ pub fn capture_modules(py: Option<Python<'_>>) {
         let sys_modules = py.import("sys").unwrap().getattr("modules").unwrap();
         sys_modules
             .extract::<HashMap<String, Py<PyAny>>>()
-            .unwrap()
-            .iter()
-            .map(|(k, _)| k.clone())
-            .collect::<Vec<_>>()
+            .unwrap().keys().cloned().collect::<Vec<String>>()
     };
     let modules = match py {
         Some(py) => func(py),
@@ -393,7 +390,7 @@ pub fn reload() {
             let py_modules = py_modules_unbind.bind(py);
             for m in py_modules.keys() {
                 let m = m.extract::<String>().unwrap();
-                if modules.contains(&m) || (&m).starts_with("vcmp") {
+                if modules.contains(&m) || m.starts_with("vcmp") {
                     continue;
                 }
                 let _ = py_modules.del_item(m);

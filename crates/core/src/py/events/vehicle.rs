@@ -267,7 +267,7 @@ impl PyEvent for VehicleMoveEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PyClassInitializer::from(VehicleEvent::new()).add_subclass(self.clone()),
+            PyClassInitializer::from(VehicleEvent::new()).add_subclass(*self),
         )
         .unwrap()
         .into_any()
@@ -356,7 +356,7 @@ impl PyEvent for VehicleHealthChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PyClassInitializer::from(VehicleEvent::new()).add_subclass(self.clone()),
+            PyClassInitializer::from(VehicleEvent::new()).add_subclass(*self),
         )
         .unwrap()
         .into_any()

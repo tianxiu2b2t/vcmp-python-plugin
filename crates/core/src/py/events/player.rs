@@ -418,7 +418,7 @@ impl PlayerDeathEvent {
     #[getter]
     fn killer(&self) -> Option<PlayerPy> {
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_player(self.inner.killer_id).map(|p| *p)
+        pool.get_player(self.inner.killer_id).copied()
     }
     #[getter]
     fn reason(&self) -> i32 {
@@ -433,7 +433,7 @@ impl PlayerDeathEvent {
             "PlayerDeathEvent(player={}, killer={}, reason={}, body={})",
             self.player(),
             self.killer()
-                .map(|k| format!("{}", k))
+                .map(|k| format!("{k}"))
                 .unwrap_or("None".to_string()),
             self.reason(),
             self.body()
@@ -1522,14 +1522,14 @@ impl PlayerSpectateEvent {
     #[getter]
     fn target(&self) -> Option<PlayerPy> {
         let pool = ENTITY_POOL.lock().unwrap();
-        pool.get_player(self.inner.target_id).map(|p| *p)
+        pool.get_player(self.inner.target_id).copied()
     }
     fn __repr__(&self) -> String {
         format!(
             "PlayerSpectateEvent(player={}, target={})",
             self.player(),
             self.target()
-                .map(|t| format!("{}", t))
+                .map(|t| format!("{t}"))
                 .unwrap_or("None".to_string())
         )
     }
@@ -1758,7 +1758,7 @@ impl PyEvent for PlayerHealthChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
         .unwrap()
         .into_any()
@@ -1847,7 +1847,7 @@ impl PyEvent for PlayerArmourChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
         .unwrap()
         .into_any()
@@ -1936,7 +1936,7 @@ impl PyEvent for PlayerWeaponChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
         .unwrap()
         .into_any()
@@ -2025,7 +2025,7 @@ impl PyEvent for PlayerAmmoChangeEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
         .unwrap()
         .into_any()
@@ -2114,7 +2114,7 @@ impl PyEvent for PlayerMoveEvent {
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
         Py::new(
             py,
-            PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
+            PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
         .unwrap()
         .into_any()

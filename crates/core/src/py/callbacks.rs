@@ -137,7 +137,7 @@ impl PyCallbackManager {
                 "Python with gil after counter: {:?}(ID: {event_id})",
                 callback_utils::PY_GIL_REF_COUNTER.increase()
             );
-            let res = match self.py_handle(py, PyVcmpEvent::from(event)) {
+            match self.py_handle(py, PyVcmpEvent::from(event)) {
                 Ok(res) => {
                     if res.is_none(py) {
                         abortable
@@ -204,8 +204,7 @@ impl PyCallbackManager {
                         continue;
                     }
                     result = Some(res.clone());
-                    if let Ok(res) = res.extract::<bool>(py) {
-                        if res {
+                    if let Ok(res) = res.extract::<bool>(py) && res {
                             break;
                         }
                     }
@@ -954,7 +953,7 @@ impl PyCallbackManager {
 
 /// 全局的 callback 管理器
 pub static PY_CALLBACK_MANAGER: LazyLock<PyCallbackManager> =
-    LazyLock::new(|| PyCallbackManager::default());
+    LazyLock::new(PyCallbackManager::default);
 
 pub fn module_define(py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<PyCallbackManager>()?;
