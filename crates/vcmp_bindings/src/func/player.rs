@@ -195,7 +195,7 @@ impl PlayerMethods for VcmpFunctions {
         // set rgba, a to 255
         let color = (color & 0xFFFFFF00) | 0x000000FF;
         // append \0
-        let msg = format!("{}\0", message);
+        let msg = format!("{message}\0");
         let msg_ptr = msg.as_ptr() as *const i8;
         let code = (self.inner.SendClientMessage)(player_id, color, msg_ptr);
         if code != 0 {
@@ -294,7 +294,7 @@ impl PlayerMethods for VcmpFunctions {
     }
 
     fn set_player_name(&self, player: i32, name: &str) {
-        let name = format!("{}\0", name); // append \0
+        let name = format!("{name}\0"); // append \0
         let name_ptr = name.as_ptr() as *const i8;
         (self.inner.SetPlayerName)(player, name_ptr);
     }
