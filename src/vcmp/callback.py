@@ -3,6 +3,8 @@ from typing import TYPE_CHECKING, Callable, Optional, Any
 from vcmp.events import EventBuilder
 
 if TYPE_CHECKING:
+    from vcmp.types import EventType
+
     EVENT_FUNCTION = Callable[[Any], Any]
 
 DEFAULT_PRIORITY = 65535
@@ -322,12 +324,11 @@ class CallbackManager:
         func: Optional[EVENT_FUNCTION] = None,
         tag: Optional[str] = None,
     ) -> EVENT_FUNCTION: ...
-
     def get_register_callbacks(
         self,
+        event_type: EventType,
         tag: Optional[str] = None,
     ) -> list[EVENT_FUNCTION]: ...
-
     def remove_callback(self, func: EVENT_FUNCTION) -> None: ...
 
 
