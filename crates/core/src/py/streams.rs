@@ -1,5 +1,5 @@
 use pyo3::{
-    exceptions::PyValueError, pyclass, pymethods, types::{
+    exceptions::{PyEOFError, PyValueError}, pyclass, pymethods, types::{
         PyAny, PyAnyMethods, PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods, PyModule,
         PyModuleMethods,
     }, Bound, Py, PyResult, Python
@@ -160,6 +160,10 @@ impl ReadStream {
                 return Err(e.into());
             },
         };
+        // if length != res
+        if length != res || length != buf.len() {
+            return Err(PyEOFError::new_err("ReadStream read EOF"));
+        }
         buf.truncate(res);
         Ok(buf)
     }
