@@ -262,6 +262,12 @@ impl PyCallbackManager {
                                     );
                                 }
                             }
+                        } else {
+                            event!(
+                                Level::ERROR,
+                                "Failed to call callback: {}",
+                                get_traceback(&e, Some(py))
+                            );
                         }
                     }
                 }
