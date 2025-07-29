@@ -153,11 +153,16 @@ pub struct ReadStream {
 }
 
 impl ReadStream {
-    pub fn read(&mut self, length: usize) -> Vec<u8> {
+    pub fn read(&mut self, length: usize) -> PyResult<Vec<u8>> {
         let mut buf = vec![0u8; length];
-        let bytes_read = self.buffer.read(&mut buf).unwrap();
-        buf.truncate(bytes_read);
-        buf
+        let res = match self.buffer.read(&mut buf) {
+            Ok(bytes_read) => bytes_read,
+            Err(e) => {
+                return Err(e.into());
+            }
+        };
+        buf.truncate(res);
+        Ok(buf)
     }
 }
 
@@ -189,71 +194,62 @@ impl ReadStream {
         )
     }
 
-    fn read_byte(&mut self) -> i8 {
-        self.read(1)[0] as i8
+    fn read_byte(&mut self) -> PyResult<i8> {
+        self.read(1).map(|i| i[0] as i8)
     }
 
-    fn read_bytes<'a>(&mut self, py: Python<'a>, length: usize) -> Bound<'a, PyBytes> {
-        let buf = self.read(length);
-        PyBytes::new(py, &buf)
+    fn read_bytes<'a>(&mut self, py: Python<'a>, length: usize) -> PyResult<Bound<'a, PyBytes>> {
+        let buf = self.read(length)?;
+        Ok(PyBytes::new(py, &buf))
     }
     // read_int
     // from old api
-    fn read_int(&mut self) -> i32 {
-        let mut buf = [0u8; 4];
-        self.buffer.read_exact(&mut buf).unwrap();
-        i32::from_be_bytes(buf)
+    fn read_int(&mut self) -> PyResult<i32> {
+        let buf = self.read(4).map(|i| i[0..4].try_into().unwrap())?;
+        Ok(i32::from_be_bytes(buf))
     }
     // var int avro encode
     // from old api
-    fn read_long(&mut self) -> i64 {
+    fn read_long(&mut self) -> PyResult<i64> {
         let mut datum = 0i64;
         let mut shift = 0;
         loop {
-            let mut buf = [0u8; 1];
-            self.buffer.read_exact(&mut buf).unwrap();
-            let byte = buf[0] as i64;
+            let byte = self.read(1)?[0] as i64;
             datum |= (byte & 0x7F) << shift;
             shift += 7;
             if (byte & 0x80) == 0 {
                 break;
             }
         }
-        (datum >> 1) ^ -(datum & 1)
+        Ok((datum >> 1) ^ -(datum & 1))
     }
 
-    fn read_sq_string(&mut self) -> String {
-        let mut buf = [0u8; 2];
-        self.buffer.read_exact(&mut buf).unwrap();
+    fn read_sq_string(&mut self) -> PyResult<String> {
+        let buf = self.read(2).map(|i| i[0..2].try_into().unwrap())?;
         let length = i16::from_be_bytes(buf) as usize;
-        let mut data = vec![0u8; length];
-        self.buffer.read_exact(&mut data).unwrap();
+        let data = self.read(length)?;
 
-        decode_gbk(&data)
+        Ok(decode_gbk(&data))
     }
 
-    fn read_string(&mut self) -> String {
-        let length = self.read_long() as usize;
-        let mut data = vec![0u8; length];
-        self.buffer.read_exact(&mut data).unwrap();
+    fn read_string(&mut self) -> PyResult<String> {
+        let length = self.read_long()? as usize;
+        let data = self.read(length)?;
 
-        decode_gbk(&data)
+        Ok(decode_gbk(&data))
     }
 
-    fn read_bool(&mut self) -> bool {
-        let mut buf = [0u8; 1];
-        self.buffer.read_exact(&mut buf).unwrap();
-        buf[0] != 0
+    fn read_bool(&mut self) -> PyResult<bool> {
+        Ok(self.read(1)?[0] != 0)
     }
 
-    fn read_boolean(&mut self) -> bool {
+    fn read_boolean(&mut self) -> PyResult<bool> {
         self.read_bool()
     }
 
-    fn read_float(&mut self) -> f32 {
-        let mut buf = [0u8; 4];
-        self.buffer.read_exact(&mut buf).unwrap();
-        f32::from_be_bytes(buf)
+    fn read_float(&mut self) -> PyResult<f32> {
+        let buf = self.read(4).map(|i| i[0..4].try_into().unwrap())?;
+        Ok(f32::from_be_bytes(buf))
     }
 
     fn get_raw_buffer(&self) -> Vec<u8> {
@@ -273,6 +269,7 @@ impl Display for ReadStream {
             f,
             "ReadStream(buffer={}, position={})",
             bytes_repr(self.get_raw_buffer()),
+            // read position
             self.buffer.position()
         )
     }
