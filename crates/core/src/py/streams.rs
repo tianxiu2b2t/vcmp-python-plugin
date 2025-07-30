@@ -1,8 +1,11 @@
 use pyo3::{
-    exceptions::{PyEOFError, PyValueError}, pyclass, pymethods, types::{
+    Bound, Py, PyResult, Python,
+    exceptions::{PyEOFError, PyValueError},
+    pyclass, pymethods,
+    types::{
         PyAny, PyAnyMethods, PyByteArray, PyByteArrayMethods, PyBytes, PyBytesMethods, PyModule,
         PyModuleMethods,
-    }, Bound, Py, PyResult, Python
+    },
 };
 use std::fmt::{Display, Formatter};
 use std::io::{Cursor, Read, Write};
@@ -158,7 +161,7 @@ impl ReadStream {
             Ok(bytes_read) => bytes_read,
             Err(e) => {
                 return Err(e.into());
-            },
+            }
         };
         // if length != res
         if length != res || length != buf.len() {
@@ -231,7 +234,7 @@ impl ReadStream {
         let buf = self.read(2).map(|i| i[0..2].try_into().unwrap())?;
         let length = i16::from_be_bytes(buf);
         if length < 0 {
-            return Err(PyValueError::new_err("String length is negative"))
+            return Err(PyValueError::new_err("String length is negative"));
         }
         let data = self.read(length as usize)?;
 
@@ -241,7 +244,7 @@ impl ReadStream {
     fn read_string(&mut self) -> PyResult<String> {
         let length = self.read_long()?;
         if length < 0 {
-            return Err(PyValueError::new_err("String length is negative"))
+            return Err(PyValueError::new_err("String length is negative"));
         }
         let data = self.read(length as usize)?;
 
