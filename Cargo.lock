@@ -301,10 +301,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "npc_bindings"
-version = "0.2.0"
-
-[[package]]
 name = "nu-ansi-term"
 version = "0.46.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -604,6 +600,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 
 [[package]]
+name = "squirrel_ffi"
+version = "0.2.0"
+dependencies = [
+ "vcmp_bindings",
+]
+
+[[package]]
 name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -863,6 +866,7 @@ version = "0.1.0"
 dependencies = [
  "pyo3",
  "rand",
+ "squirrel_ffi",
  "toml",
  "tracing",
  "tracing-appender",

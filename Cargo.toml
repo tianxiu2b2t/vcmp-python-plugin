@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "crates/vcmp_bindings",
-    "crates/npc_bindings",
+    "crates/squirrel_ffi",
     "crates/core"
 ]
 resolver = "3"
