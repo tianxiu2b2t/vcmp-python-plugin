@@ -1,4 +1,5 @@
 #include <vector>
+#include <string>
 typedef bool (*fn_StartRecordingPlayerData)(int32_t playerId, uint8_t recordtype, std::string recordname, uint32_t flags);
 typedef bool (*fn_StopRecordingPlayerData)(int32_t playerId);
 typedef bool (*fn_CallNPCClient)(const char* szName, const char* szScript, bool bConsoleInputEnabled,
