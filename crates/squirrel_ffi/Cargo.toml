@@ -1,0 +1,10 @@
+[package]
+name = "squirrel_ffi"
+version = "0.2.0"
+edition = "2024"
+authors = [
+    "tianxiu2b2t <administrator@ttb-network.top>",
+]
+
+[dependencies]
+vcmp_bindings = { path = "../vcmp_bindings" }
