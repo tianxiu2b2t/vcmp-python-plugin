@@ -24,7 +24,7 @@ impl PluginMethods for VcmpFunctions {
         let mut info = VcmpPluginInfo::new_empty();
         let info_ptr = info.inner_mut_ptr();
         let code = (self.inner.GetPluginInfo)(plugin_id, info_ptr);
-        if code == 0 { None } else { Some(info) }
+        if code != 0 { None } else { Some(info) }
     }
     /// 查找插件的 id
     fn find_plugin(&self, plugin_name: &str) -> Option<i32> {
