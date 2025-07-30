@@ -17,6 +17,7 @@ tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["chrono", "fmt", "ansi"] }
 ureq = "3.0.12"
 vcmp_bindings = { path = "../vcmp_bindings" }
+squirrel_ffi = { path = "../squirrel_ffi" }
 
 [lib]
 crate-type = ["cdylib"]
