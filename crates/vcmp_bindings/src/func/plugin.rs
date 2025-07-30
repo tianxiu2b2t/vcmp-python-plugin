@@ -1,5 +1,11 @@
 use crate::{VcmpError, VcmpPluginInfo, VcmpResult, func::VcmpFunctions};
 
+#[derive(Debug, Clone)]
+pub struct PluginExports {
+    pub exports_ptr: *mut *const std::os::raw::c_void,
+    pub size: usize,
+}
+
 pub trait PluginMethods {
     /// 获取插件(加载?)数量
     fn get_plugin_count(&self) -> u32;
@@ -11,6 +17,8 @@ pub trait PluginMethods {
     fn find_plugin(&self, plugin_name: &str) -> Option<i32>;
 
     fn send_plugin_command(&self, command_identifier: i32, command: &str) -> VcmpResult<()>;
+
+    fn get_plugin_exports(&self, plugin_id: i32) -> PluginExports;
 }
 
 impl PluginMethods for VcmpFunctions {
@@ -40,6 +48,15 @@ impl PluginMethods for VcmpFunctions {
             Err(VcmpError::from(code))
         } else {
             Ok(())
+        }
+    }
+
+    fn get_plugin_exports(&self, plugin_id: i32) -> PluginExports {
+        let mut size: usize = 0;
+        let ptr = (self.inner.GetPluginExports)(plugin_id, &mut size);
+        PluginExports {
+            exports_ptr: ptr,
+            size,
         }
     }
 }
