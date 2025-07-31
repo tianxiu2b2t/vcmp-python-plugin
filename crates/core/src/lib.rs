@@ -22,6 +22,10 @@ pub mod update;
 #[allow(clippy::zero_prefixed_literal)]
 pub const PLUGIN_VERSION: u32 = 00_01_01;
 
+/// 插件的指令 Identifier
+/// 都是 init 的时候调用的啦
+pub const PLUGIN_COMMAND: u32 = 0x7CCC_FFFF;
+
 use crate::{
     callbacks::init_callbacks,
     cfg::{CONFIG, init_config},

@@ -28,7 +28,9 @@ impl VcmpServerSettings {
                 .iter()
                 .map(|v| *v as u8)
                 .collect::<Vec<u8>>()),
-        ).trim_end_matches("\0").to_string()
+        )
+        .trim_end_matches("\0")
+        .to_string()
     }
 
     pub fn port(&self) -> u32 {

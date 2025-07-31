@@ -1,3 +1,0 @@
-[submodule "vcmp_bindings"]
-    path = crates/vcmp_bindings
-    url = https://github.com/tianxiu2b2t/vcmp_bindings

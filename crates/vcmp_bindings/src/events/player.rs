@@ -28,13 +28,19 @@ impl From<(*mut c_char, usize, *const c_char, *const c_char)> for IncomingConnec
             Self {
                 player_name: std::ffi::CStr::from_ptr(value.0)
                     .to_string_lossy()
-                    .to_string().trim_end_matches("\0").to_string(),
+                    .to_string()
+                    .trim_end_matches("\0")
+                    .to_string(),
                 password: std::ffi::CStr::from_ptr(value.2)
                     .to_string_lossy()
-                    .to_string().trim_end_matches("\0").to_string(),
+                    .to_string()
+                    .trim_end_matches("\0")
+                    .to_string(),
                 ip: std::ffi::CStr::from_ptr(value.3)
                     .to_string_lossy()
-                    .to_string().trim_end_matches("\0").to_string(),
+                    .to_string()
+                    .trim_end_matches("\0")
+                    .to_string(),
             }
         }
     }

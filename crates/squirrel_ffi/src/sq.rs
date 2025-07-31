@@ -1,8 +1,8 @@
 /*
     Squirrel FFI for Rust + Python
-    
+
     FFI: https://bitbucket.org/stormeus/0.4-squirrel/src/master/
-    
+
 */
 
 use std::sync::OnceLock;
@@ -35,7 +35,6 @@ impl SquirrelImports {
         }
     }
 }
-
 
 pub const SQUIRREL_LOAD_IDENTIFIER: u32 = 0x7D6E22D8;
 pub static SQIURREL_IMPORTS: OnceLock<SquirrelImports> = OnceLock::new();

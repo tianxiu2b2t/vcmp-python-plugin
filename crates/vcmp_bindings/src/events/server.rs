@@ -40,7 +40,9 @@ impl From<(usize, *mut *const ::std::os::raw::c_char, *mut u64)> for ServerPerfo
                         Some(
                             std::ffi::CStr::from_ptr(desc_ptr)
                                 .to_string_lossy()
-                                .to_string().trim_end_matches("\0").to_string(),
+                                .to_string()
+                                .trim_end_matches("\0")
+                                .to_string(),
                         )
                     }
                 })

@@ -1,5 +1,6 @@
 use std::os::raw::c_char;
 
+use crate::PLUGIN_COMMAND;
 use crate::py::callbacks::PY_CALLBACK_MANAGER;
 use crate::py::events::{
     VcmpEvent, checkpoint::*, object::*, pickup::*, player::*, server::*, vehicle::*,
@@ -7,7 +8,7 @@ use crate::py::events::{
 use crate::py::types::VectorPy;
 use squirrel_ffi::init_squirrel;
 use vcmp_bindings::events::{checkpoint, object, pickup, player, server, vehicle};
-use vcmp_bindings::func::{PlayerMethods, QueryVehicle, SetVehicle};
+use vcmp_bindings::func::{PlayerMethods, PluginMethods, QueryVehicle, SetVehicle};
 use vcmp_bindings::vcmp_func;
 use vcmp_bindings::{options::VcmpEntityPool, raw::PluginCallbacks};
 
@@ -24,6 +25,9 @@ pub extern "C" fn on_server_init() -> u8 {
     if !CONFIG.get().unwrap().preloader {
         load_script();
     }
+
+    // Call Plugin Command
+    vcmp_func().send_plugin_command(PLUGIN_COMMAND as i32, "");
 
     let _ =
         PY_CALLBACK_MANAGER.handle(VcmpEvent::ServerInitialise(ServerInitialiseEvent {}), false);

@@ -12,7 +12,7 @@ pub fn init_squirrel() {
         None => {
             event!(tracing::Level::ERROR, "Failed to find SQHost2 plugin");
             return;
-        },
+        }
     };
     let res = init_sq_imports(vcmp_func().get_plugin_exports(id));
     if res.is_err() {
