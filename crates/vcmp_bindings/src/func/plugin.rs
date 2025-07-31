@@ -65,8 +65,7 @@ impl PluginMethods for VcmpFunctions {
 
     fn get_plugins(&self) -> Vec<VcmpPluginInfo> {
         (0..self.get_plugin_count())
-            .map(|id| self.get_plugin_info(id as i32))
-            .filter_map(|x| x)
+            .filter_map(|id| self.get_plugin_info(id as i32))
             .collect::<Vec<_>>()
     }
 }

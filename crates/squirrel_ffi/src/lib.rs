@@ -4,7 +4,7 @@ pub mod sq_ffi;
 use tracing::event;
 use vcmp_bindings::{func::PluginMethods, vcmp_func};
 
-use crate::sq::{init_sq_imports, sq_imports};
+use crate::sq::init_sq_imports;
 
 pub fn init_squirrel() {
     let id = match vcmp_func().find_plugin("SQHost2\0") {
