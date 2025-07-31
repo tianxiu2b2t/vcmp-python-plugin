@@ -11,7 +11,7 @@ impl VcmpPluginInfo {
     pub fn new_empty() -> Self {
         Self {
             inner: raw::PluginInfo {
-                structSize: 0,
+                structSize: 48,
                 pluginId: 0,
                 name: [0; 32],
                 pluginVersion: 0,
