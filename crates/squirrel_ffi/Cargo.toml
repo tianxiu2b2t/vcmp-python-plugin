@@ -8,3 +8,4 @@ authors = [
 
 [dependencies]
 vcmp_bindings = { path = "../vcmp_bindings" }
+tracing = "0.1.41"
