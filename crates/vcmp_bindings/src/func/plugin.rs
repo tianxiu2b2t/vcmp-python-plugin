@@ -19,6 +19,8 @@ pub trait PluginMethods {
     fn send_plugin_command(&self, command_identifier: i32, command: &str) -> VcmpResult<()>;
 
     fn get_plugin_exports(&self, plugin_id: i32) -> PluginExports;
+
+    fn get_plugins(&self) -> Vec<VcmpPluginInfo>;
 }
 
 impl PluginMethods for VcmpFunctions {
@@ -58,5 +60,12 @@ impl PluginMethods for VcmpFunctions {
             exports_ptr: ptr,
             size,
         }
+    }
+
+    fn get_plugins(&self) -> Vec<VcmpPluginInfo> {
+        (0..self.get_plugin_count())
+            .map(|id| self.get_plugin_info(id as i32))
+            .filter_map(|x| x)
+            .collect::<Vec<_>>()
     }
 }
