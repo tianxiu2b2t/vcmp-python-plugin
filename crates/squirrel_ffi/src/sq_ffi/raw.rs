@@ -483,7 +483,7 @@ unsafe extern "C" {
 }
 unsafe extern "C" {
     pub fn sq_setnativeclosurename(v: HSQUIRRELVM, idx: SQInteger, name: *const SQChar)
-        -> SQRESULT;
+    -> SQRESULT;
 }
 unsafe extern "C" {
     pub fn sq_setinstanceup(v: HSQUIRRELVM, idx: SQInteger, p: SQUserPointer) -> SQRESULT;
@@ -735,259 +735,179 @@ unsafe extern "C" {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct sq_api {
-    pub open:
-        extern "C" fn(initialstacksize: SQInteger) -> HSQUIRRELVM,
-    pub newthread: 
-        extern "C" fn(friendvm: HSQUIRRELVM, initialstacksize: SQInteger) -> HSQUIRRELVM,
+    pub open: extern "C" fn(initialstacksize: SQInteger) -> HSQUIRRELVM,
+    pub newthread: extern "C" fn(friendvm: HSQUIRRELVM, initialstacksize: SQInteger) -> HSQUIRRELVM,
     pub seterrorhandler: extern "C" fn(v: HSQUIRRELVM),
     pub close: extern "C" fn(v: HSQUIRRELVM),
-    pub setforeignptr:
-        extern "C" fn(v: HSQUIRRELVM, p: SQUserPointer),
+    pub setforeignptr: extern "C" fn(v: HSQUIRRELVM, p: SQUserPointer),
     pub getforeignptr: extern "C" fn(v: HSQUIRRELVM) -> SQUserPointer,
-    pub setprintfunc: 
+    pub setprintfunc:
         extern "C" fn(v: HSQUIRRELVM, printfunc: SQPRINTFUNCTION, arg1: SQPRINTFUNCTION),
-    pub getprintfunc:
-        extern "C" fn(v: HSQUIRRELVM) -> SQPRINTFUNCTION,
+    pub getprintfunc: extern "C" fn(v: HSQUIRRELVM) -> SQPRINTFUNCTION,
     pub suspendvm: extern "C" fn(v: HSQUIRRELVM) -> SQRESULT,
-    pub wakeupvm: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            resumedret: SQBool,
-            retval: SQBool,
-            raiseerror: SQBool,
-            throwerror: SQBool,
-        ) -> SQRESULT,
+    pub wakeupvm: extern "C" fn(
+        v: HSQUIRRELVM,
+        resumedret: SQBool,
+        retval: SQBool,
+        raiseerror: SQBool,
+        throwerror: SQBool,
+    ) -> SQRESULT,
     pub getvmstate: extern "C" fn(v: HSQUIRRELVM) -> SQInteger,
-    pub compile: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            read: SQLEXREADFUNC,
-            p: SQUserPointer,
-            sourcename: *const SQChar,
-            raiseerror: SQBool,
-        ) -> SQRESULT,
-    pub compilebuffer: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            s: *const SQChar,
-            size: SQInteger,
-            sourcename: *const SQChar,
-            raiseerror: SQBool,
-        ) -> SQRESULT,
-    pub enabledebuginfo:
-        extern "C" fn(v: HSQUIRRELVM, enable: SQBool),
-    pub notifyallexceptions:
-        extern "C" fn(v: HSQUIRRELVM, enable: SQBool),
-    pub setcompilererrorhandler:
-        extern "C" fn(v: HSQUIRRELVM, f: SQCOMPILERERROR),
+    pub compile: extern "C" fn(
+        v: HSQUIRRELVM,
+        read: SQLEXREADFUNC,
+        p: SQUserPointer,
+        sourcename: *const SQChar,
+        raiseerror: SQBool,
+    ) -> SQRESULT,
+    pub compilebuffer: extern "C" fn(
+        v: HSQUIRRELVM,
+        s: *const SQChar,
+        size: SQInteger,
+        sourcename: *const SQChar,
+        raiseerror: SQBool,
+    ) -> SQRESULT,
+    pub enabledebuginfo: extern "C" fn(v: HSQUIRRELVM, enable: SQBool),
+    pub notifyallexceptions: extern "C" fn(v: HSQUIRRELVM, enable: SQBool),
+    pub setcompilererrorhandler: extern "C" fn(v: HSQUIRRELVM, f: SQCOMPILERERROR),
     pub push: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger),
     pub pop: extern "C" fn(v: HSQUIRRELVM, nelemstopop: SQInteger),
     pub poptop: extern "C" fn(v: HSQUIRRELVM),
     pub remove: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger),
     pub gettop: extern "C" fn(v: HSQUIRRELVM) -> SQInteger,
     pub settop: extern "C" fn(v: HSQUIRRELVM, newtop: SQInteger),
-    pub reservestack:
-        extern "C" fn(v: HSQUIRRELVM, nsize: SQInteger) -> SQRESULT,
+    pub reservestack: extern "C" fn(v: HSQUIRRELVM, nsize: SQInteger) -> SQRESULT,
     pub cmp: extern "C" fn(v: HSQUIRRELVM) -> SQInteger,
-    pub move_: 
-        extern "C" fn(dest: HSQUIRRELVM, src: HSQUIRRELVM, idx: SQInteger),
-    pub newuserdata: 
-        extern "C" fn(v: HSQUIRRELVM, size: SQUnsignedInteger) -> SQUserPointer,
+    pub move_: extern "C" fn(dest: HSQUIRRELVM, src: HSQUIRRELVM, idx: SQInteger),
+    pub newuserdata: extern "C" fn(v: HSQUIRRELVM, size: SQUnsignedInteger) -> SQUserPointer,
     pub newtable: extern "C" fn(v: HSQUIRRELVM),
     pub newarray: extern "C" fn(v: HSQUIRRELVM, size: SQInteger),
-    pub newclosure: 
-        extern "C" fn(v: HSQUIRRELVM, func: SQFUNCTION, nfreevars: SQUnsignedInteger),
-    pub setparamscheck: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            nparamscheck: SQInteger,
-            typemask: *const SQChar,
-        ) -> SQRESULT,
-    pub bindenv:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub pushstring: 
-        extern "C" fn(v: HSQUIRRELVM, s: *const SQChar, len: SQInteger),
+    pub newclosure: extern "C" fn(v: HSQUIRRELVM, func: SQFUNCTION, nfreevars: SQUnsignedInteger),
+    pub setparamscheck:
+        extern "C" fn(v: HSQUIRRELVM, nparamscheck: SQInteger, typemask: *const SQChar) -> SQRESULT,
+    pub bindenv: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub pushstring: extern "C" fn(v: HSQUIRRELVM, s: *const SQChar, len: SQInteger),
     pub pushfloat: extern "C" fn(v: HSQUIRRELVM, f: SQFloat),
     pub pushinteger: extern "C" fn(v: HSQUIRRELVM, n: SQInteger),
     pub pushbool: extern "C" fn(v: HSQUIRRELVM, b: SQBool),
-    pub pushuserpointer:
-        extern "C" fn(v: HSQUIRRELVM, p: SQUserPointer),
+    pub pushuserpointer: extern "C" fn(v: HSQUIRRELVM, p: SQUserPointer),
     pub pushnull: extern "C" fn(v: HSQUIRRELVM),
-    pub gettype:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQObjectType,
-    pub getsize:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQInteger,
-    pub getbase:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub gettype: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQObjectType,
+    pub getsize: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQInteger,
+    pub getbase: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
     pub instanceof: extern "C" fn(v: HSQUIRRELVM) -> SQBool,
-    pub tostring:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub tobool:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, b: *mut SQBool),
-    pub getstring: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, c: *mut *const SQChar) -> SQRESULT,
-    pub getinteger: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, i: *mut SQInteger) -> SQRESULT,
-    pub getfloat: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, f: *mut SQFloat) -> SQRESULT,
-    pub getbool: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, b: *mut SQBool) -> SQRESULT,
-    pub getthread: 
+    pub tostring: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub tobool: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, b: *mut SQBool),
+    pub getstring: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, c: *mut *const SQChar) -> SQRESULT,
+    pub getinteger: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, i: *mut SQInteger) -> SQRESULT,
+    pub getfloat: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, f: *mut SQFloat) -> SQRESULT,
+    pub getbool: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, b: *mut SQBool) -> SQRESULT,
+    pub getthread:
         extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, thread: *mut HSQUIRRELVM) -> SQRESULT,
-    pub getuserpointer: 
+    pub getuserpointer:
         extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, p: *mut SQUserPointer) -> SQRESULT,
-    pub getuserdata: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            idx: SQInteger,
-            p: *mut SQUserPointer,
-            typetag: *mut SQUserPointer,
-        ) -> SQRESULT,
-    pub settypetag: 
+    pub getuserdata: extern "C" fn(
+        v: HSQUIRRELVM,
+        idx: SQInteger,
+        p: *mut SQUserPointer,
+        typetag: *mut SQUserPointer,
+    ) -> SQRESULT,
+    pub settypetag:
         extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, typetag: SQUserPointer) -> SQRESULT,
-    pub gettypetag: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            idx: SQInteger,
-            typetag: *mut SQUserPointer,
-        ) -> SQRESULT,
-    pub setreleasehook: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, hook: SQRELEASEHOOK),
-    pub getscratchpad: 
-        extern "C" fn(v: HSQUIRRELVM, minsize: SQInteger) -> *mut SQChar,
-    pub getclosureinfo: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            idx: SQInteger,
-            nparams: *mut SQUnsignedInteger,
-            nfreevars: *mut SQUnsignedInteger,
-        ) -> SQRESULT,
-    pub setnativeclosurename: 
+    pub gettypetag:
+        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, typetag: *mut SQUserPointer) -> SQRESULT,
+    pub setreleasehook: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, hook: SQRELEASEHOOK),
+    pub getscratchpad: extern "C" fn(v: HSQUIRRELVM, minsize: SQInteger) -> *mut SQChar,
+    pub getclosureinfo: extern "C" fn(
+        v: HSQUIRRELVM,
+        idx: SQInteger,
+        nparams: *mut SQUnsignedInteger,
+        nfreevars: *mut SQUnsignedInteger,
+    ) -> SQRESULT,
+    pub setnativeclosurename:
         extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, name: *const SQChar) -> SQRESULT,
-    pub setinstanceup: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, p: SQUserPointer) -> SQRESULT,
-    pub getinstanceup: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            idx: SQInteger,
-            p: *mut SQUserPointer,
-            typetag: SQUserPointer,
-        ) -> SQRESULT,
-    pub setclassudsize: 
+    pub setinstanceup: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, p: SQUserPointer) -> SQRESULT,
+    pub getinstanceup: extern "C" fn(
+        v: HSQUIRRELVM,
+        idx: SQInteger,
+        p: *mut SQUserPointer,
+        typetag: SQUserPointer,
+    ) -> SQRESULT,
+    pub setclassudsize:
         extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, udsize: SQInteger) -> SQRESULT,
-    pub newclass:
-        extern "C" fn(v: HSQUIRRELVM, hasbase: SQBool) -> SQRESULT,
-    pub createinstance:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub setattributes:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub getattributes:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub getclass:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub newclass: extern "C" fn(v: HSQUIRRELVM, hasbase: SQBool) -> SQRESULT,
+    pub createinstance: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub setattributes: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub getattributes: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub getclass: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
     pub weakref: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger),
-    pub getdefaultdelegate:
-        extern "C" fn(v: HSQUIRRELVM, t: SQObjectType) -> SQRESULT,
+    pub getdefaultdelegate: extern "C" fn(v: HSQUIRRELVM, t: SQObjectType) -> SQRESULT,
     pub pushroottable: extern "C" fn(v: HSQUIRRELVM),
     pub pushregistrytable: extern "C" fn(v: HSQUIRRELVM),
     pub pushconsttable: extern "C" fn(v: HSQUIRRELVM),
     pub setroottable: extern "C" fn(v: HSQUIRRELVM) -> SQRESULT,
     pub setconsttable: extern "C" fn(v: HSQUIRRELVM) -> SQRESULT,
-    pub newslot: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, bstatic: SQBool) -> SQRESULT,
-    pub deleteslot: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT,
-    pub set:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub get:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub rawget:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub rawset:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub rawdeleteslot: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT,
-    pub arrayappend:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub arraypop: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT,
-    pub arrayresize: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, newsize: SQInteger) -> SQRESULT,
-    pub arrayreverse:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub arrayremove: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, itemidx: SQInteger) -> SQRESULT,
-    pub arrayinsert: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, destpos: SQInteger) -> SQRESULT,
-    pub setdelegate:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub getdelegate:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub clone:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub setfreevariable: 
+    pub newslot: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, bstatic: SQBool) -> SQRESULT,
+    pub deleteslot: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT,
+    pub set: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub get: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub rawget: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub rawset: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub rawdeleteslot: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT,
+    pub arrayappend: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub arraypop: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT,
+    pub arrayresize: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, newsize: SQInteger) -> SQRESULT,
+    pub arrayreverse: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub arrayremove: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, itemidx: SQInteger) -> SQRESULT,
+    pub arrayinsert: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, destpos: SQInteger) -> SQRESULT,
+    pub setdelegate: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub getdelegate: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub clone: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub setfreevariable:
         extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, nval: SQUnsignedInteger) -> SQRESULT,
-    pub next:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub getweakrefval:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub clear:
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
-    pub call: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            params: SQInteger,
-            retval: SQBool,
-            raiseerror: SQBool,
-        ) -> SQRESULT,
-    pub resume: 
-        extern "C" fn(v: HSQUIRRELVM, retval: SQBool, raiseerror: SQBool) -> SQRESULT,
-    pub getlocal: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            level: SQUnsignedInteger,
-            idx: SQUnsignedInteger,
-        ) -> *const SQChar,
-    pub getfreevariable: 
-        extern "C" fn(
-            v: HSQUIRRELVM,
-            idx: SQInteger,
-            nval: SQUnsignedInteger,
-        ) -> *const SQChar,
-    pub throwerror:
-        extern "C" fn(v: HSQUIRRELVM, err: *const SQChar) -> SQRESULT,
+    pub next: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub getweakrefval: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub clear: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT,
+    pub call: extern "C" fn(
+        v: HSQUIRRELVM,
+        params: SQInteger,
+        retval: SQBool,
+        raiseerror: SQBool,
+    ) -> SQRESULT,
+    pub resume: extern "C" fn(v: HSQUIRRELVM, retval: SQBool, raiseerror: SQBool) -> SQRESULT,
+    pub getlocal: extern "C" fn(
+        v: HSQUIRRELVM,
+        level: SQUnsignedInteger,
+        idx: SQUnsignedInteger,
+    ) -> *const SQChar,
+    pub getfreevariable:
+        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, nval: SQUnsignedInteger) -> *const SQChar,
+    pub throwerror: extern "C" fn(v: HSQUIRRELVM, err: *const SQChar) -> SQRESULT,
     pub reseterror: extern "C" fn(v: HSQUIRRELVM),
     pub getlasterror: extern "C" fn(v: HSQUIRRELVM),
-    pub getstackobj: 
-        extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, po: *mut HSQOBJECT) -> SQRESULT,
+    pub getstackobj: extern "C" fn(v: HSQUIRRELVM, idx: SQInteger, po: *mut HSQOBJECT) -> SQRESULT,
     pub pushobject: extern "C" fn(v: HSQUIRRELVM, obj: HSQOBJECT),
     pub addref: extern "C" fn(v: HSQUIRRELVM, po: *mut HSQOBJECT),
-    pub release:
-        extern "C" fn(v: HSQUIRRELVM, po: *mut HSQOBJECT) -> SQBool,
+    pub release: extern "C" fn(v: HSQUIRRELVM, po: *mut HSQOBJECT) -> SQBool,
     pub resetobject: extern "C" fn(po: *mut HSQOBJECT),
-    pub objtostring:
-        extern "C" fn(o: *const HSQOBJECT) -> *const SQChar,
+    pub objtostring: extern "C" fn(o: *const HSQOBJECT) -> *const SQChar,
     pub objtobool: extern "C" fn(o: *const HSQOBJECT) -> SQBool,
     pub objtointeger: extern "C" fn(o: *const HSQOBJECT) -> SQInteger,
     pub objtofloat: extern "C" fn(o: *const HSQOBJECT) -> SQFloat,
-    pub getobjtypetag: 
-        extern "C" fn(o: *const HSQOBJECT, typetag: *mut SQUserPointer) -> SQRESULT,
+    pub getobjtypetag: extern "C" fn(o: *const HSQOBJECT, typetag: *mut SQUserPointer) -> SQRESULT,
     pub collectgarbage: extern "C" fn(v: HSQUIRRELVM) -> SQInteger,
-    pub writeclosure: 
+    pub writeclosure:
         extern "C" fn(vm: HSQUIRRELVM, writef: SQWRITEFUNC, up: SQUserPointer) -> SQRESULT,
-    pub readclosure: 
+    pub readclosure:
         extern "C" fn(vm: HSQUIRRELVM, readf: SQREADFUNC, up: SQUserPointer) -> SQRESULT,
-    pub malloc: 
-        extern "C" fn(size: SQUnsignedInteger) -> *mut ::std::os::raw::c_void,
-    pub realloc: 
-        extern "C" fn(
-            p: *mut ::std::os::raw::c_void,
-            oldsize: SQUnsignedInteger,
-            newsize: SQUnsignedInteger,
-        ) -> *mut ::std::os::raw::c_void,
-    pub free: 
-        extern "C" fn(p: *mut ::std::os::raw::c_void, size: SQUnsignedInteger),
-    pub stackinfos: 
+    pub malloc: extern "C" fn(size: SQUnsignedInteger) -> *mut ::std::os::raw::c_void,
+    pub realloc: extern "C" fn(
+        p: *mut ::std::os::raw::c_void,
+        oldsize: SQUnsignedInteger,
+        newsize: SQUnsignedInteger,
+    ) -> *mut ::std::os::raw::c_void,
+    pub free: extern "C" fn(p: *mut ::std::os::raw::c_void, size: SQUnsignedInteger),
+    pub stackinfos:
         extern "C" fn(v: HSQUIRRELVM, level: SQInteger, si: *mut SQStackInfos) -> SQRESULT,
     pub setdebughook: extern "C" fn(v: HSQUIRRELVM),
 }

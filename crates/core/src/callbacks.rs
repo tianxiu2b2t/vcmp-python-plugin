@@ -761,9 +761,9 @@ pub unsafe extern "C" fn on_plugin_command(identifier: u32, command: *const c_ch
     match identifier {
         SQUIRREL_LOAD_IDENTIFIER => {
             init_squirrel();
-        },
+        }
         _ => {}
-    } 
+    }
     1
 }
 

@@ -1,12 +1,11 @@
-
 use std::sync::OnceLock;
 use vcmp_bindings::func::plugin::PluginExports;
 
-use crate::sq_ffi::raw::{self, sq_api, HSQUIRRELVM, SQVM};
+use crate::sq_ffi::raw::{self, HSQUIRRELVM, sq_api};
 
 #[derive(Debug, Clone)]
 pub struct SquirrelImports {
-    pub inner: raw::SquirrelImports
+    pub inner: raw::SquirrelImports,
 }
 
 /*
@@ -56,13 +55,13 @@ impl SquirrelImports {
 
 pub struct SquirrelVM {
     pub inner: HSQUIRRELVM,
-    pub api: &'static sq_api
+    pub api: &'static sq_api,
 }
 impl SquirrelVM {
     pub fn new() -> Self {
         Self {
             inner: sq_imports().get_vm().unwrap(),
-            api: sq_imports().get_api()
+            api: sq_imports().get_api(),
         }
     }
 
@@ -89,7 +88,11 @@ pub fn init_sq_imports(exports: PluginExports) -> Result<(), &'static str> {
         // 解引用获取实际的SquirrelImports结构体
         let raw_imports = &*sq_funcs_ptr;
 
-        SQIURREL_IMPORTS.set(SquirrelImports { inner: *raw_imports }).unwrap();
+        SQIURREL_IMPORTS
+            .set(SquirrelImports {
+                inner: *raw_imports,
+            })
+            .unwrap();
         Ok(())
     }
 }
