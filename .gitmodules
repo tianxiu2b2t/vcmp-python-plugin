@@ -1,3 +1,3 @@
-[submodule "pybind11"]
-    path = pybind11
-    url = https://github.com/pybind/pybind11.git
+[submodule "vcmp_bindings"]
+    path = crates/vcmp_bindings
+    url = https://github.com/tianxiu2b2t/vcmp_bindings

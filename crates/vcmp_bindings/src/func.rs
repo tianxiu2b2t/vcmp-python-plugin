@@ -76,7 +76,8 @@ impl VcmpFunctions {
     }
 
     pub fn log_message(&self, message: &str) {
-        let msg = encode_to_gbk(message);
+        let zero_msg = format!("{message}\0");
+        let msg = encode_to_gbk(zero_msg.as_str());
         let msg_ptr = msg.as_ptr() as *const i8;
         let _ = (self.inner.LogMessage)(msg_ptr);
     }

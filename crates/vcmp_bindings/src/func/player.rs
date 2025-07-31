@@ -212,7 +212,8 @@ impl PlayerMethods for VcmpFunctions {
         announce_type: i32,
         message: &str,
     ) -> VcmpResult<()> {
-        let msg = message.as_bytes();
+        let zero_msg = format!("{message}\0");
+        let msg = zero_msg.as_bytes();
         let msg_ptr = msg.as_ptr() as *const i8;
         let code = (self.inner.SendGameMessage)(player_id, announce_type, msg_ptr);
         if code != 0 {
@@ -811,10 +812,10 @@ impl PlayerMethods for VcmpFunctions {
     ) -> VcmpResult<()> {
         use std::ffi::CString;
 
-        let c_ip = CString::new(ip).unwrap();
-        let c_nick = CString::new(nick).unwrap();
-        let c_server_password = CString::new(server_password).unwrap();
-        let c_user_password = CString::new(user_password).unwrap();
+        let c_ip = CString::new(format!("{ip}\0")).unwrap();
+        let c_nick = CString::new(format!("{nick}\0")).unwrap();
+        let c_server_password = CString::new(format!("{server_password}\0")).unwrap();
+        let c_user_password = CString::new(format!("{user_password}\0")).unwrap();
 
         let code = (self.inner.RedirectPlayerToServer)(
             player,

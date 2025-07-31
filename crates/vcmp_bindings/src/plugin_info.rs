@@ -11,7 +11,7 @@ impl VcmpPluginInfo {
     pub fn new_empty() -> Self {
         Self {
             inner: raw::PluginInfo {
-                structSize: 48,
+                structSize: 48, // 神奇的结构体（？
                 pluginId: 0,
                 name: [0; 32],
                 pluginVersion: 0,
@@ -38,7 +38,7 @@ impl VcmpPluginInfo {
                 .iter()
                 .map(|v| *v as u8)
                 .collect::<Vec<u8>>()),
-        )
+        ).trim_end_matches("\0").to_string()
     }
 
     pub fn plugin_version(&self) -> u32 {
