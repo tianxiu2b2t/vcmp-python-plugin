@@ -38,7 +38,8 @@ impl PluginMethods for VcmpFunctions {
     }
     /// 查找插件的 id
     fn find_plugin(&self, plugin_name: &str) -> Option<i32> {
-        let ptr = plugin_name.as_ptr() as *const i8;
+        let name = format!("{plugin_name}\0");
+        let ptr = name.as_ptr() as *const i8;
         let res = (self.inner.FindPlugin)(ptr);
         if res == -1 { None } else { Some(res) }
     }
