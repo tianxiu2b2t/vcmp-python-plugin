@@ -27,7 +27,7 @@ pub extern "C" fn on_server_init() -> u8 {
     }
 
     // Call Plugin Command
-    vcmp_func().send_plugin_command(PLUGIN_COMMAND as i32, "");
+    let _ = vcmp_func().send_plugin_command(PLUGIN_COMMAND as i32, "");
 
     let _ =
         PY_CALLBACK_MANAGER.handle(VcmpEvent::ServerInitialise(ServerInitialiseEvent {}), false);
@@ -759,9 +759,9 @@ pub unsafe extern "C" fn on_checkpoint_exited(checkpoint_id: i32, player_id: i32
 /// # Safety
 /// FFI callback for plugin command
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn on_plugin_command(identifier: u32, command: *const c_char) -> u8 {
-    println!("on_plugin_command: {} {:?}", identifier, command);
+pub unsafe extern "C" fn on_plugin_command(identifier: u32, _command: *const c_char) -> u8 {
     // FFI Squirrel
+    #[allow(clippy::single_match)] // 先允许，后面还有个 npc ffi 呢，也可能单独出一个插件也不好说
     match identifier {
         SQUIRREL_LOAD_IDENTIFIER => {
             init_squirrel();
