@@ -15,7 +15,7 @@ use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script, py::reload};
 use tracing::{Level, event};
 
 // FFI Squirrel
-use squirrel_ffi::sq_ffi::SQUIRREL_LOAD_IDENTIFIER;
+use squirrel_ffi::sq::SQUIRREL_LOAD_IDENTIFIER;
 
 // use crate::py::callbacks::CALLBACK;
 

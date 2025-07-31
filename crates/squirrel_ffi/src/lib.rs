@@ -1,8 +1,9 @@
 pub mod sq_ffi;
+pub mod sq;
 
 use vcmp_bindings::{func::PluginMethods, vcmp_func};
 
-use crate::sq_ffi::raw::SquirrelImports;
+use crate::sq::{init_sq_imports, sq_imports, SquirrelImports};
 
 pub fn init_squirrel() {
 //    void OnSquirrelScriptLoad() {
@@ -36,24 +37,20 @@ pub fn init_squirrel() {
 // 		OutputError("Failed to attach to SQHost2.");
 // }
     for i in 0..vcmp_func().get_plugin_count() {
-        println!("Plugin: {:?}", vcmp_func().get_plugin_info(i as i32));
+        println!("Plugin: {}", vcmp_func().get_plugin_info(i as i32).unwrap());
     }
-    let id = match vcmp_func().find_plugin("SQHost2") {
+    let id = match vcmp_func().find_plugin("SQHost2\0") {
         Some(id) => id,
         None => return,
     };
-    let exports = vcmp_func().get_plugin_exports(id);
+    let res = init_sq_imports(vcmp_func().get_plugin_exports(id));
+    if res.is_err() {
+        println!("Failed to init squirrel imports: {:?}", res);
+        return;
+    }
 
-    let ptr = exports.exports_ptr;
-
-    let sq_funcs = unsafe { &mut *(ptr as *mut SquirrelImports) };
-    let sq_funcs =  &*sq_funcs;
-    let v = unsafe { &mut *(sq_funcs.GetSquirrelVM)() };
-    let sq = unsafe { &mut *(sq_funcs.GetSquirrelAPI)() };
-
-    println!("v: {:?}", v);
-    println!("sq: {:?}", sq);
-
-
-    vcmp_func();
+    let api = sq_imports().get_api();
+    let vm = sq_imports().get_vm();
+    println!("VM: {:?}", vm);
+    println!("API: {:?}", api);
 }
