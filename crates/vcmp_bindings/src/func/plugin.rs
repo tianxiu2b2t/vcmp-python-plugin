@@ -16,7 +16,7 @@ pub trait PluginMethods {
     /// 查找插件的 id
     fn find_plugin(&self, plugin_name: &str) -> Option<i32>;
 
-    fn send_plugin_command(&self, command_identifier: i32, command: &str) -> VcmpResult<()>;
+    fn send_plugin_command(&self, command_identifier: u32, command: &str) -> VcmpResult<()>;
 
     fn get_plugin_exports(&self, plugin_id: i32) -> PluginExports;
 
@@ -44,9 +44,10 @@ impl PluginMethods for VcmpFunctions {
         if res == -1 { None } else { Some(res) }
     }
 
-    fn send_plugin_command(&self, command_identifier: i32, command: &str) -> VcmpResult<()> {
-        let cmd_ptr = command.as_ptr() as *const i8;
-        let code = (self.inner.SendPluginCommand)(command_identifier as u32, cmd_ptr);
+    fn send_plugin_command(&self, command_identifier: u32, command: &str) -> VcmpResult<()> {
+        let cmd = format!("{command}\0");
+        let cmd_ptr = cmd.as_ptr() as *const i8;
+        let code = (self.inner.SendPluginCommand)(command_identifier, cmd_ptr);
         if code != 0 {
             Err(VcmpError::from(code))
         } else {
