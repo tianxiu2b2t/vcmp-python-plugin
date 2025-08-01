@@ -27,7 +27,7 @@ pub extern "C" fn on_server_init() -> u8 {
     }
 
     // Call Plugin Command
-    let _ = vcmp_func().send_plugin_command(PLUGIN_COMMAND as i32, "");
+    let _ = vcmp_func().send_plugin_command(PLUGIN_COMMAND, "");
 
     let _ =
         PY_CALLBACK_MANAGER.handle(VcmpEvent::ServerInitialise(ServerInitialiseEvent {}), false);
