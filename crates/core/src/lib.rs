@@ -26,6 +26,9 @@ pub const PLUGIN_VERSION: u32 = 00_01_01;
 /// 都是 init 的时候调用的啦
 pub const PLUGIN_COMMAND: u32 = 0x7CCC_FFFF;
 
+/// 插件名称
+pub const PLUGIN_NAME: &str = "PythonPlugin";
+
 use crate::{
     callbacks::init_callbacks,
     cfg::{CONFIG, init_config},
@@ -79,6 +82,15 @@ extern "C" fn VcmpPluginInit(
     info.apiMajorVersion = 2;
     info.apiMinorVersion = 0; // 就先 .0了
     info.pluginVersion = PLUGIN_VERSION;
+
+    // set name
+    info.name = {
+        let mut val = [0i8; 32];
+        for (i, &c) in PLUGIN_NAME.as_bytes().iter().enumerate() {
+            val[i] = c as i8;
+        }
+        val
+    };
 
     event!(Level::DEBUG, "vcmp-plugin-rs info: {info:?}");
 
