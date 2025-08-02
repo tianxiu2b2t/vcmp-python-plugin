@@ -1,8 +1,0 @@
-[package]
-name = "npc_bindings"
-version = "0.2.0"
-edition = "2024"
-authors = [
-    "tianxiu2b2t <administrator@ttb-network.top>",
-]
-repository = "https://github.com/habi498/NPC-VCMP"
