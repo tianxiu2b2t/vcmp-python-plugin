@@ -1,9 +1,11 @@
 [workspace]
 members = [
     "crates/vcmp_bindings",
+    "crates/squirrel_ffi_macros",
     "crates/squirrel_ffi",
     "crates/core"
 ]
+
 resolver = "3"
 
 [profile.release]

@@ -8,4 +8,5 @@ authors = [
 
 [dependencies]
 vcmp_bindings = { path = "../vcmp_bindings" }
+squirrel_ffi_macros = { path = "../squirrel_ffi_macros" }
 tracing = "0.1.41"

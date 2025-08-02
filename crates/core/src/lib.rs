@@ -15,6 +15,9 @@ pub mod pool;
 pub mod py;
 pub mod update;
 
+// squirrel ffi
+pub mod squirrel;
+
 /// 插件版本
 ///
 /// semver:

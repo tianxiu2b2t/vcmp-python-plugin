@@ -15,7 +15,8 @@ use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script, py::reload};
 use tracing::{Level, event};
 
 // FFI Squirrel
-use squirrel_ffi::{SQUIRREL_LOAD_IDENTIFIER, init_squirrel};
+use squirrel_ffi::SQUIRREL_LOAD_IDENTIFIER;
+use crate::squirrel::init as init_squirrel;
 
 // use crate::py::callbacks::CALLBACK;
 
@@ -760,12 +761,8 @@ pub unsafe extern "C" fn on_checkpoint_exited(checkpoint_id: i32, player_id: i32
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn on_plugin_command(identifier: u32, _command: *const c_char) -> u8 {
     // FFI Squirrel
-    #[allow(clippy::single_match)] // 先允许，后面还有个 npc ffi 呢，也可能单独出一个插件也不好说
-    match identifier {
-        SQUIRREL_LOAD_IDENTIFIER => {
-            init_squirrel();
-        }
-        _ => {}
+    if identifier == SQUIRREL_LOAD_IDENTIFIER {
+        init_squirrel();
     }
     1
 }

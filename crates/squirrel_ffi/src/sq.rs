@@ -39,6 +39,7 @@ pub struct SQAPI {
 
 impl SQAPI {
     /// 从原始HSQAPI指针创建SQAPI实例
+    #[allow(clippy::not_unsafe_ptr_arg_deref)]
     pub fn new(inner: raw::HSQAPI) -> Self {
         Self {
             inner: unsafe { *inner },
@@ -129,8 +130,9 @@ impl SQAPI {
         source_name: &str,
         raise_error: SQBool,
     ) -> SQRESULT {
-        let c_source_name = CString::new(source_name).expect("Invalid source name");
-        (self.inner.compile)(vm, read_func, user_ptr, c_source_name.as_ptr(), raise_error)
+        let name = format!("{source_name}\0");
+        let ptr = name.as_ptr() as *const i8;
+        (self.inner.compile)(vm, read_func, user_ptr, ptr, raise_error)
     }
 
     /// 从内存缓冲区编译Squirrel代码
@@ -141,25 +143,27 @@ impl SQAPI {
         source_name: &str,
         raise_error: SQBool,
     ) -> SQRESULT {
-        let c_buffer = CString::new(buffer).expect("Invalid buffer");
-        let c_source_name = CString::new(source_name).expect("Invalid source name");
+        let buffer = format!("{buffer}\0");
+        let source_name = format!("{source_name}\0");
+        let buffer_ptr = buffer.as_ptr() as *const i8;
+        let source_name_ptr = source_name.as_ptr() as *const i8;
             (self.inner.compilebuffer)(
                 vm,
-                c_buffer.as_ptr(),
+                buffer_ptr,
                 buffer.len() as SQInteger,
-                c_source_name.as_ptr(),
+                source_name_ptr,
                 raise_error,
             )
     }
 
     /// 启用/禁用调试信息生成
-    pub fn enable_debug_info(&self, vm: HSQUIRRELVM, enable: SQBool) {
-        (self.inner.enabledebuginfo)(vm, enable)
+    pub fn enable_debug_info(&self, vm: HSQUIRRELVM, enable: bool) {
+        (self.inner.enabledebuginfo)(vm, enable as SQBool)
     }
 
     /// 启用/禁用所有异常通知
-    pub fn notify_all_exceptions(&self, vm: HSQUIRRELVM, enable: SQBool) {
-        (self.inner.notifyallexceptions)(vm, enable)
+    pub fn notify_all_exceptions(&self, vm: HSQUIRRELVM, enable: bool) {
+        (self.inner.notifyallexceptions)(vm, enable as SQBool)
     }
 
     /// 设置编译器错误处理器
@@ -247,8 +251,9 @@ impl SQAPI {
         check_count: SQInteger,
         type_mask: &str,
     ) -> SQRESULT {
-        let c_mask = CString::new(type_mask).expect("Invalid type mask");
-        (self.inner.setparamscheck)(vm, check_count, c_mask.as_ptr())
+        let mask = format!("{type_mask}\0");
+        let ptr = mask.as_ptr() as *const i8;
+        (self.inner.setparamscheck)(vm, check_count, ptr)
     }
 
     /// 将栈元素绑定为闭包的环境
@@ -278,8 +283,8 @@ impl SQAPI {
     }
 
     /// 推入布尔值到栈顶
-    pub fn push_bool(&self, vm: HSQUIRRELVM, b: SQBool) {
-        (self.inner.pushbool)(vm, b)
+    pub fn push_bool(&self, vm: HSQUIRRELVM, b: bool) {
+        (self.inner.pushbool)(vm, b as SQBool)
     }
 
     /// 推入用户指针到栈顶
@@ -322,8 +327,10 @@ impl SQAPI {
     }
 
     /// 将指定元素转换为布尔值（输出参数）
-    pub fn to_bool(&self, vm: HSQUIRRELVM, index: SQInteger, out: &mut SQBool) {
-        (self.inner.tobool)(vm, index, out as *mut _)
+    pub fn to_bool(&self, vm: HSQUIRRELVM, index: SQInteger) -> bool {
+        let mut value = 0u64;
+        (self.inner.tobool)(vm, index, &mut value as *mut SQBool);
+        value != 0
     }
 
     /// 获取指定元素的字符串值（输出参数：字符串指针）
@@ -331,24 +338,38 @@ impl SQAPI {
         &self,
         vm: HSQUIRRELVM,
         index: SQInteger,
-        out: &mut *const SQChar,
-    ) -> SQRESULT {
-        (self.inner.getstring)(vm, index, out as *mut _)
+    ) -> String {
+        let mut str_ptr: *const SQChar = std::ptr::null();
+        (self.inner.getstring)(vm, index, &mut str_ptr);
+
+        if str_ptr.is_null() {
+            return String::new();
+        }
+
+        let c_str = unsafe { CStr::from_ptr(str_ptr) };
+        c_str.to_string_lossy().into_owned()
+
     }
 
     /// 获取指定元素的整数值（输出参数）
-    pub fn get_integer(&self, vm: HSQUIRRELVM, index: SQInteger, out: &mut SQInteger) -> SQRESULT {
-        (self.inner.getinteger)(vm, index, out as *mut _)
+    pub fn get_integer(&self, vm: HSQUIRRELVM, index: SQInteger) -> i64 {
+        let mut value = 0i64;
+        (self.inner.getinteger)(vm, index, &mut value as *mut SQInteger);
+        value
     }
 
     /// 获取指定元素的浮点值（输出参数）
-    pub fn get_float(&self, vm: HSQUIRRELVM, index: SQInteger, out: &mut SQFloat) -> SQRESULT {
-        (self.inner.getfloat)(vm, index, out as *mut _)
+    pub fn get_float(&self, vm: HSQUIRRELVM, index: SQInteger) -> f32 {
+        let mut value = 0f32;
+        (self.inner.getfloat)(vm, index, &mut value as *mut SQFloat);
+        value
     }
 
     /// 获取指定元素的布尔值（输出参数）
-    pub fn get_bool(&self, vm: HSQUIRRELVM, index: SQInteger, out: &mut SQBool) -> SQRESULT {
-        (self.inner.getbool)(vm, index, out as *mut _)
+    pub fn get_bool(&self, vm: HSQUIRRELVM, index: SQInteger) -> bool {
+        let mut value = 0u64;
+        (self.inner.getbool)(vm, index, &mut value as *mut SQBool);
+        value != 0
     }
 
     /// 获取指定元素的线程句柄（输出参数）
@@ -424,8 +445,9 @@ impl SQAPI {
         index: SQInteger,
         name: &str,
     ) -> SQRESULT {
-        let c_name = CString::new(name).expect("Invalid name");
-        (self.inner.setnativeclosurename)(vm, index, c_name.as_ptr())
+        let n = format!("{name}\0");
+        let ptr = n.as_ptr() as *const SQChar;
+        (self.inner.setnativeclosurename)(vm, index, ptr)
     }
 
     // =========================================================================

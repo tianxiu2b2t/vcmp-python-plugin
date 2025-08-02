@@ -603,8 +603,18 @@ checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
 name = "squirrel_ffi"
 version = "0.2.0"
 dependencies = [
+ "squirrel_ffi_macros",
  "tracing",
  "vcmp_bindings",
+]
+
+[[package]]
+name = "squirrel_ffi_macros"
+version = "0.2.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -868,6 +878,7 @@ dependencies = [
  "pyo3",
  "rand",
  "squirrel_ffi",
+ "squirrel_ffi_macros",
  "toml",
  "tracing",
  "tracing-appender",
