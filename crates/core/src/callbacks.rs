@@ -6,7 +6,6 @@ use crate::py::events::{
     VcmpEvent, checkpoint::*, object::*, pickup::*, player::*, server::*, vehicle::*,
 };
 use crate::py::types::VectorPy;
-use squirrel_ffi::init_squirrel;
 use vcmp_bindings::events::{checkpoint, object, pickup, player, server, vehicle};
 use vcmp_bindings::func::{PlayerMethods, PluginMethods, QueryVehicle, SetVehicle};
 use vcmp_bindings::vcmp_func;
@@ -16,7 +15,7 @@ use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script, py::reload};
 use tracing::{Level, event};
 
 // FFI Squirrel
-use squirrel_ffi::sq::SQUIRREL_LOAD_IDENTIFIER;
+use squirrel_ffi::{SQUIRREL_LOAD_IDENTIFIER, init_squirrel};
 
 // use crate::py::callbacks::CALLBACK;
 

@@ -186,37 +186,28 @@ pub type SQStackInfos = tagSQStackInfos;
 pub type HSQUIRRELVM = *mut SQVM;
 pub type HSQOBJECT = SQObject;
 pub type HSQMEMBERHANDLE = SQMemberHandle;
-pub type SQFUNCTION = ::std::option::Option<unsafe extern "C" fn(arg1: HSQUIRRELVM) -> SQInteger>;
-pub type SQRELEASEHOOK =
-    ::std::option::Option<unsafe extern "C" fn(arg1: SQUserPointer, size: SQInteger) -> SQInteger>;
-pub type SQCOMPILERERROR = ::std::option::Option<
-    unsafe extern "C" fn(
-        arg1: HSQUIRRELVM,
-        arg2: *const SQChar,
-        arg3: *const SQChar,
-        arg4: SQInteger,
-        arg5: SQInteger,
-    ),
->;
-pub type SQPRINTFUNCTION =
-    ::std::option::Option<unsafe extern "C" fn(arg1: HSQUIRRELVM, arg2: *const SQChar, ...)>;
-pub type SQDEBUGHOOK = ::std::option::Option<
-    unsafe extern "C" fn(
-        arg1: HSQUIRRELVM,
-        arg2: SQInteger,
-        arg3: *const SQChar,
-        arg4: SQInteger,
-        arg5: *const SQChar,
-    ),
->;
-pub type SQWRITEFUNC = ::std::option::Option<
-    unsafe extern "C" fn(arg1: SQUserPointer, arg2: SQUserPointer, arg3: SQInteger) -> SQInteger,
->;
-pub type SQREADFUNC = ::std::option::Option<
-    unsafe extern "C" fn(arg1: SQUserPointer, arg2: SQUserPointer, arg3: SQInteger) -> SQInteger,
->;
-pub type SQLEXREADFUNC =
-    ::std::option::Option<unsafe extern "C" fn(arg1: SQUserPointer) -> SQInteger>;
+pub type SQFUNCTION = extern "C" fn(arg1: HSQUIRRELVM) -> SQInteger;
+pub type SQRELEASEHOOK = extern "C" fn(arg1: SQUserPointer, size: SQInteger) -> SQInteger;
+pub type SQCOMPILERERROR = extern "C" fn(
+    arg1: HSQUIRRELVM,
+    arg2: *const SQChar,
+    arg3: *const SQChar,
+    arg4: SQInteger,
+    arg5: SQInteger,
+);
+pub type SQPRINTFUNCTION = extern "C" fn(arg1: HSQUIRRELVM, arg2: *const SQChar, ...);
+pub type SQDEBUGHOOK = extern "C" fn(
+    arg1: HSQUIRRELVM,
+    arg2: SQInteger,
+    arg3: *const SQChar,
+    arg4: SQInteger,
+    arg5: *const SQChar,
+);
+pub type SQWRITEFUNC =
+    extern "C" fn(arg1: SQUserPointer, arg2: SQUserPointer, arg3: SQInteger) -> SQInteger;
+pub type SQREADFUNC =
+    extern "C" fn(arg1: SQUserPointer, arg2: SQUserPointer, arg3: SQInteger) -> SQInteger;
+pub type SQLEXREADFUNC = extern "C" fn(arg1: SQUserPointer) -> SQInteger;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct tagSQRegFunction {
@@ -237,53 +228,21 @@ pub struct tagSQFunctionInfo {
 pub type SQFunctionInfo = tagSQFunctionInfo;
 unsafe extern "C" {
     pub fn sq_open(initialstacksize: SQInteger) -> HSQUIRRELVM;
-}
-unsafe extern "C" {
     pub fn sq_newthread(friendvm: HSQUIRRELVM, initialstacksize: SQInteger) -> HSQUIRRELVM;
-}
-unsafe extern "C" {
     pub fn sq_seterrorhandler(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_close(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_setforeignptr(v: HSQUIRRELVM, p: SQUserPointer);
-}
-unsafe extern "C" {
     pub fn sq_getforeignptr(v: HSQUIRRELVM) -> SQUserPointer;
-}
-unsafe extern "C" {
     pub fn sq_setsharedforeignptr(v: HSQUIRRELVM, p: SQUserPointer);
-}
-unsafe extern "C" {
     pub fn sq_getsharedforeignptr(v: HSQUIRRELVM) -> SQUserPointer;
-}
-unsafe extern "C" {
     pub fn sq_setvmreleasehook(v: HSQUIRRELVM, hook: SQRELEASEHOOK);
-}
-unsafe extern "C" {
     pub fn sq_getvmreleasehook(v: HSQUIRRELVM) -> SQRELEASEHOOK;
-}
-unsafe extern "C" {
     pub fn sq_setsharedreleasehook(v: HSQUIRRELVM, hook: SQRELEASEHOOK);
-}
-unsafe extern "C" {
     pub fn sq_getsharedreleasehook(v: HSQUIRRELVM) -> SQRELEASEHOOK;
-}
-unsafe extern "C" {
     pub fn sq_setprintfunc(v: HSQUIRRELVM, printfunc: SQPRINTFUNCTION, errfunc: SQPRINTFUNCTION);
-}
-unsafe extern "C" {
     pub fn sq_getprintfunc(v: HSQUIRRELVM) -> SQPRINTFUNCTION;
-}
-unsafe extern "C" {
     pub fn sq_geterrorfunc(v: HSQUIRRELVM) -> SQPRINTFUNCTION;
-}
-unsafe extern "C" {
     pub fn sq_suspendvm(v: HSQUIRRELVM) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_wakeupvm(
         v: HSQUIRRELVM,
         resumedret: SQBool,
@@ -291,14 +250,8 @@ unsafe extern "C" {
         raiseerror: SQBool,
         throwerror: SQBool,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getvmstate(v: HSQUIRRELVM) -> SQInteger;
-}
-unsafe extern "C" {
     pub fn sq_getversion() -> SQInteger;
-}
-unsafe extern "C" {
     pub fn sq_compile(
         v: HSQUIRRELVM,
         read: SQLEXREADFUNC,
@@ -306,8 +259,6 @@ unsafe extern "C" {
         sourcename: *const SQChar,
         raiseerror: SQBool,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_compilebuffer(
         v: HSQUIRRELVM,
         s: *const SQChar,
@@ -315,421 +266,179 @@ unsafe extern "C" {
         sourcename: *const SQChar,
         raiseerror: SQBool,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_enabledebuginfo(v: HSQUIRRELVM, enable: SQBool);
-}
-unsafe extern "C" {
     pub fn sq_notifyallexceptions(v: HSQUIRRELVM, enable: SQBool);
-}
-unsafe extern "C" {
     pub fn sq_setcompilererrorhandler(v: HSQUIRRELVM, f: SQCOMPILERERROR);
-}
-unsafe extern "C" {
     pub fn sq_push(v: HSQUIRRELVM, idx: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_pop(v: HSQUIRRELVM, nelemstopop: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_poptop(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_remove(v: HSQUIRRELVM, idx: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_gettop(v: HSQUIRRELVM) -> SQInteger;
-}
-unsafe extern "C" {
     pub fn sq_settop(v: HSQUIRRELVM, newtop: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_reservestack(v: HSQUIRRELVM, nsize: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_cmp(v: HSQUIRRELVM) -> SQInteger;
-}
-unsafe extern "C" {
     pub fn sq_move(dest: HSQUIRRELVM, src: HSQUIRRELVM, idx: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_newuserdata(v: HSQUIRRELVM, size: SQUnsignedInteger) -> SQUserPointer;
-}
-unsafe extern "C" {
     pub fn sq_newtable(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_newtableex(v: HSQUIRRELVM, initialcapacity: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_newarray(v: HSQUIRRELVM, size: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_newclosure(v: HSQUIRRELVM, func: SQFUNCTION, nfreevars: SQUnsignedInteger);
-}
-unsafe extern "C" {
     pub fn sq_setparamscheck(
         v: HSQUIRRELVM,
         nparamscheck: SQInteger,
         typemask: *const SQChar,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_bindenv(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setclosureroot(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getclosureroot(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_pushstring(v: HSQUIRRELVM, s: *const SQChar, len: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_pushfloat(v: HSQUIRRELVM, f: SQFloat);
-}
-unsafe extern "C" {
     pub fn sq_pushinteger(v: HSQUIRRELVM, n: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_pushbool(v: HSQUIRRELVM, b: SQBool);
-}
-unsafe extern "C" {
     pub fn sq_pushuserpointer(v: HSQUIRRELVM, p: SQUserPointer);
-}
-unsafe extern "C" {
     pub fn sq_pushnull(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_gettype(v: HSQUIRRELVM, idx: SQInteger) -> SQObjectType;
-}
-unsafe extern "C" {
     pub fn sq_typeof(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getsize(v: HSQUIRRELVM, idx: SQInteger) -> SQInteger;
-}
-unsafe extern "C" {
     pub fn sq_gethash(v: HSQUIRRELVM, idx: SQInteger) -> SQHash;
-}
-unsafe extern "C" {
     pub fn sq_getbase(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_instanceof(v: HSQUIRRELVM) -> SQBool;
-}
-unsafe extern "C" {
     pub fn sq_tostring(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_tobool(v: HSQUIRRELVM, idx: SQInteger, b: *mut SQBool);
-}
-unsafe extern "C" {
     pub fn sq_getstring(v: HSQUIRRELVM, idx: SQInteger, c: *mut *const SQChar) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getinteger(v: HSQUIRRELVM, idx: SQInteger, i: *mut SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getfloat(v: HSQUIRRELVM, idx: SQInteger, f: *mut SQFloat) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getbool(v: HSQUIRRELVM, idx: SQInteger, b: *mut SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getthread(v: HSQUIRRELVM, idx: SQInteger, thread: *mut HSQUIRRELVM) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getuserpointer(v: HSQUIRRELVM, idx: SQInteger, p: *mut SQUserPointer) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getuserdata(
         v: HSQUIRRELVM,
         idx: SQInteger,
         p: *mut SQUserPointer,
         typetag: *mut SQUserPointer,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_settypetag(v: HSQUIRRELVM, idx: SQInteger, typetag: SQUserPointer) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_gettypetag(v: HSQUIRRELVM, idx: SQInteger, typetag: *mut SQUserPointer) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setreleasehook(v: HSQUIRRELVM, idx: SQInteger, hook: SQRELEASEHOOK);
-}
-unsafe extern "C" {
     pub fn sq_getscratchpad(v: HSQUIRRELVM, minsize: SQInteger) -> *mut SQChar;
-}
-unsafe extern "C" {
     pub fn sq_getfunctioninfo(
         v: HSQUIRRELVM,
         level: SQInteger,
         fi: *mut SQFunctionInfo,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getclosureinfo(
         v: HSQUIRRELVM,
         idx: SQInteger,
         nparams: *mut SQUnsignedInteger,
         nfreevars: *mut SQUnsignedInteger,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getclosurename(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setnativeclosurename(v: HSQUIRRELVM, idx: SQInteger, name: *const SQChar)
     -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setinstanceup(v: HSQUIRRELVM, idx: SQInteger, p: SQUserPointer) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getinstanceup(
         v: HSQUIRRELVM,
         idx: SQInteger,
         p: *mut SQUserPointer,
         typetag: SQUserPointer,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setclassudsize(v: HSQUIRRELVM, idx: SQInteger, udsize: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_newclass(v: HSQUIRRELVM, hasbase: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_createinstance(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setattributes(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getattributes(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getclass(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_weakref(v: HSQUIRRELVM, idx: SQInteger);
-}
-unsafe extern "C" {
     pub fn sq_getdefaultdelegate(v: HSQUIRRELVM, t: SQObjectType) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getmemberhandle(
         v: HSQUIRRELVM,
         idx: SQInteger,
         handle: *mut HSQMEMBERHANDLE,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getbyhandle(
         v: HSQUIRRELVM,
         idx: SQInteger,
         handle: *const HSQMEMBERHANDLE,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setbyhandle(
         v: HSQUIRRELVM,
         idx: SQInteger,
         handle: *const HSQMEMBERHANDLE,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_pushroottable(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_pushregistrytable(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_pushconsttable(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_setroottable(v: HSQUIRRELVM) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setconsttable(v: HSQUIRRELVM) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_newslot(v: HSQUIRRELVM, idx: SQInteger, bstatic: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_deleteslot(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_set(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_get(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_rawget(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_rawset(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_rawdeleteslot(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_newmember(v: HSQUIRRELVM, idx: SQInteger, bstatic: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_rawnewmember(v: HSQUIRRELVM, idx: SQInteger, bstatic: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_arrayappend(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_arraypop(v: HSQUIRRELVM, idx: SQInteger, pushval: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_arrayresize(v: HSQUIRRELVM, idx: SQInteger, newsize: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_arrayreverse(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_arrayremove(v: HSQUIRRELVM, idx: SQInteger, itemidx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_arrayinsert(v: HSQUIRRELVM, idx: SQInteger, destpos: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setdelegate(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getdelegate(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_clone(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setfreevariable(v: HSQUIRRELVM, idx: SQInteger, nval: SQUnsignedInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_next(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getweakrefval(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_clear(v: HSQUIRRELVM, idx: SQInteger) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_call(
         v: HSQUIRRELVM,
         params: SQInteger,
         retval: SQBool,
         raiseerror: SQBool,
     ) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_resume(v: HSQUIRRELVM, retval: SQBool, raiseerror: SQBool) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getlocal(
         v: HSQUIRRELVM,
         level: SQUnsignedInteger,
         idx: SQUnsignedInteger,
     ) -> *const SQChar;
-}
-unsafe extern "C" {
     pub fn sq_getcallee(v: HSQUIRRELVM) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_getfreevariable(
         v: HSQUIRRELVM,
         idx: SQInteger,
         nval: SQUnsignedInteger,
     ) -> *const SQChar;
-}
-unsafe extern "C" {
     pub fn sq_throwerror(v: HSQUIRRELVM, err: *const SQChar) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_throwobject(v: HSQUIRRELVM) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_reseterror(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_getlasterror(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_getstackobj(v: HSQUIRRELVM, idx: SQInteger, po: *mut HSQOBJECT) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_pushobject(v: HSQUIRRELVM, obj: HSQOBJECT);
-}
-unsafe extern "C" {
     pub fn sq_addref(v: HSQUIRRELVM, po: *mut HSQOBJECT);
-}
-unsafe extern "C" {
     pub fn sq_release(v: HSQUIRRELVM, po: *mut HSQOBJECT) -> SQBool;
-}
-unsafe extern "C" {
     pub fn sq_getrefcount(v: HSQUIRRELVM, po: *mut HSQOBJECT) -> SQUnsignedInteger;
-}
-unsafe extern "C" {
     pub fn sq_resetobject(po: *mut HSQOBJECT);
-}
-unsafe extern "C" {
     pub fn sq_objtostring(o: *const HSQOBJECT) -> *const SQChar;
-}
-unsafe extern "C" {
     pub fn sq_objtobool(o: *const HSQOBJECT) -> SQBool;
-}
-unsafe extern "C" {
     pub fn sq_objtointeger(o: *const HSQOBJECT) -> SQInteger;
-}
-unsafe extern "C" {
     pub fn sq_objtofloat(o: *const HSQOBJECT) -> SQFloat;
-}
-unsafe extern "C" {
     pub fn sq_objtouserpointer(o: *const HSQOBJECT) -> SQUserPointer;
-}
-unsafe extern "C" {
     pub fn sq_getobjtypetag(o: *const HSQOBJECT, typetag: *mut SQUserPointer) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_collectgarbage(v: HSQUIRRELVM) -> SQInteger;
-}
-unsafe extern "C" {
     pub fn sq_resurrectunreachable(v: HSQUIRRELVM) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_writeclosure(vm: HSQUIRRELVM, writef: SQWRITEFUNC, up: SQUserPointer) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_readclosure(vm: HSQUIRRELVM, readf: SQREADFUNC, up: SQUserPointer) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_malloc(size: SQUnsignedInteger) -> *mut ::std::os::raw::c_void;
-}
-unsafe extern "C" {
     pub fn sq_realloc(
         p: *mut ::std::os::raw::c_void,
         oldsize: SQUnsignedInteger,
         newsize: SQUnsignedInteger,
     ) -> *mut ::std::os::raw::c_void;
-}
-unsafe extern "C" {
     pub fn sq_free(p: *mut ::std::os::raw::c_void, size: SQUnsignedInteger);
-}
-unsafe extern "C" {
     pub fn sq_stackinfos(v: HSQUIRRELVM, level: SQInteger, si: *mut SQStackInfos) -> SQRESULT;
-}
-unsafe extern "C" {
     pub fn sq_setdebughook(v: HSQUIRRELVM);
-}
-unsafe extern "C" {
     pub fn sq_setnativedebughook(v: HSQUIRRELVM, hook: SQDEBUGHOOK);
 }
 #[repr(C)]
@@ -912,8 +621,8 @@ pub struct sq_api {
     pub setdebughook: extern "C" fn(v: HSQUIRRELVM),
 }
 pub type HSQAPI = *mut sq_api;
-pub type Sq_GetSquirrelAPI = unsafe extern "C" fn() -> *mut HSQAPI;
-pub type Sq_GetSquirrelVM = unsafe extern "C" fn() -> *mut HSQUIRRELVM;
+pub type Sq_GetSquirrelAPI = extern "C" fn() -> *mut HSQAPI;
+pub type Sq_GetSquirrelVM = extern "C" fn() -> *mut HSQUIRRELVM;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct SquirrelImports {
