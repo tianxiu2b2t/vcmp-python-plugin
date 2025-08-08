@@ -16,9 +16,7 @@ tracing = "0.1.41"
 tracing-appender = "0.2.3"
 tracing-subscriber = { version = "0.3.19", features = ["chrono", "fmt", "ansi"] }
 ureq = "3.0.12"
-vcmp_bindings = { path = "../vcmp_bindings" }
-squirrel_ffi = { path = "../squirrel_ffi" }
-squirrel_ffi_macros = { path = "../squirrel_ffi_macros" }
+vcmp_bindings = { git = "https://github.com/tianxiu2b2t/vcmp_bindings" }
 
 [lib]
 crate-type = ["cdylib"]

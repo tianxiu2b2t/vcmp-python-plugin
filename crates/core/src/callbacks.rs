@@ -14,10 +14,6 @@ use vcmp_bindings::{options::VcmpEntityPool, raw::PluginCallbacks};
 use crate::{cfg::CONFIG, pool::ENTITY_POOL, py::load_script, py::reload};
 use tracing::{Level, event};
 
-// FFI Squirrel
-use squirrel_ffi::SQUIRREL_LOAD_IDENTIFIER;
-use crate::squirrel::init as init_squirrel;
-
 // use crate::py::callbacks::CALLBACK;
 
 #[unsafe(no_mangle)]
@@ -756,16 +752,6 @@ pub unsafe extern "C" fn on_checkpoint_exited(checkpoint_id: i32, player_id: i32
     );
 }
 
-/// # Safety
-/// FFI callback for plugin command
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn on_plugin_command(identifier: u32, _command: *const c_char) -> u8 {
-    // FFI Squirrel
-    if identifier == SQUIRREL_LOAD_IDENTIFIER {
-        init_squirrel();
-    }
-    1
-}
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);
@@ -823,6 +809,4 @@ pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnCheckpointExited = Some(on_checkpoint_exited);
 
     callbacks.OnEntityPoolChange = Some(on_entity_pool_change);
-
-    callbacks.OnPluginCommand = Some(on_plugin_command);
 }
