@@ -870,7 +870,7 @@ dependencies = [
 [[package]]
 name = "vcmp_bindings"
 version = "0.2.0"
-source = "git+https://github.com/tianxiu2b2t/vcmp_bindings#05673dfa6027d7bd6840ca7bbdbc9a003c55850c"
+source = "git+https://github.com/tianxiu2b2t/vcmp_bindings#efa77c3b5ee59c5d3e69469452144ed2719af3f8"
 dependencies = [
  "encoding_rs",
 ]
