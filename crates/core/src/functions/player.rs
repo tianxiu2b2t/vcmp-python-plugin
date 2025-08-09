@@ -734,13 +734,20 @@ impl PlayerPy {
 
     pub fn set_vehicle_slot(&self, py: Python<'_>, vehicle: Option<VehiclePy>, slot: i32) {
         py.allow_threads(|| {
-            if vehicle.is_none() {
-                let _ = vcmp_func().remove_player_from_vehicle(self.id);
-                return;
+            match vehicle {
+                Some(vehicle) => {
+                    let _ = vcmp_func().put_player_in_vehicle(
+                        self.id,
+                        vehicle.get_id(),
+                        slot,
+                        1,
+                        0,
+                    );
+                }
+                None => {
+                    let _ = vcmp_func().remove_player_from_vehicle(self.id);
+                }
             }
-
-            let _ =
-                vcmp_func().put_player_in_vehicle(self.id, vehicle.unwrap().get_id(), slot, 1, 0);
         })
     }
 
@@ -794,7 +801,7 @@ impl PlayerPy {
     #[getter]
     pub fn get_spectate_target(&self, py: Python<'_>) -> Option<PlayerPy> {
         py.allow_threads(|| {
-            let pool = ENTITY_POOL.lock().unwrap();
+            let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let id = vcmp_func().get_player_spectate_target(self.id);
             pool.get_player(id).copied()
         })
@@ -824,7 +831,7 @@ impl PlayerPy {
     pub fn get_standing_on_object(&self, py: Python<'_>) -> Option<ObjectPy> {
         py.allow_threads(|| {
             let id = vcmp_func().get_player_standing_on_object(self.id);
-            let pool = ENTITY_POOL.lock().unwrap();
+            let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             pool.get_object(id).copied()
         })
     }
@@ -833,7 +840,7 @@ impl PlayerPy {
     pub fn get_standing_vehicle(&self, py: Python<'_>) -> Option<VehiclePy> {
         py.allow_threads(|| {
             let id = vcmp_func().get_player_standing_on_vehicle(self.id);
-            let pool = ENTITY_POOL.lock().unwrap();
+            let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             pool.get_vehicle(id).copied()
         })
     }
@@ -874,7 +881,7 @@ impl PlayerPy {
     pub fn get_vehicle(&self, py: Python<'_>) -> Option<VehiclePy> {
         py.allow_threads(|| {
             let vehicle_id = vcmp_func().get_player_vehicle_id(self.id);
-            let pool = ENTITY_POOL.lock().unwrap();
+            let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             pool.get_vehicle(vehicle_id).copied()
         })
     }

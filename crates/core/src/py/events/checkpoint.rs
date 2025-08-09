@@ -43,13 +43,13 @@ pub struct CheckpointEnteredEvent {
 impl CheckpointEnteredEvent {
     #[getter]
     fn checkpoint(&self) -> CheckPointPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_checkpoint(self.inner.checkpoint_id).unwrap()
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
 
@@ -100,13 +100,13 @@ pub struct CheckpointExitedEvent {
 impl CheckpointExitedEvent {
     #[getter]
     fn checkpoint(&self) -> CheckPointPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_checkpoint(self.inner.checkpoint_id).unwrap()
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
 

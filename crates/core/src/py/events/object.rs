@@ -43,13 +43,13 @@ pub struct ObjectShotEvent {
 impl ObjectShotEvent {
     #[getter]
     fn object(&self) -> ObjectPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_object(self.inner.object_id).unwrap()
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
 
@@ -107,13 +107,13 @@ pub struct ObjectTouchedEvent {
 impl ObjectTouchedEvent {
     #[getter]
     fn object(&self) -> ObjectPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_object(self.inner.object_id).unwrap()
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
 

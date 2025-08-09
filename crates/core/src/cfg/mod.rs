@@ -93,17 +93,17 @@ fn init_config_from_cfg() -> Option<Config> {
     let mut config = Config::new(); // dev... toml
 
     let cfg_file = Path::new("./server.cfg");
-    if !cfg_file.exists() || !cfg_file.is_file() || cfg_file.metadata().unwrap().len() == 0 {
+    if !cfg_file.exists() || !cfg_file.is_file() || cfg_file.metadata().expect("Failed to get metadata").len() == 0 {
         return None;
     }
 
-    let content = std::fs::read_to_string(cfg_file).unwrap();
+    let content = std::fs::read_to_string(cfg_file).expect("Failed to read server.cfg");
 
     let find_value = |key: &str| {
         let mut value = String::new();
         for line in content.lines() {
             if line.starts_with(key) {
-                value = line.split(' ').nth(1).unwrap().trim().to_string();
+                value = line.split(' ').nth(1).expect("Failed to split line").trim().to_string();
                 break;
             }
         }
@@ -125,10 +125,14 @@ fn init_config_from_toml() -> Option<Config> {
     None
 }
 
+pub fn get_config() -> &'static Config {
+    CONFIG.get().expect("config not init")
+}
+
 pub fn init_config() {
     CONFIG.get_or_init(|| {
         init_config_from_toml().unwrap_or(init_config_from_cfg().unwrap_or_default())
     });
 
-    event!(Level::DEBUG, "{}", CONFIG.get().unwrap());
+    event!(Level::DEBUG, "{}", get_config());
 }

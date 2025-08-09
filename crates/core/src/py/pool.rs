@@ -11,7 +11,7 @@ use pyo3::{Py, PyAny};
 #[pyfunction]
 #[pyo3(signature = (all = false))]
 pub fn get_players(all: bool) -> Vec<PlayerPy> {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     if all {
         pool.get_all_players()
     } else {
@@ -21,31 +21,31 @@ pub fn get_players(all: bool) -> Vec<PlayerPy> {
 
 #[pyfunction]
 pub fn get_vehicles() -> Vec<VehiclePy> {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     pool.get_vehicles()
 }
 
 #[pyfunction]
 pub fn get_pickups() -> Vec<PickupPy> {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     pool.get_pickups()
 }
 
 #[pyfunction]
 pub fn get_objects() -> Vec<ObjectPy> {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     pool.get_objects()
 }
 
 #[pyfunction]
 pub fn get_markers() -> Vec<MarkerPy> {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     pool.get_markers()
 }
 
 #[pyfunction]
 pub fn get_checkpoints() -> Vec<CheckPointPy> {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     pool.get_checkpoints()
 }
 

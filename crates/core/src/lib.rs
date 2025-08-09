@@ -31,7 +31,7 @@ pub const PLUGIN_NAME: &str = "PythonPlugin";
 
 use crate::{
     callbacks::init_callbacks,
-    cfg::{CONFIG, init_config},
+    cfg::{get_config, init_config},
     py::init_py,
 };
 
@@ -126,7 +126,7 @@ extern "C" fn VcmpPluginInit(
 
     event!(Level::INFO, "vcmp-plugin-rs loaded");
 
-    if CONFIG.get().unwrap().check_update {
+    if get_config().check_update {
         update::init();
     }
 

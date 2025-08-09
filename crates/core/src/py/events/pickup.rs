@@ -43,13 +43,13 @@ pub struct PickupPickAttemptEvent {
 impl PickupPickAttemptEvent {
     #[getter]
     fn pickup(&self) -> PickupPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_pickup(self.inner.pickup_id).unwrap()
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
 
@@ -100,13 +100,13 @@ pub struct PickupPickedEvent {
 impl PickupPickedEvent {
     #[getter]
     fn pickup(&self) -> PickupPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_pickup(self.inner.pickup_id).unwrap()
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
 
@@ -157,7 +157,7 @@ pub struct PickupRespawnEvent {
 impl PickupRespawnEvent {
     #[getter]
     fn pickup(&self) -> PickupPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_pickup(self.inner.pickup_id).unwrap()
     }
 

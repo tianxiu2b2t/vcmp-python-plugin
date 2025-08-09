@@ -98,14 +98,12 @@ impl WriteStream {
         let data = binding.as_ref();
 
         if data.len() > 4095 {
-            self.buffer.write_all(&(4095i16).to_be_bytes()).unwrap();
             self.buffer.write_all(&data[0..4095])?;
             event!(Level::WARN, "String is too long, truncated to 4095 bytes");
             Ok(false)
         } else {
             self.buffer
-                .write_all(&(data.len() as i16).to_be_bytes())
-                .unwrap();
+                .write_all(&(data.len() as i16).to_be_bytes())?;
             self.buffer.write_all(data)?;
             Ok(true)
         }

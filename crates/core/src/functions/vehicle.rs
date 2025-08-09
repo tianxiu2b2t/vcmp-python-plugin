@@ -572,7 +572,7 @@ impl VehiclePy {
 
     #[getter]
     fn get_driver(&self) -> Option<PlayerPy> {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         pool.get_players().into_iter().find(|&player| {
             vcmp_func().get_player_vehicle_id(player.get_id()) == self.id
                 && vcmp_func().get_player_in_vehicle_slot(player.get_id()) == 0
@@ -582,14 +582,14 @@ impl VehiclePy {
     #[getter]
     fn get_passengers(&self) -> Vec<PlayerPy> {
         let mut passenger_seats: HashMap<i32, Vec<PlayerPy>> = HashMap::new();
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         for player in pool.get_players() {
             if vcmp_func().get_player_vehicle_id(player.get_id()) == self.id {
                 let slot = vcmp_func().get_player_in_vehicle_slot(player.get_id());
                 if let std::collections::hash_map::Entry::Vacant(e) = passenger_seats.entry(slot) {
                     e.insert(vec![player]);
                 } else {
-                    passenger_seats.get_mut(&slot).unwrap().push(player);
+                    passenger_seats.get_mut(&slot).expect("Failed to get passenger seats").push(player);
                 }
             }
         }
@@ -598,7 +598,7 @@ impl VehiclePy {
         let mut slots = passenger_seats.keys().collect::<Vec<_>>();
         slots.sort();
         for slot in slots {
-            passengers.extend(passenger_seats.get(slot).unwrap());
+            passengers.extend(passenger_seats.get(slot).expect("Failed to get passenger seats"));
         }
         passengers
     }
@@ -633,7 +633,7 @@ pub fn create_vehicle(
         secondary_colour,
     );
 
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     pool.get_vehicle(id).copied().unwrap_or(VehiclePy::new(id))
 }
 

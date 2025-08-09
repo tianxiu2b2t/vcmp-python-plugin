@@ -10,7 +10,7 @@ use tracing_subscriber::{
     util::SubscriberInitExt,
 };
 
-use crate::cfg::CONFIG;
+use crate::cfg::get_config;
 
 /// 用于持有 WorkerGuard, 让它别 Drop 了
 ///
@@ -18,7 +18,7 @@ use crate::cfg::CONFIG;
 static LOG_FILE_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
 
 pub fn init() {
-    let level = CONFIG.get().unwrap().log_level;
+    let level = get_config().log_level;
 
     let stdio = std::io::stdout.with_max_level(level);
 
@@ -30,7 +30,7 @@ pub fn init() {
     // 初始化
     let registry = tracing_subscriber::registry().with(stdout_layer);
 
-    if CONFIG.get().unwrap().file_log {
+    if get_config().file_log {
         // 创建按天轮换的文件 appender
         let file_appender = {
             RollingFileAppender::builder()

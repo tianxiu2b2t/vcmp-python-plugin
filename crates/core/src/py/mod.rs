@@ -11,7 +11,7 @@ use pyo3::types::{
 use pyo3::{Bound, Py, PyAny, PyErr, PyResult, Python, pyfunction, pymodule, wrap_pyfunction};
 use tracing::{Level, event};
 
-use crate::cfg::CONFIG;
+use crate::cfg::get_config;
 use crate::functions;
 use crate::functions::checkpoint::CheckPointPy;
 use crate::functions::marker::MarkerPy;
@@ -70,7 +70,7 @@ pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> =
 
 pub fn init_py_environment() {
     init_py_module();
-    let virtual_env = CONFIG.get().unwrap().virtual_env.as_str();
+    let virtual_env = get_config().virtual_env.as_str();
 
     let mut config;
     unsafe {
@@ -254,10 +254,10 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
 
 pub fn capture_modules(py: Option<Python<'_>>) {
     let func = |py: Python<'_>| {
-        let sys_modules = py.import("sys").unwrap().getattr("modules").unwrap();
+        let sys_modules = py.import("sys").expect("sys module not found").getattr("modules").expect("sys.modules not found");
         sys_modules
             .extract::<HashMap<String, Py<PyAny>>>()
-            .unwrap()
+            .expect("sys.modules not found")
             .keys()
             .cloned()
             .collect::<Vec<String>>()
@@ -269,7 +269,7 @@ pub fn capture_modules(py: Option<Python<'_>>) {
 
     event!(Level::DEBUG, "Capture modules: {:?}", modules.clone());
 
-    GLOBAL_VAR.lock().unwrap().capture_modules = Some(modules.clone());
+    GLOBAL_VAR.lock().expect("Failed to lock global var").capture_modules = Some(modules.clone());
 }
 
 pub fn init_py() {
@@ -277,7 +277,7 @@ pub fn init_py() {
     init_py_environment();
     capture_modules(None);
 
-    if CONFIG.get().unwrap().preloader {
+    if get_config().preloader {
         load_script();
     }
 }
@@ -285,12 +285,13 @@ pub fn init_py() {
 #[pyfunction]
 #[pyo3(name = "reload", signature = (**kwargs))]
 pub fn py_reload(kwargs: Option<HashMap<String, Py<PyAny>>>) {
-    let var = GLOBAL_VAR.try_lock();
-    if var.is_err() {
-        event!(Level::ERROR, "Script reload failed, global var lock failed");
-        return;
-    }
-    let mut var = var.unwrap();
+    let mut var = match GLOBAL_VAR.try_lock() {
+        Ok(var) => var,
+        Err(_) => {
+            event!(Level::ERROR, "Script reload failed, global var lock failed");
+            return;
+        }
+    };
     if var.need_reload {
         event!(Level::DEBUG, "Script already reloading");
         return;
@@ -307,19 +308,19 @@ pub fn py_reload(kwargs: Option<HashMap<String, Py<PyAny>>>) {
 #[pyfunction]
 #[pyo3(name = "set_error_handler", signature = (handler))]
 pub fn py_set_error_handler(handler: Py<PyAny>) {
-    GLOBAL_VAR.lock().unwrap().error_handler = Some(handler);
+    GLOBAL_VAR.lock().expect("Failed to lock global var").error_handler = Some(handler);
 }
 
 #[pyfunction]
 #[pyo3(name = "get_error_handler")]
 pub fn py_get_error_handler() -> Option<Py<PyAny>> {
-    GLOBAL_VAR.lock().unwrap().error_handler.clone()
+    GLOBAL_VAR.lock().expect("Failed to lock global var").error_handler.clone()
 }
 
 pub fn reload() {
     // check if need reload
     {
-        let var = GLOBAL_VAR.lock().unwrap();
+        let var = GLOBAL_VAR.lock().expect("Failed to lock global var");
         if !var.need_reload {
             return;
         }
@@ -328,13 +329,13 @@ pub fn reload() {
     let start_time = Instant::now();
 
     let kwargs = {
-        let mut var = GLOBAL_VAR.lock().unwrap();
+        let mut var = GLOBAL_VAR.lock().expect("Failed to lock global var");
         let kwargs = var.reload_var.take().unwrap_or_default();
         event!(Level::DEBUG, "Reload kwargs: {:?}", kwargs.clone());
         kwargs
     };
     let players = {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         pool.get_all_players().clone()
     };
 
@@ -343,7 +344,7 @@ pub fn reload() {
     let capture_modules = {
         GLOBAL_VAR
             .lock()
-            .unwrap()
+            .expect("Failed to lock global var")
             .capture_modules
             .clone()
             .unwrap_or_default()
@@ -361,8 +362,8 @@ pub fn reload() {
                 .with_kwargs(kwargs.clone()),
             );
             {
-                let mut pool = ENTITY_POOL.lock().unwrap();
-                let player = pool.get_mut_player(player.get_id()).unwrap();
+                let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
+                let player = pool.get_mut_player(player.get_id()).expect("Failed to get mut player");
                 player.set_var_reload_joined(false);
             }
         }
@@ -375,7 +376,7 @@ pub fn reload() {
         );
 
         py.allow_threads(|| {
-            let count = PY_CALLBACK_STORAGE.lock().unwrap().clear();
+            let count = PY_CALLBACK_STORAGE.lock().expect("Failed to lock PyCallbackStorage").clear();
             event!(Level::DEBUG, "Cleared {count} callback(s)");
         });
 
@@ -388,11 +389,11 @@ pub fn reload() {
                 .into_iter()
                 .chain(capture_modules)
                 .collect::<Vec<_>>();
-            let py_sys_modules = py.import("sys").unwrap().getattr("modules").unwrap();
-            let py_modules_unbind = py_sys_modules.extract::<Py<PyDict>>().unwrap();
+            let py_sys_modules = py.import("sys").expect("Failed to import sys").getattr("modules").expect("Failed to get sys.modules");
+            let py_modules_unbind = py_sys_modules.extract::<Py<PyDict>>().expect("Failed to extract sys.modules");
             let py_modules = py_modules_unbind.bind(py);
             for m in py_modules.keys() {
-                let m = m.extract::<String>().unwrap();
+                let m = m.extract::<String>().expect("Failed to extract module name");
                 if modules.contains(&m) || m.starts_with("vcmp") {
                     continue;
                 }
@@ -415,15 +416,15 @@ pub fn reload() {
 
         // 重新获取玩家，防止玩家断开连接后，玩家列表为空
         let players = {
-            let pool = ENTITY_POOL.lock().unwrap();
+            let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             pool.get_all_players().clone()
         };
 
         event!(Level::DEBUG, "Callback manager trigger player join");
         for player in players.clone() {
             {
-                let mut pool = ENTITY_POOL.lock().unwrap();
-                let player = pool.get_mut_player(player.get_id()).unwrap();
+                let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
+                let player = pool.get_mut_player(player.get_id()).expect("Failed to get mut player");
                 player.set_var_reload_joined(true);
             }
             let _ = PY_CALLBACK_MANAGER.trigger(
@@ -468,13 +469,13 @@ pub fn reload() {
     );
 
     {
-        let mut var = GLOBAL_VAR.lock().unwrap();
+        let mut var = GLOBAL_VAR.lock().expect("Failed to lock global var");
         var.need_reload = false;
     }
 }
 
 pub fn load_script() {
-    let script_path = CONFIG.get().unwrap().script_path.as_str();
+    let script_path = get_config().script_path.as_str();
     let script = Path::new(script_path);
 
     if !script.exists() {

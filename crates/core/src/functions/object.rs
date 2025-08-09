@@ -225,7 +225,7 @@ impl ObjectPy {
 pub fn create_object(model: i32, world: i32, pos: VectorPy, alpha: i32) -> ObjectPy {
     let id = vcmp_func().create_object(model, world, pos.into(), alpha);
 
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
 
     pool.get_object(id).copied().unwrap_or(ObjectPy::new(id))
 }

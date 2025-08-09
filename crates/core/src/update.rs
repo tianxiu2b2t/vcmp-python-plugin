@@ -21,24 +21,21 @@ pub static INFO: OnceLock<PluginInfo> = OnceLock::new();
 fn get_info() -> &'static PluginInfo {
     INFO.get_or_init(|| {
         let pyproject_content = include_str!("../../../pyproject.toml");
-        let pyproject = toml::from_str::<toml::Table>(pyproject_content).unwrap();
-        let version = pyproject
-            .get("project")
-            .unwrap()
+        let pyproject_table = toml::from_str::<toml::Table>(pyproject_content).expect("Failed to parse pyproject.toml");
+        let project = pyproject_table.get("project").expect("Failed to get project");
+        let version = project
             .get("version")
-            .unwrap()
+            .expect("Failed to get project.version")
             .as_str()
-            .unwrap()
+            .expect("Failed to get project.version as string")
             .to_string();
-        let repo_url = pyproject
-            .get("project")
-            .unwrap()
+        let repo_url = project
             .get("urls")
-            .unwrap()
+            .expect("Failed to get project.urls")
             .get("repository")
-            .unwrap()
+            .expect("Failed to get project.urls.repository")
             .as_str()
-            .unwrap()
+            .expect("Failed to get project.urls.repository as string")
             .to_string();
         PluginInfo {
             version,
@@ -49,7 +46,7 @@ fn get_info() -> &'static PluginInfo {
 
 pub fn get_repo() -> String {
     let info = get_info();
-    let url = info.url.clone();
+    let url = &info.url;
     url.replace("https://github.com/", "")
         .split("/")
         .take(2)
@@ -75,14 +72,14 @@ pub fn check() {
         return;
     }
 
-    let binding = session.unwrap().into_body().read_to_string().unwrap();
+    let binding = session.expect("Failed to get response body").into_body().read_to_string().expect("Failed to read response body");
     let tag_name = binding
         .split("\"tag_name\":\"v")
         .nth(1)
-        .unwrap()
+        .expect("Failed to get tag_name")
         .split("\"")
         .next()
-        .unwrap();
+        .expect("Failed to get tag_name");
 
     if tag_name != info.version {
         event!(

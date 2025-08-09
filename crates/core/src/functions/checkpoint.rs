@@ -103,7 +103,7 @@ impl CheckPointPy {
     #[getter]
     fn get_owner(&self) -> Option<PlayerPy> {
         let id = vcmp_func().get_checkpoint_owner(self.id);
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         pool.get_player(id).copied()
     }
 
@@ -166,7 +166,7 @@ pub fn create_checkpoint(
         radius,
     );
 
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
 
     pool.get_checkpoint(id)
         .copied()

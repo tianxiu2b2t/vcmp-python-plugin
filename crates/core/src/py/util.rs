@@ -476,13 +476,13 @@ pub fn get_district_name(x: f64, y: f64) -> &'static str {
 
 #[pyfunction]
 pub fn get_players() -> Vec<PlayerPy> {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     pool.get_players()
 }
 
 #[pyfunction]
 pub fn announce_all(announce_type: i32, message: String) {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     for player in pool.get_players() {
         player.announce(announce_type, &message.clone());
     }
@@ -490,7 +490,7 @@ pub fn announce_all(announce_type: i32, message: String) {
 
 #[pyfunction]
 pub fn message_all(message: String) {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     for player in pool.get_players() {
         player.message(&message.clone());
     }
@@ -498,7 +498,7 @@ pub fn message_all(message: String) {
 
 #[pyfunction]
 pub fn raw_message_all(color: RGBPy, message: String) {
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
     for player in pool.get_players() {
         player.raw_message(color, &message.clone());
     }

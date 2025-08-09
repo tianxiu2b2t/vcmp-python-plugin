@@ -109,7 +109,7 @@ pub struct ClientScriptDataEvent {
 impl ClientScriptDataEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -164,7 +164,7 @@ pub struct PlayerConnectEvent {
 impl PlayerConnectEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
@@ -210,7 +210,7 @@ pub struct PlayerDisconnectEvent {
 impl PlayerDisconnectEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -265,7 +265,7 @@ pub struct PlayerRequestClassEvent {
 impl PlayerRequestClassEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -320,7 +320,7 @@ pub struct PlayerSpawnEvent {
 impl PlayerSpawnEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
@@ -366,7 +366,7 @@ pub struct PlayerRequestSpawnEvent {
 impl PlayerRequestSpawnEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
@@ -412,12 +412,12 @@ pub struct PlayerDeathEvent {
 impl PlayerDeathEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
     fn killer(&self) -> Option<PlayerPy> {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         pool.get_player(self.inner.killer_id).copied()
     }
     #[getter]
@@ -482,7 +482,7 @@ pub struct PlayerUpdateEvent {
 impl PlayerUpdateEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -537,12 +537,12 @@ pub struct PlayerRequestEnterVehicleEvent {
 impl PlayerRequestEnterVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.inner.vehicle_id).unwrap()
     }
     #[getter]
@@ -599,12 +599,12 @@ pub struct PlayerEnterVehicleEvent {
 impl PlayerEnterVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.inner.vehicle_id).unwrap()
     }
     #[getter]
@@ -661,12 +661,12 @@ pub struct PlayerExitVehicleEvent {
 impl PlayerExitVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.inner.vehicle_id).unwrap()
     }
     fn __repr__(&self) -> String {
@@ -717,7 +717,7 @@ pub struct PlayerNameChangeEvent {
 impl PlayerNameChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -778,7 +778,7 @@ pub struct PlayerStateChangeEvent {
 impl PlayerStateChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -839,7 +839,7 @@ pub struct PlayerActionChangeEvent {
 impl PlayerActionChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -900,7 +900,7 @@ pub struct PlayerOnFireChangeEvent {
 impl PlayerOnFireChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -955,7 +955,7 @@ pub struct PlayerCrouchChangeEvent {
 impl PlayerCrouchChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1010,7 +1010,7 @@ pub struct PlayerGameKeysChangeEvent {
 impl PlayerGameKeysChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1071,7 +1071,7 @@ pub struct PlayerBeginTypingEvent {
 impl PlayerBeginTypingEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
@@ -1117,7 +1117,7 @@ pub struct PlayerEndTypingEvent {
 impl PlayerEndTypingEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     fn __repr__(&self) -> String {
@@ -1163,7 +1163,7 @@ pub struct PlayerAwayChangeEvent {
 impl PlayerAwayChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1218,7 +1218,7 @@ pub struct PlayerMessageEvent {
 impl PlayerMessageEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1273,7 +1273,7 @@ pub struct PlayerCommandEvent {
 impl PlayerCommandEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1344,12 +1344,12 @@ pub struct PlayerPrivateMessageEvent {
 impl PlayerPrivateMessageEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
     fn target(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.target_id).unwrap()
     }
     #[getter]
@@ -1406,7 +1406,7 @@ pub struct PlayerKeyBindDownEvent {
 impl PlayerKeyBindDownEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1461,7 +1461,7 @@ pub struct PlayerKeyBindUpEvent {
 impl PlayerKeyBindUpEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1516,12 +1516,12 @@ pub struct PlayerSpectateEvent {
 impl PlayerSpectateEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
     fn target(&self) -> Option<PlayerPy> {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         pool.get_player(self.inner.target_id).copied()
     }
     fn __repr__(&self) -> String {
@@ -1574,7 +1574,7 @@ pub struct PlayerCrashReportEvent {
 impl PlayerCrashReportEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1629,7 +1629,7 @@ pub struct PlayerModuleListEvent {
 impl PlayerModuleListEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.inner.player_id).unwrap()
     }
     #[getter]
@@ -1688,7 +1688,7 @@ pub struct PlayerHealthChangeEvent {
 impl PlayerHealthChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.player_id).unwrap()
     }
 
@@ -1711,7 +1711,7 @@ impl PlayerHealthChangeEvent {
     fn set_current_health(&mut self, health: f32) {
         self.current_health = health;
         {
-            let mut pool = ENTITY_POOL.lock().unwrap();
+            let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let player = pool.get_mut_player(self.player_id).unwrap();
             player.set_var_last_health(self.current_health);
         };
@@ -1777,7 +1777,7 @@ pub struct PlayerArmourChangeEvent {
 impl PlayerArmourChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.player_id).unwrap()
     }
 
@@ -1800,7 +1800,7 @@ impl PlayerArmourChangeEvent {
     fn set_current_armour(&mut self, armour: f32) {
         self.current_armour = armour;
         {
-            let mut pool = ENTITY_POOL.lock().unwrap();
+            let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let player = pool.get_mut_player(self.player_id).unwrap();
             player.set_var_last_armour(self.current_armour);
         };
@@ -1866,7 +1866,7 @@ pub struct PlayerWeaponChangeEvent {
 impl PlayerWeaponChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.player_id).unwrap()
     }
 
@@ -1889,7 +1889,7 @@ impl PlayerWeaponChangeEvent {
     fn set_current_weapon(&mut self, weapon: i32) {
         self.current_weapon = weapon;
         {
-            let mut pool = ENTITY_POOL.lock().unwrap();
+            let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let player = pool.get_mut_player(self.player_id).unwrap();
             player.set_var_last_weapon(self.current_weapon);
         };
@@ -1955,7 +1955,7 @@ pub struct PlayerAmmoChangeEvent {
 impl PlayerAmmoChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.player_id).unwrap()
     }
 
@@ -1978,7 +1978,7 @@ impl PlayerAmmoChangeEvent {
     fn set_current_ammo(&mut self, ammo: i32) {
         self.current_ammo = ammo;
         {
-            let mut pool = ENTITY_POOL.lock().unwrap();
+            let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let player = pool.get_mut_player(self.player_id).unwrap();
             player.set_var_last_ammo(self.current_ammo);
         };
@@ -2044,7 +2044,7 @@ pub struct PlayerMoveEvent {
 impl PlayerMoveEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_player(self.player_id).unwrap()
     }
 
@@ -2067,7 +2067,7 @@ impl PlayerMoveEvent {
     fn set_current_position(&mut self, position: VectorPy) {
         self.current_position = position;
         {
-            let mut pool = ENTITY_POOL.lock().unwrap();
+            let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let player = pool.get_mut_player(self.player_id).unwrap();
             player.set_var_last_position(self.current_position.get_entity_pos());
         };

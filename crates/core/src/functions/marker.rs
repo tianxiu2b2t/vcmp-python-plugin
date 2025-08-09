@@ -116,7 +116,7 @@ pub fn create_marker(
 ) -> MarkerPy {
     let id = vcmp_func().create_marker(world, position.into(), scale, color.into(), model, None);
 
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
 
     pool.get_marker(id).copied().unwrap_or(MarkerPy::new(id))
 }

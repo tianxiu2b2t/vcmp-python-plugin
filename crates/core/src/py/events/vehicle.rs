@@ -46,7 +46,7 @@ pub struct VehicleUpdateEvent {
 impl VehicleUpdateEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.inner.vehicle_id).unwrap()
     }
 
@@ -102,7 +102,7 @@ pub struct VehicleExplodeEvent {
 impl VehicleExplodeEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.inner.vehicle_id).unwrap()
     }
 
@@ -148,7 +148,7 @@ pub struct VehicleRespawnEvent {
 impl VehicleRespawnEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.inner.vehicle_id).unwrap()
     }
 
@@ -197,7 +197,7 @@ pub struct VehicleMoveEvent {
 impl VehicleMoveEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.vehicle_id).unwrap()
     }
 
@@ -220,7 +220,7 @@ impl VehicleMoveEvent {
     fn set_current_position(&mut self, position: VectorPy) {
         self.current_position = position;
         {
-            let mut pool = ENTITY_POOL.lock().unwrap();
+            let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let vehicle = pool.get_mut_vehicle(self.vehicle_id).unwrap();
             vehicle.set_var_last_position(self.current_position.get_entity_pos());
         };
@@ -286,7 +286,7 @@ pub struct VehicleHealthChangeEvent {
 impl VehicleHealthChangeEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
-        let pool = ENTITY_POOL.lock().unwrap();
+        let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
         *pool.get_vehicle(self.vehicle_id).unwrap()
     }
 
@@ -309,7 +309,7 @@ impl VehicleHealthChangeEvent {
     fn set_current_health(&mut self, health: f32) {
         self.current_health = health;
         {
-            let mut pool = ENTITY_POOL.lock().unwrap();
+            let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
             let vehicle = pool.get_mut_vehicle(self.vehicle_id).unwrap();
             vehicle.set_var_last_health(self.current_health);
         };

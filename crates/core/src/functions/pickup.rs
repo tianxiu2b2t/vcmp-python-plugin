@@ -185,7 +185,7 @@ pub fn create_pickup(
         is_automatic,
     );
 
-    let pool = ENTITY_POOL.lock().unwrap();
+    let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
 
     pool.get_pickup(id).copied().unwrap_or(PickupPy::new(id))
 }
