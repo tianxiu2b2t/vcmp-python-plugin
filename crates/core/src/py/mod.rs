@@ -409,6 +409,7 @@ pub fn reload() {
                 .chain(capture_modules)
                 .chain(get_ignore_py_modules())
                 .collect::<Vec<_>>();
+            event!(Level::DEBUG, "Unload modules: {:?}", modules);
             let py_sys_modules = py
                 .import("sys")
                 .expect("Failed to import sys")
