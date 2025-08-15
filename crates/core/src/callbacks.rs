@@ -1,5 +1,6 @@
 use std::os::raw::c_char;
 
+use crate::cfg::get_preloader;
 use crate::PLUGIN_COMMAND;
 use crate::py::callbacks::PY_CALLBACK_MANAGER;
 use crate::py::events::{
@@ -11,14 +12,14 @@ use vcmp_bindings::func::{PlayerMethods, PluginMethods, QueryVehicle, SetVehicle
 use vcmp_bindings::vcmp_func;
 use vcmp_bindings::{options::VcmpEntityPool, raw::PluginCallbacks};
 
-use crate::{cfg::get_config, pool::ENTITY_POOL, py::load_script, py::reload};
+use crate::{pool::ENTITY_POOL, py::load_script, py::reload};
 use tracing::{Level, event};
 
 // use crate::py::callbacks::CALLBACK;
 
 #[unsafe(no_mangle)]
 pub extern "C" fn on_server_init() -> u8 {
-    if !get_config().preloader {
+    if !get_preloader() {
         load_script();
     }
 

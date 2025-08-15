@@ -36,7 +36,7 @@ impl PyEvent for PlayerEvent {
             py,
             PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerEvent")
         .into_any()
     }
 }
@@ -95,7 +95,7 @@ impl PyEvent for IncomingConnectionEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create IncomingConnectionEvent")
         .into_any()
     }
 }
@@ -110,7 +110,7 @@ impl ClientScriptDataEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn stream(&self) -> ReadStream {
@@ -149,7 +149,7 @@ impl PyEvent for ClientScriptDataEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ClientScriptDataEvent")
         .into_any()
     }
 }
@@ -165,7 +165,7 @@ impl PlayerConnectEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerConnectEvent(player={})", self.player())
@@ -195,7 +195,7 @@ impl PyEvent for PlayerConnectEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerConnectEvent")
         .into_any()
     }
 }
@@ -211,7 +211,7 @@ impl PlayerDisconnectEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn reason(&self) -> i32 {
@@ -250,7 +250,7 @@ impl PyEvent for PlayerDisconnectEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerDisconnectEvent")
         .into_any()
     }
 }
@@ -266,7 +266,7 @@ impl PlayerRequestClassEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn class_id(&self) -> i32 {
@@ -305,7 +305,7 @@ impl PyEvent for PlayerRequestClassEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerRequestClassEvent")
         .into_any()
     }
 }
@@ -321,7 +321,7 @@ impl PlayerSpawnEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerSpawnEvent(player={})", self.player())
@@ -351,7 +351,7 @@ impl PyEvent for PlayerSpawnEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerSpawnEvent")
         .into_any()
     }
 }
@@ -367,7 +367,7 @@ impl PlayerRequestSpawnEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerRequestSpawnEvent(player={})", self.player())
@@ -397,7 +397,7 @@ impl PyEvent for PlayerRequestSpawnEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerRequestSpawnEvent")
         .into_any()
     }
 }
@@ -413,7 +413,7 @@ impl PlayerDeathEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn killer(&self) -> Option<PlayerPy> {
@@ -467,7 +467,7 @@ impl PyEvent for PlayerDeathEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerDeathEvent")
         .into_any()
     }
 }
@@ -483,7 +483,7 @@ impl PlayerUpdateEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn update(&self) -> i32 {
@@ -522,7 +522,7 @@ impl PyEvent for PlayerUpdateEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerUpdateEvent")
         .into_any()
     }
 }
@@ -538,12 +538,12 @@ impl PlayerRequestEnterVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
     }
     #[getter]
     fn slot_index(&self) -> i32 {
@@ -584,7 +584,7 @@ impl PyEvent for PlayerRequestEnterVehicleEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerRequestEnterVehicleEvent")
         .into_any()
     }
 }
@@ -600,12 +600,12 @@ impl PlayerEnterVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
     }
     #[getter]
     fn slot_index(&self) -> i32 {
@@ -646,7 +646,7 @@ impl PyEvent for PlayerEnterVehicleEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerEnterVehicleEvent")
         .into_any()
     }
 }
@@ -662,12 +662,12 @@ impl PlayerExitVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
     }
     fn __repr__(&self) -> String {
         format!(
@@ -702,7 +702,7 @@ impl PyEvent for PlayerExitVehicleEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerExitVehicleEvent")
         .into_any()
     }
 }
@@ -718,7 +718,7 @@ impl PlayerNameChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_name(&self) -> String {
@@ -763,7 +763,7 @@ impl PyEvent for PlayerNameChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerNameChangeEvent")
         .into_any()
     }
 }
@@ -779,7 +779,7 @@ impl PlayerStateChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_state(&self) -> i32 {
@@ -824,7 +824,7 @@ impl PyEvent for PlayerStateChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerStateChangeEvent")
         .into_any()
     }
 }
@@ -840,7 +840,7 @@ impl PlayerActionChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_action(&self) -> i32 {
@@ -885,7 +885,7 @@ impl PyEvent for PlayerActionChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerActionChangeEvent")
         .into_any()
     }
 }
@@ -901,7 +901,7 @@ impl PlayerOnFireChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn is_on_fire(&self) -> bool {
@@ -940,7 +940,7 @@ impl PyEvent for PlayerOnFireChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerOnFireChangeEvent")
         .into_any()
     }
 }
@@ -956,7 +956,7 @@ impl PlayerCrouchChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn is_crouching(&self) -> bool {
@@ -995,7 +995,7 @@ impl PyEvent for PlayerCrouchChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerCrouchChangeEvent")
         .into_any()
     }
 }
@@ -1011,7 +1011,7 @@ impl PlayerGameKeysChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_keys(&self) -> u32 {
@@ -1056,7 +1056,7 @@ impl PyEvent for PlayerGameKeysChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerGameKeysChangeEvent")
         .into_any()
     }
 }
@@ -1072,7 +1072,7 @@ impl PlayerBeginTypingEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerBeginTypingEvent(player={})", self.player())
@@ -1102,7 +1102,7 @@ impl PyEvent for PlayerBeginTypingEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerBeginTypingEvent")
         .into_any()
     }
 }
@@ -1118,7 +1118,7 @@ impl PlayerEndTypingEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerEndTypingEvent(player={})", self.player())
@@ -1148,7 +1148,7 @@ impl PyEvent for PlayerEndTypingEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerEndTypingEvent")
         .into_any()
     }
 }
@@ -1164,7 +1164,7 @@ impl PlayerAwayChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn is_away(&self) -> bool {
@@ -1203,7 +1203,7 @@ impl PyEvent for PlayerAwayChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerAwayChangeEvent")
         .into_any()
     }
 }
@@ -1219,7 +1219,7 @@ impl PlayerMessageEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn message(&self) -> String {
@@ -1258,7 +1258,7 @@ impl PyEvent for PlayerMessageEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerMessageEvent")
         .into_any()
     }
 }
@@ -1274,7 +1274,7 @@ impl PlayerCommandEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn command(&self) -> String {
@@ -1329,7 +1329,7 @@ impl PyEvent for PlayerCommandEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerCommandEvent")
         .into_any()
     }
 }
@@ -1345,12 +1345,12 @@ impl PlayerPrivateMessageEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn target(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.target_id).unwrap()
+        *pool.get_player(self.inner.target_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn message(&self) -> String {
@@ -1391,7 +1391,7 @@ impl PyEvent for PlayerPrivateMessageEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerPrivateMessageEvent")
         .into_any()
     }
 }
@@ -1407,11 +1407,11 @@ impl PlayerKeyBindDownEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn key(&self) -> KeyBindPy {
-        get_bindkey(self.inner.bind_id).unwrap()
+        get_bindkey(self.inner.bind_id).expect("Failed to get bindkey")
     }
     fn __repr__(&self) -> String {
         format!(
@@ -1446,7 +1446,7 @@ impl PyEvent for PlayerKeyBindDownEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerKeyBindDownEvent")
         .into_any()
     }
 }
@@ -1462,11 +1462,11 @@ impl PlayerKeyBindUpEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn key(&self) -> KeyBindPy {
-        get_bindkey(self.inner.bind_id).unwrap()
+        get_bindkey(self.inner.bind_id).expect("Failed to get bindkey")
     }
     fn __repr__(&self) -> String {
         format!(
@@ -1501,7 +1501,7 @@ impl PyEvent for PlayerKeyBindUpEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerKeyBindUpEvent")
         .into_any()
     }
 }
@@ -1517,7 +1517,7 @@ impl PlayerSpectateEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn target(&self) -> Option<PlayerPy> {
@@ -1559,7 +1559,7 @@ impl PyEvent for PlayerSpectateEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerSpectateEvent")
         .into_any()
     }
 }
@@ -1575,7 +1575,7 @@ impl PlayerCrashReportEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn report(&self) -> String {
@@ -1614,7 +1614,7 @@ impl PyEvent for PlayerCrashReportEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerCrashReportEvent")
         .into_any()
     }
 }
@@ -1630,7 +1630,7 @@ impl PlayerModuleListEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
     #[getter]
     fn modules(&self) -> String {
@@ -1669,7 +1669,7 @@ impl PyEvent for PlayerModuleListEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create PlayerModuleListEvent")
         .into_any()
     }
 }
@@ -1689,7 +1689,7 @@ impl PlayerHealthChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).unwrap()
+        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1712,7 +1712,7 @@ impl PlayerHealthChangeEvent {
         self.current_health = health;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).unwrap();
+            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
             player.set_var_last_health(self.current_health);
         };
     }
@@ -1760,7 +1760,7 @@ impl PyEvent for PlayerHealthChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
-        .unwrap()
+        .expect("Failed to create PlayerHealthChangeEvent")
         .into_any()
     }
 }
@@ -1778,7 +1778,7 @@ impl PlayerArmourChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).unwrap()
+        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1801,7 +1801,7 @@ impl PlayerArmourChangeEvent {
         self.current_armour = armour;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).unwrap();
+            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
             player.set_var_last_armour(self.current_armour);
         };
     }
@@ -1849,7 +1849,7 @@ impl PyEvent for PlayerArmourChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
-        .unwrap()
+        .expect("Failed to create PlayerArmourChangeEvent")
         .into_any()
     }
 }
@@ -1867,7 +1867,7 @@ impl PlayerWeaponChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).unwrap()
+        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1890,7 +1890,7 @@ impl PlayerWeaponChangeEvent {
         self.current_weapon = weapon;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).unwrap();
+            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
             player.set_var_last_weapon(self.current_weapon);
         };
     }
@@ -1938,7 +1938,7 @@ impl PyEvent for PlayerWeaponChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
-        .unwrap()
+        .expect("Failed to create PlayerWeaponChangeEvent")
         .into_any()
     }
 }
@@ -1956,7 +1956,7 @@ impl PlayerAmmoChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).unwrap()
+        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1979,7 +1979,7 @@ impl PlayerAmmoChangeEvent {
         self.current_ammo = ammo;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).unwrap();
+            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
             player.set_var_last_ammo(self.current_ammo);
         };
     }
@@ -2027,7 +2027,7 @@ impl PyEvent for PlayerAmmoChangeEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
-        .unwrap()
+        .expect("Failed to create PlayerAmmoChangeEvent")
         .into_any()
     }
 }
@@ -2045,7 +2045,7 @@ impl PlayerMoveEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).unwrap()
+        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -2068,7 +2068,7 @@ impl PlayerMoveEvent {
         self.current_position = position;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).unwrap();
+            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
             player.set_var_last_position(self.current_position.get_entity_pos());
         };
     }
@@ -2116,7 +2116,7 @@ impl PyEvent for PlayerMoveEvent {
             py,
             PyClassInitializer::from(PlayerEvent::new()).add_subclass(*self),
         )
-        .unwrap()
+        .expect("Failed to create PlayerMoveEvent")
         .into_any()
     }
 }

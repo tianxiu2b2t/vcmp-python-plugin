@@ -29,7 +29,7 @@ impl PyEvent for ObjectEvent {
             py,
             PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ObjectEvent")
         .into_any()
     }
 }
@@ -44,13 +44,13 @@ impl ObjectShotEvent {
     #[getter]
     fn object(&self) -> ObjectPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_object(self.inner.object_id).unwrap()
+        *pool.get_object(self.inner.object_id).expect("Failed to get object from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -93,7 +93,7 @@ impl PyEvent for ObjectShotEvent {
             py,
             PyClassInitializer::from(ObjectEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ObjectShotEvent")
         .into_any()
     }
 }
@@ -108,13 +108,13 @@ impl ObjectTouchedEvent {
     #[getter]
     fn object(&self) -> ObjectPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_object(self.inner.object_id).unwrap()
+        *pool.get_object(self.inner.object_id).expect("Failed to get object from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
 
     fn __repr__(&self) -> String {
@@ -150,7 +150,7 @@ impl PyEvent for ObjectTouchedEvent {
             py,
             PyClassInitializer::from(ObjectEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ObjectTouchedEvent")
         .into_any()
     }
 }

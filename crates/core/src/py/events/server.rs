@@ -24,7 +24,7 @@ impl PyEvent for ServerEvent {
             py,
             PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ServerEvent")
         .into_any()
     }
 }
@@ -42,7 +42,7 @@ impl PyEvent for ServerInitialiseEvent {
             py,
             PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ServerInitialiseEvent")
         .into_any()
     }
 }
@@ -60,7 +60,7 @@ impl PyEvent for ServerShutdownEvent {
             py,
             PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ServerShutdownEvent")
         .into_any()
     }
 }
@@ -102,7 +102,7 @@ impl PyEvent for ServerFrameEvent {
             py,
             PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ServerFrameEvent")
         .into_any()
     }
 }
@@ -164,7 +164,7 @@ impl PyEvent for ServerPerformanceReportEvent {
             py,
             PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ServerPerformanceReportEvent")
         .into_any()
     }
 }
@@ -208,7 +208,7 @@ impl PyEvent for ServerReloadedEvent {
             py,
             PyClassInitializer::from(ServerEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create ServerReloadedEvent")
         .into_any()
     }
 }

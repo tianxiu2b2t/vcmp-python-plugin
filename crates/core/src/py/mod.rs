@@ -11,7 +11,7 @@ use pyo3::types::{
 use pyo3::{Bound, Py, PyAny, PyErr, PyResult, Python, pyfunction, pymodule, wrap_pyfunction};
 use tracing::{Level, event};
 
-use crate::cfg::get_config;
+use crate::cfg::{get_preloader, get_script_path, get_virtual_env};
 use crate::functions;
 use crate::functions::checkpoint::CheckPointPy;
 use crate::functions::marker::MarkerPy;
@@ -70,7 +70,7 @@ pub static GLOBAL_VAR: LazyLock<Mutex<GlobalVar>> =
 
 pub fn init_py_environment() {
     init_py_module();
-    let virtual_env = get_config().virtual_env.as_str();
+    let virtual_env = &get_virtual_env();
 
     let mut config;
     unsafe {
@@ -277,7 +277,7 @@ pub fn init_py() {
     init_py_environment();
     capture_modules(None);
 
-    if get_config().preloader {
+    if get_preloader() {
         load_script();
     }
 }
@@ -475,7 +475,8 @@ pub fn reload() {
 }
 
 pub fn load_script() {
-    let script_path = get_config().script_path.as_str();
+    let script_path_string = get_script_path();
+    let script_path = script_path_string.as_str();
     let script = Path::new(script_path);
 
     if !script.exists() {

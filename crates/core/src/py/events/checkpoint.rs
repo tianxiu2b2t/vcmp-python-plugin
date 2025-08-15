@@ -29,7 +29,7 @@ impl PyEvent for CheckpointEvent {
             py,
             PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create CheckpointEvent")
         .into_any()
     }
 }
@@ -44,13 +44,13 @@ impl CheckpointEnteredEvent {
     #[getter]
     fn checkpoint(&self) -> CheckPointPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_checkpoint(self.inner.checkpoint_id).unwrap()
+        *pool.get_checkpoint(self.inner.checkpoint_id).expect("Failed to get checkpoint from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
 
     fn __repr__(&self) -> String {
@@ -86,7 +86,7 @@ impl PyEvent for CheckpointEnteredEvent {
             py,
             PyClassInitializer::from(CheckpointEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create CheckpointEnteredEvent")
         .into_any()
     }
 }
@@ -101,13 +101,13 @@ impl CheckpointExitedEvent {
     #[getter]
     fn checkpoint(&self) -> CheckPointPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_checkpoint(self.inner.checkpoint_id).unwrap()
+        *pool.get_checkpoint(self.inner.checkpoint_id).expect("Failed to get checkpoint from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).unwrap()
+        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
     }
 
     fn __repr__(&self) -> String {
@@ -143,7 +143,7 @@ impl PyEvent for CheckpointExitedEvent {
             py,
             PyClassInitializer::from(CheckpointEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create CheckpointExitedEvent")
         .into_any()
     }
 }

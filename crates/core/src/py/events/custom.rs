@@ -23,7 +23,7 @@ impl PyEvent for CustomEvent {
             py,
             PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create CustomEvent")
         .into_any()
     }
 }

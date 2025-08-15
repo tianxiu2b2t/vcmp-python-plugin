@@ -32,7 +32,7 @@ impl PyEvent for VehicleEvent {
             py,
             PyClassInitializer::from(BaseEvent::default()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create VehicleEvent")
         .into_any()
     }
 }
@@ -47,7 +47,7 @@ impl VehicleUpdateEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
     }
 
     #[getter]
@@ -88,7 +88,7 @@ impl PyEvent for VehicleUpdateEvent {
             py,
             PyClassInitializer::from(VehicleEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create VehicleUpdateEvent")
         .into_any()
     }
 }
@@ -103,7 +103,7 @@ impl VehicleExplodeEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
     }
 
     fn __repr__(&self) -> String {
@@ -134,7 +134,7 @@ impl PyEvent for VehicleExplodeEvent {
             py,
             PyClassInitializer::from(VehicleEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create VehicleExplodeEvent")
         .into_any()
     }
 }
@@ -149,7 +149,7 @@ impl VehicleRespawnEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).unwrap()
+        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
     }
 
     fn __repr__(&self) -> String {
@@ -180,7 +180,7 @@ impl PyEvent for VehicleRespawnEvent {
             py,
             PyClassInitializer::from(VehicleEvent::new()).add_subclass(self.clone()),
         )
-        .unwrap()
+        .expect("Failed to create VehicleRespawnEvent")
         .into_any()
     }
 }
@@ -198,7 +198,7 @@ impl VehicleMoveEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.vehicle_id).unwrap()
+        *pool.get_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool")
     }
 
     #[getter]
@@ -221,7 +221,7 @@ impl VehicleMoveEvent {
         self.current_position = position;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let vehicle = pool.get_mut_vehicle(self.vehicle_id).unwrap();
+            let vehicle = pool.get_mut_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool");
             vehicle.set_var_last_position(self.current_position.get_entity_pos());
         };
     }
@@ -269,7 +269,7 @@ impl PyEvent for VehicleMoveEvent {
             py,
             PyClassInitializer::from(VehicleEvent::new()).add_subclass(*self),
         )
-        .unwrap()
+        .expect("Failed to create VehicleMoveEvent")
         .into_any()
     }
 }
@@ -287,7 +287,7 @@ impl VehicleHealthChangeEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.vehicle_id).unwrap()
+        *pool.get_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool")
     }
 
     #[getter]
@@ -310,7 +310,7 @@ impl VehicleHealthChangeEvent {
         self.current_health = health;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let vehicle = pool.get_mut_vehicle(self.vehicle_id).unwrap();
+            let vehicle = pool.get_mut_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool");
             vehicle.set_var_last_health(self.current_health);
         };
     }
@@ -358,7 +358,7 @@ impl PyEvent for VehicleHealthChangeEvent {
             py,
             PyClassInitializer::from(VehicleEvent::new()).add_subclass(*self),
         )
-        .unwrap()
+        .expect("Failed to create VehicleHealthChangeEvent")
         .into_any()
     }
 }
