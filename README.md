@@ -74,7 +74,7 @@ python_script_path main.py
 # 例子： _bcrypt,_signal
 # python_ignore_py_modules
 ```
-or
+or python_cfg.toml
 
 ```toml
 [script]
