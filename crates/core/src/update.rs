@@ -21,8 +21,11 @@ pub static INFO: OnceLock<PluginInfo> = OnceLock::new();
 fn get_info() -> &'static PluginInfo {
     INFO.get_or_init(|| {
         let pyproject_content = include_str!("../../../pyproject.toml");
-        let pyproject_table = toml::from_str::<toml::Table>(pyproject_content).expect("Failed to parse pyproject.toml");
-        let project = pyproject_table.get("project").expect("Failed to get project");
+        let pyproject_table = toml::from_str::<toml::Table>(pyproject_content)
+            .expect("Failed to parse pyproject.toml");
+        let project = pyproject_table
+            .get("project")
+            .expect("Failed to get project");
         let version = project
             .get("version")
             .expect("Failed to get project.version")
@@ -72,7 +75,11 @@ pub fn check() {
         return;
     }
 
-    let binding = session.expect("Failed to get response body").into_body().read_to_string().expect("Failed to read response body");
+    let binding = session
+        .expect("Failed to get response body")
+        .into_body()
+        .read_to_string()
+        .expect("Failed to read response body");
     let tag_name = binding
         .split("\"tag_name\":\"v")
         .nth(1)

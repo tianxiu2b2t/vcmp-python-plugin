@@ -733,20 +733,12 @@ impl PlayerPy {
     }
 
     pub fn set_vehicle_slot(&self, py: Python<'_>, vehicle: Option<VehiclePy>, slot: i32) {
-        py.allow_threads(|| {
-            match vehicle {
-                Some(vehicle) => {
-                    let _ = vcmp_func().put_player_in_vehicle(
-                        self.id,
-                        vehicle.get_id(),
-                        slot,
-                        1,
-                        0,
-                    );
-                }
-                None => {
-                    let _ = vcmp_func().remove_player_from_vehicle(self.id);
-                }
+        py.allow_threads(|| match vehicle {
+            Some(vehicle) => {
+                let _ = vcmp_func().put_player_in_vehicle(self.id, vehicle.get_id(), slot, 1, 0);
+            }
+            None => {
+                let _ = vcmp_func().remove_player_from_vehicle(self.id);
             }
         })
     }

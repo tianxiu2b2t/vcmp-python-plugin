@@ -589,7 +589,10 @@ impl VehiclePy {
                 if let std::collections::hash_map::Entry::Vacant(e) = passenger_seats.entry(slot) {
                     e.insert(vec![player]);
                 } else {
-                    passenger_seats.get_mut(&slot).expect("Failed to get passenger seats").push(player);
+                    passenger_seats
+                        .get_mut(&slot)
+                        .expect("Failed to get passenger seats")
+                        .push(player);
                 }
             }
         }
@@ -598,7 +601,11 @@ impl VehiclePy {
         let mut slots = passenger_seats.keys().collect::<Vec<_>>();
         slots.sort();
         for slot in slots {
-            passengers.extend(passenger_seats.get(slot).expect("Failed to get passenger seats"));
+            passengers.extend(
+                passenger_seats
+                    .get(slot)
+                    .expect("Failed to get passenger seats"),
+            );
         }
         passengers
     }

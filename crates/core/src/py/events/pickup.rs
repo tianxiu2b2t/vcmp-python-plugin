@@ -44,13 +44,17 @@ impl PickupPickAttemptEvent {
     #[getter]
     fn pickup(&self) -> PickupPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_pickup(self.inner.pickup_id).expect("Failed to get pickup from entity pool")
+        *pool
+            .get_pickup(self.inner.pickup_id)
+            .expect("Failed to get pickup from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     fn __repr__(&self) -> String {
@@ -101,13 +105,17 @@ impl PickupPickedEvent {
     #[getter]
     fn pickup(&self) -> PickupPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_pickup(self.inner.pickup_id).expect("Failed to get pickup from entity pool")
+        *pool
+            .get_pickup(self.inner.pickup_id)
+            .expect("Failed to get pickup from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     fn __repr__(&self) -> String {
@@ -158,7 +166,9 @@ impl PickupRespawnEvent {
     #[getter]
     fn pickup(&self) -> PickupPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_pickup(self.inner.pickup_id).expect("Failed to get pickup from entity pool")
+        *pool
+            .get_pickup(self.inner.pickup_id)
+            .expect("Failed to get pickup from entity pool")
     }
 
     fn __repr__(&self) -> String {

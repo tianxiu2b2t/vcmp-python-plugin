@@ -110,7 +110,9 @@ impl ClientScriptDataEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn stream(&self) -> ReadStream {
@@ -165,7 +167,9 @@ impl PlayerConnectEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerConnectEvent(player={})", self.player())
@@ -211,7 +215,9 @@ impl PlayerDisconnectEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn reason(&self) -> i32 {
@@ -266,7 +272,9 @@ impl PlayerRequestClassEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn class_id(&self) -> i32 {
@@ -321,7 +329,9 @@ impl PlayerSpawnEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerSpawnEvent(player={})", self.player())
@@ -367,7 +377,9 @@ impl PlayerRequestSpawnEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerRequestSpawnEvent(player={})", self.player())
@@ -413,7 +425,9 @@ impl PlayerDeathEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn killer(&self) -> Option<PlayerPy> {
@@ -483,7 +497,9 @@ impl PlayerUpdateEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn update(&self) -> i32 {
@@ -538,12 +554,16 @@ impl PlayerRequestEnterVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.inner.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
     #[getter]
     fn slot_index(&self) -> i32 {
@@ -600,12 +620,16 @@ impl PlayerEnterVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.inner.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
     #[getter]
     fn slot_index(&self) -> i32 {
@@ -662,12 +686,16 @@ impl PlayerExitVehicleEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.inner.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
     fn __repr__(&self) -> String {
         format!(
@@ -718,7 +746,9 @@ impl PlayerNameChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_name(&self) -> String {
@@ -779,7 +809,9 @@ impl PlayerStateChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_state(&self) -> i32 {
@@ -840,7 +872,9 @@ impl PlayerActionChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_action(&self) -> i32 {
@@ -901,7 +935,9 @@ impl PlayerOnFireChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn is_on_fire(&self) -> bool {
@@ -956,7 +992,9 @@ impl PlayerCrouchChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn is_crouching(&self) -> bool {
@@ -1011,7 +1049,9 @@ impl PlayerGameKeysChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn old_keys(&self) -> u32 {
@@ -1072,7 +1112,9 @@ impl PlayerBeginTypingEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerBeginTypingEvent(player={})", self.player())
@@ -1118,7 +1160,9 @@ impl PlayerEndTypingEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     fn __repr__(&self) -> String {
         format!("PlayerEndTypingEvent(player={})", self.player())
@@ -1164,7 +1208,9 @@ impl PlayerAwayChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn is_away(&self) -> bool {
@@ -1219,7 +1265,9 @@ impl PlayerMessageEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn message(&self) -> String {
@@ -1274,7 +1322,9 @@ impl PlayerCommandEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn command(&self) -> String {
@@ -1345,12 +1395,16 @@ impl PlayerPrivateMessageEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn target(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.target_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.target_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn message(&self) -> String {
@@ -1407,7 +1461,9 @@ impl PlayerKeyBindDownEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn key(&self) -> KeyBindPy {
@@ -1462,7 +1518,9 @@ impl PlayerKeyBindUpEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn key(&self) -> KeyBindPy {
@@ -1517,7 +1575,9 @@ impl PlayerSpectateEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn target(&self) -> Option<PlayerPy> {
@@ -1575,7 +1635,9 @@ impl PlayerCrashReportEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn report(&self) -> String {
@@ -1630,7 +1692,9 @@ impl PlayerModuleListEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
     #[getter]
     fn modules(&self) -> String {
@@ -1689,7 +1753,9 @@ impl PlayerHealthChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1712,7 +1778,9 @@ impl PlayerHealthChangeEvent {
         self.current_health = health;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
+            let player = pool
+                .get_mut_player(self.player_id)
+                .expect("Failed to get player from entity pool");
             player.set_var_last_health(self.current_health);
         };
     }
@@ -1778,7 +1846,9 @@ impl PlayerArmourChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1801,7 +1871,9 @@ impl PlayerArmourChangeEvent {
         self.current_armour = armour;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
+            let player = pool
+                .get_mut_player(self.player_id)
+                .expect("Failed to get player from entity pool");
             player.set_var_last_armour(self.current_armour);
         };
     }
@@ -1867,7 +1939,9 @@ impl PlayerWeaponChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1890,7 +1964,9 @@ impl PlayerWeaponChangeEvent {
         self.current_weapon = weapon;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
+            let player = pool
+                .get_mut_player(self.player_id)
+                .expect("Failed to get player from entity pool");
             player.set_var_last_weapon(self.current_weapon);
         };
     }
@@ -1956,7 +2032,9 @@ impl PlayerAmmoChangeEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -1979,7 +2057,9 @@ impl PlayerAmmoChangeEvent {
         self.current_ammo = ammo;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
+            let player = pool
+                .get_mut_player(self.player_id)
+                .expect("Failed to get player from entity pool");
             player.set_var_last_ammo(self.current_ammo);
         };
     }
@@ -2045,7 +2125,9 @@ impl PlayerMoveEvent {
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     #[getter]
@@ -2068,7 +2150,9 @@ impl PlayerMoveEvent {
         self.current_position = position;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let player = pool.get_mut_player(self.player_id).expect("Failed to get player from entity pool");
+            let player = pool
+                .get_mut_player(self.player_id)
+                .expect("Failed to get player from entity pool");
             player.set_var_last_position(self.current_position.get_entity_pos());
         };
     }

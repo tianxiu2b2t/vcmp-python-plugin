@@ -43,7 +43,9 @@ impl PyEvent for BaseEvent {
     }
 
     fn init(&self, py: Python<'_>) -> Py<PyAny> {
-        Py::new(py, self.clone()).expect("Failed to create event").into_any()
+        Py::new(py, self.clone())
+            .expect("Failed to create event")
+            .into_any()
     }
 }
 

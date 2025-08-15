@@ -47,7 +47,9 @@ impl VehicleUpdateEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.inner.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
 
     #[getter]
@@ -103,7 +105,9 @@ impl VehicleExplodeEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.inner.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
 
     fn __repr__(&self) -> String {
@@ -149,7 +153,9 @@ impl VehicleRespawnEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.inner.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.inner.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
 
     fn __repr__(&self) -> String {
@@ -198,7 +204,9 @@ impl VehicleMoveEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
 
     #[getter]
@@ -221,7 +229,9 @@ impl VehicleMoveEvent {
         self.current_position = position;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let vehicle = pool.get_mut_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool");
+            let vehicle = pool
+                .get_mut_vehicle(self.vehicle_id)
+                .expect("Failed to get vehicle from pool");
             vehicle.set_var_last_position(self.current_position.get_entity_pos());
         };
     }
@@ -287,7 +297,9 @@ impl VehicleHealthChangeEvent {
     #[getter]
     fn vehicle(&self) -> VehiclePy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool")
+        *pool
+            .get_vehicle(self.vehicle_id)
+            .expect("Failed to get vehicle from pool")
     }
 
     #[getter]
@@ -310,7 +322,9 @@ impl VehicleHealthChangeEvent {
         self.current_health = health;
         {
             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-            let vehicle = pool.get_mut_vehicle(self.vehicle_id).expect("Failed to get vehicle from pool");
+            let vehicle = pool
+                .get_mut_vehicle(self.vehicle_id)
+                .expect("Failed to get vehicle from pool");
             vehicle.set_var_last_health(self.current_health);
         };
     }

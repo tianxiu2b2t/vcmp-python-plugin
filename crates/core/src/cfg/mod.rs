@@ -27,15 +27,16 @@ impl LogLevel {
             "info" => Self(Level::INFO),
             "debug" => Self(Level::DEBUG),
             "trace" => Self(Level::TRACE),
-            _ => Self(Level::INFO)
+            _ => Self(Level::INFO),
         }
     }
 }
 
 impl<'de> Deserialize<'de> for LogLevel {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-        where
-            D: serde::Deserializer<'de> {
+    where
+        D: serde::Deserializer<'de>,
+    {
         let t = String::deserialize(deserializer)?.to_lowercase();
         let s = t.as_str();
         Ok(Self::from_str(s))
@@ -91,7 +92,7 @@ fn init_config_from_toml() -> Option<Config> {
         Err(e) => {
             println!("Failed to parse toml config: {e}");
             None
-        },
+        }
     }
 }
 
@@ -101,16 +102,16 @@ fn parse_bool(s: &String) -> bool {
     let s = s.to_lowercase();
     match s.as_str() {
         "true" | "t" | "1" | "yes" | "y" | "on" | "enable" => true,
-        _ => false
+        _ => false,
     }
 }
 
 fn init_config_from_cfg() -> Config {
     // default server.cfg
     let mut config = Config::default(); // dev... toml
-    
+
     let cfg_file = Path::new("./server.cfg");
-    
+
     // let config maybe ascii (like gbk)
     let content = {
         let c = std::fs::read(cfg_file).expect("Failed to read server.cfg");
@@ -129,22 +130,49 @@ fn init_config_from_cfg() -> Config {
         dictionary
     };
 
-    config.script.preloader = parse_bool(dictionary.get("python_preloader").unwrap_or(&"0".to_string()));
-    config.script.script_path = dictionary.get("python_script_path").unwrap_or(&"".to_string()).to_string();
-    config.script.virtual_env = dictionary.get("python_virtual_env").unwrap_or(&"".to_string()).to_string();
+    config.script.preloader = parse_bool(
+        dictionary
+            .get("python_preloader")
+            .unwrap_or(&"0".to_string()),
+    );
+    config.script.script_path = dictionary
+        .get("python_script_path")
+        .unwrap_or(&"".to_string())
+        .to_string();
+    config.script.virtual_env = dictionary
+        .get("python_virtual_env")
+        .unwrap_or(&"".to_string())
+        .to_string();
 
-    config.logger.log_level = LogLevel::from_str(dictionary.get("python_log_level").unwrap_or(&"info".to_string()));
-    config.logger.file_log = parse_bool(dictionary.get("python_file_log").unwrap_or(&"0".to_string()));
-    config.advanced.check_update = parse_bool(dictionary.get("python_check_update").unwrap_or(&"1".to_string()));
-    config.advanced.ignore_py_modules = dictionary.get("python_ignore_py_modules").unwrap_or(&"".to_string()).split(',').map(|s| s.to_string()).collect();
+    config.logger.log_level = LogLevel::from_str(
+        dictionary
+            .get("python_log_level")
+            .unwrap_or(&"info".to_string()),
+    );
+    config.logger.file_log = parse_bool(
+        dictionary
+            .get("python_file_log")
+            .unwrap_or(&"0".to_string()),
+    );
+    config.advanced.check_update = parse_bool(
+        dictionary
+            .get("python_check_update")
+            .unwrap_or(&"1".to_string()),
+    );
+    config.advanced.ignore_py_modules = dictionary
+        .get("python_ignore_py_modules")
+        .unwrap_or(&"".to_string())
+        .split(',')
+        .map(|s| s.to_string())
+        .collect();
 
     config
-
-
 }
 
 pub fn init_config() {
-    CONFIG.set(init_config_from_toml().unwrap_or_else(|| init_config_from_cfg())).unwrap();
+    CONFIG
+        .set(init_config_from_toml().unwrap_or_else(|| init_config_from_cfg()))
+        .unwrap();
 }
 
 pub fn get_config() -> &'static Config {

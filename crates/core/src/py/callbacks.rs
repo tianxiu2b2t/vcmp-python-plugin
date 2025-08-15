@@ -51,7 +51,9 @@ impl CallbackFunction {
     }
 
     fn delete(&self) {
-        let mut storage = PY_CALLBACK_STORAGE.lock().expect("PyCallbackStorage lock failed");
+        let mut storage = PY_CALLBACK_STORAGE
+            .lock()
+            .expect("PyCallbackStorage lock failed");
         storage.remove(self.func.clone())
     }
 }
@@ -73,7 +75,10 @@ impl PyCallbackStorage {
         // 根据优先级来排列
         // 最高的优先，最后的最后来执行
 
-        let handlers = self.callbacks.get_mut(&event_type).expect("get handlers failed");
+        let handlers = self
+            .callbacks
+            .get_mut(&event_type)
+            .expect("get handlers failed");
         let mut i = 0;
         while i < handlers.len() {
             if handlers[i].priority > priority {
@@ -202,16 +207,20 @@ impl PyCallbackManager {
         let event_type = VcmpEventType::from(event.event_type.clone());
         let event = event.event_type;
         let storage_handlers = {
-            let storage = PY_CALLBACK_STORAGE.lock().expect("Failed to lock callback storage");
+            let storage = PY_CALLBACK_STORAGE
+                .lock()
+                .expect("Failed to lock callback storage");
             storage.get_handlers(event_type).cloned()
         };
         let handlers = match storage_handlers {
             Some(handlers) => handlers,
-            None => return Ok(PyNone::get(py)
-                .downcast::<PyAny>()
-                .expect("Failed to downcast to PyAny")
-                .clone()
-                .unbind())
+            None => {
+                return Ok(PyNone::get(py)
+                    .downcast::<PyAny>()
+                    .expect("Failed to downcast to PyAny")
+                    .clone()
+                    .unbind());
+            }
         };
 
         let mut result = None;
@@ -245,7 +254,12 @@ impl PyCallbackManager {
                         vcmp_func().shutdown();
                         break;
                     } else {
-                        let error_handler = { &GLOBAL_VAR.lock().expect("Failed to lock global var").error_handler };
+                        let error_handler = {
+                            &GLOBAL_VAR
+                                .lock()
+                                .expect("Failed to lock global var")
+                                .error_handler
+                        };
                         if let Some(error_handler) = error_handler {
                             match error_handler.call1(py, (e.clone_ref(py),)) {
                                 Ok(_) => {}
@@ -292,12 +306,10 @@ impl PyCallbackManager {
         tag: Option<String>,
     ) -> Py<PyAny> {
         if let Some(func) = func {
-            PY_CALLBACK_STORAGE.lock().expect("Failed to lock callback storage").register_func(
-                event_type,
-                func.clone(),
-                priority,
-                tag.clone(),
-            );
+            PY_CALLBACK_STORAGE
+                .lock()
+                .expect("Failed to lock callback storage")
+                .register_func(event_type, func.clone(), priority, tag.clone());
             func
         } else {
             PyCFunction::new_closure(
@@ -305,13 +317,15 @@ impl PyCallbackManager {
                 None,
                 None,
                 move |args, _kwargs| -> PyResult<Py<PyAny>> {
-                    let func = args.get_item(0).expect("Failed to get func").extract::<Py<PyAny>>().expect("Failed to extract func");
-                    PY_CALLBACK_STORAGE.lock().expect("Failed to lock callback storage").register_func(
-                        event_type,
-                        func.clone(),
-                        priority,
-                        tag.clone(),
-                    );
+                    let func = args
+                        .get_item(0)
+                        .expect("Failed to get func")
+                        .extract::<Py<PyAny>>()
+                        .expect("Failed to extract func");
+                    PY_CALLBACK_STORAGE
+                        .lock()
+                        .expect("Failed to lock callback storage")
+                        .register_func(event_type, func.clone(), priority, tag.clone());
                     Ok(func)
                 },
             )
@@ -977,13 +991,17 @@ impl PyCallbackManager {
         event_type: VcmpEventType,
         tag: Option<String>,
     ) -> PyResult<Vec<Py<PyAny>>> {
-        let storage = PY_CALLBACK_STORAGE.lock().expect("Failed to lock PyCallbackStorage");
+        let storage = PY_CALLBACK_STORAGE
+            .lock()
+            .expect("Failed to lock PyCallbackStorage");
         let handlers = storage.get_handlers_by_tag(&event_type, tag);
         Ok(handlers.into_iter().map(|h| h.func.clone_ref(py)).collect())
     }
 
     pub fn remove_callback(&self, callback: Py<PyAny>) {
-        let mut storage = PY_CALLBACK_STORAGE.lock().expect("Failed to lock PyCallbackStorage");
+        let mut storage = PY_CALLBACK_STORAGE
+            .lock()
+            .expect("Failed to lock PyCallbackStorage");
         storage.remove(callback);
     }
 }

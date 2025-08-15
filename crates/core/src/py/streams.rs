@@ -102,8 +102,7 @@ impl WriteStream {
             event!(Level::WARN, "String is too long, truncated to 4095 bytes");
             Ok(false)
         } else {
-            self.buffer
-                .write_all(&(data.len() as i16).to_be_bytes())?;
+            self.buffer.write_all(&(data.len() as i16).to_be_bytes())?;
             self.buffer.write_all(data)?;
             Ok(true)
         }

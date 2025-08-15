@@ -44,13 +44,17 @@ impl CheckpointEnteredEvent {
     #[getter]
     fn checkpoint(&self) -> CheckPointPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_checkpoint(self.inner.checkpoint_id).expect("Failed to get checkpoint from entity pool")
+        *pool
+            .get_checkpoint(self.inner.checkpoint_id)
+            .expect("Failed to get checkpoint from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     fn __repr__(&self) -> String {
@@ -101,13 +105,17 @@ impl CheckpointExitedEvent {
     #[getter]
     fn checkpoint(&self) -> CheckPointPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_checkpoint(self.inner.checkpoint_id).expect("Failed to get checkpoint from entity pool")
+        *pool
+            .get_checkpoint(self.inner.checkpoint_id)
+            .expect("Failed to get checkpoint from entity pool")
     }
 
     #[getter]
     fn player(&self) -> PlayerPy {
         let pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        *pool.get_player(self.inner.player_id).expect("Failed to get player from entity pool")
+        *pool
+            .get_player(self.inner.player_id)
+            .expect("Failed to get player from entity pool")
     }
 
     fn __repr__(&self) -> String {

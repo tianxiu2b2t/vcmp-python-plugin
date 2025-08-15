@@ -254,7 +254,11 @@ pub fn bytes_repr(data: Vec<u8>) -> String {
 
 pub fn capture_modules(py: Option<Python<'_>>) {
     let func = |py: Python<'_>| {
-        let sys_modules = py.import("sys").expect("sys module not found").getattr("modules").expect("sys.modules not found");
+        let sys_modules = py
+            .import("sys")
+            .expect("sys module not found")
+            .getattr("modules")
+            .expect("sys.modules not found");
         sys_modules
             .extract::<HashMap<String, Py<PyAny>>>()
             .expect("sys.modules not found")
@@ -269,7 +273,10 @@ pub fn capture_modules(py: Option<Python<'_>>) {
 
     event!(Level::DEBUG, "Capture modules: {:?}", modules.clone());
 
-    GLOBAL_VAR.lock().expect("Failed to lock global var").capture_modules = Some(modules.clone());
+    GLOBAL_VAR
+        .lock()
+        .expect("Failed to lock global var")
+        .capture_modules = Some(modules.clone());
 }
 
 pub fn init_py() {
@@ -308,13 +315,20 @@ pub fn py_reload(kwargs: Option<HashMap<String, Py<PyAny>>>) {
 #[pyfunction]
 #[pyo3(name = "set_error_handler", signature = (handler))]
 pub fn py_set_error_handler(handler: Py<PyAny>) {
-    GLOBAL_VAR.lock().expect("Failed to lock global var").error_handler = Some(handler);
+    GLOBAL_VAR
+        .lock()
+        .expect("Failed to lock global var")
+        .error_handler = Some(handler);
 }
 
 #[pyfunction]
 #[pyo3(name = "get_error_handler")]
 pub fn py_get_error_handler() -> Option<Py<PyAny>> {
-    GLOBAL_VAR.lock().expect("Failed to lock global var").error_handler.clone()
+    GLOBAL_VAR
+        .lock()
+        .expect("Failed to lock global var")
+        .error_handler
+        .clone()
 }
 
 pub fn reload() {
@@ -363,7 +377,9 @@ pub fn reload() {
             );
             {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let player = pool.get_mut_player(player.get_id()).expect("Failed to get mut player");
+                let player = pool
+                    .get_mut_player(player.get_id())
+                    .expect("Failed to get mut player");
                 player.set_var_reload_joined(false);
             }
         }
@@ -376,7 +392,10 @@ pub fn reload() {
         );
 
         py.allow_threads(|| {
-            let count = PY_CALLBACK_STORAGE.lock().expect("Failed to lock PyCallbackStorage").clear();
+            let count = PY_CALLBACK_STORAGE
+                .lock()
+                .expect("Failed to lock PyCallbackStorage")
+                .clear();
             event!(Level::DEBUG, "Cleared {count} callback(s)");
         });
 
@@ -389,11 +408,19 @@ pub fn reload() {
                 .into_iter()
                 .chain(capture_modules)
                 .collect::<Vec<_>>();
-            let py_sys_modules = py.import("sys").expect("Failed to import sys").getattr("modules").expect("Failed to get sys.modules");
-            let py_modules_unbind = py_sys_modules.extract::<Py<PyDict>>().expect("Failed to extract sys.modules");
+            let py_sys_modules = py
+                .import("sys")
+                .expect("Failed to import sys")
+                .getattr("modules")
+                .expect("Failed to get sys.modules");
+            let py_modules_unbind = py_sys_modules
+                .extract::<Py<PyDict>>()
+                .expect("Failed to extract sys.modules");
             let py_modules = py_modules_unbind.bind(py);
             for m in py_modules.keys() {
-                let m = m.extract::<String>().expect("Failed to extract module name");
+                let m = m
+                    .extract::<String>()
+                    .expect("Failed to extract module name");
                 if modules.contains(&m) || m.starts_with("vcmp") {
                     continue;
                 }
@@ -424,7 +451,9 @@ pub fn reload() {
         for player in players.clone() {
             {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let player = pool.get_mut_player(player.get_id()).expect("Failed to get mut player");
+                let player = pool
+                    .get_mut_player(player.get_id())
+                    .expect("Failed to get mut player");
                 player.set_var_reload_joined(true);
             }
             let _ = PY_CALLBACK_MANAGER.trigger(

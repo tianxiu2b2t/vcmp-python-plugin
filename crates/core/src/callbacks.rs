@@ -1,7 +1,7 @@
 use std::os::raw::c_char;
 
-use crate::cfg::get_preloader;
 use crate::PLUGIN_COMMAND;
+use crate::cfg::get_preloader;
 use crate::py::callbacks::PY_CALLBACK_MANAGER;
 use crate::py::events::{
     VcmpEvent, checkpoint::*, object::*, pickup::*, player::*, server::*, vehicle::*,
@@ -165,7 +165,9 @@ pub unsafe extern "C" fn on_player_request_class(player_id: i32, class_id: i32) 
     {
         // set loaded
         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+        let player = pool
+            .get_mut_player(player_id)
+            .expect("Failed to get mut player");
         player.set_var_loaded(true);
     }
 
@@ -456,7 +458,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
             let current_health = vcmp_func().get_player_health(player_id);
             let last_health = {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                let player = pool
+                    .get_mut_player(player_id)
+                    .expect("Failed to get mut player");
                 player.get_var_last_health()
             };
             if current_health != last_health {
@@ -466,7 +470,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 if !health_res {
                     let _ = vcmp_func().set_player_health(player_id, {
                         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                        let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                        let player = pool
+                            .get_mut_player(player_id)
+                            .expect("Failed to get mut player");
                         player.get_var_last_health()
                     });
                 }
@@ -477,7 +483,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
             let current_armour = vcmp_func().get_player_armour(player_id);
             let last_armour = {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                let player = pool
+                    .get_mut_player(player_id)
+                    .expect("Failed to get mut player");
                 player.get_var_last_armour()
             };
             if current_armour != last_armour {
@@ -487,7 +495,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 if !armour_res {
                     let _ = vcmp_func().set_player_armour(player_id, {
                         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                        let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                        let player = pool
+                            .get_mut_player(player_id)
+                            .expect("Failed to get mut player");
                         player.get_var_last_armour()
                     });
                 }
@@ -498,7 +508,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
             let current_weapon = vcmp_func().get_player_weapon(player_id);
             let last_weapon = {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                let player = pool
+                    .get_mut_player(player_id)
+                    .expect("Failed to get mut player");
                 player.get_var_last_weapon()
             };
             if current_weapon != last_weapon {
@@ -510,7 +522,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                         player_id,
                         {
                             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                            let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                            let player = pool
+                                .get_mut_player(player_id)
+                                .expect("Failed to get mut player");
                             player.get_var_last_weapon()
                         },
                         0,
@@ -524,7 +538,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
             let current_wep = vcmp_func().get_player_weapon(player_id);
             let last_ammo = {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                let player = pool
+                    .get_mut_player(player_id)
+                    .expect("Failed to get mut player");
                 player.get_var_last_ammo()
             };
             if current_ammo != last_ammo {
@@ -534,7 +550,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                     let real_ammo = vcmp_func().get_player_weapon_ammo(player_id);
                     let restore_ammo = {
                         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                        let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                        let player = pool
+                            .get_mut_player(player_id)
+                            .expect("Failed to get mut player");
                         player.get_var_last_ammo()
                     } - real_ammo;
                     let _ = vcmp_func().give_player_weapon(player_id, current_wep, restore_ammo);
@@ -548,7 +566,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 .unwrap_or_default();
             let last_pos = {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                let player = pool
+                    .get_mut_player(player_id)
+                    .expect("Failed to get mut player");
                 player.get_var_last_position()
             };
             if current_pos != last_pos {
@@ -561,7 +581,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
                 if !move_res {
                     let _ = vcmp_func().set_player_position(player_id, {
                         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                        let player = pool.get_mut_player(player_id).expect("Failed to get mut player");
+                        let player = pool
+                            .get_mut_player(player_id)
+                            .expect("Failed to get mut player");
                         player.get_var_last_position()
                     });
                 }
@@ -582,7 +604,9 @@ pub unsafe extern "C" fn on_player_update(player_id: i32, state: i32) {
 pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
     {
         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        let vehicle = pool.get_mut_vehicle(vehicle_id).expect("Failed to get mut vehicle");
+        let vehicle = pool
+            .get_mut_vehicle(vehicle_id)
+            .expect("Failed to get mut vehicle");
         if vehicle.get_var_updating() {
             return;
         }
@@ -594,7 +618,9 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
             let current_health = vcmp_func().get_vehicle_health(vehicle_id);
             let last_health = {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let vehicle = pool.get_mut_vehicle(vehicle_id).expect("Failed to get mut vehicle");
+                let vehicle = pool
+                    .get_mut_vehicle(vehicle_id)
+                    .expect("Failed to get mut vehicle");
                 vehicle.get_var_last_health()
             };
             if current_health != last_health {
@@ -605,7 +631,9 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                 if !health_res {
                     let _ = vcmp_func().set_vehicle_health(vehicle_id, {
                         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                        let vehicle = pool.get_mut_vehicle(vehicle_id).expect("Failed to get mut vehicle");
+                        let vehicle = pool
+                            .get_mut_vehicle(vehicle_id)
+                            .expect("Failed to get mut vehicle");
                         vehicle.get_var_last_health()
                     });
                 }
@@ -616,7 +644,9 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
             let current_pos = vcmp_func().get_vehicle_position(vehicle_id);
             let last_pos = {
                 let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                let vehicle = pool.get_mut_vehicle(vehicle_id).expect("Failed to get mut vehicle");
+                let vehicle = pool
+                    .get_mut_vehicle(vehicle_id)
+                    .expect("Failed to get mut vehicle");
                 vehicle.get_var_last_position()
             };
             if current_pos != last_pos {
@@ -632,7 +662,9 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
                         {
                             // fix object clone bug
                             let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-                            let vehicle = pool.get_mut_vehicle(vehicle_id).expect("Failed to get mut vehicle");
+                            let vehicle = pool
+                                .get_mut_vehicle(vehicle_id)
+                                .expect("Failed to get mut vehicle");
                             vehicle.get_var_last_position()
                         },
                         Some(false),
@@ -649,7 +681,9 @@ pub unsafe extern "C" fn on_vehicle_update(vehicle_id: i32, update_type: i32) {
 
     {
         let mut pool = ENTITY_POOL.lock().expect("Failed to lock entity pool");
-        let vehicle = pool.get_mut_vehicle(vehicle_id).expect("Failed to get mut vehicle");
+        let vehicle = pool
+            .get_mut_vehicle(vehicle_id)
+            .expect("Failed to get mut vehicle");
         vehicle.set_var_updating(false);
     }
 }
@@ -752,7 +786,6 @@ pub unsafe extern "C" fn on_checkpoint_exited(checkpoint_id: i32, player_id: i32
         false,
     );
 }
-
 
 pub fn init_callbacks(callbacks: &mut PluginCallbacks) {
     callbacks.OnServerInitialise = Some(on_server_init);
