@@ -1,6 +1,6 @@
 use vcmp_bindings::{
-    func::{VcmpFunctions, server::ServerMethods},
-    raw::{PluginCallbacks, PluginFuncs, PluginInfo},
+    func::{server::ServerMethods, VcmpFunctions},
+    raw::{PluginCallbacks, PluginFuncs, PluginInfo}, utils::set_plugin_name,
 };
 
 use tracing::{Level, event};
@@ -84,13 +84,7 @@ extern "C" fn VcmpPluginInit(
     info.pluginVersion = PLUGIN_VERSION;
 
     // set name
-    info.name = {
-        let mut val = [0i8; 32];
-        for (i, &c) in PLUGIN_NAME.as_bytes().iter().enumerate() {
-            val[i] = c as i8;
-        }
-        val
-    };
+    let _ = set_plugin_name(PLUGIN_NAME, info);
 
     event!(Level::DEBUG, "vcmp-plugin-rs info: {info:?}");
 
