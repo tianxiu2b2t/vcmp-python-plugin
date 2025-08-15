@@ -28,8 +28,6 @@
 
 > lets RWIR!
 
-> 注：目前 `rwir` 分支合并成 `master` 分支，目前处于 `PreRelease` 版本（测试版），但目前的 `Release` 版本为 `1.2.10.6` 处于稳定状态
-
 
 ## TODO
 - [ ] 实现 NPC 插件（habi）的 bindings
@@ -72,6 +70,28 @@ python_script_path main.py
 # python check_update true
 # 是否记录日志，默认为 false
 # python_file_log
+# 重载脚本的时候，忽略已加载的模块，默认为 
+# 例子： _bcrypt,_signal
+# python_ignore_py_modules
+```
+or
+
+```toml
+[script]
+script_path = "main.py"
+virtual_env = ".venv/lib/python3.8/site-packages"
+# 默认为 false
+# preloader = false
+[logger] # 可选
+log_level = "INFO"
+file_log = false
+
+[advanced] # 可选
+check_update = true
+ignore_py_modules = [
+    "_bcrypt",
+    "_signal"
+]
 ```
 
 5. 启动你的服务器
@@ -92,3 +112,7 @@ main.py:
 ```bash
 cargo build --release
 ```
+
+> 如果你怕更新的时候复制插件到 `plugins` 里的话，可以访问此项目
+
+> [vcmp-python-plugin-link](https://github.com/tianxiu2b2t/vcmp-python-plugin-link/releases) 页面下载最新的插件

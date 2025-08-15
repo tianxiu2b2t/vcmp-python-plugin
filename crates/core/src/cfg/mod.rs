@@ -8,6 +8,7 @@ use vcmp_bindings::encodes::decode_gbk;
 pub struct ScriptConfig {
     pub script_path: String,
     pub virtual_env: String,
+    #[serde(default)]
     pub preloader: bool,
 }
 
@@ -46,6 +47,7 @@ impl<'de> Deserialize<'de> for LogLevel {
 #[derive(Debug, Clone, Deserialize)]
 pub struct LoggerConfig {
     pub log_level: LogLevel,
+    #[serde(default)]
     pub file_log: bool,
 }
 
@@ -53,15 +55,20 @@ impl Default for LoggerConfig {
     fn default() -> Self {
         Self {
             log_level: LogLevel(Level::INFO),
-            file_log: true,
+            file_log: false,
         }
     }
 }
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct AdvancedConfig {
+    #[serde(default = "check_update_true")]
     pub check_update: bool,
+    #[serde(default)]
     pub ignore_py_modules: Vec<String>,
+}
+fn check_update_true() -> bool {
+    true
 }
 
 impl Default for AdvancedConfig {
@@ -163,7 +170,11 @@ fn init_config_from_cfg() -> Config {
         .get("python_ignore_py_modules")
         .unwrap_or(&"".to_string())
         .split(',')
-        .map(|s| s.to_string())
+        .map(|s| {
+            // trim spaces
+            let trim = s.trim();
+            trim.to_string()
+        })
         .collect();
 
     config

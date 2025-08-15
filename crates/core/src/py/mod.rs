@@ -11,7 +11,7 @@ use pyo3::types::{
 use pyo3::{Bound, Py, PyAny, PyErr, PyResult, Python, pyfunction, pymodule, wrap_pyfunction};
 use tracing::{Level, event};
 
-use crate::cfg::{get_preloader, get_script_path, get_virtual_env};
+use crate::cfg::{get_preloader, get_script_path, get_virtual_env, get_ignore_py_modules};
 use crate::functions;
 use crate::functions::checkpoint::CheckPointPy;
 use crate::functions::marker::MarkerPy;
@@ -407,6 +407,7 @@ pub fn reload() {
                 .clone()
                 .into_iter()
                 .chain(capture_modules)
+                .chain(get_ignore_py_modules())
                 .collect::<Vec<_>>();
             let py_sys_modules = py
                 .import("sys")
