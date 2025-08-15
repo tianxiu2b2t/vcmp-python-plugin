@@ -4,10 +4,11 @@ import subprocess
 
 from pathlib import Path
 
+
 def gen_binding_and_process():
     print("bindgen 生成中")
     subprocess.run(
-        'bindgen ./crates/squirrel_ffi/include/SQImports.h -o ./crates/squirrel_ffi/src/raw.rs --no-layout-tests',
+        "bindgen ./crates/squirrel_ffi/include/SQImports.h -o ./crates/squirrel_ffi/src/raw.rs --no-layout-tests",
         shell=True,
     )
     print("bindgen 生成完成, 开始处理 Option")
@@ -31,13 +32,14 @@ def gen_binding_and_process():
         # ,   >; replace with ;
         elif (right_semicolon := raw_content.find(">;")) != -1:
             if len(raw_content[right_semicolon - 1].strip()) == 1:
-                raw_content = raw_content[:right_semicolon] + raw_content[right_semicolon + 1 :]
+                raw_content = (
+                    raw_content[:right_semicolon] + raw_content[right_semicolon + 1 :]
+                )
             else:
                 left_newline = raw_content.rfind("\n", 0, right_semicolon)
                 raw_content = (
                     raw_content[: left_newline + 1] + raw_content[right_semicolon + 3 :]
                 )
-
 
     print("处理 Option 完成")
 
@@ -47,7 +49,7 @@ def gen_binding_and_process():
 
     print("处理 unsafe extern 完成")
 
-    #content = content[:raw_start_pos] + raw_content + content[raw_end_pos:]
+    # content = content[:raw_start_pos] + raw_content + content[raw_end_pos:]
 
     with open(target_file, "w", encoding="utf-8") as bind_file:
         bind_file.write(raw_content)

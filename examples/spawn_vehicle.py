@@ -3,11 +3,14 @@ from vcmp.events.player import PlayerCommandEvent
 from vcmp.functions.vehicle import create_vehicle
 from vcmp.types import RGB
 
+
 @callbacks.on_player_command()
 def _(event: PlayerCommandEvent):
     if event.command in ("car", "veh", "cveh"):
         if not event.text.isdigit():
-            event.player.send_raw_message(RGB.from_rgb(0xFF5555), "Usage: /car <vehicleid>")
+            event.player.send_raw_message(
+                RGB.from_rgb(0xFF5555), "Usage: /car <vehicleid>"
+            )
             return
         veh = create_vehicle(
             int(event.text),
@@ -16,4 +19,6 @@ def _(event: PlayerCommandEvent):
             event.player.angle,
         )
         event.player.vehicle = veh
-        event.player.send_raw_message(RGB.from_rgb(0x55FF55), f"Spawned vehicle {event.text}")
+        event.player.send_raw_message(
+            RGB.from_rgb(0x55FF55), f"Spawned vehicle {event.text}"
+        )
