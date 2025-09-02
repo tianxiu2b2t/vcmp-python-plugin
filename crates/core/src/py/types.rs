@@ -617,21 +617,21 @@ impl VectorPy {
 
     #[setter]
     pub fn set_z(&mut self, py: Python<'_>, value: f32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.set_entity_pos(None, None, Some(value));
         });
     }
 
     #[setter]
     pub fn set_y(&mut self, py: Python<'_>, value: f32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.set_entity_pos(None, Some(value), None);
         });
     }
 
     #[setter]
     pub fn set_x(&mut self, py: Python<'_>, value: f32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.set_entity_pos(Some(value), None, None);
         });
     }
@@ -643,23 +643,23 @@ impl VectorPy {
 
     // support - + / * for VectorPy
     fn __add__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| *self + *other)
+        py.detach(|| *self + *other)
     }
 
     fn __sub__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| *self - *other)
+        py.detach(|| *self - *other)
     }
 
     fn __mul__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| *self * *other)
+        py.detach(|| *self * *other)
     }
 
     fn __truediv__(&self, py: Python<'_>, other: &VectorPy) -> VectorPy {
-        py.allow_threads(|| *self / *other)
+        py.detach(|| *self / *other)
     }
 
     pub fn distance(&self, py: Python<'_>, other: &VectorPy) -> f32 {
-        py.allow_threads(|| {
+        py.detach(|| {
             let origin = self.get_entity_pos();
             let other = other.get_entity_pos();
 
@@ -668,7 +668,7 @@ impl VectorPy {
     }
 
     pub fn distance_with_z(&self, py: Python<'_>, other: &VectorPy) -> f32 {
-        py.allow_threads(|| {
+        py.detach(|| {
             let origin = self.get_entity_pos();
             let other = other.get_entity_pos();
 
@@ -896,46 +896,46 @@ impl QuaternionPy {
 
     #[setter]
     pub fn set_w(&mut self, py: Python<'_>, value: f32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.set_entity_quaternion(None, None, None, Some(value));
         });
     }
 
     #[setter]
     pub fn set_z(&mut self, py: Python<'_>, value: f32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.set_entity_quaternion(None, None, Some(value), None);
         });
     }
 
     #[setter]
     pub fn set_y(&mut self, py: Python<'_>, value: f32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.set_entity_quaternion(None, Some(value), None, None);
         });
     }
 
     #[setter]
     pub fn set_x(&mut self, py: Python<'_>, value: f32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             self.set_entity_quaternion(None, Some(value), None, None);
         });
     }
 
     fn __add__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| *self + *other)
+        py.detach(|| *self + *other)
     }
 
     fn __sub__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| *self - *other)
+        py.detach(|| *self - *other)
     }
 
     fn __mul__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| *self * *other)
+        py.detach(|| *self * *other)
     }
 
     fn __div__(&self, py: Python<'_>, other: &QuaternionPy) -> QuaternionPy {
-        py.allow_threads(|| *self / *other)
+        py.detach(|| *self / *other)
     }
 
     fn __repr__(&self) -> String {

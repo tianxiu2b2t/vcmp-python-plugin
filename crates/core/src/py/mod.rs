@@ -218,7 +218,7 @@ pub fn get_traceback(py_err: &PyErr, py: Option<Python<'_>>) -> String {
             Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
             None => "Traceback (most recent call last):\n  (Rust) Code\n\n".to_string(),
         },
-        None => Python::with_gil(|py| match py_err.traceback(py) {
+        None => Python::attach(|py| match py_err.traceback(py) {
             Some(traceback) => traceback.format().unwrap_or_else(|e| format!("{e:?}")),
             None => "Traceback (most recent call last):\n  (Rust) Code\n\n".to_string(),
         }),
@@ -268,7 +268,7 @@ pub fn capture_modules(py: Option<Python<'_>>) {
     };
     let modules = match py {
         Some(py) => func(py),
-        None => Python::with_gil(func),
+        None => Python::attach(func),
     };
 
     event!(Level::DEBUG, "Capture modules: {:?}", modules.clone());
@@ -365,7 +365,7 @@ pub fn reload() {
     };
     let mut elapsed_time = 0f64;
 
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         event!(Level::DEBUG, "Callback manager trigger player disconnect");
         for player in players.clone() {
             let _ = PY_CALLBACK_MANAGER.trigger(
@@ -391,7 +391,7 @@ pub fn reload() {
                 .with_kwargs(kwargs.clone()),
         );
 
-        py.allow_threads(|| {
+        py.detach(|| {
             let count = PY_CALLBACK_STORAGE
                 .lock()
                 .expect("Failed to lock PyCallbackStorage")
@@ -431,7 +431,7 @@ pub fn reload() {
         }
 
         event!(Level::DEBUG, "Reload script");
-        py.allow_threads(|| {
+        py.detach(|| {
             load_script();
         });
         event!(Level::DEBUG, "Reload script done");
@@ -518,7 +518,7 @@ pub fn load_script() {
         .expect("faild to create c string for code");
     let c_path = CString::new(script.to_str().unwrap_or_default())
         .expect("faild to create c string for path");
-    Python::with_gil(|py| {
+    Python::attach(|py| {
         let res = PyModule::from_code(
             py,
             &code,

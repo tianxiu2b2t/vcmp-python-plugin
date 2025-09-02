@@ -151,7 +151,7 @@ impl PickupPy {
 
     #[setter]
     fn set_timer(&self, py: Python<'_>, timer: u32) {
-        py.allow_threads(|| {
+        py.detach(|| {
             let _ = vcmp_func().set_pickup_auto_timer(self.id, timer);
         });
     }

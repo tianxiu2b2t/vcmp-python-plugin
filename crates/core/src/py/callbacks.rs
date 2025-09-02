@@ -162,7 +162,7 @@ impl PyCallbackManager {
             callback_utils::PY_GIL_REF_COUNTER.current()
         );
 
-        let res = Python::with_gil(|py| {
+        let res = Python::attach(|py| {
             event!(
                 Level::TRACE,
                 "Python with gil after counter: {:?}(ID: {event_id})",

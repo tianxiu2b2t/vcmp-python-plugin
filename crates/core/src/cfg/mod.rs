@@ -20,7 +20,7 @@ impl LogLevel {
         self.0
     }
 
-    pub fn from_str(s: &str) -> Self {
+    pub fn parse_str(s: &str) -> Self {
         let s = s.to_lowercase();
         match s.as_str() {
             "error" => Self(Level::ERROR),
@@ -40,7 +40,7 @@ impl<'de> Deserialize<'de> for LogLevel {
     {
         let t = String::deserialize(deserializer)?.to_lowercase();
         let s = t.as_str();
-        Ok(Self::from_str(s))
+        Ok(Self::parse_str(s))
     }
 }
 
@@ -105,12 +105,9 @@ fn init_config_from_toml() -> Option<Config> {
 
 pub static CONFIG: OnceLock<Config> = OnceLock::new();
 
-fn parse_bool(s: &String) -> bool {
+fn parse_bool(s: &str) -> bool {
     let s = s.to_lowercase();
-    match s.as_str() {
-        "true" | "t" | "1" | "yes" | "y" | "on" | "enable" => true,
-        _ => false,
-    }
+    matches!(s.as_str(), "true" | "t" | "1" | "yes" | "y" | "on" | "enable")
 }
 
 fn init_config_from_cfg() -> Config {
@@ -151,7 +148,7 @@ fn init_config_from_cfg() -> Config {
         .unwrap_or(&"".to_string())
         .to_string();
 
-    config.logger.log_level = LogLevel::from_str(
+    config.logger.log_level = LogLevel::parse_str(
         dictionary
             .get("python_log_level")
             .unwrap_or(&"info".to_string()),
@@ -182,7 +179,7 @@ fn init_config_from_cfg() -> Config {
 
 pub fn init_config() {
     CONFIG
-        .set(init_config_from_toml().unwrap_or_else(|| init_config_from_cfg()))
+        .set(init_config_from_toml().unwrap_or_else(init_config_from_cfg))
         .unwrap();
 }
 

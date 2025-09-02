@@ -17,7 +17,7 @@ pub fn create_explosion(
     target: Option<PlayerPy>,
     ground: bool,
 ) {
-    py.allow_threads(|| {
+    py.detach(|| {
         vcmp_func().create_explosion(
             world_id,
             explosion_type,
@@ -36,7 +36,7 @@ pub fn play_sound(world_id: i32, sound_id: i32, pos: VectorPy) {
 
 #[pyfunction]
 pub fn hide_map_object(py: Python<'_>, object_id: i32, pos: VectorPy) {
-    py.allow_threads(|| vcmp_func().hide_map_object(object_id, pos.into()))
+    py.detach(|| vcmp_func().hide_map_object(object_id, pos.into()))
 }
 
 #[pyfunction]
